@@ -1415,6 +1415,187 @@ async def get_my_availability(current_user: dict = Depends(get_current_user)):
     
     return availability or {"availability": {}}
 
+# ============ GROUP CODE ENDPOINTS ============
+
+import random
+import string
+
+def generate_unique_code():
+    """Generate a unique 6-character alphanumeric code"""
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+
+@api_router.post("/teacher/create-group-code")
+async def create_group_code(code_data: GroupCodeCreate, current_user: dict = Depends(get_current_user)):
+    """Teacher creates a group code for students to join"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    # Generate unique code
+    code = generate_unique_code()
+    
+    # Ensure code is unique
+    while await db.group_codes.find_one({"code": code}, {"_id": 0}):
+        code = generate_unique_code()
+    
+    # Create group code
+    group_code = GroupCode(
+        code=code,
+        teacher_id=current_user['id'],
+        teacher_name=f"{current_user['first_name']} {current_user['last_name']}",
+        group_name=code_data.group_name,
+        level=code_data.level,
+        max_students=code_data.max_students,
+        current_students=0,
+        is_active=True
+    )
+    
+    doc = group_code.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    
+    await db.group_codes.insert_one(doc)
+    
+    logger.info(f"Group code {code} created by teacher {current_user['id']}")
+    
+    return {
+        "message": "Code de groupe créé avec succès",
+        "group_code": doc
+    }
+
+@api_router.get("/teacher/my-group-codes")
+async def get_my_group_codes(current_user: dict = Depends(get_current_user)):
+    """Get all group codes created by the teacher"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    codes = await db.group_codes.find(
+        {"teacher_id": current_user['id']},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    return codes
+
+@api_router.put("/teacher/toggle-group-code/{code_id}")
+async def toggle_group_code(code_id: str, current_user: dict = Depends(get_current_user)):
+    """Activate or deactivate a group code"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    code = await db.group_codes.find_one(
+        {"id": code_id, "teacher_id": current_user['id']},
+        {"_id": 0}
+    )
+    
+    if not code:
+        raise HTTPException(status_code=404, detail="Code not found")
+    
+    new_status = not code['is_active']
+    
+    await db.group_codes.update_one(
+        {"id": code_id},
+        {"$set": {"is_active": new_status}}
+    )
+    
+    logger.info(f"Group code {code['code']} toggled to {new_status} by teacher {current_user['id']}")
+    
+    return {
+        "message": f"Code {'activé' if new_status else 'désactivé'} avec succès",
+        "is_active": new_status
+    }
+
+@api_router.get("/auth/validate-code/{code}")
+async def validate_group_code(code: str):
+    """Validate a group code and return group information (public endpoint)"""
+    group_code = await db.group_codes.find_one(
+        {"code": code.upper()},
+        {"_id": 0}
+    )
+    
+    if not group_code:
+        raise HTTPException(status_code=404, detail="Code invalide")
+    
+    if not group_code['is_active']:
+        raise HTTPException(status_code=400, detail="Ce code n'est plus actif")
+    
+    if group_code['current_students'] >= group_code['max_students']:
+        raise HTTPException(status_code=400, detail="Ce groupe est complet")
+    
+    return {
+        "valid": True,
+        "group_name": group_code['group_name'],
+        "teacher_name": group_code['teacher_name'],
+        "level": group_code['level'],
+        "available_spots": group_code['max_students'] - group_code['current_students']
+    }
+
+@api_router.post("/auth/register-with-code")
+async def register_with_code(registration: RegisterWithCode):
+    """Register a student using a group code"""
+    # Validate code
+    group_code = await db.group_codes.find_one(
+        {"code": registration.code.upper()},
+        {"_id": 0}
+    )
+    
+    if not group_code:
+        raise HTTPException(status_code=404, detail="Code invalide")
+    
+    if not group_code['is_active']:
+        raise HTTPException(status_code=400, detail="Ce code n'est plus actif")
+    
+    if group_code['current_students'] >= group_code['max_students']:
+        raise HTTPException(status_code=400, detail="Ce groupe est complet")
+    
+    # Check if email already exists
+    existing = await db.users.find_one({"email": registration.email}, {"_id": 0})
+    if existing:
+        raise HTTPException(status_code=400, detail="Cette adresse email est déjà enregistrée")
+    
+    # Create user
+    user = User(
+        email=registration.email,
+        first_name=registration.first_name,
+        last_name=registration.last_name,
+        phone=registration.phone,
+        level=group_code['level'],
+        role="student",
+        is_active=False,
+        is_restricted=False,
+        password_hash="",
+        assigned_teacher=group_code['teacher_id']
+    )
+    
+    doc = user.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    doc['group_code'] = registration.code.upper()
+    doc['group_id'] = group_code['id']
+    doc['course_type'] = 'group'
+    
+    await db.users.insert_one(doc)
+    
+    # Increment student count
+    await db.group_codes.update_one(
+        {"id": group_code['id']},
+        {"$inc": {"current_students": 1}}
+    )
+    
+    # Send notification to admin
+    await email_service.send_admin_notification(
+        registration.email,
+        registration.first_name,
+        registration.last_name,
+        group_code['level'],
+        registration.phone
+    )
+    
+    logger.info(f"Student registered with code {registration.code.upper()}: {registration.email}")
+    
+    return {
+        "message": "Inscription envoyée avec succès! Attendez l'approbation de l'administrateur.",
+        "group_name": group_code['group_name'],
+        "teacher_name": group_code['teacher_name']
+    }
+
+
 @api_router.get("/admin/all-teacher-availability")
 async def get_all_teacher_availability(current_user: dict = Depends(get_current_user)):
     if current_user['role'] != 'admin':

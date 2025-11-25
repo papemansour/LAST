@@ -191,6 +191,46 @@ const HomePage = () => {
     setGroupMembers(updated);
   };
 
+
+  // Fonction pour valider le code de groupe
+  const validateGroupCode = async (code) => {
+    if (!code || code.trim().length === 0) {
+      setGroupCodeInfo(null);
+      return;
+    }
+
+    setValidatingCode(true);
+    try {
+      const response = await axios.get(`${API}/auth/validate-code/${code.trim().toUpperCase()}`);
+      setGroupCodeInfo(response.data);
+      toast.success(`Code valide ! Groupe "${response.data.group_name}" trouvé`);
+    } catch (error) {
+      setGroupCodeInfo(null);
+      if (error.response?.status === 404) {
+        toast.error('Code invalide. Vérifiez le code fourni par votre professeur.');
+      } else if (error.response?.status === 400) {
+        toast.error(error.response.data.detail);
+      } else {
+        toast.error('Erreur lors de la validation du code');
+      }
+    } finally {
+      setValidatingCode(false);
+    }
+  };
+
+  // Validation automatique quand le code change
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (groupCode && groupCode.length >= 4) {
+        validateGroupCode(groupCode);
+      } else {
+        setGroupCodeInfo(null);
+      }
+    }, 500); // Délai de 500ms pour éviter trop d'appels API
+
+    return () => clearTimeout(timeoutId);
+  }, [groupCode]);
+
   // Fonction pour obtenir le lien Stripe selon le pack et KALAMA CLUB
   const getStripeLink = (level, joinKalamaClub) => {
     const stripeLinks = {

@@ -254,13 +254,14 @@ const HomePage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validation pour cours groupé
+    // Validation pour cours groupé avec code
     if (courseType === 'group') {
-      const hasInvalidMember = groupMembers.some(member => 
-        !member.first_name || !member.last_name || !member.email || !member.phone || !member.level
-      );
-      if (hasInvalidMember) {
-        toast.error('Veuillez remplir tous les champs obligatoires pour chaque personne');
+      if (!groupCode || !groupCodeInfo) {
+        toast.error('Veuillez entrer un code de groupe valide');
+        return;
+      }
+      if (!formData.first_name || !formData.last_name || !formData.email || !formData.phone) {
+        toast.error('Veuillez remplir tous les champs obligatoires');
         return;
       }
     } else {
@@ -273,25 +274,21 @@ const HomePage = () => {
     setLoading(true);
 
     try {
-      const preferredSlots = formatPreferredSlots();
-      
       if (courseType === 'group') {
-        // Inscription groupée
-        const groupData = {
-          course_type: 'group',
-          preferred_slots: preferredSlots || '',
-          referral_source: formData.referral_source || '',
-          members: groupMembers.map(member => ({
-            ...member,
-            phone: `${member.country_code}${member.phone}`
-          }))
-        };
-        
-        await axios.post(`${API}/auth/register-group`, groupData);
-        toast.success(`Inscription groupée envoyée avec succès pour ${groupMembers.length} personne(s)!`);
+        // Inscription avec code de groupe
+        const fullPhone = `${formData.country_code}${formData.phone}`;
+        const response = await axios.post(`${API}/auth/register-with-code`, {
+          code: groupCode.toUpperCase(),
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          email: formData.email,
+          phone: fullPhone
+        });
+        toast.success(response.data.message);
       } else {
         // Inscription individuelle
         const fullPhone = `${formData.country_code}${formData.phone}`;
+        const preferredSlots = formatPreferredSlots();
         await axios.post(`${API}/auth/register`, {
           ...formData,
           phone: fullPhone,

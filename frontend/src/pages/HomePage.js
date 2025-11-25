@@ -56,6 +56,9 @@ const HomePage = () => {
   const [groupMembers, setGroupMembers] = useState([
     { first_name: '', last_name: '', email: '', phone: '', country_code: '+33', level: '' }
   ]);
+  const [groupCode, setGroupCode] = useState('');
+  const [groupCodeInfo, setGroupCodeInfo] = useState(null);
+  const [validatingCode, setValidatingCode] = useState(false);
   const [pricingData, setPricingData] = useState({
     kkid_eur: 30,
     kkid_discount: 0,

@@ -946,75 +946,96 @@ const HomePage = () => {
                     </div>
                   </>
                 ) : (
-                  /* Formulaire cours groupé */
+                  /* Formulaire cours groupé avec code */
                   <div className="space-y-6">
-                    <div className="flex justify-between items-center">
-                      <h3 className="font-semibold text-lg">Personnes inscrites ({groupMembers.length}/3)</h3>
-                      {groupMembers.length < 3 && (
-                        <Button
-                          type="button"
-                          onClick={handleAddGroupMember}
-                          variant="outline"
-                          size="sm"
-                          className="border-teal-600 text-teal-600"
-                        >
-                          + Ajouter une personne
-                        </Button>
+                    {/* Section Code Magique */}
+                    <div className="p-6 bg-gradient-to-br from-violet-50 to-indigo-50 rounded-xl border-2 border-violet-200">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-2xl">🔑</span>
+                        <h3 className="font-bold text-lg text-violet-800">Code Magique du Groupe</h3>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-4">
+                        Entrez le code fourni par votre professeur pour rejoindre le groupe
+                      </p>
+                      
+                      <div className="relative">
+                        <Input
+                          value={groupCode}
+                          onChange={(e) => setGroupCode(e.target.value.toUpperCase())}
+                          placeholder="Entrez votre code (ex: ABC123)"
+                          className="text-center text-2xl font-bold tracking-wider border-2 border-violet-300 focus:border-violet-500 h-16 uppercase"
+                          maxLength={8}
+                          required
+                        />
+                        {validatingCode && (
+                          <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-violet-600"></div>
+                          </div>
+                        )}
+                      </div>
+
+                      {groupCodeInfo && (
+                        <div className="mt-4 p-4 bg-green-50 border-2 border-green-200 rounded-lg">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-xl">✅</span>
+                            <span className="font-semibold text-green-800">Code Valide !</span>
+                          </div>
+                          <div className="text-sm space-y-1 text-gray-700">
+                            <p><strong>Groupe :</strong> {groupCodeInfo.group_name}</p>
+                            <p><strong>Professeur :</strong> {groupCodeInfo.teacher_name}</p>
+                            <p><strong>Niveau :</strong> {groupCodeInfo.level === 'beginner' ? 'Débutant' : groupCodeInfo.level === 'intermediate' ? 'Intermédiaire' : groupCodeInfo.level === 'advanced' ? 'Avancé' : 'K-Kid'}</p>
+                            <p><strong>Places disponibles :</strong> {groupCodeInfo.available_spots}</p>
+                          </div>
+                        </div>
                       )}
                     </div>
 
-                    {groupMembers.map((member, index) => (
-                      <div key={index} className="p-4 border-2 border-teal-200 rounded-lg bg-teal-50/50">
-                        <div className="flex justify-between items-center mb-3">
-                          <h4 className="font-semibold">Personne {index + 1}</h4>
-                          {groupMembers.length > 1 && (
-                            <Button
-                              type="button"
-                              onClick={() => handleRemoveGroupMember(index)}
-                              variant="outline"
-                              size="sm"
-                              className="border-red-500 text-red-600"
-                            >
-                              Retirer
-                            </Button>
-                          )}
-                        </div>
-
-                        <div className="grid md:grid-cols-2 gap-3">
+                    {/* Formulaire étudiant si code valide */}
+                    {groupCodeInfo && (
+                      <div className="space-y-4">
+                        <h3 className="font-semibold text-lg border-b pb-2">Vos informations</h3>
+                        
+                        <div className="grid md:grid-cols-2 gap-4">
                           <div>
-                            <Label>Prénom *</Label>
+                            <Label htmlFor="first_name">Prénom *</Label>
                             <Input
-                              value={member.first_name}
-                              onChange={(e) => handleGroupMemberChange(index, 'first_name', e.target.value)}
+                              id="first_name"
                               required
+                              value={formData.first_name}
+                              onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                              className="border-gray-200"
                             />
                           </div>
                           <div>
-                            <Label>Nom *</Label>
+                            <Label htmlFor="last_name">Nom *</Label>
                             <Input
-                              value={member.last_name}
-                              onChange={(e) => handleGroupMemberChange(index, 'last_name', e.target.value)}
+                              id="last_name"
                               required
+                              value={formData.last_name}
+                              onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                              className="border-gray-200"
                             />
                           </div>
                         </div>
 
-                        <div className="mt-3">
-                          <Label>Email de contact *</Label>
+                        <div>
+                          <Label htmlFor="email">Email de contact *</Label>
                           <Input
+                            id="email"
                             type="email"
-                            value={member.email}
-                            onChange={(e) => handleGroupMemberChange(index, 'email', e.target.value)}
                             required
+                            value={formData.email}
+                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            className="border-gray-200"
                           />
                         </div>
 
-                        <div className="mt-3">
-                          <Label>Téléphone *</Label>
+                        <div>
+                          <Label htmlFor="phone">Téléphone *</Label>
                           <div className="flex gap-2">
                             <Select
-                              value={member.country_code}
-                              onValueChange={(value) => handleGroupMemberChange(index, 'country_code', value)}
+                              value={formData.country_code}
+                              onValueChange={(value) => setFormData({ ...formData, country_code: value })}
                             >
                               <SelectTrigger className="w-[140px]">
                                 <SelectValue />
@@ -1026,28 +1047,17 @@ const HomePage = () => {
                               </SelectContent>
                             </Select>
                             <Input
-                              value={member.phone}
-                              onChange={(e) => handleGroupMemberChange(index, 'phone', e.target.value)}
+                              id="phone"
+                              required
+                              value={formData.phone}
+                              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                               placeholder="6 12 34 56 78"
                               className="flex-1"
-                              required
                             />
                           </div>
                         </div>
-
-                        <div className="mt-3">
-                          <Label>Niveau d'anglais *</Label>
-                          <Select
-                            value={member.level}
-                            onValueChange={(value) => handleGroupMemberChange(index, 'level', value)}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Sélectionner" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="beginner">Débutant</SelectItem>
-                              <SelectItem value="intermediate">Intermédiaire</SelectItem>
-                              <SelectItem value="advanced">Pack professionnel</SelectItem>
+                      </div>
+                    )}
                             </SelectContent>
                           </Select>
                         </div>

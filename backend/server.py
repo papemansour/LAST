@@ -1454,11 +1454,14 @@ async def create_group_code(code_data: GroupCodeCreate, current_user: dict = Dep
     
     await db.group_codes.insert_one(doc)
     
+    # Retrieve the inserted document without _id
+    created_code = await db.group_codes.find_one({"id": group_code.id}, {"_id": 0})
+    
     logger.info(f"Group code {code} created by teacher {current_user['id']}")
     
     return {
         "message": "Code de groupe créé avec succès",
-        "group_code": doc
+        "group_code": created_code
     }
 
 @api_router.get("/teacher/my-group-codes")

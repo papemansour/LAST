@@ -396,7 +396,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Nouvelles fonctionnalités backend testées et validées"
+    - "Système Code Magique - Backend API"
+    - "Système Code Magique - Interface Professeur"
+    - "Système Code Magique - Inscription Étudiants"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"

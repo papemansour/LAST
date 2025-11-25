@@ -200,6 +200,31 @@ class ClubComment(BaseModel):
 class ClubCommentCreate(BaseModel):
     content: str
 
+class GroupCode(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    code: str  # Unique 6-character alphanumeric code
+    teacher_id: str
+    teacher_name: str
+    group_name: str
+    level: str
+    max_students: int = 3
+    current_students: int = 0
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class GroupCodeCreate(BaseModel):
+    group_name: str
+    level: str
+    max_students: int = 3
+
+class RegisterWithCode(BaseModel):
+    code: str
+    first_name: str
+    last_name: str
+    email: EmailStr
+    phone: str
+
 class ClubEvent(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))

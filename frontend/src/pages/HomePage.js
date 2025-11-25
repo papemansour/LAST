@@ -1058,11 +1058,6 @@ const HomePage = () => {
                         </div>
                       </div>
                     )}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                    ))}
                   </div>
                 )}
 

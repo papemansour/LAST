@@ -457,6 +457,12 @@ const TeacherDashboard = () => {
             </Card>
           </TabsContent>
 
+          {/* Group Codes Tab */}
+          <TabsContent value="group-codes">
+            <GroupCodeManager />
+          </TabsContent>
+
+
           <TabsContent value="courses">
             <div className="grid md:grid-cols-2 gap-6">
               <Card className="border-teal-100">

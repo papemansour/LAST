@@ -313,6 +313,8 @@ const HomePage = () => {
       setGroupMembers([
         { first_name: '', last_name: '', email: '', phone: '', country_code: '+33', level: '' }
       ]);
+      setGroupCode('');
+      setGroupCodeInfo(null);
       setSelectedDates([]);
       setSelectedTimeSlots({});
       setShowRegistrationModal(false);

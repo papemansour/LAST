@@ -371,6 +371,10 @@ const TeacherDashboard = () => {
               <span className="text-3xl">👥</span>
               <span className="text-xs font-semibold">Étudiants</span>
             </TabsTrigger>
+            <TabsTrigger value="group-codes" className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-violet-500 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-violet-50 border-2 border-violet-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+              <span className="text-3xl">🔑</span>
+              <span className="text-xs font-semibold">Codes Groupe</span>
+            </TabsTrigger>
             <TabsTrigger value="courses" className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-purple-50 border-2 border-purple-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <span className="text-3xl">📖</span>
               <span className="text-xs font-semibold">Cours</span>

@@ -1007,6 +1007,28 @@ const HomePage = () => {
                       <div className="space-y-4">
                         <h3 className="font-semibold text-lg border-b pb-2">Vos informations</h3>
                         
+                        {/* Sélecteur de nombre de participants */}
+                        <div className="bg-yellow-50 p-4 rounded-lg border-2 border-yellow-200">
+                          <Label htmlFor="number_of_students" className="text-base font-semibold text-gray-800">
+                            Combien de personnes dans votre groupe ? *
+                          </Label>
+                          <p className="text-sm text-gray-600 mb-3">
+                            Un seul compte sera créé pour tout le groupe avec un code de connexion partagé
+                          </p>
+                          <Select
+                            value={numberOfStudents.toString()}
+                            onValueChange={(value) => setNumberOfStudents(parseInt(value))}
+                          >
+                            <SelectTrigger className="w-full bg-white">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="2">👥 2 personnes</SelectItem>
+                              <SelectItem value="3">👥👤 3 personnes</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
                         <div className="grid md:grid-cols-2 gap-4">
                           <div>
                             <Label htmlFor="first_name">Prénom *</Label>

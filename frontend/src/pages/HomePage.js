@@ -1444,6 +1444,116 @@ const HomePage = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Success Modal with Shared Login Code */}
+      <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <div className="flex items-center justify-center mb-4">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                <span className="text-4xl">🎉</span>
+              </div>
+            </div>
+            <DialogTitle className="text-center text-2xl font-bold text-green-800">
+              Inscription Réussie !
+            </DialogTitle>
+            <DialogDescription className="text-center text-base">
+              Votre compte de groupe a été créé avec succès
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-4">
+            {/* Shared Login Code Display */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border-2 border-blue-300">
+              <div className="text-center mb-3">
+                <p className="text-sm text-gray-700 font-semibold mb-2">🔑 Code de Connexion Partagé</p>
+                <p className="text-xs text-gray-600 mb-3">
+                  Partagez ce code avec les {numberOfStudents - 1} autre(s) membre(s) de votre groupe
+                </p>
+              </div>
+              
+              <div className="bg-white p-4 rounded-lg border-2 border-blue-400 mb-3">
+                <p className="text-4xl font-bold text-center text-blue-600 tracking-widest font-mono">
+                  {sharedLoginCode}
+                </p>
+              </div>
+              
+              <Button
+                onClick={() => {
+                  navigator.clipboard.writeText(sharedLoginCode || '');
+                  toast.success('Code copié dans le presse-papiers !');
+                }}
+                variant="outline"
+                className="w-full border-blue-400 text-blue-600 hover:bg-blue-50"
+              >
+                📋 Copier le code
+              </Button>
+            </div>
+            
+            {/* Instructions */}
+            <div className="bg-yellow-50 p-4 rounded-lg border-2 border-yellow-200">
+              <h4 className="font-semibold text-gray-800 mb-2">📌 Instructions importantes :</h4>
+              <ul className="text-sm text-gray-700 space-y-2">
+                <li className="flex items-start gap-2">
+                  <span className="text-yellow-600 font-bold">1.</span>
+                  <span>Conservez ce code en lieu sûr</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-yellow-600 font-bold">2.</span>
+                  <span>Tous les membres du groupe utiliseront <strong>la même adresse email</strong> ({formData.email}) et <strong>ce code</strong> pour se connecter</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-yellow-600 font-bold">3.</span>
+                  <span>Attendez l'approbation de l'administrateur avant de pouvoir vous connecter</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-yellow-600 font-bold">4.</span>
+                  <span>Vous recevrez un email de confirmation à {formData.email}</span>
+                </li>
+              </ul>
+            </div>
+            
+            {/* Group Info Summary */}
+            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+              <h4 className="font-semibold text-gray-800 mb-2">📋 Récapitulatif :</h4>
+              <div className="text-sm text-gray-700 space-y-1">
+                <p><strong>Groupe :</strong> {groupCodeInfo?.group_name}</p>
+                <p><strong>Professeur :</strong> {groupCodeInfo?.teacher_name}</p>
+                <p><strong>Nombre de personnes :</strong> {numberOfStudents}</p>
+                <p><strong>Email de connexion :</strong> {formData.email}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex gap-3">
+            <Button
+              onClick={() => {
+                setShowSuccessModal(false);
+                setSharedLoginCode(null);
+                // Reset form
+                setFormData({
+                  first_name: '',
+                  last_name: '',
+                  email: '',
+                  phone: '',
+                  country_code: '+33',
+                  level: '',
+                  preferred_slots: '',
+                  referral_source: '',
+                  join_kalama_club: false
+                });
+                setGroupCode('');
+                setGroupCodeInfo(null);
+                setNumberOfStudents(2);
+              }}
+              className="flex-1 bg-blue-600 hover:bg-blue-700"
+            >
+              J'ai compris
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12 md:py-16 px-4">
         <div className="container mx-auto max-w-7xl">

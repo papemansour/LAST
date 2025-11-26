@@ -1052,9 +1052,8 @@ const HomePage = () => {
                       </div>
                     </div>
 
-                {/* Section Membres Additionnels pour cours groupé */}
-                {courseType === 'group' && (
-                  <div className="space-y-4 p-4 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl border-2 border-yellow-200">
+                    {/* Section Membres Additionnels pour cours groupé */}
+                    <div className="space-y-4 p-4 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl border-2 border-yellow-200">
                     <div className="flex justify-between items-center">
                       <div>
                         <h3 className="font-semibold text-lg text-gray-800">👥 Membres additionnels du groupe</h3>

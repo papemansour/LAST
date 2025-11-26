@@ -1696,7 +1696,7 @@ startxref
             logger.info(f"\n📋 Running: Group System Verification")
             logger.info("-" * 50)
             try:
-                result = await self.test_group_system_verification(magic_code_info["group_id"], magic_code_info["magic_code"])
+                result = await self.test_group_system_verification(magic_code_info["group_id"], magic_code_info["magic_code"], magic_code_info["email"])
                 if result:
                     logger.info(f"✅ Group System Verification: PASSED")
                 else:

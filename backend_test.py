@@ -1580,7 +1580,7 @@ startxref
             
             # 3. Test multiple simultaneous logins with same code
             login_data = {
-                "email": "alice.groupe@example.com",
+                "email": email,
                 "password": magic_code
             }
             

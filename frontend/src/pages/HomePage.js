@@ -1033,9 +1033,7 @@ const HomePage = () => {
                           </div>
                         </div>
                       </div>
-                    )}
-                  </div>
-                )}
+                    </div>
 
                 {/* Section Membres Additionnels pour cours groupé */}
                 {courseType === 'group' && (

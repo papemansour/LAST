@@ -396,7 +396,6 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Système Code Magique - Backend API"
     - "Système Code Magique - Interface Professeur"
     - "Système Code Magique - Inscription Étudiants"
   stuck_tasks: []

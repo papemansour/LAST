@@ -1543,7 +1543,7 @@ startxref
             self.test_results["magic_code_login"]["details"].append(f"Test error: {str(e)}")
             return False
 
-    async def test_group_system_verification(self, group_id: str, magic_code: str) -> bool:
+    async def test_group_system_verification(self, group_id: str, magic_code: str, email: str) -> bool:
         """Test 5: Additional verifications for group system"""
         try:
             logger.info("🔍 Testing group system verifications...")

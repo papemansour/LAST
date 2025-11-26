@@ -961,7 +961,7 @@ const HomePage = () => {
                   </>
                 ) : (
                   /* Formulaire cours groupé - personne principale + membres additionnels */
-                  <div className="space-y-6">
+                  <>
                     <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-200">
                       <p className="text-sm text-gray-700">
                         <strong>📝 Inscription de groupe :</strong> Remplissez vos informations complètes, puis ajoutez les autres membres (nom et prénom uniquement).
@@ -969,9 +969,9 @@ const HomePage = () => {
                       </p>
                     </div>
 
-                    <h3 className="font-semibold text-lg border-b pb-2">Vos informations (personne principale)</h3>
+                    <h3 className="font-semibold text-lg border-b pb-2 mt-6">Vos informations (personne principale)</h3>
                     
-                    <div className="grid md:grid-cols-2 gap-4">
+                    <div className="grid md:grid-cols-2 gap-4 mt-4">
                           <div>
                             <Label htmlFor="first_name">Prénom *</Label>
                             <Input

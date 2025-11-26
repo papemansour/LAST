@@ -971,168 +971,168 @@ const HomePage = () => {
 
                     <h3 className="font-semibold text-lg border-b pb-2 mt-6">Vos informations (personne principale)</h3>
                     
-                    <div className="grid md:grid-cols-2 gap-4 mt-4">
-                      <div>
-                        <Label htmlFor="first_name">Prénom *</Label>
-                        <Input
-                          id="first_name"
-                          required
-                          value={formData.first_name}
-                          onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                          className="border-gray-200"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="last_name">Nom *</Label>
-                        <Input
-                          id="last_name"
-                          required
-                          value={formData.last_name}
-                          onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                          className="border-gray-200"
-                        />
-                      </div>
-                    </div>
-
+                    <div className="space-y-4 mt-4">
+                      <div className="grid md:grid-cols-2 gap-4">
                         <div>
-                          <Label htmlFor="email">Email de contact *</Label>
+                          <Label htmlFor="first_name">Prénom *</Label>
                           <Input
-                            id="email"
-                            type="email"
+                            id="first_name"
                             required
-                            value={formData.email}
-                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            value={formData.first_name}
+                            onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
                             className="border-gray-200"
                           />
                         </div>
-
                         <div>
-                          <Label htmlFor="phone">Téléphone *</Label>
-                          <div className="flex gap-2">
-                            <Select
-                              value={formData.country_code}
-                              onValueChange={(value) => setFormData({ ...formData, country_code: value })}
-                            >
-                              <SelectTrigger className="w-[140px]">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="+33">🇫🇷 +33</SelectItem>
-                                <SelectItem value="+221">🇸🇳 +221</SelectItem>
-                                <SelectItem value="+1">🇺🇸 +1</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <Input
-                              id="phone"
-                              required
-                              value={formData.phone}
-                              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                              placeholder="6 12 34 56 78"
-                              className="flex-1"
-                            />
-                          </div>
+                          <Label htmlFor="last_name">Nom *</Label>
+                          <Input
+                            id="last_name"
+                            required
+                            value={formData.last_name}
+                            onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                            className="border-gray-200"
+                          />
                         </div>
+                      </div>
 
-                        <div>
-                          <Label htmlFor="level">Niveau d'anglais *</Label>
+                      <div>
+                        <Label htmlFor="email">Email de contact *</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          required
+                          value={formData.email}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          className="border-gray-200"
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="phone">Téléphone *</Label>
+                        <div className="flex gap-2">
                           <Select
-                            value={formData.level}
-                            onValueChange={(value) => setFormData({ ...formData, level: value })}
+                            value={formData.country_code}
+                            onValueChange={(value) => setFormData({ ...formData, country_code: value })}
                           >
-                            <SelectTrigger className="border-gray-200">
-                              <SelectValue placeholder="Sélectionnez votre niveau" />
+                            <SelectTrigger className="w-[140px]">
+                              <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="beginner">Débutant</SelectItem>
-                              <SelectItem value="intermediate">Intermédiaire</SelectItem>
-                              <SelectItem value="advanced">Pack professionnel</SelectItem>
+                              <SelectItem value="+33">🇫🇷 +33</SelectItem>
+                              <SelectItem value="+221">🇸🇳 +221</SelectItem>
+                              <SelectItem value="+1">🇺🇸 +1</SelectItem>
                             </SelectContent>
                           </Select>
+                          <Input
+                            id="phone"
+                            required
+                            value={formData.phone}
+                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                            placeholder="6 12 34 56 78"
+                            className="flex-1"
+                          />
                         </div>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="level">Niveau d'anglais *</Label>
+                        <Select
+                          value={formData.level}
+                          onValueChange={(value) => setFormData({ ...formData, level: value })}
+                        >
+                          <SelectTrigger className="border-gray-200">
+                            <SelectValue placeholder="Sélectionnez votre niveau" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="beginner">Débutant</SelectItem>
+                            <SelectItem value="intermediate">Intermédiaire</SelectItem>
+                            <SelectItem value="advanced">Pack professionnel</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
 
                     {/* Section Membres Additionnels pour cours groupe */}
-                    <div className="space-y-4 p-4 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl border-2 border-yellow-200">
+                    <div className="space-y-4 p-4 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl border-2 border-yellow-200 mt-6">
                       <div className="flex justify-between items-center">
-                      <div>
-                        <h3 className="font-semibold text-lg text-gray-800">👥 Membres additionnels du groupe</h3>
-                        <p className="text-sm text-gray-600">Ajoutez 1 à 2 personnes (nom et prénom uniquement)</p>
-                      </div>
-                      {additionalMembers.length < 2 && (
-                        <Button
-                          type="button"
-                          onClick={() => setAdditionalMembers([...additionalMembers, { first_name: '', last_name: '' }])}
-                          variant="outline"
-                          className="border-orange-400 text-orange-600 hover:bg-orange-50"
-                        >
-                          <span className="text-lg mr-2">+</span> Ajouter une personne
-                        </Button>
-                      )}
-                    </div>
-
-                    {additionalMembers.length === 0 && (
-                      <div className="text-center py-6 text-gray-500">
-                        <p className="mb-2">Aucun membre additionnel</p>
-                        <p className="text-sm">Cliquez sur "Ajouter une personne" pour commencer</p>
-                      </div>
-                    )}
-
-                    {additionalMembers.map((member, index) => (
-                      <div key={index} className="p-4 bg-white rounded-lg border-2 border-orange-200">
-                        <div className="flex justify-between items-center mb-3">
-                          <h4 className="font-semibold text-gray-800">Personne {index + 2}</h4>
+                        <div>
+                          <h3 className="font-semibold text-lg text-gray-800">👥 Membres additionnels du groupe</h3>
+                          <p className="text-sm text-gray-600">Ajoutez 1 à 2 personnes (nom et prénom uniquement)</p>
+                        </div>
+                        {additionalMembers.length < 2 && (
                           <Button
                             type="button"
-                            onClick={() => setAdditionalMembers(additionalMembers.filter((_, i) => i !== index))}
-                            variant="ghost"
-                            size="sm"
-                            className="text-red-600 hover:bg-red-50"
+                            onClick={() => setAdditionalMembers([...additionalMembers, { first_name: '', last_name: '' }])}
+                            variant="outline"
+                            className="border-orange-400 text-orange-600 hover:bg-orange-50"
                           >
-                            ✕ Retirer
+                            <span className="text-lg mr-2">+</span> Ajouter une personne
                           </Button>
-                        </div>
-                        <div className="grid md:grid-cols-2 gap-3">
-                          <div>
-                            <Label>Prénom *</Label>
-                            <Input
-                              value={member.first_name}
-                              onChange={(e) => {
-                                const updated = [...additionalMembers];
-                                updated[index].first_name = e.target.value;
-                                setAdditionalMembers(updated);
-                              }}
-                              placeholder="Ex: Jean"
-                              required
-                              className="border-gray-200"
-                            />
-                          </div>
-                          <div>
-                            <Label>Nom *</Label>
-                            <Input
-                              value={member.last_name}
-                              onChange={(e) => {
-                                const updated = [...additionalMembers];
-                                updated[index].last_name = e.target.value;
-                                setAdditionalMembers(updated);
-                              }}
-                              placeholder="Ex: Dupont"
-                              required
-                              className="border-gray-200"
-                            />
-                          </div>
-                        </div>
+                        )}
                       </div>
-                    ))}
 
-                    {additionalMembers.length > 0 && (
-                      <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                        <p className="text-sm text-gray-700">
-                          <strong>ℹ️ Important :</strong> Après validation par l'admin, un code de connexion unique sera généré pour tout le groupe. Tous les membres utiliseront le même code pour se connecter.
-                        </p>
-                      </div>
-                    )}
-                  </div>
+                      {additionalMembers.length === 0 && (
+                        <div className="text-center py-6 text-gray-500">
+                          <p className="mb-2">Aucun membre additionnel</p>
+                          <p className="text-sm">Cliquez sur "Ajouter une personne" pour commencer</p>
+                        </div>
+                      )}
+
+                      {additionalMembers.map((member, index) => (
+                        <div key={index} className="p-4 bg-white rounded-lg border-2 border-orange-200">
+                          <div className="flex justify-between items-center mb-3">
+                            <h4 className="font-semibold text-gray-800">Personne {index + 2}</h4>
+                            <Button
+                              type="button"
+                              onClick={() => setAdditionalMembers(additionalMembers.filter((_, i) => i !== index))}
+                              variant="ghost"
+                              size="sm"
+                              className="text-red-600 hover:bg-red-50"
+                            >
+                              ✕ Retirer
+                            </Button>
+                          </div>
+                          <div className="grid md:grid-cols-2 gap-3">
+                            <div>
+                              <Label>Prénom *</Label>
+                              <Input
+                                value={member.first_name}
+                                onChange={(e) => {
+                                  const updated = [...additionalMembers];
+                                  updated[index].first_name = e.target.value;
+                                  setAdditionalMembers(updated);
+                                }}
+                                placeholder="Ex: Jean"
+                                required
+                                className="border-gray-200"
+                              />
+                            </div>
+                            <div>
+                              <Label>Nom *</Label>
+                              <Input
+                                value={member.last_name}
+                                onChange={(e) => {
+                                  const updated = [...additionalMembers];
+                                  updated[index].last_name = e.target.value;
+                                  setAdditionalMembers(updated);
+                                }}
+                                placeholder="Ex: Dupont"
+                                required
+                                className="border-gray-200"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+
+                      {additionalMembers.length > 0 && (
+                        <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                          <p className="text-sm text-gray-700">
+                            <strong>ℹ️ Important :</strong> Après validation par l'admin, un code de connexion unique sera généré pour tout le groupe. Tous les membres utiliseront le même code pour se connecter.
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </>
                 )}
 

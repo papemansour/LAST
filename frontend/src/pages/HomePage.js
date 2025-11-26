@@ -1052,6 +1052,7 @@ const HomePage = () => {
                         </div>
                       </div>
                     </div>
+                    </div>
 
                     {/* Section Membres Additionnels pour cours groupé */}
                     <div className="space-y-4 p-4 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl border-2 border-yellow-200">

@@ -341,6 +341,17 @@ const AdminDashboard = () => {
               <UserCheck className="w-6 h-6" />
               <span className="text-xs font-semibold">En attente</span>
             </TabsTrigger>
+
+
+            <TabsTrigger 
+              value="pending-groups" 
+              data-testid="admin-tab-pending-groups"
+              className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-indigo-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-indigo-50 border-2 border-indigo-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+            >
+              <Users className="w-6 h-6" />
+              <span className="text-xs font-semibold">Groupes</span>
+            </TabsTrigger>
+
             
             <TabsTrigger 
               value="students" 

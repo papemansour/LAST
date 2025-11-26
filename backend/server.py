@@ -30,7 +30,9 @@ FRONTEND_URL = os.environ.get('FRONTEND_URL', '')
 # Security
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
-SECRET_KEY = os.environ.get('JWT_SECRET', 'your-secret-key-change-in-production')
+SECRET_KEY = os.environ.get('JWT_SECRET')
+if not SECRET_KEY:
+    raise ValueError("JWT_SECRET environment variable must be set")
 ALGORITHM = "HS256"
 
 app = FastAPI()

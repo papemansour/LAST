@@ -1869,10 +1869,22 @@ startxref
         logger.info("🏁 MY KALAMA ENGLISH BACKEND TEST SUMMARY")
         logger.info("=" * 70)
         
-        # Priority tests first
+        # Group registration tests first (highest priority)
+        group_tests = ["group_registration", "pending_group_registrations", "magic_code_generation", "magic_code_login", "group_system_verification"]
+        
+        logger.info("\n🎯 GROUP REGISTRATION SYSTEM TESTS (HIGHEST PRIORITY):")
+        for test_name in group_tests:
+            if test_name in self.test_results:
+                results = self.test_results[test_name]
+                status = "✅ PASSED" if results["passed"] else "❌ FAILED"
+                logger.info(f"  {test_name.upper().replace('_', ' ')}: {status}")
+                for detail in results["details"]:
+                    logger.info(f"    • {detail}")
+        
+        # Priority tests second
         priority_tests = ["flashcard_system", "video_system", "test_questions", "pricing_independence", "admin_delete_user", "email_notifications"]
         
-        logger.info("\n🎯 PRIORITY TESTS (New Features):")
+        logger.info("\n🎯 OTHER PRIORITY TESTS (New Features):")
         for test_name in priority_tests:
             if test_name in self.test_results:
                 results = self.test_results[test_name]

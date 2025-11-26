@@ -1133,7 +1133,6 @@ const HomePage = () => {
                       </div>
                     )}
                   </div>
-                )}
                   </>
                 }
 

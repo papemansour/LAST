@@ -255,14 +255,22 @@ const HomePage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validation pour cours groupé avec code
+    // Validation pour cours groupé
     if (courseType === 'group') {
-      if (!groupCode || !groupCodeInfo) {
-        toast.error('Veuillez entrer un code de groupe valide');
+      if (!formData.first_name || !formData.last_name || !formData.email || !formData.phone || !formData.level) {
+        toast.error('Veuillez remplir tous les champs obligatoires');
         return;
       }
-      if (!formData.first_name || !formData.last_name || !formData.email || !formData.phone) {
-        toast.error('Veuillez remplir tous les champs obligatoires');
+      if (additionalMembers.length === 0) {
+        toast.error('Pour un cours groupé, vous devez ajouter au moins une personne supplémentaire');
+        return;
+      }
+      // Validate additional members
+      const hasInvalidMember = additionalMembers.some(member => 
+        !member.first_name || !member.last_name
+      );
+      if (hasInvalidMember) {
+        toast.error('Veuillez remplir le nom et prénom de tous les membres');
         return;
       }
     } else {
@@ -276,23 +284,20 @@ const HomePage = () => {
 
     try {
       if (courseType === 'group') {
-        // Inscription avec code de groupe
+        // Inscription de groupe (sans code magique - sera généré par l'admin)
         const fullPhone = `${formData.country_code}${formData.phone}`;
-        const response = await axios.post(`${API}/auth/register-with-code`, {
-          code: groupCode.toUpperCase(),
+        const preferredSlots = formatPreferredSlots();
+        const response = await axios.post(`${API}/auth/register-group`, {
           first_name: formData.first_name,
           last_name: formData.last_name,
           email: formData.email,
           phone: fullPhone,
-          number_of_students: numberOfStudents
+          country_code: formData.country_code,
+          level: formData.level,
+          additional_members: additionalMembers,
+          preferred_slots: preferredSlots || '',
+          referral_source: formData.referral_source || ''
         });
-        
-        // Store the shared login code to display in success modal
-        setSharedLoginCode(response.data.shared_login_code);
-        
-        // Close registration modal and show success modal with code
-        setShowRegistrationModal(false);
-        setShowSuccessModal(true);
         
         toast.success(response.data.message);
       } else {

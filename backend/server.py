@@ -1247,8 +1247,7 @@ async def admin_reset_user_password(user_id: str, current_user: dict = Depends(g
         email_sent = False
     
     # Create notification for user
-    await create_notification(
-
+    # (notification logic can be added here if needed)
 
 # ADMIN: Generate Magic Code for Group Registration
 @api_router.post("/admin/generate-magic-code/{user_id}")

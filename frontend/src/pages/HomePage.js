@@ -877,8 +877,8 @@ const HomePage = () => {
                   </div>
                 </div>
 
-                {courseType === 'individual' ? (
-                  /* Formulaire cours individuel */
+                <div>
+                  {/* Formulaire cours individuel */}
                   <>
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>

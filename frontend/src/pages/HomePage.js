@@ -325,11 +325,10 @@ const HomePage = () => {
         referral_source: '',
         join_kalama_club: false
       });
-      setGroupMembers([
-        { first_name: '', last_name: '', email: '', phone: '', country_code: '+33', level: '' }
-      ]);
+      setAdditionalMembers([]);
       setGroupCode('');
       setGroupCodeInfo(null);
+      setNumberOfStudents(2);
       setSelectedDates([]);
       setSelectedTimeSlots({});
       setShowRegistrationModal(false);

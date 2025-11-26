@@ -586,6 +586,13 @@ const AdminDashboard = () => {
             </Card>
           </TabsContent>
 
+
+
+          {/* Pending Group Registrations Tab */}
+          <TabsContent value="pending-groups">
+            <PendingGroupRegistrations />
+          </TabsContent>
+
           <TabsContent value="teachers">
             <div className="grid md:grid-cols-2 gap-6">
               <Card>

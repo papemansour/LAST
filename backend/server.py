@@ -30,9 +30,10 @@ FRONTEND_URL = os.environ.get('FRONTEND_URL', '')
 # Security
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
-SECRET_KEY = os.environ.get('JWT_SECRET')
-if not SECRET_KEY:
-    raise ValueError("JWT_SECRET environment variable must be set")
+SECRET_KEY = os.environ.get('JWT_SECRET') or os.environ.get('SECRET_KEY', 'development-secret-key-change-in-production')
+# Warn if using default key
+if SECRET_KEY == 'development-secret-key-change-in-production':
+    logger.warning("⚠️ Using default JWT secret key. Set JWT_SECRET environment variable in production!")
 ALGORITHM = "HS256"
 
 app = FastAPI()

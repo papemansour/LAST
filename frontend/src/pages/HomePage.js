@@ -960,78 +960,18 @@ const HomePage = () => {
                     </div>
                   </>
                 ) : (
-                  /* Formulaire cours groupé avec code */
+                  /* Formulaire cours groupé - personne principale + membres additionnels */
                   <div className="space-y-6">
-                    {/* Section Code Magique */}
-                    <div className="p-6 bg-gradient-to-br from-violet-50 to-indigo-50 rounded-xl border-2 border-violet-200">
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-2xl">🔑</span>
-                        <h3 className="font-bold text-lg text-violet-800">Code Magique du Groupe</h3>
-                      </div>
-                      <p className="text-sm text-gray-600 mb-4">
-                        Entrez le code fourni par votre professeur pour rejoindre le groupe
+                    <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-200">
+                      <p className="text-sm text-gray-700">
+                        <strong>📝 Inscription de groupe :</strong> Remplissez vos informations complètes, puis ajoutez les autres membres (nom et prénom uniquement).
+                        L'admin générera un code de connexion partagé après validation.
                       </p>
-                      
-                      <div className="relative">
-                        <Input
-                          value={groupCode}
-                          onChange={(e) => setGroupCode(e.target.value.toUpperCase())}
-                          placeholder="Entrez votre code (ex: ABC123)"
-                          className="text-center text-2xl font-bold tracking-wider border-2 border-violet-300 focus:border-violet-500 h-16 uppercase"
-                          maxLength={8}
-                          required
-                        />
-                        {validatingCode && (
-                          <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
-                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-violet-600"></div>
-                          </div>
-                        )}
-                      </div>
-
-                      {groupCodeInfo && (
-                        <div className="mt-4 p-4 bg-green-50 border-2 border-green-200 rounded-lg">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-xl">✅</span>
-                            <span className="font-semibold text-green-800">Code Valide !</span>
-                          </div>
-                          <div className="text-sm space-y-1 text-gray-700">
-                            <p><strong>Groupe :</strong> {groupCodeInfo.group_name}</p>
-                            <p><strong>Professeur :</strong> {groupCodeInfo.teacher_name}</p>
-                            <p><strong>Niveau :</strong> {groupCodeInfo.level === 'beginner' ? 'Débutant' : groupCodeInfo.level === 'intermediate' ? 'Intermédiaire' : groupCodeInfo.level === 'advanced' ? 'Avancé' : 'K-Kid'}</p>
-                            <p><strong>Places disponibles :</strong> {groupCodeInfo.available_spots}</p>
-                          </div>
-                        </div>
-                      )}
                     </div>
 
-                    {/* Formulaire étudiant si code valide */}
-                    {groupCodeInfo && (
-                      <div className="space-y-4">
-                        <h3 className="font-semibold text-lg border-b pb-2">Vos informations</h3>
-                        
-                        {/* Sélecteur de nombre de participants */}
-                        <div className="bg-yellow-50 p-4 rounded-lg border-2 border-yellow-200">
-                          <Label htmlFor="number_of_students" className="text-base font-semibold text-gray-800">
-                            Combien de personnes dans votre groupe ? *
-                          </Label>
-                          <p className="text-sm text-gray-600 mb-3">
-                            Un seul compte sera créé pour tout le groupe avec un code de connexion partagé
-                          </p>
-                          <Select
-                            value={numberOfStudents.toString()}
-                            onValueChange={(value) => setNumberOfStudents(parseInt(value))}
-                          >
-                            <SelectTrigger className="w-full bg-white">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="2">👥 2 personnes</SelectItem>
-                              <SelectItem value="3">👥👤 3 personnes</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        
-                        <div className="grid md:grid-cols-2 gap-4">
+                    <h3 className="font-semibold text-lg border-b pb-2">Vos informations (personne principale)</h3>
+                    
+                    <div className="grid md:grid-cols-2 gap-4">
                           <div>
                             <Label htmlFor="first_name">Prénom *</Label>
                             <Input

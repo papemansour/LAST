@@ -959,7 +959,8 @@ const HomePage = () => {
                       </Select>
                     </div>
                   </>
-                  {/* Formulaire cours groupé - personne principale + membres additionnels */}
+                ) : (
+                  /* Formulaire cours groupé - personne principale + membres additionnels */
                   <>
                     <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-200">
                       <p className="text-sm text-gray-700">

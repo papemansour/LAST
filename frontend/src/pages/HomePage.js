@@ -53,9 +53,7 @@ const HomePage = () => {
   const navigate = useNavigate();
   const { currency, formatPrice, formatPriceWithSmallFCFA, EUR_TO_FCFA } = useCurrency();
   const [courseType, setCourseType] = useState('individual'); // 'individual' ou 'group'
-  const [groupMembers, setGroupMembers] = useState([
-    { first_name: '', last_name: '', email: '', phone: '', country_code: '+33', level: '' }
-  ]);
+  const [additionalMembers, setAdditionalMembers] = useState([]);  // Membres additionnels (juste nom/prénom)
   const [groupCode, setGroupCode] = useState('');
   const [groupCodeInfo, setGroupCodeInfo] = useState(null);
   const [validatingCode, setValidatingCode] = useState(false);

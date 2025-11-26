@@ -444,6 +444,9 @@ test_plan:
         - working: "NA"
           agent: "main"
           comment: "Implémenté - Modale inscription HomePage avec option 'Cours Groupé', champ saisie code magique, validation automatique code, affichage infos groupe, formulaire inscription étudiant. Intégration complète avec backend. Nécessite tests complets."
+        - working: "NA"
+          agent: "testing"
+          comment: "⚠️ NON TESTÉ - Interface inscription étudiants non testée car focus sur backend selon instructions. Backend API validé, interface frontend nécessite tests séparés par main agent."
 
 agent_communication:
     - agent: "testing"

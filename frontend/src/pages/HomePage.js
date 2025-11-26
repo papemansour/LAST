@@ -1133,7 +1133,7 @@ const HomePage = () => {
                     )}
                   </div>
                   </>
-                )}
+                </div>
 
                 {/* Créneaux (facultatif) */}
                 <div>

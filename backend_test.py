@@ -1629,6 +1629,75 @@ startxref
         if student_info:
             await self.login_student(student_info["email"], student_info["password"])
         
+        # GROUP REGISTRATION SYSTEM TESTS (HIGHEST PRIORITY FROM REVIEW REQUEST)
+        logger.info(f"\n📋 Running: Group Registration System Tests")
+        logger.info("=" * 70)
+        
+        # Test 1: Group Registration
+        logger.info(f"\n📋 Running: Group Registration")
+        logger.info("-" * 50)
+        group_info = None
+        try:
+            group_info = await self.test_group_registration()
+            if group_info:
+                logger.info(f"✅ Group Registration: PASSED")
+            else:
+                logger.error(f"❌ Group Registration: FAILED")
+        except Exception as e:
+            logger.error(f"❌ Group Registration: ERROR - {str(e)}")
+        
+        # Test 2: Pending Group Registrations
+        logger.info(f"\n📋 Running: Pending Group Registrations")
+        logger.info("-" * 50)
+        try:
+            result = await self.test_pending_group_registrations()
+            if result:
+                logger.info(f"✅ Pending Group Registrations: PASSED")
+            else:
+                logger.error(f"❌ Pending Group Registrations: FAILED")
+        except Exception as e:
+            logger.error(f"❌ Pending Group Registrations: ERROR - {str(e)}")
+        
+        # Test 3: Magic Code Generation (only if group registration succeeded)
+        magic_code_info = None
+        if group_info:
+            logger.info(f"\n📋 Running: Magic Code Generation")
+            logger.info("-" * 50)
+            try:
+                magic_code_info = await self.test_magic_code_generation(group_info["group_id"])
+                if magic_code_info:
+                    logger.info(f"✅ Magic Code Generation: PASSED")
+                else:
+                    logger.error(f"❌ Magic Code Generation: FAILED")
+            except Exception as e:
+                logger.error(f"❌ Magic Code Generation: ERROR - {str(e)}")
+        
+        # Test 4: Magic Code Login (only if magic code was generated)
+        if magic_code_info:
+            logger.info(f"\n📋 Running: Magic Code Login")
+            logger.info("-" * 50)
+            try:
+                result = await self.test_magic_code_login(magic_code_info["email"], magic_code_info["magic_code"])
+                if result:
+                    logger.info(f"✅ Magic Code Login: PASSED")
+                else:
+                    logger.error(f"❌ Magic Code Login: FAILED")
+            except Exception as e:
+                logger.error(f"❌ Magic Code Login: ERROR - {str(e)}")
+        
+        # Test 5: Group System Verification (only if magic code was generated)
+        if magic_code_info:
+            logger.info(f"\n📋 Running: Group System Verification")
+            logger.info("-" * 50)
+            try:
+                result = await self.test_group_system_verification(magic_code_info["group_id"], magic_code_info["magic_code"])
+                if result:
+                    logger.info(f"✅ Group System Verification: PASSED")
+                else:
+                    logger.error(f"❌ Group System Verification: FAILED")
+            except Exception as e:
+                logger.error(f"❌ Group System Verification: ERROR - {str(e)}")
+
         # Run NEW FEATURE TESTS first (priority tests from review request)
         
         # Test 1: Flashcard System (NOUVEAU)

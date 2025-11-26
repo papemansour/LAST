@@ -1,0 +1,14 @@
+[
+  {
+    "content": "Identify root cause of tar extraction failure in copy.go Copy function",
+    "status": "completed"
+  },
+  {
+    "content": "Collect additional diagnostic information about source pod state",
+    "status": "completed"
+  },
+  {
+    "content": "Provide final RCA with recommended fixes",
+    "status": "in_progress"
+  }
+]

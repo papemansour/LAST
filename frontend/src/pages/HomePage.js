@@ -1035,13 +1035,19 @@ const HomePage = () => {
 
                         <div>
                           <Label htmlFor="level">Niveau d'anglais *</Label>
-                          <Input
-                            id="level"
+                          <Select
                             value={formData.level}
-                            onChange={(e) => setFormData({ ...formData, level: e.target.value })}
-                            placeholder="Sélectionnez votre niveau"
-                            className="border-gray-200"
-                          />
+                            onValueChange={(value) => setFormData({ ...formData, level: value })}
+                          >
+                            <SelectTrigger className="border-gray-200">
+                              <SelectValue placeholder="Sélectionnez votre niveau" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="beginner">Débutant</SelectItem>
+                              <SelectItem value="intermediate">Intermédiaire</SelectItem>
+                              <SelectItem value="advanced">Pack professionnel</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
                       </div>
                     </div>

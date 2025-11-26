@@ -634,51 +634,11 @@ async def register_group(group_data: GroupRegistration):
     
     logger.info(f"Group registration submitted: {group_data.email} with {total_members} members")
     
-    registered_members = []
-    for member in members:
-        # Check if email already exists
-        existing = await db.users.find_one({"email": member['email']}, {"_id": 0})
-        if existing:
-            raise HTTPException(status_code=400, detail=f"Email {member['email']} already registered")
-        
-        # Create user
-        user = User(
-            email=member['email'],
-            first_name=member['first_name'],
-            last_name=member['last_name'],
-            phone=member['phone'],
-            level=member['level'],
-            role="student",
-            is_active=False,
-            is_restricted=False,
-            password_hash="",
-            preferred_slots=group_data.get('preferred_slots', ''),
-            referral_source=group_data.get('referral_source', '')
-        )
-        
-        doc = user.model_dump()
-        doc['created_at'] = doc['created_at'].isoformat()
-        doc['group_id'] = group_id  # Link members together
-        doc['course_type'] = 'group'
-        
-        await db.users.insert_one(doc)
-        registered_members.append(f"{member['first_name']} {member['last_name']}")
-        
-        # Send notification to admin for each member
-        await email_service.send_admin_notification(
-            member['email'],
-            member['first_name'],
-            member['last_name'],
-            member['level'],
-            member['phone']
-        )
-    
-    logger.info(f"Group registration: {len(members)} members, group_id: {group_id}")
-    
     return {
-        "message": f"Group registration submitted for {len(members)} members",
+        "message": f"Inscription de groupe envoyée avec succès pour {total_members} personne(s)! En attente d'approbation par l'administrateur.",
         "group_id": group_id,
-        "members": registered_members
+        "total_members": total_members,
+        "members_names": members_names
     }
 
 @api_router.post("/auth/login")

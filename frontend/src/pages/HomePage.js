@@ -59,6 +59,9 @@ const HomePage = () => {
   const [groupCode, setGroupCode] = useState('');
   const [groupCodeInfo, setGroupCodeInfo] = useState(null);
   const [validatingCode, setValidatingCode] = useState(false);
+  const [numberOfStudents, setNumberOfStudents] = useState(2);
+  const [sharedLoginCode, setSharedLoginCode] = useState(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [pricingData, setPricingData] = useState({
     kkid_eur: 30,
     kkid_discount: 0,

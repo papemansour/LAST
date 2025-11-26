@@ -1533,7 +1533,7 @@ async def validate_group_code(code: str):
 
 @api_router.post("/auth/register-with-code")
 async def register_with_code(registration: RegisterWithCode):
-    """Register a student using a group code"""
+    """Register a GROUP account with a shared login code"""
     # Validate code
     group_code = await db.group_codes.find_one(
         {"code": registration.code.upper()},
@@ -1546,15 +1546,27 @@ async def register_with_code(registration: RegisterWithCode):
     if not group_code['is_active']:
         raise HTTPException(status_code=400, detail="Ce code n'est plus actif")
     
-    if group_code['current_students'] >= group_code['max_students']:
-        raise HTTPException(status_code=400, detail="Ce groupe est complet")
+    # Check if there's enough space for this group
+    remaining_spots = group_code['max_students'] - group_code['current_students']
+    if remaining_spots < registration.number_of_students:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Pas assez de places disponibles. Places restantes: {remaining_spots}"
+        )
     
     # Check if email already exists
     existing = await db.users.find_one({"email": registration.email}, {"_id": 0})
     if existing:
         raise HTTPException(status_code=400, detail="Cette adresse email est déjà enregistrée")
     
-    # Create user
+    # Generate unique shared login code (8 characters)
+    shared_login_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+    
+    # Ensure code is unique
+    while await db.users.find_one({"temporary_password": shared_login_code}, {"_id": 0}):
+        shared_login_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+    
+    # Create ONE group account for all members
     user = User(
         email=registration.email,
         first_name=registration.first_name,
@@ -1562,9 +1574,10 @@ async def register_with_code(registration: RegisterWithCode):
         phone=registration.phone,
         level=group_code['level'],
         role="student",
-        is_active=False,
+        is_active=False,  # Will be activated by admin
         is_restricted=False,
-        password_hash="",
+        password_hash=pwd_context.hash(shared_login_code),  # Hash the shared code
+        temporary_password=shared_login_code,  # Store it for display
         assigned_teacher=group_code['teacher_id']
     )
     
@@ -1573,30 +1586,34 @@ async def register_with_code(registration: RegisterWithCode):
     doc['group_code'] = registration.code.upper()
     doc['group_id'] = group_code['id']
     doc['course_type'] = 'group'
+    doc['number_of_students'] = registration.number_of_students  # Track group size
     
     await db.users.insert_one(doc)
     
-    # Increment student count
+    # Increment student count by the number of students in this group
     await db.group_codes.update_one(
         {"id": group_code['id']},
-        {"$inc": {"current_students": 1}}
+        {"$inc": {"current_students": registration.number_of_students}}
     )
     
     # Send notification to admin
     await email_service.send_admin_notification(
         registration.email,
-        registration.first_name,
+        f"{registration.first_name} {registration.last_name} (Groupe de {registration.number_of_students})",
         registration.last_name,
         group_code['level'],
         registration.phone
     )
     
-    logger.info(f"Student registered with code {registration.code.upper()}: {registration.email}")
+    logger.info(f"Group account created with code {registration.code.upper()}: {registration.email} ({registration.number_of_students} students)")
     
     return {
-        "message": "Inscription envoyée avec succès! Attendez l'approbation de l'administrateur.",
+        "message": "Inscription envoyée avec succès! Voici votre code de connexion partagé.",
         "group_name": group_code['group_name'],
-        "teacher_name": group_code['teacher_name']
+        "teacher_name": group_code['teacher_name'],
+        "shared_login_code": shared_login_code,  # Return the code to display to user
+        "email": registration.email,
+        "number_of_students": registration.number_of_students
     }
 
 

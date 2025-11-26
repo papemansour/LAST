@@ -1052,7 +1052,7 @@ const HomePage = () => {
                       </div>
                     </div>
 
-                    {/* Section Membres Additionnels pour cours groupe */}
+                    {/* Section Membres Additionnels pour cours groupe - temporarily removed */}
                     <div className="space-y-4 p-4 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl border-2 border-yellow-200">
                       <div className="flex justify-between items-center">
                       <div>

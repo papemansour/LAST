@@ -224,6 +224,7 @@ class RegisterWithCode(BaseModel):
     last_name: str
     email: EmailStr
     phone: str
+    number_of_students: int = 2  # Nombre de personnes dans le groupe (2 ou 3)
 
 class ClubEvent(BaseModel):
     model_config = ConfigDict(extra="ignore")

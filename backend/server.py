@@ -1248,6 +1248,88 @@ async def admin_reset_user_password(user_id: str, current_user: dict = Depends(g
     
     # Create notification for user
     await create_notification(
+
+
+# ADMIN: Generate Magic Code for Group Registration
+@api_router.post("/admin/generate-magic-code/{user_id}")
+async def admin_generate_magic_code(
+    user_id: str,
+    teacher_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Admin generates a magic code for a group registration and assigns to teacher"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Find the group registration
+    group_reg = await db.users.find_one({"id": user_id, "course_type": "group"}, {"_id": 0})
+    if not group_reg:
+        raise HTTPException(status_code=404, detail="Inscription de groupe non trouvée")
+    
+    if group_reg.get('magic_code_generated'):
+        raise HTTPException(status_code=400, detail="Un code magique a déjà été généré pour ce groupe")
+    
+    # Verify teacher exists
+    teacher = await db.users.find_one({"id": teacher_id, "role": "teacher"}, {"_id": 0})
+    if not teacher:
+        raise HTTPException(status_code=404, detail="Professeur non trouvé")
+    
+    # Generate unique magic code (8 characters)
+    magic_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+    
+    # Ensure code is unique
+    while await db.users.find_one({"temporary_password": magic_code}, {"_id": 0}):
+        magic_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+    
+    # Update the group registration
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {
+            "is_active": True,  # Activate the account
+            "is_approved": True,  # Mark as approved
+            "password_hash": pwd_context.hash(magic_code),  # Hash the magic code
+            "temporary_password": magic_code,  # Store for display
+            "assigned_teacher": teacher_id,
+            "magic_code_generated": True,
+            "magic_code_generated_at": datetime.now(timezone.utc).isoformat(),
+            "magic_code_generated_by": current_user['id']
+        }}
+    )
+    
+    logger.info(f"Magic code {magic_code} generated for group {user_id} by admin {current_user['id']}")
+    
+    # Get member names for response
+    members_names = ", ".join([f"{m['first_name']} {m['last_name']}" for m in group_reg['members']])
+    
+    return {
+        "message": "Code magique généré avec succès",
+        "magic_code": magic_code,
+        "group_id": user_id,
+        "email": group_reg['email'],
+        "total_members": group_reg['total_members'],
+        "members_names": members_names,
+        "teacher_name": f"{teacher['first_name']} {teacher['last_name']}",
+        "teacher_email": teacher['email']
+    }
+
+# ADMIN: Get pending group registrations
+@api_router.get("/admin/pending-group-registrations")
+async def get_pending_group_registrations(current_user: dict = Depends(get_current_user)):
+    """Get all pending group registrations waiting for magic code"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    pending_groups = await db.users.find(
+        {
+            "course_type": "group",
+            "is_approved": False,
+            "magic_code_generated": False
+        },
+        {"_id": 0}
+    ).to_list(1000)
+    
+    return pending_groups
+
         user_id=user_id,
         notification_type="password_reset",
         data={"message": "Votre mot de passe a été réinitialisé par l'administrateur. Veuillez vérifier votre email."}

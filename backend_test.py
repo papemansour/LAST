@@ -1317,11 +1317,15 @@ startxref
         try:
             logger.info("🔍 Testing group registration...")
             
+            # Generate unique email for this test run
+            import time
+            unique_id = str(int(time.time()))[-6:]  # Last 6 digits of timestamp
+            
             # Test group registration with 1 main person + 2 additional members
             group_data = {
                 "first_name": "Alice",
                 "last_name": "Dupont",
-                "email": "alice.groupe@example.com",
+                "email": f"alice.groupe.{unique_id}@example.com",
                 "phone": "+33612345678",
                 "country_code": "+33",
                 "level": "intermediate",

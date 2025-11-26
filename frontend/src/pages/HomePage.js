@@ -1037,6 +1037,91 @@ const HomePage = () => {
                   </div>
                 )}
 
+                {/* Section Membres Additionnels pour cours groupé */}
+                {courseType === 'group' && (
+                  <div className="space-y-4 p-4 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl border-2 border-yellow-200">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="font-semibold text-lg text-gray-800">👥 Membres additionnels du groupe</h3>
+                        <p className="text-sm text-gray-600">Ajoutez 1 à 2 personnes (nom et prénom uniquement)</p>
+                      </div>
+                      {additionalMembers.length < 2 && (
+                        <Button
+                          type="button"
+                          onClick={() => setAdditionalMembers([...additionalMembers, { first_name: '', last_name: '' }])}
+                          variant="outline"
+                          className="border-orange-400 text-orange-600 hover:bg-orange-50"
+                        >
+                          <span className="text-lg mr-2">+</span> Ajouter une personne
+                        </Button>
+                      )}
+                    </div>
+
+                    {additionalMembers.length === 0 && (
+                      <div className="text-center py-6 text-gray-500">
+                        <p className="mb-2">Aucun membre additionnel</p>
+                        <p className="text-sm">Cliquez sur "Ajouter une personne" pour commencer</p>
+                      </div>
+                    )}
+
+                    {additionalMembers.map((member, index) => (
+                      <div key={index} className="p-4 bg-white rounded-lg border-2 border-orange-200">
+                        <div className="flex justify-between items-center mb-3">
+                          <h4 className="font-semibold text-gray-800">Personne {index + 2}</h4>
+                          <Button
+                            type="button"
+                            onClick={() => setAdditionalMembers(additionalMembers.filter((_, i) => i !== index))}
+                            variant="ghost"
+                            size="sm"
+                            className="text-red-600 hover:bg-red-50"
+                          >
+                            ✕ Retirer
+                          </Button>
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-3">
+                          <div>
+                            <Label>Prénom *</Label>
+                            <Input
+                              value={member.first_name}
+                              onChange={(e) => {
+                                const updated = [...additionalMembers];
+                                updated[index].first_name = e.target.value;
+                                setAdditionalMembers(updated);
+                              }}
+                              placeholder="Ex: Jean"
+                              required
+                              className="border-gray-200"
+                            />
+                          </div>
+                          <div>
+                            <Label>Nom *</Label>
+                            <Input
+                              value={member.last_name}
+                              onChange={(e) => {
+                                const updated = [...additionalMembers];
+                                updated[index].last_name = e.target.value;
+                                setAdditionalMembers(updated);
+                              }}
+                              placeholder="Ex: Dupont"
+                              required
+                              className="border-gray-200"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    {additionalMembers.length > 0 && (
+                      <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                        <p className="text-sm text-gray-700">
+                          <strong>ℹ️ Important :</strong> Après validation par l'admin, un code de connexion unique sera généré pour tout le groupe. Tous les membres utiliseront le même code pour se connecter.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+
                 {/* Créneaux (facultatif) */}
                 <div>
                   <Label className="flex items-center gap-2 mb-2">

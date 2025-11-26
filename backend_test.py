@@ -1310,6 +1310,304 @@ startxref
             self.test_results["email_notifications"]["details"].append(f"Test error: {str(e)}")
             return False
     
+    async def test_group_registration(self) -> dict:
+        """Test 1: Group registration endpoint"""
+        try:
+            logger.info("🔍 Testing group registration...")
+            
+            # Test group registration with 1 main person + 2 additional members
+            group_data = {
+                "first_name": "Alice",
+                "last_name": "Dupont",
+                "email": "alice.groupe@example.com",
+                "phone": "+33612345678",
+                "country_code": "+33",
+                "level": "intermediate",
+                "additional_members": [
+                    {
+                        "first_name": "Bob",
+                        "last_name": "Martin"
+                    },
+                    {
+                        "first_name": "Charlie",
+                        "last_name": "Bernard"
+                    }
+                ],
+                "preferred_slots": "Lundi 14h-16h",
+                "referral_source": "Facebook"
+            }
+            
+            async with self.session.post(f"{BACKEND_URL}/auth/register-group", json=group_data) as response:
+                if response.status == 200:
+                    result = await response.json()
+                    
+                    # Verify response structure
+                    required_fields = ["message", "group_id", "total_members", "members_names"]
+                    missing_fields = [field for field in required_fields if field not in result]
+                    
+                    if not missing_fields:
+                        if result.get("total_members") == 3:
+                            logger.info("✅ Group registration successful with correct member count")
+                            self.test_results["group_registration"]["details"].append("Group registration endpoint works")
+                            self.test_results["group_registration"]["details"].append(f"Group ID: {result.get('group_id')}")
+                            self.test_results["group_registration"]["details"].append(f"Total members: {result.get('total_members')}")
+                            self.test_results["group_registration"]["passed"] = True
+                            return {
+                                "group_id": result.get("group_id"),
+                                "email": group_data["email"],
+                                "total_members": result.get("total_members")
+                            }
+                        else:
+                            logger.error(f"❌ Incorrect member count: expected 3, got {result.get('total_members')}")
+                            self.test_results["group_registration"]["details"].append(f"Incorrect member count: {result.get('total_members')}")
+                            return None
+                    else:
+                        logger.error(f"❌ Missing required fields in response: {missing_fields}")
+                        self.test_results["group_registration"]["details"].append(f"Missing fields: {missing_fields}")
+                        return None
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ Group registration failed: {response.status} - {error_text}")
+                    self.test_results["group_registration"]["details"].append(f"Registration failed: {error_text}")
+                    return None
+                    
+        except Exception as e:
+            logger.error(f"❌ Group registration test error: {str(e)}")
+            self.test_results["group_registration"]["details"].append(f"Test error: {str(e)}")
+            return None
+
+    async def test_pending_group_registrations(self) -> bool:
+        """Test 2: Get pending group registrations (Admin)"""
+        try:
+            logger.info("🔍 Testing pending group registrations retrieval...")
+            
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            
+            async with self.session.get(f"{BACKEND_URL}/admin/pending-group-registrations", headers=headers) as response:
+                if response.status == 200:
+                    pending_groups = await response.json()
+                    
+                    if isinstance(pending_groups, list):
+                        logger.info(f"✅ Retrieved {len(pending_groups)} pending group registrations")
+                        self.test_results["pending_group_registrations"]["details"].append(f"Retrieved {len(pending_groups)} pending groups")
+                        
+                        # Verify structure of pending groups
+                        if len(pending_groups) > 0:
+                            group = pending_groups[0]
+                            required_fields = ["id", "email", "is_approved", "magic_code_generated", "members", "total_members"]
+                            missing_fields = [field for field in required_fields if field not in group]
+                            
+                            if not missing_fields:
+                                if group.get("is_approved") == False and group.get("magic_code_generated") == False:
+                                    logger.info("✅ Pending group has correct approval status")
+                                    self.test_results["pending_group_registrations"]["details"].append("Group approval status correct")
+                                    self.test_results["pending_group_registrations"]["passed"] = True
+                                    return True
+                                else:
+                                    logger.error("❌ Group approval status incorrect")
+                                    self.test_results["pending_group_registrations"]["details"].append("Incorrect approval status")
+                                    return False
+                            else:
+                                logger.error(f"❌ Missing fields in group data: {missing_fields}")
+                                self.test_results["pending_group_registrations"]["details"].append(f"Missing fields: {missing_fields}")
+                                return False
+                        else:
+                            logger.info("✅ No pending groups found (expected if none exist)")
+                            self.test_results["pending_group_registrations"]["details"].append("No pending groups found")
+                            self.test_results["pending_group_registrations"]["passed"] = True
+                            return True
+                    else:
+                        logger.error("❌ Response is not a list")
+                        self.test_results["pending_group_registrations"]["details"].append("Invalid response format")
+                        return False
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ Failed to get pending groups: {response.status} - {error_text}")
+                    self.test_results["pending_group_registrations"]["details"].append(f"Request failed: {error_text}")
+                    return False
+                    
+        except Exception as e:
+            logger.error(f"❌ Pending group registrations test error: {str(e)}")
+            self.test_results["pending_group_registrations"]["details"].append(f"Test error: {str(e)}")
+            return False
+
+    async def test_magic_code_generation(self, group_id: str) -> dict:
+        """Test 3: Generate magic code for group (Admin)"""
+        try:
+            logger.info("🔍 Testing magic code generation...")
+            
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            
+            # First ensure we have a teacher to assign
+            if not self.test_teacher_id:
+                teacher_info = await self.create_test_teacher()
+                if not teacher_info:
+                    logger.error("❌ Failed to create test teacher for magic code test")
+                    self.test_results["magic_code_generation"]["details"].append("Failed to create test teacher")
+                    return None
+            
+            # Generate magic code
+            async with self.session.post(f"{BACKEND_URL}/admin/generate-magic-code/{group_id}?teacher_id={self.test_teacher_id}", headers=headers) as response:
+                if response.status == 200:
+                    result = await response.json()
+                    
+                    # Verify response structure
+                    required_fields = ["message", "magic_code", "group_id", "email", "total_members", "members_names", "teacher_name", "teacher_email"]
+                    missing_fields = [field for field in required_fields if field not in result]
+                    
+                    if not missing_fields:
+                        magic_code = result.get("magic_code")
+                        if magic_code and len(magic_code) == 8:
+                            logger.info(f"✅ Magic code generated successfully: {magic_code}")
+                            self.test_results["magic_code_generation"]["details"].append("Magic code generated with correct length")
+                            self.test_results["magic_code_generation"]["details"].append(f"Magic code: {magic_code}")
+                            self.test_results["magic_code_generation"]["details"].append(f"Teacher assigned: {result.get('teacher_name')}")
+                            self.test_results["magic_code_generation"]["passed"] = True
+                            return {
+                                "magic_code": magic_code,
+                                "email": result.get("email"),
+                                "group_id": group_id
+                            }
+                        else:
+                            logger.error(f"❌ Invalid magic code format: {magic_code}")
+                            self.test_results["magic_code_generation"]["details"].append(f"Invalid magic code: {magic_code}")
+                            return None
+                    else:
+                        logger.error(f"❌ Missing required fields in response: {missing_fields}")
+                        self.test_results["magic_code_generation"]["details"].append(f"Missing fields: {missing_fields}")
+                        return None
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ Magic code generation failed: {response.status} - {error_text}")
+                    self.test_results["magic_code_generation"]["details"].append(f"Generation failed: {error_text}")
+                    return None
+                    
+        except Exception as e:
+            logger.error(f"❌ Magic code generation test error: {str(e)}")
+            self.test_results["magic_code_generation"]["details"].append(f"Test error: {str(e)}")
+            return None
+
+    async def test_magic_code_login(self, email: str, magic_code: str) -> bool:
+        """Test 4: Login with magic code"""
+        try:
+            logger.info("🔍 Testing magic code login...")
+            
+            login_data = {
+                "email": email,
+                "password": magic_code
+            }
+            
+            async with self.session.post(f"{BACKEND_URL}/auth/login", json=login_data) as response:
+                if response.status == 200:
+                    result = await response.json()
+                    
+                    # Verify response structure
+                    required_fields = ["access_token", "token_type", "user"]
+                    missing_fields = [field for field in required_fields if field not in result]
+                    
+                    if not missing_fields:
+                        if result.get("token_type") == "bearer" and result.get("access_token"):
+                            user_info = result.get("user", {})
+                            if user_info.get("email") == email:
+                                logger.info("✅ Magic code login successful")
+                                self.test_results["magic_code_login"]["details"].append("Magic code login works")
+                                self.test_results["magic_code_login"]["details"].append(f"User logged in: {user_info.get('first_name')} {user_info.get('last_name')}")
+                                self.test_results["magic_code_login"]["passed"] = True
+                                return True
+                            else:
+                                logger.error("❌ User email mismatch in login response")
+                                self.test_results["magic_code_login"]["details"].append("Email mismatch in response")
+                                return False
+                        else:
+                            logger.error("❌ Invalid token response")
+                            self.test_results["magic_code_login"]["details"].append("Invalid token response")
+                            return False
+                    else:
+                        logger.error(f"❌ Missing required fields in login response: {missing_fields}")
+                        self.test_results["magic_code_login"]["details"].append(f"Missing fields: {missing_fields}")
+                        return False
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ Magic code login failed: {response.status} - {error_text}")
+                    self.test_results["magic_code_login"]["details"].append(f"Login failed: {error_text}")
+                    return False
+                    
+        except Exception as e:
+            logger.error(f"❌ Magic code login test error: {str(e)}")
+            self.test_results["magic_code_login"]["details"].append(f"Test error: {str(e)}")
+            return False
+
+    async def test_group_system_verification(self, group_id: str, magic_code: str) -> bool:
+        """Test 5: Additional verifications for group system"""
+        try:
+            logger.info("🔍 Testing group system verifications...")
+            
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            
+            # 1. Verify group no longer appears in pending registrations
+            async with self.session.get(f"{BACKEND_URL}/admin/pending-group-registrations", headers=headers) as response:
+                if response.status == 200:
+                    pending_groups = await response.json()
+                    group_still_pending = any(group.get("id") == group_id for group in pending_groups)
+                    
+                    if not group_still_pending:
+                        logger.info("✅ Group no longer appears in pending registrations")
+                        self.test_results["group_system_verification"]["details"].append("Group removed from pending list")
+                    else:
+                        logger.error("❌ Group still appears in pending registrations")
+                        self.test_results["group_system_verification"]["details"].append("Group still in pending list")
+                        return False
+                else:
+                    logger.error("❌ Failed to check pending registrations")
+                    self.test_results["group_system_verification"]["details"].append("Failed to check pending list")
+                    return False
+            
+            # 2. Try to generate magic code again (should fail)
+            async with self.session.post(f"{BACKEND_URL}/admin/generate-magic-code/{group_id}?teacher_id={self.test_teacher_id}", headers=headers) as response:
+                if response.status == 400:
+                    logger.info("✅ Cannot generate second magic code (correct behavior)")
+                    self.test_results["group_system_verification"]["details"].append("Duplicate magic code generation prevented")
+                else:
+                    logger.error("❌ Should not be able to generate second magic code")
+                    self.test_results["group_system_verification"]["details"].append("Duplicate magic code generation not prevented")
+                    return False
+            
+            # 3. Test multiple simultaneous logins with same code
+            login_data = {
+                "email": "alice.groupe@example.com",
+                "password": magic_code
+            }
+            
+            # Simulate 2 simultaneous logins
+            login_tasks = [
+                self.session.post(f"{BACKEND_URL}/auth/login", json=login_data),
+                self.session.post(f"{BACKEND_URL}/auth/login", json=login_data)
+            ]
+            
+            responses = await asyncio.gather(*login_tasks, return_exceptions=True)
+            successful_logins = 0
+            
+            for response in responses:
+                if not isinstance(response, Exception):
+                    if response.status == 200:
+                        successful_logins += 1
+                    await response.close()
+            
+            if successful_logins >= 2:
+                logger.info("✅ Multiple simultaneous logins work with same magic code")
+                self.test_results["group_system_verification"]["details"].append("Multiple simultaneous logins supported")
+                self.test_results["group_system_verification"]["passed"] = True
+                return True
+            else:
+                logger.error(f"❌ Only {successful_logins}/2 simultaneous logins succeeded")
+                self.test_results["group_system_verification"]["details"].append(f"Only {successful_logins}/2 simultaneous logins worked")
+                return False
+                
+        except Exception as e:
+            logger.error(f"❌ Group system verification test error: {str(e)}")
+            self.test_results["group_system_verification"]["details"].append(f"Test error: {str(e)}")
+            return False
+
     async def run_all_tests(self):
         """Run comprehensive backend tests for My KALAMA ENGLISH"""
         logger.info("🚀 Starting My KALAMA ENGLISH Backend Tests")

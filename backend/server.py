@@ -3644,3 +3644,27 @@ logger = logging.getLogger(__name__)
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
+
+
+# Health check endpoints for Kubernetes
+@app.get("/health")
+async def health_check():
+    """Basic health check endpoint"""
+    return {"status": "healthy", "service": "mykalamaenglish-backend"}
+
+@app.get("/readiness")
+async def readiness_check():
+    """Readiness check - verifies database connection"""
+    try:
+        # Test MongoDB connection
+        await db.command('ping')
+        return {"status": "ready", "database": "connected"}
+    except Exception as e:
+        logger.error(f"Readiness check failed: {e}")
+        return {"status": "not_ready", "database": "disconnected", "error": str(e)}
+
+@app.get("/")
+async def root():
+    """Root endpoint"""
+    return {"message": "MyKalamaEnglish API", "version": "1.0", "status": "running"}
+

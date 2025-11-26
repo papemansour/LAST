@@ -1329,10 +1329,15 @@ async def get_pending_group_registrations(current_user: dict = Depends(get_curre
     
     return pending_groups
 
-        user_id=user_id,
-        notification_type="password_reset",
-        data={"message": "Votre mot de passe a été réinitialisé par l'administrateur. Veuillez vérifier votre email."}
-    )
+@api_router.post("/admin/reset-password/{user_id}")
+async def admin_reset_password(user_id: str, current_user: dict = Depends(get_current_user)):
+    """Admin resets password for a user"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
     
     logger.info(f"Password reset by admin {current_user['email']} for user {user['email']}")
     

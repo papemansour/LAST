@@ -54,6 +54,13 @@ class MyKalamaEnglishBackendTester:
             "admin_delete_user": {"passed": False, "details": []},
             "email_notifications": {"passed": False, "details": []},
             
+            # Group registration system tests
+            "group_registration": {"passed": False, "details": []},
+            "pending_group_registrations": {"passed": False, "details": []},
+            "magic_code_generation": {"passed": False, "details": []},
+            "magic_code_login": {"passed": False, "details": []},
+            "group_system_verification": {"passed": False, "details": []},
+            
             # Overall results
             "overall_backend": {"passed": False, "details": []}
         }

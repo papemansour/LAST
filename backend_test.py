@@ -13,6 +13,8 @@ import sys
 import os
 import base64
 import tempfile
+import random
+import string
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

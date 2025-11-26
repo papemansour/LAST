@@ -971,8 +971,7 @@ const HomePage = () => {
 
                     <h3 className="font-semibold text-lg border-b pb-2 mt-6">Vos informations (personne principale)</h3>
                     
-                    <div>
-                      <div className="grid md:grid-cols-2 gap-4 mt-4">
+                    <div className="grid md:grid-cols-2 gap-4 mt-4">
                           <div>
                             <Label htmlFor="first_name">Prénom *</Label>
                             <Input

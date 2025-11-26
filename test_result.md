@@ -429,6 +429,9 @@ test_plan:
         - working: "NA"
           agent: "main"
           comment: "Implémenté - Composant GroupCodeManager intégré dans TeacherDashboard onglet 'Codes Groupe'. Interface pour créer codes, voir liste codes avec statut, toggle activation/désactivation, copier codes. Nécessite tests complets."
+        - working: "NA"
+          agent: "testing"
+          comment: "⚠️ NON TESTÉ - Interface professeur non testée car focus sur backend selon instructions. Backend API validé, interface frontend nécessite tests séparés par main agent."
 
   - task: "Système Code Magique - Inscription Étudiants"
     implemented: true

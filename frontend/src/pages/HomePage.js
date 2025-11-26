@@ -285,8 +285,17 @@ const HomePage = () => {
           first_name: formData.first_name,
           last_name: formData.last_name,
           email: formData.email,
-          phone: fullPhone
+          phone: fullPhone,
+          number_of_students: numberOfStudents
         });
+        
+        // Store the shared login code to display in success modal
+        setSharedLoginCode(response.data.shared_login_code);
+        
+        // Close registration modal and show success modal with code
+        setShowRegistrationModal(false);
+        setShowSuccessModal(true);
+        
         toast.success(response.data.message);
       } else {
         // Inscription individuelle

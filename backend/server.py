@@ -564,17 +564,76 @@ async def register(user_data: UserCreate):
     return {"message": "Registration submitted. Please wait for admin approval."}
 
 @api_router.post("/auth/register-group")
-async def register_group(group_data: dict):
-    """Register a group of students (max 3)"""
-    members = group_data.get('members', [])
+async def register_group(group_data: GroupRegistration):
+    """Register a group - 1 person with full info + 1-2 additional members (name only)"""
     
-    if len(members) == 0 or len(members) > 3:
-        raise HTTPException(status_code=400, detail="Group must have between 1 and 3 members")
+    # Validate: must have at least 1 additional member for group registration
+    if len(group_data.additional_members) == 0:
+        raise HTTPException(status_code=400, detail="L'inscription de groupe nécessite au moins 2 personnes")
+    
+    if len(group_data.additional_members) > 2:
+        raise HTTPException(status_code=400, detail="Maximum 3 personnes au total (vous + 2 autres)")
+    
+    # Check if email already exists
+    existing = await db.users.find_one({"email": group_data.email}, {"_id": 0})
+    if existing:
+        raise HTTPException(status_code=400, detail="Cette adresse email est déjà enregistrée")
     
     # Generate group ID
     group_id = str(uuid.uuid4())
     
-    # Register each member
+    # Prepare group members list
+    total_members = len(group_data.additional_members) + 1
+    members_list = [
+        {
+            "first_name": group_data.first_name,
+            "last_name": group_data.last_name,
+            "is_main": True
+        }
+    ]
+    
+    for member in group_data.additional_members:
+        members_list.append({
+            "first_name": member.first_name,
+            "last_name": member.last_name,
+            "is_main": False
+        })
+    
+    # Create ONE pending group registration (not activated yet)
+    group_registration = {
+        "id": group_id,
+        "email": group_data.email,
+        "phone": group_data.phone,
+        "level": group_data.level,
+        "role": "student",
+        "course_type": "group",
+        "is_active": False,
+        "is_approved": False,  # Admin needs to approve
+        "password_hash": "",
+        "temporary_password": None,  # Will be set by admin when generating magic code
+        "total_members": total_members,
+        "members": members_list,
+        "assigned_teacher": None,  # Will be set by admin
+        "preferred_slots": group_data.preferred_slots or "",
+        "referral_source": group_data.referral_source or "",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "magic_code_generated": False
+    }
+    
+    await db.users.insert_one(group_registration)
+    
+    # Send notification to admin
+    members_names = ", ".join([f"{m['first_name']} {m['last_name']}" for m in members_list])
+    await email_service.send_admin_notification(
+        group_data.email,
+        f"Groupe de {total_members}",
+        members_names,
+        group_data.level,
+        group_data.phone
+    )
+    
+    logger.info(f"Group registration submitted: {group_data.email} with {total_members} members")
+    
     registered_members = []
     for member in members:
         # Check if email already exists

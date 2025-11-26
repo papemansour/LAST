@@ -1280,6 +1280,9 @@ async def admin_generate_magic_code(
     while await db.users.find_one({"temporary_password": magic_code}, {"_id": 0}):
         magic_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
     
+    # Get the main member's name from the members array
+    main_member = next((m for m in group_reg['members'] if m.get('is_main')), group_reg['members'][0])
+    
     # Update the group registration
     await db.users.update_one(
         {"id": user_id},
@@ -1291,7 +1294,10 @@ async def admin_generate_magic_code(
             "assigned_teacher": teacher_id,
             "magic_code_generated": True,
             "magic_code_generated_at": datetime.now(timezone.utc).isoformat(),
-            "magic_code_generated_by": current_user['id']
+            "magic_code_generated_by": current_user['id'],
+            # Add the main member's name for login compatibility
+            "first_name": main_member['first_name'],
+            "last_name": main_member['last_name']
         }}
     )
     

@@ -218,6 +218,25 @@ class GroupCodeCreate(BaseModel):
     level: str
     max_students: int = 3
 
+class GroupMemberSimple(BaseModel):
+    """Membre additionnel du groupe (juste nom et prénom)"""
+    first_name: str
+    last_name: str
+
+class GroupRegistration(BaseModel):
+    """Inscription de groupe - une personne principale + 1-2 personnes additionnelles"""
+    # Personne principale (infos complètes)
+    first_name: str
+    last_name: str
+    email: EmailStr
+    phone: str
+    country_code: str = "+33"
+    level: str
+    # Membres additionnels (juste nom/prénom)
+    additional_members: List[GroupMemberSimple] = []
+    preferred_slots: Optional[str] = None
+    referral_source: Optional[str] = None
+
 class RegisterWithCode(BaseModel):
     code: str
     first_name: str

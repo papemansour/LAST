@@ -972,27 +972,27 @@ const HomePage = () => {
                     <h3 className="font-semibold text-lg border-b pb-2 mt-6">Vos informations (personne principale)</h3>
                     
                     <div className="grid md:grid-cols-2 gap-4 mt-4">
-                          <div>
-                            <Label htmlFor="first_name">Prénom *</Label>
-                            <Input
-                              id="first_name"
-                              required
-                              value={formData.first_name}
-                              onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                              className="border-gray-200"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="last_name">Nom *</Label>
-                            <Input
-                              id="last_name"
-                              required
-                              value={formData.last_name}
-                              onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                              className="border-gray-200"
-                            />
-                          </div>
-                        </div>
+                      <div>
+                        <Label htmlFor="first_name">Prénom *</Label>
+                        <Input
+                          id="first_name"
+                          required
+                          value={formData.first_name}
+                          onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                          className="border-gray-200"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="last_name">Nom *</Label>
+                        <Input
+                          id="last_name"
+                          required
+                          value={formData.last_name}
+                          onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                          className="border-gray-200"
+                        />
+                      </div>
+                    </div>
 
                         <div>
                           <Label htmlFor="email">Email de contact *</Label>

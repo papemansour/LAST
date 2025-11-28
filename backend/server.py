@@ -142,6 +142,10 @@ class AttendanceCreate(BaseModel):
     date: str
     status: str
 
+class GenerateGroupMagicCode(BaseModel):
+    student_ids: List[str]
+    group_name: str
+
 class News(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))

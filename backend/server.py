@@ -4246,6 +4246,16 @@ async def create_checkout_session(payment: PaymentRequest):
             detail=f"Lien de paiement non trouvé pour le pack {plan_name}"
         )
     
+    # Ajouter le code promo à l'URL si fourni
+    # Code promo par défaut de l'utilisateur
+    default_promo = "promo_1SYGM3I4faCc3GWYbdYRPXX8"
+    promo_to_apply = promo_code if promo_code else default_promo
+    
+    if promo_to_apply:
+        # Ajouter le code promo comme paramètre URL
+        separator = '&' if '?' in checkout_url else '?'
+        checkout_url = f"{checkout_url}{separator}prefilled_promo_code={promo_to_apply}"
+    
     logger.info(f"Payment link generated: {link_key} -> {checkout_url}")
     
     return {
@@ -4253,7 +4263,7 @@ async def create_checkout_session(payment: PaymentRequest):
         "plan_name": plan_name,
         "amount": amount,
         "currency": currency,
-        "promo_applied": promo_code if promo_code else None
+        "promo_applied": promo_to_apply
     }
 
 app.include_router(api_router)

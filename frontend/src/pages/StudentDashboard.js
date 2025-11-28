@@ -718,7 +718,7 @@ const StudentDashboard = () => {
                 {!teacher ? (
                   <div className="text-center py-12">
                     <MessageCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500">Vous n'avez pas encore de professeur assigné</p>
+                    <p className="text-gray-500">Vous n&apos;avez pas encore de professeur assigné</p>
                   </div>
                 ) : (
                   <ConversationChat

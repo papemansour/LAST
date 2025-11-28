@@ -2759,6 +2759,60 @@ async def get_my_attendance(current_user: dict = Depends(get_current_user)):
     return attendances
 
 # MESSAGING
+@api_router.post("/messages/upload-attachment")
+async def upload_message_attachment(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
+    """Upload a file attachment for messages"""
+    from pathlib import Path
+    
+    # File size limit: 10MB
+    MAX_FILE_SIZE = 10 * 1024 * 1024
+    contents = await file.read()
+    
+    if len(contents) > MAX_FILE_SIZE:
+        raise HTTPException(status_code=400, detail="File too large (max 10MB)")
+    
+    # Create upload directory
+    upload_dir = Path("/app/frontend/public/uploads/messages")
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Generate unique filename
+    file_ext = file.filename.split('.')[-1] if '.' in file.filename else 'file'
+    unique_filename = f"{str(uuid4())}.{file_ext}"
+    file_path = upload_dir / unique_filename
+    
+    # Save file
+    try:
+        with open(file_path, "wb") as f:
+            f.write(contents)
+        
+        file_url = f"/uploads/messages/{unique_filename}"
+        
+        # Determine file type
+        file_type = "other"
+        if file_ext.lower() in ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']:
+            file_type = "image"
+        elif file_ext.lower() in ['pdf']:
+            file_type = "pdf"
+        elif file_ext.lower() in ['doc', 'docx']:
+            file_type = "document"
+        elif file_ext.lower() in ['xls', 'xlsx']:
+            file_type = "spreadsheet"
+        elif file_ext.lower() in ['mp4', 'avi', 'mov', 'webm']:
+            file_type = "video"
+        elif file_ext.lower() in ['mp3', 'wav', 'ogg']:
+            file_type = "audio"
+        
+        logger.info(f"Message attachment uploaded by {current_user['id']}: {file.filename}")
+        
+        return {
+            "file_url": file_url,
+            "filename": file.filename,
+            "file_type": file_type
+        }
+    except Exception as e:
+        logger.error(f"Upload error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error uploading file")
+
 @api_router.post("/messages/send")
 async def send_message(message_data: MessageCreate, current_user: dict = Depends(get_current_user)):
     # Get sender info

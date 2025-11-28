@@ -1082,14 +1082,24 @@ async def teacher_send_document_to_admin(doc_data: dict, current_user: dict = De
 
 @api_router.post("/teacher/send-kkid-video")
 async def teacher_send_kkid_video(video_data: dict, current_user: dict = Depends(get_current_user)):
-    """Teacher uploads and sends a video to all K-Kids"""
+    """Teacher uploads and sends a video to a specific K-Kid student"""
     if current_user['role'] != 'teacher':
         raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    # Verify the student exists and is a K-Kid
+    student = await db.users.find_one({"id": video_data['student_id']}, {"_id": 0})
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+    
+    if student.get('level') != 'kkid':
+        raise HTTPException(status_code=400, detail="Only K-Kid students can receive these videos")
     
     video = {
         "id": str(uuid4()),
         "teacher_id": current_user['id'],
         "teacher_name": f"{current_user['first_name']} {current_user['last_name']}",
+        "student_id": video_data['student_id'],
+        "student_name": f"{student['first_name']} {student['last_name']}",
         "title": video_data['title'],
         "description": video_data.get('description', ''),
         "video_url": video_data['video_url'],
@@ -1098,8 +1108,16 @@ async def teacher_send_kkid_video(video_data: dict, current_user: dict = Depends
     }
     
     await db.kkid_videos.insert_one(video)
-    logger.info(f"K-Kid video uploaded by teacher {current_user['id']}: {video_data['title']}")
-    return {"message": "Vidéo envoyée avec succès aux K-Kids", "video": video}
+    
+    # Create notification for the K-Kid student
+    await create_notification(
+        user_id=video_data['student_id'],
+        notification_type="new_video",
+        data={"message": f"Nouvelle vidéo de {current_user['first_name']}: {video_data['title']}"}
+    )
+    
+    logger.info(f"K-Kid video uploaded by teacher {current_user['id']} for student {video_data['student_id']}: {video_data['title']}")
+    return {"message": "Vidéo envoyée avec succès à l'élève K-Kid", "video": video}
 
 @api_router.get("/kkid/videos")
 async def get_kkid_videos(current_user: dict = Depends(get_current_user)):

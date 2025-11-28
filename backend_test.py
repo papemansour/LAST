@@ -53,6 +53,7 @@ class MyKalamaEnglishBackendTester:
             "video_system": {"passed": False, "details": []},
             "test_questions": {"passed": False, "details": []},
             "pricing_independence": {"passed": False, "details": []},
+            "pricing_update_flow": {"passed": False, "details": []},
             "admin_delete_user": {"passed": False, "details": []},
             "email_notifications": {"passed": False, "details": []},
             

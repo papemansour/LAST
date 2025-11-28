@@ -174,7 +174,16 @@ const TeacherDashboard = () => {
       return;
     }
     try {
-      await apiClient.post('/teacher/send-document', documentData);
+      // Choisir l'endpoint en fonction du destinataire
+      if (documentData.recipient_type === 'admin') {
+        await apiClient.post('/teacher/send-document-to-admin', {
+          title: documentData.title,
+          description: documentData.description,
+          file_url: documentData.file_url
+        });
+      } else {
+        await apiClient.post('/teacher/send-document', documentData);
+      }
       toast.success('Document envoyé avec succès!');
       setDocumentData({ title: '', description: '', recipient_type: 'student', recipient_id: '', file_url: '', file: null });
       fetchData();

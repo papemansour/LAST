@@ -79,6 +79,7 @@ const AdminDashboard = () => {
   });
   const [activeConversation, setActiveConversation] = useState(null);
   const [conversationMode, setConversationMode] = useState('individual'); // 'individual' ou 'group'
+  const [receivedDocuments, setReceivedDocuments] = useState([]);
 
   useEffect(() => {
     fetchData();

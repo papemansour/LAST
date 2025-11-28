@@ -1611,9 +1611,9 @@ const AdminDashboard = () => {
                           </Button>
                         </form>
 
-                        {/* Formulaire document */}
+                        {/* Formulaire document/vidéo */}
                         <div className="mt-4 pt-4 border-t">
-                          <h4 className="font-semibold mb-3">Envoyer un document</h4>
+                          <h4 className="font-semibold mb-3">📤 Envoyer un document ou une vidéo</h4>
                           <form onSubmit={handleSendDocument} className="space-y-3">
                             <div>
                               <Label htmlFor="doc_title">Titre</Label>
@@ -1622,6 +1622,7 @@ const AdminDashboard = () => {
                                 value={documentToSend.title}
                                 onChange={(e) => setDocumentToSend({ ...documentToSend, title: e.target.value })}
                                 required
+                                placeholder="Titre du document/vidéo"
                               />
                             </div>
                             <div>
@@ -1630,20 +1631,61 @@ const AdminDashboard = () => {
                                 id="doc_description"
                                 value={documentToSend.description}
                                 onChange={(e) => setDocumentToSend({ ...documentToSend, description: e.target.value })}
+                                placeholder="Description (optionnelle)"
                               />
                             </div>
                             <div>
-                              <Label htmlFor="doc_url">Lien du document</Label>
+                              <Label htmlFor="admin_file_upload">📁 Télécharger un fichier</Label>
+                              <div className="mt-2">
+                                <input
+                                  type="file"
+                                  id="admin_file_upload"
+                                  onChange={async (e) => {
+                                    const file = e.target.files[0];
+                                    if (file) {
+                                      try {
+                                        const formData = new FormData();
+                                        formData.append('file', file);
+                                        const response = await apiClient.post('/upload', formData, {
+                                          headers: { 'Content-Type': 'multipart/form-data' }
+                                        });
+                                        setDocumentToSend({ ...documentToSend, file_url: response.data.file_url });
+                                        toast.success('Fichier téléchargé avec succès!');
+                                      } catch (error) {
+                                        toast.error('Erreur lors du téléchargement du fichier');
+                                      }
+                                    }
+                                  }}
+                                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
+                                  accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.jpg,.jpeg,.png,.mp3,.mp4,.mov,.avi,.webm"
+                                />
+                                <p className="text-xs text-gray-500 mt-1">
+                                  📄 Documents, 🖼️ Images, 🎵 Audio, 🎥 Vidéo (MP4, MOV, AVI, WebM) - max 10MB
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1 h-px bg-gray-300"></div>
+                              <span className="text-xs text-gray-500">OU</span>
+                              <div className="flex-1 h-px bg-gray-300"></div>
+                            </div>
+                            <div>
+                              <Label htmlFor="doc_url">🔗 Lien du document/vidéo (URL)</Label>
                               <Input
                                 id="doc_url"
                                 value={documentToSend.file_url}
                                 onChange={(e) => setDocumentToSend({ ...documentToSend, file_url: e.target.value })}
-                                placeholder="https://..."
-                                required
+                                placeholder="https://... (YouTube, Google Drive, Dropbox, etc.)"
                               />
+                              <p className="text-xs text-gray-500 mt-1">YouTube, Vimeo, Google Drive, Dropbox, etc.</p>
                             </div>
-                            <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-700">
-                              Envoyer le document
+                            <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                              <p className="text-xs text-blue-800">
+                                💡 <strong>Destinataires sélectionnés :</strong> {selectedRecipients.length > 0 ? selectedRecipients.map(r => `${r.first_name} ${r.last_name}`).join(', ') : 'Aucun'}
+                              </p>
+                            </div>
+                            <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-700" disabled={!documentToSend.file_url || selectedRecipients.length === 0}>
+                              📤 Envoyer à {selectedRecipients.length} personne(s)
                             </Button>
                           </form>
                         </div>

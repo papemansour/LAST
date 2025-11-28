@@ -242,7 +242,7 @@ const HomePage = () => {
   }, [groupCode]);
 
   // Fonction pour obtenir le lien Stripe selon le pack et KALAMA CLUB
-  // Promo code KALAMA15 is always applied automatically on backend
+  // Promo code is always applied automatically on backend
 
   const handleSubmit = async (e) => {
     e.preventDefault();

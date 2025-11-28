@@ -1678,7 +1678,7 @@ const HomePage = () => {
             {/* Contact */}
             <div>
               <h4 className="text-lg font-semibold mb-4 text-teal-400">Contactez-nous</h4>
-              <form onSubmit={handleContactForm} className="space-y-4">
+              <form onSubmit={handleContactSubmit} className="space-y-4">
                 <Input
                   type="email"
                   placeholder="Votre email"

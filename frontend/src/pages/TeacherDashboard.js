@@ -76,8 +76,6 @@ const TeacherDashboard = () => {
     file_url: '',
     file: null
   });
-  
-  const [uploadingFile, setUploadingFile] = useState(false);
 
   useEffect(() => {
     fetchData();

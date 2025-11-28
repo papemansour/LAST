@@ -795,6 +795,9 @@ const StudentDashboard = () => {
       </div>
 
       {/* Documents removed - use Messages with attachments instead */}
+      
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };

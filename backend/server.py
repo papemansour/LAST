@@ -1098,6 +1098,43 @@ async def get_admin_documents_from_teachers(current_user: dict = Depends(get_cur
         if teacher:
             doc['teacher_name'] = f"{teacher['first_name']} {teacher['last_name']}"
             doc['teacher_email'] = teacher['email']
+
+@api_router.get("/admin/received-documents")
+async def get_admin_received_documents(current_user: dict = Depends(get_current_user)):
+    """Get all documents sent to admin from teachers and students"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    documents = await db.documents.find(
+        {"to_user_role": "admin"},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(1000)
+    
+    # Enrich with sender info
+    for doc in documents:
+        sender = await db.users.find_one(
+            {"id": doc['from_user_id']},
+            {"_id": 0, "first_name": 1, "last_name": 1, "email": 1, "role": 1}
+        )
+        if sender:
+            doc['sender_name'] = f"{sender['first_name']} {sender['last_name']}"
+            doc['sender_email'] = sender['email']
+            doc['sender_role'] = sender['role']
+    
+    return documents
+
+@api_router.delete("/admin/delete-document/{document_id}")
+async def delete_admin_document(document_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a document received by admin"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    result = await db.documents.delete_one({"id": document_id, "to_user_role": "admin"})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Document not found")
+    
+    logger.info(f"Document {document_id} deleted by admin {current_user['id']}")
+    return {"message": "Document supprimé avec succès"}
     
     return documents
 

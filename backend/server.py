@@ -671,7 +671,10 @@ async def login(credentials: UserLogin):
     user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
     
     if not user:
+        logger.warning(f"Login attempt - user not found: {credentials.email}")
         raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    logger.info(f"Login attempt for: {credentials.email}, role: {user.get('role')}, is_active: {user.get('is_active')}")
     
     if not user.get('is_active'):
         raise HTTPException(status_code=403, detail="Account not activated yet. Please wait for admin approval.")
@@ -681,7 +684,9 @@ async def login(credentials: UserLogin):
         raise HTTPException(status_code=403, detail="Your access has been restricted. Please contact the administrator.")
     
     # Verify password
-    if not verify_password(credentials.password, user['password_hash']):
+    verified = verify_password(credentials.password, user['password_hash'])
+    logger.info(f"Password verification for {credentials.email}: {verified}")
+    if not verified:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
     # Create token

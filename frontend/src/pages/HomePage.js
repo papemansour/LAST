@@ -1694,17 +1694,25 @@ const HomePage = () => {
               <h4 className="text-lg font-semibold mb-4 text-teal-400">Contactez-nous</h4>
               <form onSubmit={handleContactSubmit} className="space-y-4">
                 <Input
+                  type="text"
+                  placeholder="Votre nom"
+                  value={contactForm.name}
+                  onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                  required
+                  className="bg-gray-800 border-gray-700 text-white"
+                />
+                <Input
                   type="email"
                   placeholder="Votre email"
-                  value={contactEmail}
-                  onChange={(e) => setContactEmail(e.target.value)}
+                  value={contactForm.email}
+                  onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
                   required
                   className="bg-gray-800 border-gray-700 text-white"
                 />
                 <Textarea
                   placeholder="Votre message"
-                  value={contactMessage}
-                  onChange={(e) => setContactMessage(e.target.value)}
+                  value={contactForm.message}
+                  onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
                   required
                   className="bg-gray-800 border-gray-700 text-white"
                   rows={4}

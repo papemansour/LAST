@@ -803,6 +803,22 @@ const StudentDashboard = () => {
                     alt={previewDocument.title} 
                     className="w-full rounded-lg shadow-lg"
                   />
+                ) : previewDocument.file_url?.match(/\.(mp4|webm|mov|avi)$/i) ? (
+                  <video 
+                    controls 
+                    className="w-full rounded-lg shadow-lg"
+                    src={previewDocument.file_url}
+                  >
+                    Votre navigateur ne supporte pas la lecture vidéo.
+                  </video>
+                ) : previewDocument.file_url?.includes('youtube.com') || previewDocument.file_url?.includes('youtu.be') ? (
+                  <iframe
+                    src={previewDocument.file_url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}
+                    className="w-full h-[65vh] rounded-lg border"
+                    title={previewDocument.title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
                 ) : previewDocument.file_url?.match(/\.(pdf)$/i) ? (
                   <iframe
                     src={previewDocument.file_url}

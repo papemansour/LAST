@@ -96,7 +96,7 @@ const HomePage = () => {
   const [showWavePaymentModal, setShowWavePaymentModal] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('stripe'); // 'stripe' ou 'wave'
-  // Promo code is always KALAMA15 - no need for validation states
+  // Promo code is always applied automatically
   const [groupMembers, setGroupMembers] = useState([{ 
     first_name: '', 
     last_name: '', 

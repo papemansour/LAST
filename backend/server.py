@@ -299,7 +299,7 @@ def hash_password(password: str) -> str:
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     try:
         result = pwd_context.verify(plain_password, hashed_password)
-        logger.debug(f"verify_password: plain={plain_password[:3]}***, hash={hashed_password[:20]}..., result={result}")
+        logger.info(f"verify_password: plain_len={len(plain_password)}, hash={hashed_password[:25]}..., result={result}")
         return result
     except Exception as e:
         logger.error(f"verify_password error: {e}")

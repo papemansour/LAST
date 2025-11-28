@@ -1869,7 +1869,7 @@ async def generate_group_magic_code(
     # Verify all students belong to this teacher and are pending
     students = await db.users.find(
         {
-            "id": {"$in": student_ids},
+            "id": {"$in": data.student_ids},
             "assigned_teacher": current_user['id'],
             "course_type": "group",
             "magic_code_generated": {"$ne": True}
@@ -1877,7 +1877,7 @@ async def generate_group_magic_code(
         {"_id": 0}
     ).to_list(1000)
     
-    if len(students) != len(student_ids):
+    if len(students) != len(data.student_ids):
         raise HTTPException(
             status_code=400, 
             detail="Certains étudiants ne sont pas valides ou ont déjà un code"

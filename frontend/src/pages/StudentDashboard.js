@@ -25,6 +25,7 @@ import StudentOfMonthBadge from '../components/StudentOfMonthBadge';
 import ProgressTracker from '../components/ProgressTracker';
 import LiveNotifications from '../components/LiveNotifications';
 import StudentGames from '../components/StudentGamesAdvanced';
+import WeekendGiftSelector from '../components/WeekendGiftSelector';
 
 const StudentDashboard = () => {
   const navigate = useNavigate();

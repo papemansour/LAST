@@ -379,7 +379,7 @@ const HomePage = () => {
         plan_level: plan.level,
         amount: plan.price,
         currency: currency,
-        promo_code: 'KALAMA15' // Always include the promo code
+        promo_code: 'promo_1SYGM3I4faCc3GWYbdYRPXX8'
       });
       
       // Redirect to Stripe Checkout

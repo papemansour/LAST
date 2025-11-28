@@ -658,6 +658,7 @@ const StudentDashboard = () => {
                     onClick={async () => {
                       try {
                         const res = await apiClient.get('/kkid/videos');
+                        setLinks(res.data); // Utilise le state links temporairement
                         toast.success('Vidéos actualisées!');
                       } catch (error) {
                         toast.error('Erreur de chargement');
@@ -668,15 +669,42 @@ const StudentDashboard = () => {
                     🔄 Actualiser
                   </Button>
                   
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <Card className="border-pink-200 bg-pink-50">
-                      <CardContent className="p-6 text-center">
-                        <Video className="w-12 h-12 text-pink-400 mx-auto mb-3" />
-                        <p className="text-sm text-gray-600">Les vidéos apparaîtront ici</p>
-                        <p className="text-xs text-gray-500 mt-2">Tes professeurs peuvent t&apos;envoyer des vidéos éducatives!</p>
-                      </CardContent>
-                    </Card>
-                  </div>
+                  {(!links || links.length === 0) ? (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <Card className="border-pink-200 bg-pink-50">
+                        <CardContent className="p-6 text-center">
+                          <Video className="w-12 h-12 text-pink-400 mx-auto mb-3" />
+                          <p className="text-sm text-gray-600">Les vidéos apparaîtront ici</p>
+                          <p className="text-xs text-gray-500 mt-2">Tes professeurs peuvent t&apos;envoyer des vidéos éducatives!</p>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  ) : (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {links.map(video => (
+                        <Card key={video.id} className="border-pink-200 hover:shadow-lg transition-shadow">
+                          <CardContent className="p-4">
+                            <h3 className="font-bold text-pink-800 mb-2">{video.title}</h3>
+                            {video.description && (
+                              <p className="text-sm text-gray-600 mb-3">{video.description}</p>
+                            )}
+                            <p className="text-xs text-gray-500 mb-3">
+                              De : {video.teacher_name}
+                            </p>
+                            <Button
+                              className="w-full bg-pink-600 hover:bg-pink-700"
+                              onClick={() => {
+                                setPreviewDocument(video);
+                                setShowPreviewDialog(true);
+                              }}
+                            >
+                              📺 Regarder
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>

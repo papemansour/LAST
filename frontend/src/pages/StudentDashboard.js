@@ -431,7 +431,7 @@ const StudentDashboard = () => {
                         </li>
                         <li className="flex items-center gap-2">
                           <span className="w-2 h-2 bg-pink-600 rounded-full"></span>
-                          <span>Limite le temps d'écran</span>
+                          <span>Limite le temps d&apos;écran</span>
                         </li>
                         <li className="flex items-center gap-2">
                           <span className="w-2 h-2 bg-pink-600 rounded-full"></span>

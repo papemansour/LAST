@@ -4198,6 +4198,56 @@ async def get_promo_codes(current_user: dict = Depends(get_current_user)):
     codes = await db.promo_codes.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
     return codes
 
+
+# Payment endpoints
+@api_router.post("/payments/create-checkout")
+async def create_checkout_session(
+    plan_name: str,
+    plan_level: str,
+    amount: int,
+    currency: str = "FCFA",
+    promo_code: Optional[str] = None
+):
+    """Create a Stripe checkout session (returns hardcoded links for now)"""
+    
+    # Mapping des liens Stripe directs par pack
+    stripe_links = {
+        'kkid': 'https://buy.stripe.com/9B64gz8rFaJD7RB4q0',
+        'beginner_without_club': 'https://buy.stripe.com/fZufZheQ304Z5Jtg8I',
+        'beginner_with_club': 'https://buy.stripe.com/8x26oH37lcRL2xhbSs',
+        'intermediate_without_club': 'https://buy.stripe.com/dRmdR96jx5pjdbVf4E',
+        'intermediate_with_club': 'https://buy.stripe.com/4gMbJ10Zd6tn2xh3lW',
+        'advanced_without_club': 'https://buy.stripe.com/00w14nazNg3XefZ2hS',
+        'advanced_with_club': 'https://buy.stripe.com/28E3cv4bp1938VFf4E'
+    }
+    
+    # Déterminer la clé du lien
+    if plan_level == 'kkid':
+        link_key = 'kkid'
+    else:
+        # Détecter si c'est avec ou sans club basé sur le nom du pack
+        has_club = 'Club' in plan_name or 'club' in plan_name.lower()
+        link_key = f"{plan_level}_{'with' if has_club else 'without'}_club"
+    
+    checkout_url = stripe_links.get(link_key)
+    
+    if not checkout_url:
+        logger.error(f"No Stripe link found for key: {link_key}")
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Lien de paiement non trouvé pour le pack {plan_name}"
+        )
+    
+    logger.info(f"Payment link generated: {link_key} -> {checkout_url}")
+    
+    return {
+        "checkout_url": checkout_url,
+        "plan_name": plan_name,
+        "amount": amount,
+        "currency": currency,
+        "promo_applied": promo_code if promo_code else None
+    }
+
 app.include_router(api_router)
 
 app.add_middleware(

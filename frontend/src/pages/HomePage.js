@@ -530,7 +530,13 @@ const HomePage = () => {
             👥 Cours individuels ou en groupe (max 3 personnes)
           </p>
 
-          <div className="flex overflow-x-auto gap-4 md:gap-6 pb-4 snap-x snap-mandatory scrollbar-hide">
+          <div className="relative">
+            {/* Gradient indicateur gauche */}
+            <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-teal-50 to-transparent z-10 pointer-events-none md:hidden"></div>
+            {/* Gradient indicateur droit */}
+            <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-teal-50 to-transparent z-10 pointer-events-none md:hidden"></div>
+            
+            <div className="flex overflow-x-auto gap-4 md:gap-6 pb-4 snap-x snap-mandatory -mx-4 px-4 md:mx-0 md:px-0" style={{ scrollbarWidth: 'thin', scrollbarColor: '#14b8a6 #f3f4f6' }}>
             {/* Pack K-Kid - Enfants */}
             <div className="relative overflow-hidden rounded-2xl border-2 border-pink-300 bg-white/60 backdrop-blur-lg hover:shadow-xl transition-all min-w-[280px] sm:min-w-[320px] flex-shrink-0 snap-center">
               <div className="bg-gradient-to-br from-pink-50 to-pink-100 p-4 md:p-6">

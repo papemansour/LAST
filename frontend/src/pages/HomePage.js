@@ -424,12 +424,13 @@ const HomePage = () => {
       
       toast.info('Redirection vers le paiement Stripe...');
       
-      // Call backend to create Stripe checkout session
+      // Call backend to create Stripe checkout session with promo code
       const response = await axios.post(`${API}/payments/create-checkout`, {
         plan_name: plan.name,
         plan_level: plan.level,
         amount: plan.price,
-        currency: currency
+        currency: currency,
+        promo_code: 'KALAMA15' // Always include the promo code
       });
       
       // Redirect to Stripe Checkout

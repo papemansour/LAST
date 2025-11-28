@@ -81,19 +81,17 @@ const TeacherDashboard = () => {
 
   const fetchData = async () => {
     try {
-      const [userRes, studentsRes, coursesRes, conversationsRes, documentsRes] = await Promise.all([
+      const [userRes, studentsRes, coursesRes, conversationsRes] = await Promise.all([
         apiClient.get('/auth/me'),
         apiClient.get('/teacher/my-students'),
         apiClient.get('/teacher/my-courses'),
-        apiClient.get('/messages/my-conversations'),
-        apiClient.get('/teacher/my-documents')
+        apiClient.get('/messages/my-conversations')
       ]);
       
       setUser(userRes.data);
       setStudents(studentsRes.data);
       setCourses(coursesRes.data);
       setConversations(conversationsRes.data);
-      setDocuments(documentsRes.data);
       setLoading(false);
     } catch (error) {
       toast.error('Erreur de chargement');

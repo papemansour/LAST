@@ -64,6 +64,9 @@ const TeacherDashboard = () => {
     meet_link: ''
   });
 
+  const [showPreviewDialog, setShowPreviewDialog] = useState(false);
+  const [previewDocument, setPreviewDocument] = useState(null);
+  
   const [documentData, setDocumentData] = useState({
     title: '',
     description: '',

@@ -40,7 +40,6 @@ const TeacherDashboard = () => {
   const [user, setUser] = useState(null);
   const [students, setStudents] = useState([]);
   const [courses, setCourses] = useState([]);
-  const [documents, setDocuments] = useState([]);
   const [conversations, setConversations] = useState([]);
   const [messages, setMessages] = useState([]);
   const [studentHomeworks, setStudentHomeworks] = useState([]);
@@ -64,19 +63,7 @@ const TeacherDashboard = () => {
     meet_link: ''
   });
 
-  const [showPreviewDialog, setShowPreviewDialog] = useState(false);
-  const [previewDocument, setPreviewDocument] = useState(null);
-  const [uploadingFile, setUploadingFile] = useState(false);
   const [kkidVideos, setKkidVideos] = useState([]);
-  
-  const [documentData, setDocumentData] = useState({
-    title: '',
-    description: '',
-    recipient_type: 'student',
-    recipient_id: '',
-    file_url: '',
-    file: null
-  });
 
   useEffect(() => {
     fetchData();

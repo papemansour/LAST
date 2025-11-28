@@ -1808,13 +1808,37 @@ const AdminDashboard = () => {
                                 })}</span>
                               </div>
                               
-                              <div className="flex gap-2 mt-3">
+                              <div className="flex flex-wrap gap-2 mt-3">
+                                <Button
+                                  size="sm"
+                                  onClick={() => {
+                                    setPreviewDocument(doc);
+                                    setShowDocPreviewDialog(true);
+                                  }}
+                                  className="bg-purple-600 hover:bg-purple-700"
+                                >
+                                  👁️ Aperçu
+                                </Button>
                                 <Button
                                   size="sm"
                                   onClick={() => window.open(doc.file_url, '_blank')}
                                   className="bg-teal-600 hover:bg-teal-700"
                                 >
-                                  📂 Ouvrir le document
+                                  📂 Ouvrir
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    const link = document.createElement('a');
+                                    link.href = doc.file_url;
+                                    link.download = doc.title;
+                                    link.click();
+                                    toast.success('Téléchargement démarré');
+                                  }}
+                                  className="border-blue-500 text-blue-600"
+                                >
+                                  💾 Télécharger
                                 </Button>
                                 <Button
                                   size="sm"
@@ -1825,18 +1849,19 @@ const AdminDashboard = () => {
                                   }}
                                   className="border-purple-300 text-purple-600 hover:bg-purple-50"
                                 >
-                                  🔗 Copier le lien
+                                  🔗 Copier
                                 </Button>
                                 <Button
                                   size="sm"
-                                  variant="destructive"
+                                  variant="outline"
                                   onClick={() => {
                                     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce document ?')) {
                                       handleDeleteDocument(doc.id);
                                     }
                                   }}
+                                  className="border-red-500 text-red-600"
                                 >
-                                  <Trash2 className="w-4 h-4" />
+                                  🗑️ Supprimer
                                 </Button>
                               </div>
                             </div>

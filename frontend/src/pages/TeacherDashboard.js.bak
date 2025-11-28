@@ -616,6 +616,204 @@ const TeacherDashboard = () => {
             </div>
           </TabsContent>
 
+          <TabsContent value="documents">
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card className="border-teal-100">
+                <CardHeader>
+                  <CardTitle className="text-teal-800">Envoyer un document</CardTitle>
+                  <CardDescription>Partagez des documents avec admin ou étudiants</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleSendDocument} className="space-y-4">
+                    <div>
+                      <Label htmlFor="doc_title">Titre du document</Label>
+                      <Input
+                        id="doc_title"
+                        required
+                        value={documentData.title}
+                        onChange={(e) => setDocumentData({ ...documentData, title: e.target.value })}
+                        className="border-teal-200 focus:border-teal-500"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="doc_description">Description</Label>
+                      <Textarea
+                        id="doc_description"
+                        required
+                        value={documentData.description}
+                        onChange={(e) => setDocumentData({ ...documentData, description: e.target.value })}
+                        className="border-teal-200 focus:border-teal-500"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="recipient_type">Destinataire</Label>
+                      <Select
+                        value={documentData.recipient_type}
+                        onValueChange={(value) => setDocumentData({ ...documentData, recipient_type: value, recipient_id: '' })}
+                        required
+                      >
+                        <SelectTrigger className="border-teal-200">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="admin">Admin</SelectItem>
+                          <SelectItem value="student">Étudiant</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {documentData.recipient_type === 'student' && (
+                      <div>
+                        <Label htmlFor="recipient_student">Étudiant</Label>
+                        <Select
+                          value={documentData.recipient_id}
+                          onValueChange={(value) => setDocumentData({ ...documentData, recipient_id: value })}
+                          required
+                        >
+                          <SelectTrigger className="border-teal-200">
+                            <SelectValue placeholder="Sélectionner un étudiant" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {students.map((student) => (
+                              <SelectItem key={student.id} value={student.id}>
+                                {student.first_name} {student.last_name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                    <div>
+                      <Label htmlFor="file_upload">Télécharger un fichier depuis votre appareil</Label>
+                      <div className="mt-2">
+                        <input
+                          type="file"
+                          id="file_upload"
+                          onChange={handleFileChange}
+                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100 cursor-pointer"
+                          accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.jpg,.jpeg,.png,.mp3,.mp4,.mov,.avi,.webm"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          📄 Documents, 🖼️ Images, 🎵 Audio, 🎥 Vidéo (MP4, MOV, AVI, WebM) - max 10MB
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 h-px bg-gray-300"></div>
+                      <span className="text-xs text-gray-500">OU</span>
+                      <div className="flex-1 h-px bg-gray-300"></div>
+                    </div>
+                    <div>
+                      <Label htmlFor="file_url">Lien du document (URL)</Label>
+                      <Input
+                        id="file_url"
+                        value={documentData.file_url}
+                        onChange={(e) => setDocumentData({ ...documentData, file_url: e.target.value })}
+                        placeholder="https://..."
+                        className="border-teal-200 focus:border-teal-500"
+                        disabled={uploadingFile}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Google Drive, Dropbox, etc.</p>
+                    </div>
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-teal-600 hover:bg-teal-700"
+                      disabled={uploadingFile}
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      {uploadingFile ? 'Téléchargement...' : 'Envoyer le document'}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+
+              <Card className="border-teal-100">
+                <CardHeader>
+                  <CardTitle className="text-teal-800">Documents envoyés</CardTitle>
+                  <CardDescription>Vos documents partagés</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {documents.length === 0 ? (
+                    <p className="text-gray-500">Aucun document envoyé</p>
+                  ) : (
+                    <div className="space-y-4 max-h-[500px] overflow-y-auto">
+                      {documents.map((doc) => (
+                        <div key={doc.id} className="p-4 border border-teal-100 rounded-lg hover:bg-teal-50 transition">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-start gap-3 flex-1">
+                              <FileText className="w-5 h-5 text-teal-600 mt-1" />
+                              <div className="flex-1">
+                                <h3 className="font-semibold text-teal-800">{doc.title}</h3>
+                                <p className="text-sm text-gray-600 mt-1">{doc.description}</p>
+                                <div className="flex gap-2 mt-2">
+                                  <span className="text-xs bg-teal-100 text-teal-700 px-2 py-1 rounded">
+                                    {doc.recipient_type === 'admin' ? 'Admin' : 'Étudiant'}
+                                  </span>
+                                  <span className="text-xs text-gray-500">
+                                    {new Date(doc.created_at).toLocaleDateString('fr-FR')}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                              <Button
+                                size="sm"
+                                onClick={() => {
+                                  setPreviewDocument(doc);
+                                  setShowPreviewDialog(true);
+                                }}
+                                className="bg-purple-600 hover:bg-purple-700"
+                              >
+                                👁️ Aperçu
+                              </Button>
+                              <Button
+                                size="sm"
+                                onClick={() => window.open(doc.file_url, '_blank')}
+                                className="bg-teal-600 hover:bg-teal-700"
+                              >
+                                📄 Ouvrir
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  const link = document.createElement('a');
+                                  link.href = doc.file_url;
+                                  link.download = doc.title;
+                                  link.click();
+                                  toast.success('Téléchargement démarré');
+                                }}
+                                className="border-blue-500 text-blue-600"
+                              >
+                                💾 Télécharger
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={async () => {
+                                  if (window.confirm('Supprimer ce document ?')) {
+                                    try {
+                                      await apiClient.delete(`/documents/${doc.id}`);
+                                      toast.success('Document supprimé');
+                                      fetchData();
+                                    } catch (error) {
+                                      toast.error('Erreur de suppression');
+                                    }
+                                  }
+                                }}
+                                className="border-red-500 text-red-600"
+                              >
+                                🗑️ Supprimer
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
 
           <TabsContent value="games">
             <TeacherGames students={students} />

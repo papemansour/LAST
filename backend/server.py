@@ -1925,14 +1925,9 @@ async def generate_group_magic_code(
         ])
         await create_notification(
             admin['id'],
-            'group_code_generated',
-            {
-                'teacher_name': f"{current_user['first_name']} {current_user['last_name']}",
-                'group_name': data.group_name,
-                'magic_code': magic_code,
-                'student_count': len(students),
-                'student_names': student_names
-            }
+            'Code de groupe généré',
+            f"Le professeur {current_user['first_name']} {current_user['last_name']} a généré le code {magic_code} pour le groupe '{data.group_name}' ({len(students)} étudiants: {student_names})",
+            'group_code_generated'
         )
     
     return {

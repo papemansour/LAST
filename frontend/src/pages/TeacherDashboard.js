@@ -66,6 +66,7 @@ const TeacherDashboard = () => {
 
   const [showPreviewDialog, setShowPreviewDialog] = useState(false);
   const [previewDocument, setPreviewDocument] = useState(null);
+  const [uploadingFile, setUploadingFile] = useState(false);
   
   const [documentData, setDocumentData] = useState({
     title: '',

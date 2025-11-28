@@ -59,18 +59,19 @@ const ConversationChat = ({ recipientId, recipientName, currentUserId }) => {
     formData.append('file', file);
 
     try {
-      const res = await apiClient.post('/uploadfile/', formData, {
+      const res = await apiClient.post('/messages/upload-attachment', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
       setAttachedFile({
         file_url: res.data.file_url,
-        filename: file.name,
-        file_type: file.type
+        filename: res.data.filename,
+        file_type: res.data.file_type
       });
-      toast.success('Fichier attaché');
+      toast.success(`Fichier "${file.name}" attaché`);
     } catch (error) {
-      toast.error("Erreur d'upload");
+      console.error('Upload error:', error);
+      toast.error(error.response?.data?.detail || "Erreur d'upload");
     } finally {
       setUploading(false);
     }

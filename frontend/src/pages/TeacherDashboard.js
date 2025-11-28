@@ -824,7 +824,133 @@ const TeacherDashboard = () => {
           </TabsContent>
 
           <TabsContent value="videos">
-            <TeacherVideos students={students} />
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Video className="w-6 h-6 text-pink-600" />
+                  🎥 Vidéos pour K-Kids
+                </CardTitle>
+                <CardDescription>Uploadez et partagez des vidéos éducatives avec tous les K-Kids</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Formulaire d'upload */}
+                <Card className="border-pink-200 bg-pink-50">
+                  <CardHeader>
+                    <CardTitle className="text-lg">📤 Envoyer une nouvelle vidéo</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={async (e) => {
+                      e.preventDefault();
+                      const formData = new FormData(e.target);
+                      const videoData = {
+                        title: formData.get('video_title'),
+                        description: formData.get('video_description'),
+                        video_url: formData.get('video_url')
+                      };
+                      
+                      try {
+                        await apiClient.post('/teacher/send-kkid-video', videoData);
+                        toast.success('Vidéo envoyée aux K-Kids!');
+                        e.target.reset();
+                        fetchData();
+                      } catch (error) {
+                        toast.error('Erreur lors de l\'envoi');
+                      }
+                    }} className="space-y-4">
+                      <div>
+                        <Label htmlFor="video_title">Titre de la vidéo</Label>
+                        <Input
+                          id="video_title"
+                          name="video_title"
+                          placeholder="Ex: Leçon d'anglais - Les couleurs"
+                          required
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="video_description">Description</Label>
+                        <Textarea
+                          id="video_description"
+                          name="video_description"
+                          placeholder="Courte description de la vidéo..."
+                          rows={3}
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="video_file_upload">📁 Uploader une vidéo</Label>
+                        <input
+                          type="file"
+                          id="video_file_upload"
+                          accept="video/mp4,video/webm,video/mov,video/avi"
+                          onChange={async (e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                              try {
+                                setUploadingFile(true);
+                                const fd = new FormData();
+                                fd.append('file', file);
+                                const response = await apiClient.post('/upload', fd, {
+                                  headers: { 'Content-Type': 'multipart/form-data' }
+                                });
+                                document.getElementById('video_url').value = response.data.file_url;
+                                toast.success('Vidéo uploadée!');
+                              } catch (error) {
+                                toast.error('Erreur upload');
+                              } finally {
+                                setUploadingFile(false);
+                              }
+                            }
+                          }}
+                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">🎥 MP4, WebM, MOV, AVI - max 50MB</p>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-px bg-gray-300"></div>
+                        <span className="text-xs text-gray-500">OU</span>
+                        <div className="flex-1 h-px bg-gray-300"></div>
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="video_url">🔗 Lien vidéo (YouTube, etc.)</Label>
+                        <Input
+                          id="video_url"
+                          name="video_url"
+                          placeholder="https://www.youtube.com/watch?v=..."
+                          required
+                        />
+                        <p className="text-xs text-gray-500 mt-1">YouTube, Vimeo, ou fichier uploadé</p>
+                      </div>
+                      
+                      <Button type="submit" className="w-full bg-pink-600 hover:bg-pink-700" disabled={uploadingFile}>
+                        {uploadingFile ? '⏳ Upload en cours...' : '📤 Envoyer aux K-Kids'}
+                      </Button>
+                    </form>
+                  </CardContent>
+                </Card>
+                
+                {/* Liste des vidéos existantes */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">📚 Vidéos envoyées</h3>
+                  <Button 
+                    onClick={async () => {
+                      try {
+                        const res = await apiClient.get('/kkid/videos');
+                        toast.success('Liste actualisée');
+                      } catch (error) {
+                        toast.error('Erreur de chargement');
+                      }
+                    }}
+                    className="mb-4"
+                  >
+                    🔄 Actualiser
+                  </Button>
+                  <p className="text-sm text-gray-500">Les vidéos apparaîtront ici après envoi</p>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="timer">

@@ -763,6 +763,7 @@ const HomePage = () => {
                 </p>
               </div>
             </div>
+            </div>
           </div>
           
           {/* Indicateur de scroll mobile */}

@@ -242,25 +242,6 @@ const HomePage = () => {
   }, [groupCode]);
 
   // Fonction pour obtenir le lien Stripe selon le pack et KALAMA CLUB
-  const getStripeLink = (level, joinKalamaClub) => {
-    const stripeLinks = {
-      'kkid': 'https://buy.stripe.com/9B64gz8rFaJD7RB4q0enS07',
-      'beginner_with_club': 'https://buy.stripe.com/8x26oH37lcRL2xhbSs',
-      'beginner_without_club': 'https://buy.stripe.com/fZufZheQ304Z5Jtg8IenS00',
-      'intermediate_with_club': 'https://buy.stripe.com/4gMbJ10Zd6tn2xh3lW',
-      'intermediate_without_club': 'https://buy.stripe.com/dRmdR96jx5pjdbVf4EenS01',
-      'advanced_with_club': 'https://buy.stripe.com/28E3cv4bp1938VFf4E',
-      'advanced_without_club': 'https://buy.stripe.com/00w14nazNg3XefZ2hSenS02'
-    };
-
-    if (level === 'kkid') {
-      return stripeLinks.kkid;
-    }
-
-    const key = `${level}_${joinKalamaClub ? 'with' : 'without'}_club`;
-    return stripeLinks[key] || stripeLinks.beginner_without_club;
-  };
-
   // Promo code KALAMA15 is always applied automatically on backend
 
   const handleSubmit = async (e) => {

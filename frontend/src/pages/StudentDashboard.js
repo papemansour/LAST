@@ -355,6 +355,7 @@ const StudentDashboard = () => {
               <UserCircle className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Profil</span>
             </TabsTrigger>
+              </>
             )}
           </TabsList>
           

@@ -1189,8 +1189,22 @@ async def delete_document(document_id: str, current_user: dict = Depends(get_cur
     if not document:
         raise HTTPException(status_code=404, detail="Document not found")
     
-    # Allow deletion if user is the recipient or sender
-    if document['to_user_id'] != current_user['id'] and document.get('from_user_id') != current_user['id']:
+    # Check authorization (compatible with both old and new document formats)
+    is_authorized = False
+    
+    # Check if user is recipient (support both formats)
+    if document.get('to_user_id') == current_user['id'] or document.get('recipient_id') == current_user['id']:
+        is_authorized = True
+    
+    # Check if user is sender (support both formats)
+    if document.get('from_user_id') == current_user['id'] or document.get('teacher_id') == current_user['id']:
+        is_authorized = True
+    
+    # Admin can delete any document
+    if current_user['role'] == 'admin':
+        is_authorized = True
+    
+    if not is_authorized:
         raise HTTPException(status_code=403, detail="Not authorized to delete this document")
     
     result = await db.documents.delete_one({"id": document_id})

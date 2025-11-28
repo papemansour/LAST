@@ -419,20 +419,49 @@ const HomePage = () => {
     setShowRegistrationModal(true);
   };
 
-  const handleStripePayment = (plan) => {
+  const handleStripePayment = async (plan) => {
     // Use the level and join_kalama_club from formData
     const level = plan?.level || formData.level;
     const joinKalamaClub = formData.join_kalama_club;
     
     console.log('Stripe payment:', { level, joinKalamaClub });
     
-    const link = getStripeLink(level, joinKalamaClub);
-    if (link) {
-      console.log('Redirecting to:', link);
-      window.location.href = link;
-    } else {
-      toast.error('Erreur lors de la redirection vers le paiement');
-      console.error('No link found for:', { level, joinKalamaClub });
+    try {
+      toast.info('Redirection vers Stripe...');
+      
+      // Get pack details
+      const packMapping = {
+        'kkid': { name: 'Pack K-Kid', amount: 15000 },
+        'beginner': { name: joinKalamaClub ? 'Pack K-Débutant + Club' : 'Pack K-Débutant', amount: joinKalamaClub ? 20000 : 15000 },
+        'intermediate': { name: joinKalamaClub ? 'Pack K-Intermédiaire + Club' : 'Pack K-Intermédiaire', amount: joinKalamaClub ? 25000 : 20000 },
+        'advanced': { name: joinKalamaClub ? 'Pack K-Avancé + Club' : 'Pack K-Avancé', amount: joinKalamaClub ? 30000 : 25000 }
+      };
+      
+      const packInfo = packMapping[level];
+      
+      if (!packInfo) {
+        toast.error('Erreur : Pack non trouvé');
+        return;
+      }
+      
+      // Call backend to create Stripe session with promo code
+      const response = await axios.post(`${API}/payments/create-checkout`, {
+        plan_name: packInfo.name,
+        plan_level: level,
+        amount: packInfo.amount,
+        currency: currency,
+        promo_code: 'KALAMA15' // Always include promo code
+      });
+      
+      // Redirect to Stripe Checkout
+      if (response.data.checkout_url) {
+        window.location.href = response.data.checkout_url;
+      } else {
+        toast.error('Erreur lors de la création de la session de paiement');
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
+      toast.error(error.response?.data?.detail || 'Erreur lors de la redirection vers le paiement');
     }
   };
 

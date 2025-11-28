@@ -2767,22 +2767,26 @@ async def send_message(message_data: MessageCreate, current_user: dict = Depends
     message = Message(
         from_user_id=current_user['id'],
         to_user_id=message_data.to_user_id,
-        content=message_data.content
+        content=message_data.content,
+        attachment=message_data.attachment
     )
     
     doc = message.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
+    if doc.get('attachment'):
+        doc['attachment'] = dict(doc['attachment'])
     await db.messages.insert_one(doc)
     
     # Create notification for recipient
+    attachment_text = " avec une pièce jointe" if message_data.attachment else ""
     await create_notification(
         user_id=message_data.to_user_id,
         title=f"💬 Nouveau message",
-        message=f"{sender['first_name']} {sender['last_name']} vous a envoyé un message",
+        message=f"{sender['first_name']} {sender['last_name']} vous a envoyé un message{attachment_text}",
         notification_type="message"
     )
     
-    return {"message": "Message sent"}
+    return {"message": "Message sent", "attachment_sent": message_data.attachment is not None}
 
 @api_router.get("/messages/conversation/{user_id}")
 async def get_conversation(user_id: str, current_user: dict = Depends(get_current_user)):

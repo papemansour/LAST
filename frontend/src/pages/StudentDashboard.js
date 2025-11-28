@@ -694,7 +694,7 @@ const StudentDashboard = () => {
                   <CardDescription>Découvre les cadeaux du weekend!</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <WeekendGiftSelector user={user} />
+                  <WeekendGifts user={user} />
                 </CardContent>
               </Card>
             </TabsContent>

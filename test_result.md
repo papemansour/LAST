@@ -416,6 +416,8 @@ test_plan:
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
+  completed_tests:
+    - "Système de Pièces Jointes dans la Messagerie"
 
   - task: "Système Code Magique - Backend API"
     implemented: true

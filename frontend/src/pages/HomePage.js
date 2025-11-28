@@ -779,15 +779,15 @@ const HomePage = () => {
                 <ul className="space-y-2 md:space-y-3 text-sm md:text-base">
                   <li className="flex items-center gap-2">
                     <ChevronRight className="w-4 h-4 md:w-5 md:h-5 text-teal-600 flex-shrink-0" />
-                    <span>Cours niveau avancé</span>
+                    <span>Contenu riche et intense</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <ChevronRight className="w-4 h-4 md:w-5 md:h-5 text-teal-600 flex-shrink-0" />
-                    <span>Préparation examens</span>
+                    <span>Apprentissage rapide</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <ChevronRight className="w-4 h-4 md:w-5 md:h-5 text-teal-600 flex-shrink-0" />
-                    <span>Anglais professionnel</span>
+                    <span>Efficacité garantie</span>
                   </li>
                 </ul>
                 <Button 

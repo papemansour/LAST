@@ -204,16 +204,20 @@ const ConversationChat = ({ recipientId, recipientName, currentUserId }) => {
         )}
         
         <div className="flex gap-2">
-          <label className="cursor-pointer">
+          <label className="cursor-pointer" title="Joindre un fichier">
             <input
               type="file"
               className="hidden"
               onChange={handleFileSelect}
               disabled={uploading}
-              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.webp,.mp4,.mp3,.txt,.zip"
             />
-            <div className={`p-2 border rounded-lg ${uploading ? 'opacity-50' : 'hover:bg-gray-50'}`}>
-              <Paperclip className="w-5 h-5 text-gray-600" />
+            <div className={`p-2 border rounded-lg ${uploading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50'}`}>
+              {uploading ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-teal-600"></div>
+              ) : (
+                <Paperclip className="w-5 h-5 text-gray-600" />
+              )}
             </div>
           </label>
           

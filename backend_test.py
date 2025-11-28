@@ -1858,6 +1858,18 @@ startxref
         except Exception as e:
             logger.error(f"❌ Pricing Independence: ERROR - {str(e)}")
         
+        # Test 4.5: Complete Pricing Update Flow (REVIEW REQUEST)
+        logger.info(f"\n📋 Running: Complete Pricing Update Flow (REVIEW REQUEST)")
+        logger.info("-" * 50)
+        try:
+            result = await self.test_pricing_update_flow()
+            if result:
+                logger.info(f"✅ Pricing Update Flow: PASSED")
+            else:
+                logger.error(f"❌ Pricing Update Flow: FAILED")
+        except Exception as e:
+            logger.error(f"❌ Pricing Update Flow: ERROR - {str(e)}")
+        
         # Test 5: Admin Delete User
         logger.info(f"\n📋 Running: Admin User Deletion (PRIORITY)")
         logger.info("-" * 50)

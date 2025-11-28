@@ -239,7 +239,7 @@ const HomePage = () => {
   // Fonction pour obtenir le lien Stripe selon le pack et KALAMA CLUB
   const getStripeLink = (level, joinKalamaClub) => {
     const stripeLinks = {
-      'kkid': 'https://buy.stripe.com/9B64gz8rFaJD7RB4q0',
+      'kkid': 'https://buy.stripe.com/9B64gz8rFaJD7RB4q0enS07',
       'beginner_with_club': 'https://buy.stripe.com/8x26oH37lcRL2xhbSs',
       'beginner_without_club': 'https://buy.stripe.com/fZufZheQ304Z5Jtg8IenS00',
       'intermediate_with_club': 'https://buy.stripe.com/4gMbJ10Zd6tn2xh3lW',

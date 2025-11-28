@@ -1201,6 +1201,111 @@ startxref
             self.test_results["pricing_independence"]["details"].append(f"Test error: {str(e)}")
             return False
 
+    async def test_pricing_update_flow(self) -> bool:
+        """Test complete pricing update flow as requested in review"""
+        try:
+            logger.info("🔍 Testing complete pricing update flow...")
+            
+            # 1. Admin login (already done in login_admin)
+            if not self.admin_token:
+                logger.error("❌ Admin not logged in")
+                self.test_results["pricing_update_flow"]["details"].append("Admin login failed")
+                return False
+            
+            logger.info("✅ Step 1: Admin logged in successfully")
+            self.test_results["pricing_update_flow"]["details"].append("Admin login successful")
+            
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            
+            # 2. Get current prices via GET /api/pricing
+            async with self.session.get(f"{BACKEND_URL}/pricing") as response:
+                if response.status == 200:
+                    original_pricing = await response.json()
+                    original_beginner_eur = original_pricing.get("beginner_eur", 76)
+                    logger.info(f"✅ Step 2: Retrieved current prices - beginner_eur: {original_beginner_eur}")
+                    self.test_results["pricing_update_flow"]["details"].append(f"Current beginner_eur: {original_beginner_eur}")
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ Step 2 failed: GET /api/pricing - {response.status} - {error_text}")
+                    self.test_results["pricing_update_flow"]["details"].append(f"GET pricing failed: {error_text}")
+                    return False
+            
+            # 3. Modify prices via POST /admin/update-prices (change beginner_eur from 76 to 80)
+            updated_pricing = original_pricing.copy()
+            updated_pricing["beginner_eur"] = 80
+            
+            async with self.session.post(f"{BACKEND_URL}/admin/update-prices", json=updated_pricing, headers=headers) as response:
+                if response.status == 200:
+                    result = await response.json()
+                    logger.info("✅ Step 3: Prices updated successfully via POST /admin/update-prices")
+                    self.test_results["pricing_update_flow"]["details"].append("Price update successful")
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ Step 3 failed: POST /admin/update-prices - {response.status} - {error_text}")
+                    self.test_results["pricing_update_flow"]["details"].append(f"Price update failed: {error_text}")
+                    return False
+            
+            # 4. Verify new prices are returned by GET /api/pricing
+            async with self.session.get(f"{BACKEND_URL}/pricing") as response:
+                if response.status == 200:
+                    new_pricing = await response.json()
+                    new_beginner_eur = new_pricing.get("beginner_eur")
+                    
+                    if new_beginner_eur == 80:
+                        logger.info(f"✅ Step 4: New prices verified via GET /api/pricing - beginner_eur: {new_beginner_eur}")
+                        self.test_results["pricing_update_flow"]["details"].append(f"New beginner_eur confirmed: {new_beginner_eur}")
+                    else:
+                        logger.error(f"❌ Step 4 failed: Expected beginner_eur=80, got {new_beginner_eur}")
+                        self.test_results["pricing_update_flow"]["details"].append(f"Price verification failed: expected 80, got {new_beginner_eur}")
+                        return False
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ Step 4 failed: GET /api/pricing verification - {response.status} - {error_text}")
+                    self.test_results["pricing_update_flow"]["details"].append(f"Price verification failed: {error_text}")
+                    return False
+            
+            # 5. Verify prices are saved in MongoDB (by checking persistence)
+            # Wait a moment and check again to ensure database persistence
+            await asyncio.sleep(1)
+            
+            async with self.session.get(f"{BACKEND_URL}/pricing") as response:
+                if response.status == 200:
+                    persistent_pricing = await response.json()
+                    persistent_beginner_eur = persistent_pricing.get("beginner_eur")
+                    
+                    if persistent_beginner_eur == 80:
+                        logger.info("✅ Step 5: Prices confirmed saved in MongoDB (persistence verified)")
+                        self.test_results["pricing_update_flow"]["details"].append("MongoDB persistence verified")
+                    else:
+                        logger.error(f"❌ Step 5 failed: Price not persisted in MongoDB")
+                        self.test_results["pricing_update_flow"]["details"].append("MongoDB persistence failed")
+                        return False
+                else:
+                    logger.error(f"❌ Step 5 failed: Cannot verify MongoDB persistence")
+                    self.test_results["pricing_update_flow"]["details"].append("MongoDB persistence check failed")
+                    return False
+            
+            # SUCCESS: All steps completed
+            logger.info("🎉 PRICING UPDATE FLOW COMPLETE - All steps successful!")
+            logger.info("✅ Criteria met: Modified prices by admin are immediately visible via GET /api/pricing")
+            
+            # Restore original pricing for cleanup
+            async with self.session.post(f"{BACKEND_URL}/admin/update-prices", json=original_pricing, headers=headers) as response:
+                if response.status == 200:
+                    logger.info("✅ Cleanup: Original pricing restored")
+                    self.test_results["pricing_update_flow"]["details"].append("Original pricing restored")
+                else:
+                    logger.warning("⚠️ Cleanup: Failed to restore original pricing")
+                    self.test_results["pricing_update_flow"]["details"].append("Failed to restore original pricing")
+            
+            self.test_results["pricing_update_flow"]["passed"] = True
+            return True
+                    
+        except Exception as e:
+            logger.error(f"❌ Pricing update flow test error: {str(e)}")
+            self.test_results["pricing_update_flow"]["details"].append(f"Test error: {str(e)}")
+            return False
+
     async def test_admin_delete_user(self) -> bool:
         """Test admin user deletion functionality"""
         try:

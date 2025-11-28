@@ -2129,6 +2129,39 @@ async def get_student_teacher(teacher_id: str, current_user: dict = Depends(get_
     
     return teacher
 
+@api_router.post("/upload")
+async def upload_file(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
+    """Upload a file (document, video, image, etc.)"""
+    import os
+    from pathlib import Path
+    
+    # Create upload directory if it doesn't exist
+    upload_dir = Path("/app/frontend/public/uploads")
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Generate unique filename
+    file_ext = file.filename.split('.')[-1]
+    unique_filename = f"{str(uuid4())}.{file_ext}"
+    file_path = upload_dir / unique_filename
+    
+    # Save file
+    try:
+        contents = await file.read()
+        with open(file_path, "wb") as f:
+            f.write(contents)
+        
+        file_url = f"/uploads/{unique_filename}"
+        logger.info(f"File uploaded by {current_user['role']} {current_user['id']}: {file.filename}")
+        
+        return {
+            "message": "File uploaded successfully",
+            "file_url": file_url,
+            "filename": file.filename
+        }
+    except Exception as e:
+        logger.error(f"Upload error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error uploading file")
+
 @api_router.post("/student/send-document-to-admin")
 async def student_send_document_to_admin(doc_data: dict, current_user: dict = Depends(get_current_user)):
     """Student sends a document to admin"""

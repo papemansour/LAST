@@ -1819,6 +1819,165 @@ async def toggle_group_code(code_id: str, current_user: dict = Depends(get_curre
         "is_active": new_status
     }
 
+@api_router.get("/teacher/pending-group-students")
+async def get_pending_group_students(current_user: dict = Depends(get_current_user)):
+    """Get students assigned to teacher waiting for magic code generation"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    # Find students assigned to this teacher, with course_type='group' and no magic code yet
+    students = await db.users.find(
+        {
+            "assigned_teacher": current_user['id'],
+            "course_type": "group",
+            "magic_code_generated": {"$ne": True}
+        },
+        {"_id": 0, "id": 1, "email": 1, "first_name": 1, "last_name": 1, "members": 1, "level": 1, "created_at": 1}
+    ).to_list(1000)
+    
+    logger.info(f"Teacher {current_user['id']} retrieved {len(students)} pending group students")
+    
+    return students
+
+@api_router.post("/teacher/generate-group-magic-code")
+async def generate_group_magic_code(
+    student_ids: List[str] = Body(..., embed=True),
+    group_name: str = Body(..., embed=True),
+    current_user: dict = Depends(get_current_user)
+):
+    """Teacher generates a magic code for selected group students"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    if not student_ids or len(student_ids) == 0:
+        raise HTTPException(status_code=400, detail="Veuillez sélectionner au moins un étudiant")
+    
+    # Verify all students belong to this teacher and are pending
+    students = await db.users.find(
+        {
+            "id": {"$in": student_ids},
+            "assigned_teacher": current_user['id'],
+            "course_type": "group",
+            "magic_code_generated": {"$ne": True}
+        },
+        {"_id": 0}
+    ).to_list(1000)
+    
+    if len(students) != len(student_ids):
+        raise HTTPException(
+            status_code=400, 
+            detail="Certains étudiants ne sont pas valides ou ont déjà un code"
+        )
+    
+    # Generate unique magic code (8 characters)
+    magic_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+    
+    # Ensure code is unique
+    while await db.users.find_one({"temporary_password": magic_code}, {"_id": 0}):
+        magic_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+    
+    # Update all selected students with the same magic code
+    hashed_password = pwd_context.hash(magic_code)
+    
+    for student in students:
+        # Get main member info for login compatibility
+        main_member = next((m for m in student.get('members', []) if m.get('is_main')), student.get('members', [{}])[0] if student.get('members') else {})
+        
+        await db.users.update_one(
+            {"id": student['id']},
+            {"$set": {
+                "is_active": True,
+                "is_approved": True,
+                "password_hash": hashed_password,
+                "temporary_password": magic_code,
+                "magic_code_generated": True,
+                "magic_code_generated_at": datetime.now(timezone.utc).isoformat(),
+                "magic_code_generated_by": current_user['id'],
+                "group_magic_code_name": group_name,
+                "first_name": main_member.get('first_name', student.get('first_name', '')),
+                "last_name": main_member.get('last_name', student.get('last_name', ''))
+            }}
+        )
+    
+    logger.info(f"Magic code {magic_code} generated for {len(students)} students in group '{group_name}' by teacher {current_user['id']}")
+    
+    # Create notification for admin
+    admin = await db.users.find_one({"role": "admin"}, {"_id": 0, "id": 1})
+    if admin:
+        student_names = ", ".join([
+            f"{s.get('first_name', '')} {s.get('last_name', '')}" 
+            for s in students
+        ])
+        await create_notification(
+            admin['id'],
+            'group_code_generated',
+            {
+                'teacher_name': f"{current_user['first_name']} {current_user['last_name']}",
+                'group_name': group_name,
+                'magic_code': magic_code,
+                'student_count': len(students),
+                'student_names': student_names
+            }
+        )
+    
+    return {
+        "success": True,
+        "magic_code": magic_code,
+        "group_name": group_name,
+        "student_count": len(students),
+        "students": [
+            {
+                "id": s['id'],
+                "name": f"{s.get('first_name', '')} {s.get('last_name', '')}",
+                "email": s['email']
+            }
+            for s in students
+        ]
+    }
+
+@api_router.get("/teacher/my-generated-groups")
+async def get_my_generated_groups(current_user: dict = Depends(get_current_user)):
+    """Get all groups with magic codes generated by this teacher"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    # Find all students where this teacher generated their magic code
+    groups = await db.users.find(
+        {
+            "magic_code_generated_by": current_user['id'],
+            "magic_code_generated": True,
+            "course_type": "group"
+        },
+        {"_id": 0}
+    ).to_list(1000)
+    
+    # Group by magic code
+    grouped = {}
+    for student in groups:
+        code = student.get('temporary_password', '')
+        if code not in grouped:
+            grouped[code] = {
+                "magic_code": code,
+                "group_name": student.get('group_magic_code_name', 'Groupe sans nom'),
+                "created_at": student.get('magic_code_generated_at', ''),
+                "students": []
+            }
+        
+        grouped[code]['students'].append({
+            "id": student['id'],
+            "name": f"{student.get('first_name', '')} {student.get('last_name', '')}",
+            "email": student['email'],
+            "level": student.get('level', ''),
+            "members": student.get('members', [])
+        })
+    
+    # Convert to list and sort by creation date
+    result = list(grouped.values())
+    result.sort(key=lambda x: x['created_at'], reverse=True)
+    
+    return result
+
+
 @api_router.get("/auth/validate-code/{code}")
 async def validate_group_code(code: str):
     """Validate a group code and return group information (public endpoint)"""

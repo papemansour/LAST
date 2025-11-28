@@ -32,7 +32,6 @@ const StudentDashboard = () => {
   const [user, setUser] = useState(null);
   const [teacher, setTeacher] = useState(null);
   const [links, setLinks] = useState([]);
-  const [documents, setDocuments] = useState([]);
   const [homeworks, setHomeworks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [homeworkData, setHomeworkData] = useState({
@@ -40,8 +39,6 @@ const StudentDashboard = () => {
     description: '',
     file_url: ''
   });
-  const [previewDocument, setPreviewDocument] = useState(null);
-  const [showPreviewDialog, setShowPreviewDialog] = useState(false);
   const [uploadingFile, setUploadingFile] = useState(false);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
@@ -53,17 +50,15 @@ const StudentDashboard = () => {
 
   const fetchData = async () => {
     try {
-      const [userRes, linksRes, documentsRes, homeworksRes, pricingRes] = await Promise.all([
+      const [userRes, linksRes, homeworksRes, pricingRes] = await Promise.all([
         apiClient.get('/auth/me'),
         apiClient.get('/student/my-links'),
-        apiClient.get('/student/my-documents'),
         apiClient.get('/student/my-homeworks'),
         apiClient.get('/pricing')
       ]);
       
       setUser(userRes.data);
       setLinks(linksRes.data);
-      setDocuments(documentsRes.data);
       setHomeworks(homeworksRes.data);
       setPricing(pricingRes.data);
       

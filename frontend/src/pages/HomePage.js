@@ -98,6 +98,14 @@ const HomePage = () => {
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('stripe'); // 'stripe' ou 'wave'
   // Promo code is always KALAMA15 - no need for validation states
+  const [groupMembers, setGroupMembers] = useState([{ 
+    first_name: '', 
+    last_name: '', 
+    email: '', 
+    phone: '', 
+    country_code: '+33', 
+    level: '' 
+  }]);
 
   const handleDateSelect = (date) => {
     const dateStr = format(date, 'yyyy-MM-dd');

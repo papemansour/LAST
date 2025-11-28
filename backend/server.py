@@ -1856,15 +1856,14 @@ async def get_pending_group_students(current_user: dict = Depends(get_current_us
 
 @api_router.post("/teacher/generate-group-magic-code")
 async def generate_group_magic_code(
-    student_ids: List[str] = Body(..., embed=True),
-    group_name: str = Body(..., embed=True),
+    data: GenerateGroupMagicCode,
     current_user: dict = Depends(get_current_user)
 ):
     """Teacher generates a magic code for selected group students"""
     if current_user['role'] != 'teacher':
         raise HTTPException(status_code=403, detail="Teacher access required")
     
-    if not student_ids or len(student_ids) == 0:
+    if not data.student_ids or len(data.student_ids) == 0:
         raise HTTPException(status_code=400, detail="Veuillez sélectionner au moins un étudiant")
     
     # Verify all students belong to this teacher and are pending

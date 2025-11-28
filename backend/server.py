@@ -301,13 +301,7 @@ def hash_password(password: str) -> str:
     return pwd_context.hash(password)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    try:
-        result = pwd_context.verify(plain_password, hashed_password)
-        logger.info(f"verify_password: plain_len={len(plain_password)}, hash={hashed_password[:25]}..., result={result}")
-        return result
-    except Exception as e:
-        logger.error(f"verify_password error: {e}")
-        return False
+    return pwd_context.verify(plain_password, hashed_password)
 
 def generate_welcome_letter_content(first_name: str, level: str, role: str, email: str, temp_password: str) -> str:
     """Generate welcome letter content based on user level and role"""
@@ -681,10 +675,7 @@ async def login(credentials: UserLogin):
     user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
     
     if not user:
-        logger.warning(f"Login attempt - user not found: {credentials.email}")
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    
-    logger.info(f"Login attempt for: {credentials.email}, role: {user.get('role')}, is_active: {user.get('is_active')}")
     
     if not user.get('is_active'):
         raise HTTPException(status_code=403, detail="Account not activated yet. Please wait for admin approval.")
@@ -694,9 +685,7 @@ async def login(credentials: UserLogin):
         raise HTTPException(status_code=403, detail="Your access has been restricted. Please contact the administrator.")
     
     # Verify password
-    verified = verify_password(credentials.password, user['password_hash'])
-    logger.info(f"Password verification for {credentials.email}: {verified}")
-    if not verified:
+    if not verify_password(credentials.password, user['password_hash']):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
     # Create token
@@ -1867,7 +1856,6 @@ async def generate_group_magic_code(
         raise HTTPException(status_code=400, detail="Veuillez sélectionner au moins un étudiant")
     
     # Verify all students belong to this teacher and are pending
-    logger.info(f"Searching for students with IDs: {data.student_ids}, teacher: {current_user['id']}")
     students = await db.users.find(
         {
             "id": {"$in": data.student_ids},
@@ -1877,8 +1865,6 @@ async def generate_group_magic_code(
         },
         {"_id": 0}
     ).to_list(1000)
-    
-    logger.info(f"Found {len(students)} students matching criteria (expected {len(data.student_ids)})")
     
     if len(students) != len(data.student_ids):
         raise HTTPException(

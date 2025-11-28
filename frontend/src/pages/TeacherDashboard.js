@@ -64,6 +64,7 @@ const TeacherDashboard = () => {
   });
 
   const [kkidVideos, setKkidVideos] = useState([]);
+  const [uploadingFile, setUploadingFile] = useState(false);
 
   useEffect(() => {
     fetchData();

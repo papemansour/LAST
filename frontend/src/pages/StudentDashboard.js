@@ -450,29 +450,43 @@ const StudentDashboard = () => {
                   {/* Payment Button */}
                   <Button
                     className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white py-6 text-lg"
-                    onClick={() => {
-                      const stripeLinks = {
-                        'kkid': 'https://buy.stripe.com/9B64gz8rFaJD7RB4q0',
-                        'beginner_with_club': 'https://buy.stripe.com/8x26oH37lcRL2xhbSs',
-                        'beginner_without_club': 'https://buy.stripe.com/fZufZheQ304Z5Jtg8IenS00',
-                        'intermediate_with_club': 'https://buy.stripe.com/4gMbJ10Zd6tn2xh3lW',
-                        'intermediate_without_club': 'https://buy.stripe.com/dRmdR96jx5pjdbVf4EenS01',
-                        'advanced_with_club': 'https://buy.stripe.com/28E3cv4bp1938VFf4E',
-                        'advanced_without_club': 'https://buy.stripe.com/00w14nazNg3XefZ2hSenS02'
-                      };
-                      
-                      let link;
-                      if (user.level === 'kkid') {
-                        link = stripeLinks.kkid;
-                      } else {
-                        const key = `${user.level}_${user.join_kalama_club ? 'with' : 'without'}_club`;
-                        link = stripeLinks[key];
-                      }
-                      
-                      if (link) {
-                        window.location.href = link;
-                      } else {
-                        toast.error('Erreur de paiement. Contactez l\'administration.');
+                    onClick={async () => {
+                      try {
+                        toast.info('Redirection vers Stripe...');
+                        
+                        // Get pack details based on user level
+                        const packMapping = {
+                          'kkid': { name: 'Pack K-Kid', amount: 15000 },
+                          'beginner': { name: user.join_kalama_club ? 'Pack K-Débutant + Club' : 'Pack K-Débutant', amount: user.join_kalama_club ? 20000 : 15000 },
+                          'intermediate': { name: user.join_kalama_club ? 'Pack K-Intermédiaire + Club' : 'Pack K-Intermédiaire', amount: user.join_kalama_club ? 25000 : 20000 },
+                          'advanced': { name: user.join_kalama_club ? 'Pack K-Avancé + Club' : 'Pack K-Avancé', amount: user.join_kalama_club ? 30000 : 25000 }
+                        };
+                        
+                        const pack = packMapping[user.level];
+                        
+                        if (!pack) {
+                          toast.error('Erreur : Pack non trouvé');
+                          return;
+                        }
+                        
+                        // Call backend to create Stripe session with promo code
+                        const response = await apiClient.post('/payments/create-checkout', {
+                          plan_name: pack.name,
+                          plan_level: user.level,
+                          amount: pack.amount,
+                          currency: 'FCFA',
+                          promo_code: 'KALAMA15' // Always include promo code
+                        });
+                        
+                        // Redirect to Stripe Checkout
+                        if (response.data.checkout_url) {
+                          window.location.href = response.data.checkout_url;
+                        } else {
+                          toast.error('Erreur lors de la création de la session de paiement');
+                        }
+                      } catch (error) {
+                        console.error('Payment error:', error);
+                        toast.error(error.response?.data?.detail || 'Erreur de paiement. Contactez l\'administration.');
                       }
                     }}
                   >

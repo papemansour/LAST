@@ -1836,13 +1836,18 @@ async def get_pending_group_students(current_user: dict = Depends(get_current_us
     if current_user['role'] != 'teacher':
         raise HTTPException(status_code=403, detail="Teacher access required")
     
+    logger.info(f"Teacher {current_user['id']} requesting pending group students")
+    
     # Find students assigned to this teacher, with course_type='group' and not yet active
+    query = {
+        "assigned_teacher": current_user['id'],
+        "course_type": "group",
+        "is_active": False
+    }
+    logger.info(f"Query: {query}")
+    
     students = await db.users.find(
-        {
-            "assigned_teacher": current_user['id'],
-            "course_type": "group",
-            "is_active": False
-        },
+        query,
         {"_id": 0, "id": 1, "email": 1, "first_name": 1, "last_name": 1, "members": 1, "level": 1, "created_at": 1}
     ).to_list(1000)
     

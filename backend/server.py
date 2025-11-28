@@ -18,7 +18,7 @@ from typing import List, Optional
 import uuid
 from uuid import uuid4
 from datetime import datetime, timezone, timedelta
-import jwt
+from jose import jwt, JWTError
 import stripe
 from passlib.context import CryptContext
 from email_service import email_service

@@ -257,6 +257,18 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDeleteDocument = async (documentId) => {
+    try {
+      await apiClient.delete(`/admin/delete-document/${documentId}`);
+      toast.success('Document supprimé avec succès');
+      // Refresh documents
+      const res = await apiClient.get('/admin/received-documents');
+      setReceivedDocuments(res.data);
+    } catch (error) {
+      toast.error('Erreur lors de la suppression du document');
+    }
+  };
+
 
   if (loading) {
     return (

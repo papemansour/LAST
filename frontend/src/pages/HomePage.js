@@ -256,6 +256,45 @@ const HomePage = () => {
     return stripeLinks[key] || stripeLinks.beginner_without_club;
   };
 
+  const validatePromoCode = async () => {
+    if (!promoCode.trim()) {
+      toast.error('Veuillez entrer un code promo');
+      return;
+    }
+
+    setValidatingPromo(true);
+    try {
+      const response = await axios.post(`${API}/promo-codes/validate`, {
+        code: promoCode.trim()
+      });
+
+      if (response.data.valid) {
+        setPromoCodeValid(true);
+        setPromoDiscount(response.data.discount_percent);
+        toast.success(response.data.message);
+      }
+    } catch (error) {
+      setPromoCodeValid(false);
+      setPromoDiscount(0);
+      toast.error(error.response?.data?.detail || 'Code promo invalide');
+    } finally {
+      setValidatingPromo(false);
+    }
+  };
+
+  const removePromoCode = () => {
+    setPromoCode('');
+    setPromoCodeValid(false);
+    setPromoDiscount(0);
+  };
+
+  const calculateFinalPrice = (basePrice) => {
+    if (promoCodeValid && promoDiscount > 0) {
+      return basePrice * (1 - promoDiscount / 100);
+    }
+    return basePrice;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     

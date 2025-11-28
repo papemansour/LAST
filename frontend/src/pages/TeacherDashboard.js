@@ -961,16 +961,65 @@ const TeacherDashboard = () => {
                     onClick={async () => {
                       try {
                         const res = await apiClient.get('/kkid/videos');
+                        setKkidVideos(res.data);
                         toast.success('Liste actualisée');
                       } catch (error) {
                         toast.error('Erreur de chargement');
                       }
                     }}
-                    className="mb-4"
+                    className="mb-4 bg-pink-600 hover:bg-pink-700"
                   >
                     🔄 Actualiser
                   </Button>
-                  <p className="text-sm text-gray-500">Les vidéos apparaîtront ici après envoi</p>
+                  
+                  {kkidVideos.length === 0 ? (
+                    <p className="text-sm text-gray-500">Aucune vidéo envoyée pour le moment</p>
+                  ) : (
+                    <div className="grid md:grid-cols-2 gap-4 mt-4">
+                      {kkidVideos.map(video => (
+                        <Card key={video.id} className="border-pink-200">
+                          <CardContent className="p-4">
+                            <h4 className="font-semibold mb-2">{video.title}</h4>
+                            <p className="text-sm text-gray-600 mb-2">{video.description}</p>
+                            <p className="text-xs text-gray-500">
+                              Pour : <strong>{video.student_name}</strong>
+                            </p>
+                            <p className="text-xs text-gray-400">
+                              {new Date(video.created_at).toLocaleDateString('fr-FR')}
+                            </p>
+                            <div className="flex gap-2 mt-3">
+                              <Button
+                                size="sm"
+                                onClick={() => window.open(video.video_url, '_blank')}
+                                className="bg-pink-600 hover:bg-pink-700"
+                              >
+                                📺 Voir
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={async () => {
+                                  if (window.confirm('Supprimer cette vidéo ?')) {
+                                    try {
+                                      await apiClient.delete(`/teacher/delete-kkid-video/${video.id}`);
+                                      toast.success('Vidéo supprimée');
+                                      const res = await apiClient.get('/kkid/videos');
+                                      setKkidVideos(res.data);
+                                    } catch (error) {
+                                      toast.error('Erreur de suppression');
+                                    }
+                                  }
+                                }}
+                                className="border-red-500 text-red-600"
+                              >
+                                🗑️
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

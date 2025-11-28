@@ -1684,8 +1684,9 @@ const HomePage = () => {
             <div>
               <h4 className="text-lg font-semibold mb-4 text-teal-400">Liens rapides</h4>
               <ul className="space-y-2">
-                <li><a href="#about" className="text-gray-400 hover:text-teal-400 transition">À propos</a></li>
-                <li><a href="#pricing" className="text-gray-400 hover:text-teal-400 transition">Tarifs</a></li>
+                <li><a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({top: 0, behavior: 'smooth'}); }} className="text-gray-400 hover:text-teal-400 transition cursor-pointer">Accueil</a></li>
+                <li><Link to="/login" className="text-gray-400 hover:text-teal-400 transition">Connexion</Link></li>
+                <li><a href="#" onClick={(e) => { e.preventDefault(); openRegistrationModal(); }} className="text-gray-400 hover:text-teal-400 transition cursor-pointer">Inscription</a></li>
               </ul>
             </div>
             

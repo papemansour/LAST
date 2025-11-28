@@ -297,7 +297,13 @@ def hash_password(password: str) -> str:
     return pwd_context.hash(password)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    try:
+        result = pwd_context.verify(plain_password, hashed_password)
+        logger.debug(f"verify_password: plain={plain_password[:3]}***, hash={hashed_password[:20]}..., result={result}")
+        return result
+    except Exception as e:
+        logger.error(f"verify_password error: {e}")
+        return False
 
 def generate_welcome_letter_content(first_name: str, level: str, role: str, email: str, temp_password: str) -> str:
     """Generate welcome letter content based on user level and role"""

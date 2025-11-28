@@ -108,7 +108,7 @@ Sur la page "Environment variables" :
 
 **Valeur exacte à coller :**
 ```
-https://kalamaclassroom.preview.emergentagent.com
+https://kalama-upgrade.preview.emergentagent.com
 ```
 
 ---
@@ -222,7 +222,7 @@ console.log(process.env.REACT_APP_BACKEND_URL)
 
 **Résultat attendu :**
 ```
-"https://kalamaclassroom.preview.emergentagent.com"
+"https://kalama-upgrade.preview.emergentagent.com"
 ```
 
 **Si c'est `undefined` :**
@@ -239,7 +239,7 @@ Retournez dans **Site settings → Environment variables**
 Vérifiez que vous avez EXACTEMENT :
 ```
 Key: REACT_APP_BACKEND_URL
-Value: https://kalamaclassroom.preview.emergentagent.com
+Value: https://kalama-upgrade.preview.emergentagent.com
 ```
 
 **Erreurs courantes :**
@@ -252,7 +252,7 @@ Value: https://kalamaclassroom.preview.emergentagent.com
 
 Ouvrez cette URL dans un nouvel onglet :
 ```
-https://kalamaclassroom.preview.emergentagent.com/health
+https://kalama-upgrade.preview.emergentagent.com/health
 ```
 
 **Résultat attendu :**
@@ -284,7 +284,7 @@ Environment variables:
 ## ✅ Checklist Finale
 
 - [ ] Variable `REACT_APP_BACKEND_URL` créée sur Netlify
-- [ ] Valeur = `https://kalamaclassroom.preview.emergentagent.com`
+- [ ] Valeur = `https://kalama-upgrade.preview.emergentagent.com`
 - [ ] Site redéployé après ajout de la variable
 - [ ] Déploiement terminé avec succès
 - [ ] Cache du navigateur vidé (Ctrl+F5)

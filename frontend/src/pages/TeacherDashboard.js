@@ -1168,6 +1168,9 @@ const TeacherDashboard = () => {
           </div>
         </DialogContent>
       </Dialog>
+      
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };

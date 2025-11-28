@@ -351,6 +351,9 @@ frontend:
         - working: true
           agent: "testing"
           comment: "✅ PASSED - Pricing independence system working correctly. GET /pricing retrieves current pricing, POST /admin/update-prices allows admin to update EUR prices independently. Tested changing beginner_eur from 76 to 80 and intermediate_eur from 90 to 95 - changes applied correctly and independently. FCFA prices remain unchanged when EUR prices are modified. Price update and retrieval system fully functional."
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED - Complete pricing update flow tested successfully per review request. All 5 steps verified: 1) Admin login (admin@mykalamaenglish.com / adminco), 2) GET /api/pricing (retrieved current prices with beginner_eur: 76), 3) POST /admin/update-prices (changed beginner_eur from 76 to 80), 4) GET /api/pricing (verified new beginner_eur: 80), 5) MongoDB persistence confirmed. SUCCESS CRITERIA MET: Modified prices by admin are immediately visible via GET /api/pricing endpoint. Backend logs confirm successful price updates."
 
   - task: "Dashboard Admin suppression prof"
     implemented: true

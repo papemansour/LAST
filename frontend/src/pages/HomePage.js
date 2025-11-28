@@ -96,6 +96,10 @@ const HomePage = () => {
   const [showWavePaymentModal, setShowWavePaymentModal] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('stripe'); // 'stripe' ou 'wave'
+  const [promoCode, setPromoCode] = useState('');
+  const [promoCodeValid, setPromoCodeValid] = useState(false);
+  const [promoDiscount, setPromoDiscount] = useState(0);
+  const [validatingPromo, setValidatingPromo] = useState(false);
 
   const handleDateSelect = (date) => {
     const dateStr = format(date, 'yyyy-MM-dd');

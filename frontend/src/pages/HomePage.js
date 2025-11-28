@@ -1245,20 +1245,28 @@ const HomePage = () => {
                   </Select>
                 </div>
 
-                {/* KALAMA CLUB Option */}
-                <div className="bg-gradient-to-r from-cyan-50 to-teal-50 p-4 rounded-lg border-2 border-cyan-200">
-                  <label className="flex items-start gap-3 cursor-pointer">
+                {/* KALAMA CLUB Option - Mobile Optimized */}
+                <div className="bg-gradient-to-r from-cyan-50 to-teal-50 p-3 sm:p-4 rounded-lg border-2 border-cyan-200">
+                  <label 
+                    className="flex items-start gap-2 sm:gap-3 cursor-pointer"
+                    onClick={(e) => {
+                      // Allow checkbox to be toggled by clicking anywhere on the label (mobile-friendly)
+                      if (e.target.tagName !== 'INPUT') {
+                        setFormData({ ...formData, join_kalama_club: !formData.join_kalama_club });
+                      }
+                    }}
+                  >
                     <input
                       type="checkbox"
                       checked={formData.join_kalama_club}
                       onChange={(e) => setFormData({ ...formData, join_kalama_club: e.target.checked })}
-                      className="w-5 h-5 text-cyan-600 mt-1 flex-shrink-0"
+                      className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-600 mt-0.5 flex-shrink-0 cursor-pointer"
                     />
-                    <div className="flex-1">
-                      <span className="font-semibold text-cyan-900 block">
+                    <div className="flex-1 min-w-0">
+                      <span className="font-semibold text-cyan-900 block text-sm sm:text-base">
                         ✨ Rejoindre le KALAMA CLUB
                       </span>
-                      <span className="text-sm text-cyan-700 block mt-1">
+                      <span className="text-xs sm:text-sm text-cyan-700 block mt-1 leading-relaxed">
                         Accès au forum communautaire, événements exclusifs, classement et badge d'excellence !
                       </span>
                     </div>

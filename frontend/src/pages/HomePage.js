@@ -1624,7 +1624,6 @@ const HomePage = () => {
               <h4 className="text-lg font-semibold mb-4 text-teal-400">Liens rapides</h4>
               <ul className="space-y-2">
                 <li><a href="#" className="text-gray-400 hover:text-teal-400 transition">Accueil</a></li>
-                <li><a href="#kalamatheque" className="text-gray-400 hover:text-teal-400 transition">Kalamathèque</a></li>
                 <li><Link to="/login" className="text-gray-400 hover:text-teal-400 transition">Connexion</Link></li>
                 <li><a href="#" onClick={(e) => { e.preventDefault(); openRegistrationModal(); }} className="text-gray-400 hover:text-teal-400 transition cursor-pointer">Inscription</a></li>
               </ul>

@@ -863,6 +863,23 @@ const TeacherDashboard = () => {
                       }
                     }} className="space-y-4">
                       <div>
+                        <Label htmlFor="kkid_student_id">Sélectionner l'élève K-Kid</Label>
+                        <select
+                          id="kkid_student_id"
+                          name="kkid_student_id"
+                          required
+                          className="w-full p-2 border rounded-md"
+                        >
+                          <option value="">-- Choisir un élève K-Kid --</option>
+                          {students.filter(s => s.level === 'kkid').map(student => (
+                            <option key={student.id} value={student.id}>
+                              {student.first_name} {student.last_name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      
+                      <div>
                         <Label htmlFor="video_title">Titre de la vidéo</Label>
                         <Input
                           id="video_title"

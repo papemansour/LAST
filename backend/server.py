@@ -1121,11 +1121,26 @@ async def teacher_send_kkid_video(video_data: dict, current_user: dict = Depends
 
 @api_router.get("/kkid/videos")
 async def get_kkid_videos(current_user: dict = Depends(get_current_user)):
-    """Get all K-Kid videos"""
+    """Get K-Kid videos for current user"""
     if current_user.get('level') != 'kkid' and current_user['role'] not in ['teacher', 'admin']:
         raise HTTPException(status_code=403, detail="Access restricted to K-Kids, teachers, and admins")
     
-    videos = await db.kkid_videos.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    # K-Kids only see their own videos
+    if current_user.get('level') == 'kkid':
+        videos = await db.kkid_videos.find(
+            {"student_id": current_user['id']},
+            {"_id": 0}
+        ).sort("created_at", -1).to_list(1000)
+    # Teachers and admins see all videos they sent/manage
+    else:
+        if current_user['role'] == 'teacher':
+            videos = await db.kkid_videos.find(
+                {"teacher_id": current_user['id']},
+                {"_id": 0}
+            ).sort("created_at", -1).to_list(1000)
+        else:  # admin
+            videos = await db.kkid_videos.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    
     return videos
 
 @api_router.delete("/teacher/delete-kkid-video/{video_id}")

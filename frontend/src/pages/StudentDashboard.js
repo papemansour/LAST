@@ -475,7 +475,7 @@ const StudentDashboard = () => {
                           plan_level: user.level,
                           amount: pack.amount,
                           currency: 'FCFA',
-                          promo_code: 'KALAMA15' // Always include promo code
+                          promo_code: 'promo_1SYGM3I4faCc3GWYbdYRPXX8'
                         });
                         
                         // Redirect to Stripe Checkout

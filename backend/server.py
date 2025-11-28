@@ -1867,6 +1867,7 @@ async def generate_group_magic_code(
         raise HTTPException(status_code=400, detail="Veuillez sélectionner au moins un étudiant")
     
     # Verify all students belong to this teacher and are pending
+    logger.info(f"Searching for students with IDs: {data.student_ids}, teacher: {current_user['id']}")
     students = await db.users.find(
         {
             "id": {"$in": data.student_ids},
@@ -1876,6 +1877,8 @@ async def generate_group_magic_code(
         },
         {"_id": 0}
     ).to_list(1000)
+    
+    logger.info(f"Found {len(students)} students matching criteria (expected {len(data.student_ids)})")
     
     if len(students) != len(data.student_ids):
         raise HTTPException(

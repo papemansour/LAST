@@ -248,6 +248,28 @@ class RegisterWithCode(BaseModel):
     phone: str
     number_of_students: int = 2  # Nombre de personnes dans le groupe (2 ou 3)
 
+class PromoCode(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    code: str  # Code promo (ex: KALAMA15)
+    discount_percent: int  # Pourcentage de réduction (ex: 15)
+    valid_until: datetime  # Date d'expiration
+    max_uses: Optional[int] = None  # Nombre maximum d'utilisations (None = illimité)
+    current_uses: int = 0
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class PromoCodeUsage(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    promo_code_id: str
+    promo_code: str
+    user_email: str
+    used_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ValidatePromoCodeRequest(BaseModel):
+    code: str
+
 class ClubEvent(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))

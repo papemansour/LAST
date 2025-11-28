@@ -3647,6 +3647,135 @@ async def create_default_gifts():
     
     await db.weekend_gifts.insert_many(default_gifts)
 
+# ============ PROMO CODE ROUTES ============
+
+@api_router.post("/promo-codes/validate")
+async def validate_promo_code(request: ValidatePromoCodeRequest):
+    """Validate a promo code and return discount information"""
+    code_upper = request.code.upper()
+    
+    # Find promo code
+    promo = await db.promo_codes.find_one({"code": code_upper}, {"_id": 0})
+    
+    if not promo:
+        raise HTTPException(status_code=404, detail="Code promo invalide")
+    
+    # Check if active
+    if not promo.get('is_active', False):
+        raise HTTPException(status_code=400, detail="Ce code promo n'est plus actif")
+    
+    # Check expiration
+    valid_until_str = promo.get('valid_until')
+    if valid_until_str:
+        # Parse the datetime string
+        if isinstance(valid_until_str, str):
+            valid_until = datetime.fromisoformat(valid_until_str.replace('Z', '+00:00'))
+        else:
+            valid_until = valid_until_str
+        
+        if datetime.now(timezone.utc) > valid_until:
+            raise HTTPException(status_code=400, detail="Ce code promo a expiré")
+    
+    # Check max uses
+    max_uses = promo.get('max_uses')
+    current_uses = promo.get('current_uses', 0)
+    
+    if max_uses and current_uses >= max_uses:
+        raise HTTPException(status_code=400, detail="Ce code promo a atteint sa limite d'utilisation")
+    
+    return {
+        "valid": True,
+        "code": promo['code'],
+        "discount_percent": promo['discount_percent'],
+        "message": f"Code promo valide ! {promo['discount_percent']}% de réduction"
+    }
+
+@api_router.post("/promo-codes/use")
+async def use_promo_code(request: ValidatePromoCodeRequest, user_email: str):
+    """Mark a promo code as used"""
+    code_upper = request.code.upper()
+    
+    # Validate first
+    promo = await db.promo_codes.find_one({"code": code_upper}, {"_id": 0})
+    
+    if not promo:
+        raise HTTPException(status_code=404, detail="Code promo invalide")
+    
+    # Check if user already used this code
+    usage = await db.promo_code_usage.find_one({
+        "promo_code": code_upper,
+        "user_email": user_email
+    })
+    
+    if usage:
+        raise HTTPException(status_code=400, detail="Vous avez déjà utilisé ce code promo")
+    
+    # Increment usage count
+    await db.promo_codes.update_one(
+        {"code": code_upper},
+        {"$inc": {"current_uses": 1}}
+    )
+    
+    # Record usage
+    usage_doc = {
+        "id": str(uuid4()),
+        "promo_code_id": promo['id'],
+        "promo_code": code_upper,
+        "user_email": user_email,
+        "used_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.promo_code_usage.insert_one(usage_doc)
+    
+    return {"message": "Code promo appliqué avec succès"}
+
+@api_router.post("/admin/promo-codes")
+async def create_promo_code(
+    code: str,
+    discount_percent: int,
+    valid_until: str,
+    max_uses: Optional[int] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Create a new promo code - Admin only"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    code_upper = code.upper()
+    
+    # Check if code already exists
+    existing = await db.promo_codes.find_one({"code": code_upper})
+    if existing:
+        raise HTTPException(status_code=400, detail="Ce code promo existe déjà")
+    
+    # Parse date
+    valid_until_dt = datetime.fromisoformat(valid_until.replace('Z', '+00:00'))
+    
+    promo = {
+        "id": str(uuid4()),
+        "code": code_upper,
+        "discount_percent": discount_percent,
+        "valid_until": valid_until_dt.isoformat(),
+        "max_uses": max_uses,
+        "current_uses": 0,
+        "is_active": True,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.promo_codes.insert_one(promo)
+    logger.info(f"Promo code created by admin {current_user['id']}: {code_upper}")
+    
+    return {"message": "Code promo créé", "code": code_upper}
+
+@api_router.get("/admin/promo-codes")
+async def get_promo_codes(current_user: dict = Depends(get_current_user)):
+    """Get all promo codes - Admin only"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    codes = await db.promo_codes.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    return codes
+
 app.include_router(api_router)
 
 app.add_middleware(

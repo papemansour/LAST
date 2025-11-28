@@ -1272,50 +1272,37 @@ const HomePage = () => {
                   </label>
                 </div>
 
-                {/* Code Promo Section */}
+                {/* Code Promo Section - Fixed Display */}
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border-2 border-green-200">
-                  <Label className="font-semibold text-green-900 mb-2 block">
-                    🎁 Code de réduction (optionnel)
+                  <Label className="font-semibold text-green-900 mb-3 block">
+                    🎁 Code de réduction actif
                   </Label>
-                  {!promoCodeValid ? (
-                    <div className="flex gap-2">
-                      <Input
-                        type="text"
-                        placeholder="Ex: KALAMA15"
-                        value={promoCode}
-                        onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                        className="flex-1 border-green-300"
-                        disabled={validatingPromo}
-                      />
-                      <Button
-                        type="button"
-                        onClick={validatePromoCode}
-                        disabled={validatingPromo || !promoCode.trim()}
-                        className="bg-green-600 hover:bg-green-700"
-                      >
-                        {validatingPromo ? 'Vérification...' : 'Appliquer'}
-                      </Button>
+                  <div className="bg-white p-4 rounded-lg border-2 border-green-300 flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-600 mb-1">Code promo</p>
+                      <p className="text-2xl font-bold text-green-600 tracking-wider font-mono">KALAMA15</p>
+                      <p className="text-sm text-green-700 mt-1">✅ 15% de réduction automatique</p>
                     </div>
-                  ) : (
-                    <div className="bg-green-100 p-3 rounded-lg border border-green-300 flex items-center justify-between">
-                      <div>
-                        <p className="text-green-900 font-semibold">✅ Code {promoCode} appliqué</p>
-                        <p className="text-sm text-green-700">{promoDiscount}% de réduction</p>
-                      </div>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={removePromoCode}
-                        className="border-green-600 text-green-600 hover:bg-green-50"
-                      >
-                        Retirer
-                      </Button>
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText('KALAMA15');
+                        toast.success('Code copié !');
+                      }}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      Copier
+                    </Button>
+                  </div>
+                  
+                  {/* FCFA Discount Notice */}
+                  {currency === 'FCFA' && (
+                    <div className="mt-3 bg-blue-50 p-3 rounded-lg border border-blue-200">
+                      <p className="text-sm text-blue-800 font-medium">
+                        💰 Une remise de 10% est appliquée pour les paiements en FCFA
+                      </p>
                     </div>
                   )}
-                  <p className="text-xs text-green-700 mt-2">
-                    💡 Promo actuelle : <strong>KALAMA15</strong> - 15% de réduction jusqu'au 14 janvier 2025
-                  </p>
                 </div>
 
                 <Button

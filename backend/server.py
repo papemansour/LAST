@@ -4199,16 +4199,24 @@ async def get_promo_codes(current_user: dict = Depends(get_current_user)):
     return codes
 
 
+# Pydantic model for payment
+class PaymentRequest(BaseModel):
+    plan_name: str
+    plan_level: str
+    amount: int
+    currency: str = "FCFA"
+    promo_code: Optional[str] = None
+
 # Payment endpoints
 @api_router.post("/payments/create-checkout")
-async def create_checkout_session(
-    plan_name: str,
-    plan_level: str,
-    amount: int,
-    currency: str = "FCFA",
-    promo_code: Optional[str] = None
-):
+async def create_checkout_session(payment: PaymentRequest):
     """Create a Stripe checkout session (returns hardcoded links for now)"""
+    
+    plan_name = payment.plan_name
+    plan_level = payment.plan_level
+    amount = payment.amount
+    currency = payment.currency
+    promo_code = payment.promo_code
     
     # Mapping des liens Stripe directs par pack
     stripe_links = {

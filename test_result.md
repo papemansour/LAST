@@ -462,6 +462,18 @@ test_plan:
           agent: "testing"
           comment: "⚠️ NON TESTÉ - Interface inscription étudiants non testée car focus sur backend selon instructions. Backend API validé, interface frontend nécessite tests séparés par main agent."
 
+  - task: "Système de Pièces Jointes dans la Messagerie"
+    implemented: true
+    working: true
+    file: "ConversationChat.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED - Tests complets selon spécifications: 1) Connexion étudiant et navigation vers Messages réussie, 2) Conversation avec professeur Marie Martin visible, 3) Envoi message simple fonctionne (message apparaît dans conversation), 4) Upload fichier avec prévisualisation (nom fichier visible), 5) Envoi message avec pièce jointe réussi (message et attachment affichés avec icônes œil/téléchargement/suppression), 6) Suppression pièce jointe avant envoi fonctionne (bouton X), 7) Vérification pièces jointes reçues (noms fichiers et icônes d'actions visibles), 8) Limite taille 10MB respectée (toast d'erreur affiché), 9) Icône pièce jointe (📎 paperclip) présente dans interface. Backend endpoints POST /api/messages/upload-attachment et POST /api/messages/send fonctionnels. Score: 8/8 scénarios testés avec succès (100%)."
+
 agent_communication:
     - agent: "testing"
       message: "🎉 ALL SECURITY TESTS PASSED! Fixed 2 critical bugs in admin password reset endpoint: 1) Undefined get_password_hash function (changed to hash_password), 2) Incorrect create_notification call signature. All security features now working correctly. Database verified clean of plain text passwords. Contact form working with proper validation."

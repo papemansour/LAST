@@ -2307,6 +2307,33 @@ async def get_teacher_sessions(current_user: dict = Depends(get_current_user)):
     
     return sessions
 
+@api_router.post("/admin/manual-session")
+async def create_manual_session(session_data: dict, current_user: dict = Depends(get_current_user)):
+    """Enregistrer manuellement les heures d'un professeur"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Créer une session manuelle complète
+    manual_session = {
+        "id": session_data.get('id', str(uuid4())),
+        "teacher_id": session_data['teacher_id'],
+        "teacher_name": session_data['teacher_name'],
+        "teacher_email": session_data['teacher_email'],
+        "start_time": session_data['start_time'],
+        "end_time": session_data['end_time'],
+        "total_time_seconds": session_data['total_time_seconds'],
+        "paused_duration_seconds": session_data.get('paused_duration_seconds', 0),
+        "status": "completed",
+        "is_manual": True,
+        "created_at": session_data.get('created_at', datetime.now(timezone.utc).isoformat()),
+        "created_by_admin": current_user['id']
+    }
+    
+    await db.teacher_sessions.insert_one(manual_session)
+    logger.info(f"Manual session created by admin {current_user['id']} for teacher {session_data['teacher_email']}")
+    
+    return {"message": "Session enregistrée avec succès", "session_id": manual_session['id']}
+
 @api_router.post("/teacher/attendance")
 async def mark_attendance(attendance_data: AttendanceCreate, current_user: dict = Depends(get_current_user)):
     if current_user['role'] != 'teacher':

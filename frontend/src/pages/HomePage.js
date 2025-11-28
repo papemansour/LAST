@@ -1281,13 +1281,13 @@ const HomePage = () => {
                   <div className="bg-white p-4 rounded-lg border-2 border-green-300 flex items-center justify-between">
                     <div className="flex-1">
                       <p className="text-xs text-gray-600 mb-1">Code promo</p>
-                      <p className="text-2xl font-bold text-green-600 tracking-wider font-mono">KALAMA15</p>
-                      <p className="text-sm text-green-700 mt-1">✅ 15% de réduction automatique</p>
+                      <p className="text-xl font-bold text-green-600 tracking-wider font-mono break-all">promo_1SYGM3I4faCc3GWYbdYRPXX8</p>
+                      <p className="text-sm text-green-700 mt-1">✅ Réduction automatique</p>
                     </div>
                     <Button
                       type="button"
                       onClick={() => {
-                        navigator.clipboard.writeText('KALAMA15');
+                        navigator.clipboard.writeText('promo_1SYGM3I4faCc3GWYbdYRPXX8');
                         toast.success('Code copié !');
                       }}
                       className="bg-green-600 hover:bg-green-700"

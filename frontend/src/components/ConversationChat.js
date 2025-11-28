@@ -119,9 +119,21 @@ const ConversationChat = ({ recipientId, recipientName, currentUserId }) => {
   };
 
   const getFileIcon = (fileType) => {
-    if (fileType?.startsWith('image/')) return <ImageIcon className="w-5 h-5" />;
-    if (fileType?.includes('pdf')) return <FileText className="w-5 h-5 text-red-600" />;
-    return <File className="w-5 h-5" />;
+    if (!fileType) return <File className="w-5 h-5 text-gray-600" />;
+    
+    // Check by file_type from backend
+    if (fileType === 'image') return <ImageIcon className="w-5 h-5 text-blue-600" />;
+    if (fileType === 'pdf') return <FileText className="w-5 h-5 text-red-600" />;
+    if (fileType === 'document') return <FileText className="w-5 h-5 text-blue-600" />;
+    if (fileType === 'spreadsheet') return <FileText className="w-5 h-5 text-green-600" />;
+    if (fileType === 'video') return <File className="w-5 h-5 text-purple-600" />;
+    if (fileType === 'audio') return <File className="w-5 h-5 text-orange-600" />;
+    
+    // Fallback: check if it's a MIME type string
+    if (fileType.startsWith('image/')) return <ImageIcon className="w-5 h-5 text-blue-600" />;
+    if (fileType.includes('pdf')) return <FileText className="w-5 h-5 text-red-600" />;
+    
+    return <File className="w-5 h-5 text-gray-600" />;
   };
 
   return (

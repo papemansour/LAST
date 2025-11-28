@@ -1223,6 +1223,19 @@ async def permanent_delete_user(user_id: str, current_user: dict = Depends(get_c
     logger.info(f"User permanently deleted by admin: {user_id}")
     return {"message": "User permanently deleted"}
 
+@api_router.get("/admin/users")
+async def get_users_by_role(role: Optional[str] = None, current_user: dict = Depends(get_current_user)):
+    """Get all users, optionally filtered by role"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    query = {}
+    if role:
+        query["role"] = role
+    
+    users = await db.users.find(query, {"_id": 0, "password_hash": 0}).to_list(1000)
+    return users
+
 # Endpoint en doublon supprimé - le changement de mot de passe se fait via la route ligne 339
 
 # ADMIN: Reset user password (SECURE)

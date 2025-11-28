@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../co
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
-import Footer from '../components/Footer';
 import {
   Select,
   SelectContent,
@@ -1169,9 +1168,6 @@ const TeacherDashboard = () => {
           </div>
         </DialogContent>
       </Dialog>
-      
-      {/* Footer */}
-      <Footer />
     </div>
   );
 };

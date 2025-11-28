@@ -26,8 +26,6 @@ import ProgressTracker from '../components/ProgressTracker';
 import LiveNotifications from '../components/LiveNotifications';
 import StudentGames from '../components/StudentGamesAdvanced';
 import WeekendGifts from '../components/WeekendGifts';
-import Footer from '../components/Footer';
-
 const StudentDashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -796,9 +794,6 @@ const StudentDashboard = () => {
       </div>
 
       {/* Documents removed - use Messages with attachments instead */}
-      
-      {/* Footer */}
-      <Footer />
     </div>
   );
 };

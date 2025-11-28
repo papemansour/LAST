@@ -789,6 +789,105 @@ const AdminDashboard = () => {
 
           {/* Assiduité Tab */}
           <TabsContent value="attendance">
+            {/* Tableau récapitulatif mensuel */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>📊 Récapitulatif Mensuel - Total des Heures par Professeur</CardTitle>
+                <CardDescription>Total des heures effectuées ce mois-ci par chaque professeur</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="bg-teal-50 border-b-2 border-teal-200">
+                        <th className="text-left p-3 font-semibold text-teal-900">Professeur</th>
+                        <th className="text-left p-3 font-semibold text-teal-900">Email</th>
+                        <th className="text-center p-3 font-semibold text-teal-900">Nombre de Sessions</th>
+                        <th className="text-center p-3 font-semibold text-teal-900">Total Heures</th>
+                        <th className="text-center p-3 font-semibold text-teal-900">Temps de Pause</th>
+                        <th className="text-center p-3 font-semibold text-teal-900">Heures Effectives</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(() => {
+                        const currentMonth = new Date().getMonth();
+                        const currentYear = new Date().getFullYear();
+                        
+                        // Group sessions by teacher for current month
+                        const teacherStats = teacherSessions
+                          .filter(session => {
+                            const sessionDate = new Date(session.created_at);
+                            return sessionDate.getMonth() === currentMonth && sessionDate.getFullYear() === currentYear;
+                          })
+                          .reduce((acc, session) => {
+                            const key = session.teacher_id || session.teacher_email;
+                            if (!acc[key]) {
+                              acc[key] = {
+                                name: session.teacher_name || 'Inconnu',
+                                email: session.teacher_email || 'N/A',
+                                sessions: 0,
+                                totalSeconds: 0,
+                                pausedSeconds: 0
+                              };
+                            }
+                            acc[key].sessions += 1;
+                            acc[key].totalSeconds += session.total_time_seconds || 0;
+                            acc[key].pausedSeconds += session.paused_duration_seconds || 0;
+                            return acc;
+                          }, {});
+                        
+                        const teachers = Object.values(teacherStats);
+                        
+                        if (teachers.length === 0) {
+                          return (
+                            <tr>
+                              <td colSpan="6" className="text-center p-6 text-gray-500">
+                                Aucune session enregistrée ce mois-ci
+                              </td>
+                            </tr>
+                          );
+                        }
+                        
+                        return teachers.map((teacher, index) => {
+                          const effectiveSeconds = teacher.totalSeconds - teacher.pausedSeconds;
+                          const totalHours = Math.floor(teacher.totalSeconds / 3600);
+                          const totalMinutes = Math.floor((teacher.totalSeconds % 3600) / 60);
+                          const pausedHours = Math.floor(teacher.pausedSeconds / 3600);
+                          const pausedMinutes = Math.floor((teacher.pausedSeconds % 3600) / 60);
+                          const effectiveHours = Math.floor(effectiveSeconds / 3600);
+                          const effectiveMinutes = Math.floor((effectiveSeconds % 3600) / 60);
+                          
+                          return (
+                            <tr key={index} className="border-b hover:bg-gray-50">
+                              <td className="p-3 font-medium">{teacher.name}</td>
+                              <td className="p-3 text-sm text-gray-600">{teacher.email}</td>
+                              <td className="p-3 text-center">{teacher.sessions}</td>
+                              <td className="p-3 text-center font-semibold text-blue-600">
+                                {totalHours}h {totalMinutes}m
+                              </td>
+                              <td className="p-3 text-center text-orange-600">
+                                {pausedHours}h {pausedMinutes}m
+                              </td>
+                              <td className="p-3 text-center font-bold text-green-600">
+                                {effectiveHours}h {effectiveMinutes}m
+                              </td>
+                            </tr>
+                          );
+                        });
+                      })()}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="text-sm text-blue-800">
+                    <strong>💡 Info :</strong> Le tableau affiche les statistiques du mois en cours. 
+                    Les "Heures Effectives" correspondent au total des heures moins le temps de pause.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Sessions détaillées */}
             <Card>
               <CardHeader>
                 <CardTitle>Assiduité des professeurs</CardTitle>

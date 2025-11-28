@@ -641,6 +641,64 @@ const StudentDashboard = () => {
             </Card>
           </TabsContent>
 
+          {/* K-Kid Videos Tab */}
+          {user.level === 'kkid' && (
+            <TabsContent value="videos">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Video className="w-6 h-6 text-pink-600" />
+                    🎥 Mes Vidéos
+                  </CardTitle>
+                  <CardDescription>Regardez les vidéos envoyées par vos professeurs</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button 
+                    onClick={async () => {
+                      try {
+                        const res = await apiClient.get('/kkid/videos');
+                        toast.success('Vidéos actualisées!');
+                      } catch (error) {
+                        toast.error('Erreur de chargement');
+                      }
+                    }}
+                    className="mb-4 bg-pink-600 hover:bg-pink-700"
+                  >
+                    🔄 Actualiser
+                  </Button>
+                  
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <Card className="border-pink-200 bg-pink-50">
+                      <CardContent className="p-6 text-center">
+                        <Video className="w-12 h-12 text-pink-400 mx-auto mb-3" />
+                        <p className="text-sm text-gray-600">Les vidéos apparaîtront ici</p>
+                        <p className="text-xs text-gray-500 mt-2">Tes professeurs peuvent t'envoyer des vidéos éducatives!</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
+          
+          {/* Gifts Tab for K-Kids */}
+          {user.level === 'kkid' && (
+            <TabsContent value="gifts">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Heart className="w-6 h-6 text-pink-600" />
+                    🎁 Mes Cadeaux
+                  </CardTitle>
+                  <CardDescription>Découvre les cadeaux du weekend!</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <WeekendGiftSelector user={user} />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
+
           {/* Games Tab */}
           <TabsContent value="games">
             <StudentGames />

@@ -80,6 +80,8 @@ const AdminDashboard = () => {
   const [activeConversation, setActiveConversation] = useState(null);
   const [conversationMode, setConversationMode] = useState('individual'); // 'individual' ou 'group'
   const [receivedDocuments, setReceivedDocuments] = useState([]);
+  const [showDocPreviewDialog, setShowDocPreviewDialog] = useState(false);
+  const [previewDocument, setPreviewDocument] = useState(null);
 
   useEffect(() => {
     fetchData();

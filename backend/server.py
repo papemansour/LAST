@@ -1907,13 +1907,13 @@ async def generate_group_magic_code(
                 "magic_code_generated": True,
                 "magic_code_generated_at": datetime.now(timezone.utc).isoformat(),
                 "magic_code_generated_by": current_user['id'],
-                "group_magic_code_name": group_name,
+                "group_magic_code_name": data.group_name,
                 "first_name": main_member.get('first_name', student.get('first_name', '')),
                 "last_name": main_member.get('last_name', student.get('last_name', ''))
             }}
         )
     
-    logger.info(f"Magic code {magic_code} generated for {len(students)} students in group '{group_name}' by teacher {current_user['id']}")
+    logger.info(f"Magic code {magic_code} generated for {len(students)} students in group '{data.group_name}' by teacher {current_user['id']}")
     
     # Create notification for admin
     admin = await db.users.find_one({"role": "admin"}, {"_id": 0, "id": 1})
@@ -1927,7 +1927,7 @@ async def generate_group_magic_code(
             'group_code_generated',
             {
                 'teacher_name': f"{current_user['first_name']} {current_user['last_name']}",
-                'group_name': group_name,
+                'group_name': data.group_name,
                 'magic_code': magic_code,
                 'student_count': len(students),
                 'student_names': student_names
@@ -1937,7 +1937,7 @@ async def generate_group_magic_code(
     return {
         "success": True,
         "magic_code": magic_code,
-        "group_name": group_name,
+        "group_name": data.group_name,
         "student_count": len(students),
         "students": [
             {

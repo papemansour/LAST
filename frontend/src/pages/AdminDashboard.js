@@ -1739,6 +1739,123 @@ const AdminDashboard = () => {
             </Card>
           </TabsContent>
 
+          {/* Received Documents Tab */}
+          <TabsContent value="received-documents">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="w-6 h-6 text-purple-600" />
+                  📥 Documents Reçus
+                </CardTitle>
+                <CardDescription>
+                  Documents et vidéos envoyés par les professeurs et étudiants
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button 
+                  onClick={async () => {
+                    try {
+                      const res = await apiClient.get('/admin/received-documents');
+                      setReceivedDocuments(res.data);
+                      toast.success('Documents actualisés');
+                    } catch (error) {
+                      toast.error('Erreur de chargement');
+                    }
+                  }}
+                  className="mb-4 bg-purple-600 hover:bg-purple-700"
+                >
+                  🔄 Actualiser
+                </Button>
+                
+                {receivedDocuments.length === 0 ? (
+                  <div className="text-center py-12 text-gray-500">
+                    <FileText className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                    <p className="text-lg font-medium">Aucun document reçu</p>
+                    <p className="text-sm">Les professeurs et étudiants peuvent vous envoyer des documents</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {receivedDocuments.map((doc) => (
+                      <Card key={doc.id} className="border-purple-100 hover:shadow-lg transition-shadow">
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <FileText className="w-5 h-5 text-purple-600" />
+                                <h3 className="font-semibold text-lg">{doc.title}</h3>
+                                <span className={`px-2 py-1 text-xs rounded-full ${
+                                  doc.sender_role === 'teacher' 
+                                    ? 'bg-blue-100 text-blue-800' 
+                                    : 'bg-green-100 text-green-800'
+                                }`}>
+                                  {doc.sender_role === 'teacher' ? '👨‍🏫 Professeur' : '👨‍🎓 Étudiant'}
+                                </span>
+                              </div>
+                              
+                              {doc.description && (
+                                <p className="text-gray-600 text-sm mb-2">{doc.description}</p>
+                              )}
+                              
+                              <div className="flex items-center gap-4 text-sm text-gray-500 mb-2">
+                                <span>De : <strong>{doc.sender_name}</strong> ({doc.sender_email})</span>
+                                <span>•</span>
+                                <span>{new Date(doc.created_at).toLocaleDateString('fr-FR', {
+                                  day: 'numeric',
+                                  month: 'long',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}</span>
+                              </div>
+                              
+                              <div className="flex gap-2 mt-3">
+                                <Button
+                                  size="sm"
+                                  onClick={() => window.open(doc.file_url, '_blank')}
+                                  className="bg-teal-600 hover:bg-teal-700"
+                                >
+                                  📂 Ouvrir le document
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(doc.file_url);
+                                    toast.success('Lien copié dans le presse-papier');
+                                  }}
+                                  className="border-purple-300 text-purple-600 hover:bg-purple-50"
+                                >
+                                  🔗 Copier le lien
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => {
+                                    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce document ?')) {
+                                      handleDeleteDocument(doc.id);
+                                    }
+                                  }}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+                
+                <div className="mt-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
+                  <p className="text-sm text-purple-800">
+                    💡 <strong>Astuce :</strong> Les professeurs et étudiants peuvent vous envoyer des documents directement depuis leur dashboard. Vous pouvez les consulter, télécharger et supprimer ici.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* Test Questions Tab */}
           <TabsContent value="test-questions">
             <TestQuestionsManager />

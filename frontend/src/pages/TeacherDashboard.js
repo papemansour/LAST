@@ -844,16 +844,22 @@ const TeacherDashboard = () => {
                       const videoData = {
                         title: formData.get('video_title'),
                         description: formData.get('video_description'),
-                        video_url: formData.get('video_url')
+                        video_url: formData.get('video_url'),
+                        student_id: formData.get('kkid_student_id')
                       };
+                      
+                      if (!videoData.student_id) {
+                        toast.error('Veuillez sélectionner un élève K-Kid');
+                        return;
+                      }
                       
                       try {
                         await apiClient.post('/teacher/send-kkid-video', videoData);
-                        toast.success('Vidéo envoyée aux K-Kids!');
+                        toast.success('Vidéo envoyée à l\'élève K-Kid!');
                         e.target.reset();
                         fetchData();
                       } catch (error) {
-                        toast.error('Erreur lors de l\'envoi');
+                        toast.error(error.response?.data?.detail || 'Erreur lors de l\'envoi');
                       }
                     }} className="space-y-4">
                       <div>

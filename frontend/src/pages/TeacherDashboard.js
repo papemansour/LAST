@@ -682,10 +682,10 @@ const TeacherDashboard = () => {
                           id="file_upload"
                           onChange={handleFileChange}
                           className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100 cursor-pointer"
-                          accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.jpg,.jpeg,.png,.mp3,.mp4"
+                          accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.jpg,.jpeg,.png,.mp3,.mp4,.mov,.avi,.webm"
                         />
                         <p className="text-xs text-gray-500 mt-1">
-                          PDF, Word, Excel, PowerPoint, Images, Audio, Vidéo (max 10MB)
+                          📄 Documents, 🖼️ Images, 🎵 Audio, 🎥 Vidéo (MP4, MOV, AVI, WebM) - max 10MB
                         </p>
                       </div>
                     </div>

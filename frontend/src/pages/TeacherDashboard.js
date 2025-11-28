@@ -359,60 +359,60 @@ const TeacherDashboard = () => {
 
         <Tabs defaultValue="welcome" className="space-y-6">
           <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-3 h-auto bg-transparent p-0">
-            <TabsTrigger value="welcome" className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-teal-500 data-[state=active]:to-teal-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-teal-50 border-2 border-teal-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
-              <span className="text-3xl">💌</span>
+            <TabsTrigger value="welcome" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+              <Mail className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Bienvenue</span>
             </TabsTrigger>
-            <TabsTrigger value="club" className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-cyan-500 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-cyan-50 border-2 border-cyan-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
-              <span className="text-3xl">✨</span>
+            <TabsTrigger value="club" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+              <Sparkles className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">CLUB</span>
             </TabsTrigger>
-            <TabsTrigger value="students" className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-blue-50 border-2 border-blue-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
-              <span className="text-3xl">👥</span>
+            <TabsTrigger value="students" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+              <Users className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Étudiants</span>
             </TabsTrigger>
-            <TabsTrigger value="group-codes" className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-violet-500 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-violet-50 border-2 border-violet-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
-              <span className="text-3xl">🔑</span>
+            <TabsTrigger value="group-codes" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+              <Key className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Codes Groupe</span>
             </TabsTrigger>
-            <TabsTrigger value="courses" className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-purple-50 border-2 border-purple-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
-              <span className="text-3xl">📖</span>
+            <TabsTrigger value="courses" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+              <BookOpen className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Cours</span>
             </TabsTrigger>
-            <TabsTrigger value="documents" className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-orange-50 border-2 border-orange-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
-              <span className="text-3xl">📄</span>
+            <TabsTrigger value="documents" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+              <FileText className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Documents</span>
             </TabsTrigger>
-            <TabsTrigger value="games" className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-yellow-500 data-[state=active]:to-yellow-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-yellow-50 border-2 border-yellow-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
-              <span className="text-3xl">🎮</span>
+            <TabsTrigger value="games" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+              <Gamepad2 className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Jeu</span>
             </TabsTrigger>
-            <TabsTrigger value="videos" className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-pink-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-pink-50 border-2 border-pink-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
-              <span className="text-3xl">📹</span>
+            <TabsTrigger value="videos" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+              <Video className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Vidéos K-Kid</span>
             </TabsTrigger>
-            <TabsTrigger value="timer" className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-green-500 data-[state=active]:to-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
-              <span className="text-3xl">⏰</span>
+            <TabsTrigger value="timer" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+              <Timer className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Pointage</span>
             </TabsTrigger>
-            <TabsTrigger value="messages" className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-pink-500 data-[state=active]:to-pink-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-pink-50 border-2 border-pink-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
-              <span className="text-3xl">💬</span>
+            <TabsTrigger value="messages" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+              <MessageCircle className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Messages</span>
             </TabsTrigger>
-            <TabsTrigger value="schedule" className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-indigo-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-indigo-50 border-2 border-indigo-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
-              <span className="text-3xl">📅</span>
+            <TabsTrigger value="schedule" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+              <Calendar className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Horaires</span>
             </TabsTrigger>
-            <TabsTrigger value="news" className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-red-500 data-[state=active]:to-red-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-red-50 border-2 border-red-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
-              <span className="text-3xl">📰</span>
+            <TabsTrigger value="news" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+              <Newspaper className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">News</span>
             </TabsTrigger>
-            <TabsTrigger value="kalamatheque" className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-amber-500 data-[state=active]:to-amber-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-amber-50 border-2 border-amber-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
-              <span className="text-3xl">📚</span>
+            <TabsTrigger value="kalamatheque" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+              <Library className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Bibliothèque</span>
             </TabsTrigger>
-            <TabsTrigger value="profile" className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-gray-700 data-[state=active]:to-gray-800 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-gray-50 border-2 border-gray-300 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
-              <span className="text-3xl">👤</span>
+            <TabsTrigger value="profile" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+              <UserCircle className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Profil</span>
             </TabsTrigger>
           </TabsList>

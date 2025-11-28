@@ -673,7 +673,7 @@ const StudentDashboard = () => {
                       <CardContent className="p-6 text-center">
                         <Video className="w-12 h-12 text-pink-400 mx-auto mb-3" />
                         <p className="text-sm text-gray-600">Les vidéos apparaîtront ici</p>
-                        <p className="text-xs text-gray-500 mt-2">Tes professeurs peuvent t'envoyer des vidéos éducatives!</p>
+                        <p className="text-xs text-gray-500 mt-2">Tes professeurs peuvent t&apos;envoyer des vidéos éducatives!</p>
                       </CardContent>
                     </Card>
                   </div>

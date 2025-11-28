@@ -2068,6 +2068,41 @@ async def get_student_teacher(teacher_id: str, current_user: dict = Depends(get_
     
     return teacher
 
+@api_router.post("/student/send-document-to-admin")
+async def student_send_document_to_admin(doc_data: dict, current_user: dict = Depends(get_current_user)):
+    """Student sends a document to admin"""
+    if current_user['role'] != 'student':
+        raise HTTPException(status_code=403, detail="Student access required")
+    
+    # Get admin user
+    admin = await db.users.find_one({"role": "admin"}, {"_id": 0})
+    if not admin:
+        raise HTTPException(status_code=404, detail="Admin not found")
+    
+    document = {
+        "id": str(uuid4()),
+        "from_user_id": current_user['id'],
+        "from_user_role": "student",
+        "to_user_id": admin['id'],
+        "to_user_role": "admin",
+        "title": doc_data['title'],
+        "description": doc_data.get('description', ''),
+        "file_url": doc_data['file_url'],
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.documents.insert_one(document)
+    
+    # Create notification for admin
+    await create_notification(
+        user_id=admin['id'],
+        notification_type="new_document",
+        data={"message": f"Nouveau document de l'étudiant {current_user['first_name']}: {doc_data['title']}"}
+    )
+    
+    logger.info(f"Document sent by student {current_user['id']} to admin")
+    return {"message": "Document envoyé à l'admin avec succès"}
+
 @api_router.post("/student/upload-homework")
 async def upload_homework(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
     if current_user['role'] != 'student':

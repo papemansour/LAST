@@ -242,9 +242,39 @@ const StudentDashboard = () => {
           </div>
         </div>
 
-        <Tabs defaultValue="welcome" className="space-y-6">
+        <Tabs defaultValue={user.level === 'kkid' ? 'videos' : 'welcome'} className="space-y-6">
           {/* Grid Navigation Cards */}
           <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-3 h-auto bg-transparent p-0">
+            {/* K-Kid Dashboard Simplifié : Seulement Vidéos, Jeux, Cadeaux */}
+            {user.level === 'kkid' ? (
+              <>
+                <TabsTrigger 
+                  value="videos" 
+                  className="h-24 data-[state=active]:bg-pink-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-pink-50 border-2 border-pink-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Video className="w-8 h-8 text-pink-600 data-[state=active]:text-white" />
+                  <span className="text-xs font-semibold">🎥 Vidéos</span>
+                </TabsTrigger>
+                
+                <TabsTrigger 
+                  value="games" 
+                  className="h-24 data-[state=active]:bg-pink-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-pink-50 border-2 border-pink-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Gamepad2 className="w-8 h-8 text-pink-600 data-[state=active]:text-white" />
+                  <span className="text-xs font-semibold">🎮 Jeux</span>
+                </TabsTrigger>
+                
+                <TabsTrigger 
+                  value="gifts" 
+                  className="h-24 data-[state=active]:bg-pink-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-pink-50 border-2 border-pink-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Heart className="w-8 h-8 text-pink-600 data-[state=active]:text-white" />
+                  <span className="text-xs font-semibold">🎁 Cadeaux</span>
+                </TabsTrigger>
+              </>
+            ) : (
+              /* Dashboard Normal pour les autres étudiants */
+              <>
             <TabsTrigger 
               value="welcome" 
               className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"

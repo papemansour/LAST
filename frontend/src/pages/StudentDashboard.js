@@ -26,6 +26,7 @@ import ProgressTracker from '../components/ProgressTracker';
 import LiveNotifications from '../components/LiveNotifications';
 import StudentGames from '../components/StudentGamesAdvanced';
 import WeekendGifts from '../components/WeekendGifts';
+import Footer from '../components/Footer';
 
 const StudentDashboard = () => {
   const navigate = useNavigate();

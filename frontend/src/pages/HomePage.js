@@ -764,6 +764,9 @@ const HomePage = () => {
               </div>
             </div>
           </div>
+          
+          {/* Indicateur de scroll mobile */}
+          <p className="text-center text-xs text-gray-500 mt-4 md:hidden">← Faites glisser pour voir plus →</p>
         </div>
       </section>
 

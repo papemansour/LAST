@@ -1135,6 +1135,23 @@ async def delete_admin_document(document_id: str, current_user: dict = Depends(g
     
     logger.info(f"Document {document_id} deleted by admin {current_user['id']}")
     return {"message": "Document supprimé avec succès"}
+
+@api_router.delete("/documents/{document_id}")
+async def delete_document(document_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a document (for students and teachers)"""
+    # Check if document belongs to current user (either as sender or recipient)
+    document = await db.documents.find_one({"id": document_id}, {"_id": 0})
+    
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+    
+    # Allow deletion if user is the recipient or sender
+    if document['to_user_id'] != current_user['id'] and document.get('from_user_id') != current_user['id']:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this document")
+    
+    result = await db.documents.delete_one({"id": document_id})
+    logger.info(f"Document {document_id} deleted by user {current_user['id']}")
+    return {"message": "Document supprimé avec succès"}
     
     return documents
 

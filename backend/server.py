@@ -1047,6 +1047,7 @@ async def get_teacher_documents_from_admin(current_user: dict = Depends(get_curr
 
 @api_router.post("/teacher/send-document-to-admin")
 async def teacher_send_document_to_admin(doc_data: dict, current_user: dict = Depends(get_current_user)):
+    """Teacher sends a document to admin"""
     if current_user['role'] != 'teacher':
         raise HTTPException(status_code=403, detail="Teacher access required")
     
@@ -1056,7 +1057,7 @@ async def teacher_send_document_to_admin(doc_data: dict, current_user: dict = De
         raise HTTPException(status_code=404, detail="Admin not found")
     
     document = {
-        "id": str(uuid.uuid4()),
+        "id": str(uuid4()),
         "from_user_id": current_user['id'],
         "from_user_role": "teacher",
         "to_user_id": admin['id'],
@@ -1078,6 +1079,49 @@ async def teacher_send_document_to_admin(doc_data: dict, current_user: dict = De
     
     logger.info(f"Document sent by teacher {current_user['id']} to admin")
     return {"message": "Document sent to admin successfully"}
+
+@api_router.post("/teacher/send-kkid-video")
+async def teacher_send_kkid_video(video_data: dict, current_user: dict = Depends(get_current_user)):
+    """Teacher uploads and sends a video to all K-Kids"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    video = {
+        "id": str(uuid4()),
+        "teacher_id": current_user['id'],
+        "teacher_name": f"{current_user['first_name']} {current_user['last_name']}",
+        "title": video_data['title'],
+        "description": video_data.get('description', ''),
+        "video_url": video_data['video_url'],
+        "thumbnail_url": video_data.get('thumbnail_url', ''),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.kkid_videos.insert_one(video)
+    logger.info(f"K-Kid video uploaded by teacher {current_user['id']}: {video_data['title']}")
+    return {"message": "Vidéo envoyée avec succès aux K-Kids", "video": video}
+
+@api_router.get("/kkid/videos")
+async def get_kkid_videos(current_user: dict = Depends(get_current_user)):
+    """Get all K-Kid videos"""
+    if current_user.get('level') != 'kkid' and current_user['role'] not in ['teacher', 'admin']:
+        raise HTTPException(status_code=403, detail="Access restricted to K-Kids, teachers, and admins")
+    
+    videos = await db.kkid_videos.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    return videos
+
+@api_router.delete("/teacher/delete-kkid-video/{video_id}")
+async def delete_kkid_video(video_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a K-Kid video"""
+    if current_user['role'] not in ['teacher', 'admin']:
+        raise HTTPException(status_code=403, detail="Teacher or admin access required")
+    
+    result = await db.kkid_videos.delete_one({"id": video_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Video not found")
+    
+    logger.info(f"K-Kid video {video_id} deleted by {current_user['role']} {current_user['id']}")
+    return {"message": "Vidéo supprimée avec succès"}
 
 @api_router.get("/admin/documents-from-teachers")
 async def get_admin_documents_from_teachers(current_user: dict = Depends(get_current_user)):

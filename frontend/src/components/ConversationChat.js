@@ -272,16 +272,29 @@ const ConversationChat = ({ recipientId, recipientName, currentUserId }) => {
                 <source src={selectedFile.file_url} />
                 Votre navigateur ne supporte pas la lecture audio.
               </audio>
+            ) : selectedFile?.file_type === 'document' || selectedFile?.file_type === 'spreadsheet' ? (
+              <iframe
+                src={`https://docs.google.com/viewer?url=${encodeURIComponent(window.location.origin + selectedFile?.file_url)}&embedded=true`}
+                className="w-full h-[70vh]"
+                title={selectedFile?.filename}
+              />
             ) : (
-              <div className="p-8 text-center">
-                <p className="text-gray-600 mb-4">Aperçu non disponible pour ce type de fichier</p>
-                <a 
-                  href={selectedFile?.file_url} 
-                  download={selectedFile?.filename}
-                  className="text-teal-600 hover:underline font-semibold"
-                >
-                  Télécharger le fichier
-                </a>
+              <div className="p-8">
+                <div className="bg-gray-50 rounded-lg p-6 text-center mb-4">
+                  <div className="text-6xl mb-4">📄</div>
+                  <p className="text-lg font-semibold text-gray-700 mb-2">{selectedFile?.filename}</p>
+                  <p className="text-sm text-gray-500 mb-4">Cliquez sur le bouton ci-dessous pour télécharger et ouvrir le fichier</p>
+                </div>
+                <div className="flex justify-center">
+                  <a 
+                    href={selectedFile?.file_url} 
+                    download={selectedFile?.filename}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-semibold"
+                  >
+                    <Download className="w-5 h-5" />
+                    Télécharger le fichier
+                  </a>
+                </div>
               </div>
             )}
           </div>

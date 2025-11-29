@@ -124,8 +124,7 @@ const WavePaymentCard = ({ packName, price }) => {
                 <li>2️⃣ Sélectionnez "Envoyer de l'argent"</li>
                 <li>3️⃣ Entrez le numéro : <strong>{waveNumber}</strong></li>
                 <li>4️⃣ Vérifiez le nom : <strong>{recipientName}</strong></li>
-                <li>5️⃣ Entrez le montant : <strong>{price.toLocaleString()} FCFA</strong></li>
-                <li>6️⃣ Confirmez le paiement</li>
+                <li>5️⃣ Entrez le montant : <strong>13 500 FCFA pour pack K-Débutant, 22 500 FCFA pour pack K-Intermédiaire et 36 000 FCFA pour pack K-Professionnel</strong></li>
               </ol>
             </div>
 

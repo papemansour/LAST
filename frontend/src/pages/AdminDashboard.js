@@ -527,7 +527,10 @@ const AdminDashboard = () => {
                             <h3 className="font-semibold">{student.first_name} {student.last_name}</h3>
                             <p className="text-sm text-gray-600">{student.email}</p>
                             {student.phone && (
-                              <p className="text-sm text-gray-600">📞 {student.phone}</p>
+                              <p className="text-sm text-gray-600 flex items-center gap-1">
+                                <Phone className="h-3 w-3" />
+                                {student.phone}
+                              </p>
                             )}
                             <p className="text-sm text-gray-500">Niveau: {student.level}</p>
                             {student.temporary_password && (

@@ -254,14 +254,35 @@ const ConversationChat = ({ recipientId, recipientName, currentUserId }) => {
             <DialogTitle>{selectedFile?.filename}</DialogTitle>
           </DialogHeader>
           <div className="overflow-auto">
-            {selectedFile?.file_type?.startsWith('image/') ? (
+            {(selectedFile?.file_type === 'image' || selectedFile?.file_type?.startsWith('image/')) ? (
               <img src={selectedFile.file_url} alt={selectedFile.filename} className="w-full" />
-            ) : (
+            ) : selectedFile?.file_type === 'pdf' ? (
               <iframe
                 src={selectedFile?.file_url}
                 className="w-full h-[70vh]"
                 title={selectedFile?.filename}
               />
+            ) : selectedFile?.file_type === 'video' ? (
+              <video controls className="w-full">
+                <source src={selectedFile.file_url} />
+                Votre navigateur ne supporte pas la lecture vidéo.
+              </video>
+            ) : selectedFile?.file_type === 'audio' ? (
+              <audio controls className="w-full">
+                <source src={selectedFile.file_url} />
+                Votre navigateur ne supporte pas la lecture audio.
+              </audio>
+            ) : (
+              <div className="p-8 text-center">
+                <p className="text-gray-600 mb-4">Aperçu non disponible pour ce type de fichier</p>
+                <a 
+                  href={selectedFile?.file_url} 
+                  download={selectedFile?.filename}
+                  className="text-teal-600 hover:underline font-semibold"
+                >
+                  Télécharger le fichier
+                </a>
+              </div>
             )}
           </div>
         </DialogContent>

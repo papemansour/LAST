@@ -2265,14 +2265,14 @@ class CourseCreateEnhanced(BaseModel):
     student_id: Optional[str] = None
     meet_link: Optional[str] = None
 
-class DocumentCreate(BaseModel):
+class HomeworkDocumentCreate(BaseModel):
     title: str
     description: str
     recipient_type: str  # 'admin' or 'student'
     recipient_id: Optional[str] = None
     file_url: str
 
-class Document(BaseModel):
+class HomeworkDocument(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     teacher_id: str

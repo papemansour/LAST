@@ -3448,6 +3448,173 @@ async def remove_badge(student_id: str, badge_id: str, current_user: dict = Depe
     
     return {"message": "Badge retiré"}
 
+# ==================== WEEKLY CHALLENGES & POINTS ENDPOINTS ====================
+
+@api_router.get("/challenges/current")
+async def get_current_challenges():
+    """Get current week's challenges"""
+    now = datetime.now(timezone.utc)
+    challenges = await db.weekly_challenges.find(
+        {
+            "active": True,
+            "week_start": {"$lte": now},
+            "week_end": {"$gte": now}
+        },
+        {"_id": 0}
+    ).to_list(100)
+    return challenges
+
+@api_router.get("/student/my-points")
+async def get_my_points(current_user: dict = Depends(get_current_user)):
+    """Get student's points and discount"""
+    if current_user['role'] != 'student':
+        raise HTTPException(status_code=403, detail="Student access required")
+    
+    # Get or create student points record
+    points_record = await db.student_points.find_one({"student_id": current_user['id']}, {"_id": 0})
+    
+    if not points_record:
+        # Create new record
+        points = StudentPoints(student_id=current_user['id'])
+        doc = points.model_dump()
+        doc['last_updated'] = doc['last_updated'].isoformat()
+        await db.student_points.insert_one(doc)
+        points_record = doc
+    
+    # Calculate discount (50 points = 1€ or 100 FCFA)
+    euro_discount = (points_record['available_points'] // 50) * 1
+    fcfa_discount = (points_record['available_points'] // 50) * 100
+    
+    return {
+        "total_points": points_record['total_points'],
+        "available_points": points_record['available_points'],
+        "euro_discount": euro_discount,
+        "fcfa_discount": fcfa_discount,
+        "total_discount_earned": points_record.get('total_discount_earned', 0)
+    }
+
+@api_router.get("/student/my-challenge-progress")
+async def get_my_challenge_progress(current_user: dict = Depends(get_current_user)):
+    """Get student's progress on current challenges"""
+    if current_user['role'] != 'student':
+        raise HTTPException(status_code=403, detail="Student access required")
+    
+    # Get current challenges
+    now = datetime.now(timezone.utc)
+    challenges = await db.weekly_challenges.find(
+        {
+            "active": True,
+            "week_start": {"$lte": now},
+            "week_end": {"$gte": now}
+        },
+        {"_id": 0}
+    ).to_list(100)
+    
+    # Get progress for each challenge
+    for challenge in challenges:
+        progress = await db.challenge_progress.find_one(
+            {"student_id": current_user['id'], "challenge_id": challenge['id']},
+            {"_id": 0}
+        )
+        challenge['progress'] = progress if progress else {
+            "current_count": 0,
+            "completed": False
+        }
+    
+    return challenges
+
+@api_router.post("/student/complete-challenge/{challenge_id}")
+async def complete_challenge(challenge_id: str, current_user: dict = Depends(get_current_user)):
+    """Mark a challenge as completed and award points"""
+    if current_user['role'] != 'student':
+        raise HTTPException(status_code=403, detail="Student access required")
+    
+    # Get challenge
+    challenge = await db.weekly_challenges.find_one({"id": challenge_id}, {"_id": 0})
+    if not challenge:
+        raise HTTPException(status_code=404, detail="Challenge not found")
+    
+    # Check if already completed
+    existing_progress = await db.challenge_progress.find_one({
+        "student_id": current_user['id'],
+        "challenge_id": challenge_id,
+        "completed": True
+    })
+    
+    if existing_progress:
+        raise HTTPException(status_code=400, detail="Challenge already completed")
+    
+    # Mark as completed
+    progress = ChallengeProgress(
+        student_id=current_user['id'],
+        challenge_id=challenge_id,
+        current_count=challenge['target_count'],
+        completed=True,
+        completed_at=datetime.now(timezone.utc)
+    )
+    
+    progress_doc = progress.model_dump()
+    progress_doc['completed_at'] = progress_doc['completed_at'].isoformat()
+    await db.challenge_progress.update_one(
+        {"student_id": current_user['id'], "challenge_id": challenge_id},
+        {"$set": progress_doc},
+        upsert=True
+    )
+    
+    # Award points
+    points_record = await db.student_points.find_one({"student_id": current_user['id']})
+    
+    if not points_record:
+        points = StudentPoints(
+            student_id=current_user['id'],
+            total_points=challenge['points_reward'],
+            available_points=challenge['points_reward']
+        )
+        doc = points.model_dump()
+        doc['last_updated'] = doc['last_updated'].isoformat()
+        await db.student_points.insert_one(doc)
+    else:
+        await db.student_points.update_one(
+            {"student_id": current_user['id']},
+            {
+                "$inc": {
+                    "total_points": challenge['points_reward'],
+                    "available_points": challenge['points_reward']
+                },
+                "$set": {"last_updated": datetime.now(timezone.utc).isoformat()}
+            }
+        )
+    
+    # Get updated points
+    updated_points = await db.student_points.find_one({"student_id": current_user['id']}, {"_id": 0})
+    
+    # Check if student reached 50 points threshold - notify admin
+    if updated_points['available_points'] >= 50:
+        # Get admin
+        admin = await db.users.find_one({"role": "admin"}, {"_id": 0})
+        if admin:
+            await create_notification(
+                user_id=admin['id'],
+                title=f"💰 Étudiant a atteint 50 points",
+                message=f"L'étudiant {current_user['id']} a atteint {updated_points['available_points']} points",
+                notification_type="points_milestone"
+            )
+    
+    # Notify student
+    await create_notification(
+        user_id=current_user['id'],
+        title=f"🎉 Défi complété !",
+        message=f"Vous avez gagné {challenge['points_reward']} points XP",
+        notification_type="challenge_completed"
+    )
+    
+    return {
+        "message": "Défi complété !",
+        "points_earned": challenge['points_reward'],
+        "total_points": updated_points['total_points'],
+        "available_points": updated_points['available_points']
+    }
+
 # ==================== NOTIFICATIONS ENDPOINTS ====================
 
 async def create_notification(user_id: str, title: str, message: str, notification_type: str):

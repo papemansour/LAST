@@ -11,6 +11,8 @@ import {
   DialogTitle,
 } from './ui/dialog';
 
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+
 const StudentDocuments = () => {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);

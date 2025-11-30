@@ -575,7 +575,12 @@ const HomePage = () => {
             <div className="flex overflow-x-auto gap-4 md:gap-6 pb-4 snap-x snap-mandatory -mx-4 px-4 md:mx-0 md:px-0" style={{ scrollbarWidth: 'thin', scrollbarColor: '#14b8a6 #f3f4f6' }}>
             {/* Pack K-Kid - Enfants */}
             <div className="relative overflow-hidden rounded-2xl border-2 border-pink-300 bg-white/60 backdrop-blur-lg hover:shadow-xl transition-all min-w-[280px] sm:min-w-[320px] flex-shrink-0 snap-center">
-              <div className="bg-gradient-to-br from-pink-50 to-pink-100 p-4 md:p-6">
+              <div className="bg-gradient-to-br from-pink-50 to-pink-100 p-4 md:p-6 relative">
+                {pricingData.kkid_discount_fcfa > 0 && (
+                  <div className="absolute top-2 right-2 bg-yellow-400 text-pink-900 px-3 py-1 rounded-full text-xs font-bold animate-pulse">
+                    🎉 PROMO -10%
+                  </div>
+                )}
                 <h3 className="text-xl md:text-2xl font-bold text-pink-800">Pack K-Kid</h3>
                 <p className="text-sm md:text-base text-pink-600">Enfants 3-9 ans</p>
               </div>

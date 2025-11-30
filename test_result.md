@@ -466,15 +466,18 @@ test_plan:
 
   - task: "Système de Pièces Jointes dans la Messagerie"
     implemented: true
-    working: true
+    working: false
     file: "ConversationChat.js"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: false
     status_history:
         - working: true
           agent: "testing"
           comment: "✅ PASSED - Tests complets selon spécifications: 1) Connexion étudiant et navigation vers Messages réussie, 2) Conversation avec professeur Marie Martin visible, 3) Envoi message simple fonctionne (message apparaît dans conversation), 4) Upload fichier avec prévisualisation (nom fichier visible), 5) Envoi message avec pièce jointe réussi (message et attachment affichés avec icônes œil/téléchargement/suppression), 6) Suppression pièce jointe avant envoi fonctionne (bouton X), 7) Vérification pièces jointes reçues (noms fichiers et icônes d'actions visibles), 8) Limite taille 10MB respectée (toast d'erreur affiché), 9) Icône pièce jointe (📎 paperclip) présente dans interface. Backend endpoints POST /api/messages/upload-attachment et POST /api/messages/send fonctionnels. Score: 8/8 scénarios testés avec succès (100%)."
+        - working: false
+          agent: "testing"
+          comment: "❌ RÉGRESSION CONFIRMÉE - Le système de pièces jointes ne fonctionne plus à cause d'un problème de configuration des relations professeur-étudiant. BACKEND FONCTIONNEL: Tests API directs réussis - POST /api/messages/upload-attachment (✅ upload fichier), POST /api/messages/send (✅ envoi message avec pièce jointe), GET /api/messages/conversation (✅ récupération messages avec attachments). FRONTEND DÉFAILLANT: 1) Étudiant clubtest@example.com n'a pas de professeur assigné (champ assigned_teacher manquant), 2) Interface Messages étudiant affiche 'Aucun professeur assigné', 3) Professeur marie.test@example.com a 0 étudiants assignés, 4) Interface Messages professeur affiche 'Sélectionnez une conversation' sans étudiants disponibles. CAUSE: Problème de données - relations professeur-étudiant non configurées correctement dans la base de données. SOLUTION REQUISE: Assigner des professeurs aux étudiants ou corriger la logique d'affichage des conversations."
 
 agent_communication:
     - agent: "testing"

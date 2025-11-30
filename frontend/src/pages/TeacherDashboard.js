@@ -349,63 +349,63 @@ const TeacherDashboard = () => {
 
         <Tabs defaultValue="welcome" className="space-y-6">
           <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-3 h-auto bg-transparent p-0">
-            <TabsTrigger value="welcome" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+            <TabsTrigger value="welcome" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <Mail className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Bienvenue</span>
             </TabsTrigger>
-            <TabsTrigger value="club" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+            <TabsTrigger value="club" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <Sparkles className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">CLUB</span>
             </TabsTrigger>
-            <TabsTrigger value="students" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+            <TabsTrigger value="students" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <Users className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Étudiants</span>
             </TabsTrigger>
-            <TabsTrigger value="group-codes" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+            <TabsTrigger value="group-codes" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <Key className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Codes Groupe</span>
             </TabsTrigger>
-            <TabsTrigger value="courses" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+            <TabsTrigger value="courses" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <BookOpen className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Cours</span>
             </TabsTrigger>
-            <TabsTrigger value="games" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+            <TabsTrigger value="games" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <Gamepad2 className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Jeu</span>
             </TabsTrigger>
-            <TabsTrigger value="videos" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+            <TabsTrigger value="videos" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <Video className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Vidéos K-Kid</span>
             </TabsTrigger>
-            <TabsTrigger value="timer" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+            <TabsTrigger value="timer" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <Timer className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Pointage</span>
             </TabsTrigger>
-            <TabsTrigger value="messages" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+            <TabsTrigger value="messages" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <MessageCircle className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Messages</span>
             </TabsTrigger>
-            <TabsTrigger value="documents" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+            <TabsTrigger value="documents" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <FileText className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Documents</span>
             </TabsTrigger>
-            <TabsTrigger value="meet-links" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+            <TabsTrigger value="meet-links" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <Calendar className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Cours en ligne</span>
             </TabsTrigger>
-            <TabsTrigger value="schedule" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+            <TabsTrigger value="schedule" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <Calendar className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Horaires</span>
             </TabsTrigger>
-            <TabsTrigger value="news" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+            <TabsTrigger value="news" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <Newspaper className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">News</span>
             </TabsTrigger>
-            <TabsTrigger value="kalamatheque" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+            <TabsTrigger value="kalamatheque" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <Library className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Bibliothèque</span>
             </TabsTrigger>
-            <TabsTrigger value="profile" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+            <TabsTrigger value="profile" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <UserCircle className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Profil</span>
             </TabsTrigger>
@@ -473,7 +473,7 @@ const TeacherDashboard = () => {
                         required
                         value={courseData.title}
                         onChange={(e) => setCourseData({ ...courseData, title: e.target.value })}
-                        className="border-teal-200 focus:border-teal-500"
+                        className="border-white/30 focus:border-teal-500"
                       />
                     </div>
                     <div>
@@ -483,7 +483,7 @@ const TeacherDashboard = () => {
                         required
                         value={courseData.description}
                         onChange={(e) => setCourseData({ ...courseData, description: e.target.value })}
-                        className="border-teal-200 focus:border-teal-500"
+                        className="border-white/30 focus:border-teal-500"
                       />
                     </div>
                     <div>
@@ -493,7 +493,7 @@ const TeacherDashboard = () => {
                         onValueChange={(value) => setCourseData({ ...courseData, level: value })}
                         required
                       >
-                        <SelectTrigger className="border-teal-200">
+                        <SelectTrigger className="border-white/30">
                           <SelectValue placeholder="Sélectionner" />
                         </SelectTrigger>
                         <SelectContent>
@@ -510,7 +510,7 @@ const TeacherDashboard = () => {
                         onValueChange={(value) => setCourseData({ ...courseData, student_id: value })}
                         required
                       >
-                        <SelectTrigger className="border-teal-200">
+                        <SelectTrigger className="border-white/30">
                           <SelectValue placeholder="Sélectionner un étudiant" />
                         </SelectTrigger>
                         <SelectContent>
@@ -530,7 +530,7 @@ const TeacherDashboard = () => {
                         value={courseData.student_email}
                         onChange={(e) => setCourseData({ ...courseData, student_email: e.target.value })}
                         placeholder="etudiant@example.com"
-                        className="border-teal-200 focus:border-teal-500"
+                        className="border-white/30 focus:border-teal-500"
                       />
                     </div>
                     <div>
@@ -541,7 +541,7 @@ const TeacherDashboard = () => {
                         value={courseData.schedule}
                         onChange={(e) => setCourseData({ ...courseData, schedule: e.target.value })}
                         placeholder="Ex: Lundi 18h-20h"
-                        className="border-teal-200 focus:border-teal-500"
+                        className="border-white/30 focus:border-teal-500"
                       />
                     </div>
                     <div>
@@ -552,7 +552,7 @@ const TeacherDashboard = () => {
                           value={courseData.meet_link}
                           onChange={(e) => setCourseData({ ...courseData, meet_link: e.target.value })}
                           placeholder="Générer ou coller un lien"
-                          className="border-teal-200 focus:border-teal-500"
+                          className="border-white/30 focus:border-teal-500"
                         />
                         <Button type="button" onClick={generateGoogleMeetLink} className="bg-teal-600 hover:bg-teal-700">
                           <Video className="w-4 h-4" />
@@ -618,7 +618,7 @@ const TeacherDashboard = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Formulaire d'upload */}
-                <Card className="border-pink-200 bg-pink-50">
+                <Card className="border-white/30 bg-pink-50">
                   <CardHeader>
                     <CardTitle className="text-lg">📤 Envoyer une nouvelle vidéo</CardTitle>
                   </CardHeader>
@@ -761,7 +761,7 @@ const TeacherDashboard = () => {
                   ) : (
                     <div className="grid md:grid-cols-2 gap-4 mt-4">
                       {kkidVideos.map(video => (
-                        <Card key={video.id} className="border-pink-200">
+                        <Card key={video.id} className="border-white/30">
                           <CardContent className="p-4">
                             <h4 className="font-semibold mb-2">{video.title}</h4>
                             <p className="text-sm text-gray-600 mb-2">{video.description}</p>
@@ -1056,7 +1056,7 @@ const TeacherDashboard = () => {
                           name="old_password"
                           type="password"
                           required
-                          className="border-teal-200 focus:border-teal-500"
+                          className="border-white/30 focus:border-teal-500"
                         />
                       </div>
                       <div>
@@ -1067,7 +1067,7 @@ const TeacherDashboard = () => {
                           type="password"
                           required
                           minLength={6}
-                          className="border-teal-200 focus:border-teal-500"
+                          className="border-white/30 focus:border-teal-500"
                         />
                         <p className="text-xs text-gray-500 mt-1">Minimum 6 caractères</p>
                       </div>
@@ -1079,7 +1079,7 @@ const TeacherDashboard = () => {
                           type="password"
                           required
                           minLength={6}
-                          className="border-teal-200 focus:border-teal-500"
+                          className="border-white/30 focus:border-teal-500"
                         />
                       </div>
                       <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-700">

@@ -2969,6 +2969,170 @@ async def get_my_conversations(current_user: dict = Depends(get_current_user)):
     
     return users
 
+# ==================== DOCUMENTS ENDPOINTS ====================
+
+@api_router.post("/documents/upload")
+async def upload_document(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
+    """Upload a document file"""
+    from pathlib import Path
+    
+    # File size limit: 50MB
+    MAX_FILE_SIZE = 50 * 1024 * 1024
+    contents = await file.read()
+    
+    if len(contents) > MAX_FILE_SIZE:
+        raise HTTPException(status_code=400, detail="File too large (max 50MB)")
+    
+    # Create upload directory
+    upload_dir = Path("/app/frontend/public/uploads/documents")
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Generate unique filename
+    file_ext = file.filename.split('.')[-1] if '.' in file.filename else 'file'
+    unique_filename = f"{str(uuid4())}.{file_ext}"
+    file_path = upload_dir / unique_filename
+    
+    # Save file
+    try:
+        with open(file_path, "wb") as f:
+            f.write(contents)
+        
+        file_url = f"/uploads/documents/{unique_filename}"
+        
+        # Determine file type
+        file_type = "other"
+        if file_ext.lower() in ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']:
+            file_type = "image"
+        elif file_ext.lower() in ['pdf']:
+            file_type = "pdf"
+        elif file_ext.lower() in ['doc', 'docx']:
+            file_type = "document"
+        elif file_ext.lower() in ['xls', 'xlsx']:
+            file_type = "spreadsheet"
+        elif file_ext.lower() in ['ppt', 'pptx']:
+            file_type = "presentation"
+        elif file_ext.lower() in ['mp4', 'avi', 'mov', 'webm']:
+            file_type = "video"
+        elif file_ext.lower() in ['mp3', 'wav', 'ogg']:
+            file_type = "audio"
+        
+        logger.info(f"Document uploaded by {current_user['id']}: {file.filename}")
+        
+        return {
+            "file_url": file_url,
+            "file_name": file.filename,
+            "file_type": file_type
+        }
+    except Exception as e:
+        logger.error(f"Upload error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error uploading file")
+
+@api_router.post("/documents/send")
+async def send_document(document_data: DocumentCreate, current_user: dict = Depends(get_current_user)):
+    """Send a document to students"""
+    # Verify sender is admin or teacher
+    if current_user['role'] not in ['admin', 'teacher']:
+        raise HTTPException(status_code=403, detail="Only admins and teachers can send documents")
+    
+    sender = await db.users.find_one({"id": current_user['id']}, {"_id": 0})
+    
+    document = Document(
+        title=document_data.title,
+        description=document_data.description,
+        file_url=document_data.file_url,
+        file_name=document_data.file_name,
+        file_type=document_data.file_type,
+        sender_id=current_user['id'],
+        sender_name=f"{sender['first_name']} {sender['last_name']}" if current_user['role'] == 'teacher' else "Admin KALAMA",
+        sender_role=current_user['role'],
+        recipient_ids=document_data.recipient_ids,
+        read_by=[]
+    )
+    
+    doc = document.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    await db.documents.insert_one(doc)
+    
+    # Create notification for each recipient
+    for recipient_id in document_data.recipient_ids:
+        await create_notification(
+            user_id=recipient_id,
+            title=f"📄 Nouveau document",
+            message=f"{document.sender_name} vous a envoyé un document: {document_data.title}",
+            notification_type="document"
+        )
+    
+    logger.info(f"Document sent by {current_user['id']} to {len(document_data.recipient_ids)} student(s)")
+    
+    return {"message": "Document sent successfully", "recipients_count": len(document_data.recipient_ids)}
+
+@api_router.get("/documents/my-documents")
+async def get_my_documents(current_user: dict = Depends(get_current_user)):
+    """Get all documents for current user (students receive, admin/teachers see sent)"""
+    if current_user['role'] == 'student':
+        # Students see documents sent to them
+        documents = await db.documents.find(
+            {"recipient_ids": current_user['id']},
+            {"_id": 0}
+        ).sort("created_at", -1).to_list(100)
+        
+        # Add 'is_read' flag for each document
+        for doc in documents:
+            doc['is_read'] = current_user['id'] in doc.get('read_by', [])
+        
+        return documents
+    else:
+        # Admin and teachers see documents they sent
+        documents = await db.documents.find(
+            {"sender_id": current_user['id']},
+            {"_id": 0}
+        ).sort("created_at", -1).to_list(100)
+        
+        return documents
+
+@api_router.put("/documents/{document_id}/mark-read")
+async def mark_document_as_read(document_id: str, current_user: dict = Depends(get_current_user)):
+    """Mark a document as read by current student"""
+    # Add current user to read_by list if not already there
+    result = await db.documents.update_one(
+        {"id": document_id, "recipient_ids": current_user['id']},
+        {"$addToSet": {"read_by": current_user['id']}}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Document not found or already marked as read")
+    
+    return {"message": "Document marked as read"}
+
+@api_router.delete("/documents/{document_id}")
+async def delete_document(document_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a document (only sender can delete)"""
+    # Find document
+    document = await db.documents.find_one({"id": document_id}, {"_id": 0})
+    
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+    
+    # Verify sender
+    if document['sender_id'] != current_user['id']:
+        raise HTTPException(status_code=403, detail="You can only delete your own documents")
+    
+    # Delete from database
+    await db.documents.delete_one({"id": document_id})
+    
+    # Optionally delete file from disk
+    try:
+        from pathlib import Path
+        file_path = Path(f"/app/frontend/public{document['file_url']}")
+        if file_path.exists():
+            file_path.unlink()
+    except Exception as e:
+        logger.warning(f"Could not delete file: {str(e)}")
+    
+    logger.info(f"Document deleted by {current_user['id']}: {document_id}")
+    
+    return {"message": "Document deleted successfully"}
+
 # ==================== NOTIFICATIONS ENDPOINTS ====================
 
 async def create_notification(user_id: str, title: str, message: str, notification_type: str):

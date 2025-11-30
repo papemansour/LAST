@@ -1839,7 +1839,10 @@ const AdminDashboard = () => {
             </Card>
           </TabsContent>
 
-          {/* Received Documents Tab */}
+          {/* Documents Tab */}
+          <TabsContent value="documents">
+            <DocumentsManager userRole="admin" />
+          </TabsContent>
 
           {/* Test Questions Tab */}
           <TabsContent value="test-questions">

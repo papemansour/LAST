@@ -619,9 +619,9 @@ class EmailService:
                     <strong>L'équipe MYKALMA</strong></p>
                 </div>
                 <div class="footer">
-                    <p>MYKALMAENGLISH - Plateforme d'apprentissage de l'anglais</p>
+                    <p>MYKALMA - Plateforme d'apprentissage de l'anglais</p>
                     <p>📧 info.kalamaenglish@gmail.com</p>
-                    <p>© 2025 MyKalamaenglish. Tous droits réservés.</p>
+                    <p>© 2025 MyKalama. Tous droits réservés.</p>
                 </div>
             </div>
         </body>

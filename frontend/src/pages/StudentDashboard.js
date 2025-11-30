@@ -31,6 +31,7 @@ const StudentDashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [teacher, setTeacher] = useState(null);
+  const [admin, setAdmin] = useState(null);
   const [links, setLinks] = useState([]);
   const [homeworks, setHomeworks] = useState([]);
   const [loading, setLoading] = useState(true);

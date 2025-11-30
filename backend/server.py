@@ -3171,6 +3171,115 @@ async def delete_document(document_id: str, current_user: dict = Depends(get_cur
     
     return {"message": "Document deleted successfully"}
 
+# ==================== PROGRESSION & MEET LINKS ENDPOINTS ====================
+
+@api_router.post("/teacher/send-meet-link")
+async def send_meet_link(data: MeetLinkCreate, current_user: dict = Depends(get_current_user)):
+    """Teacher sends a Google Meet link to a student"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    meet_link = MeetLink(
+        student_id=data.student_id,
+        teacher_id=current_user['id'],
+        meet_link=data.meet_link,
+        title=data.title,
+        scheduled_date=datetime.fromisoformat(data.scheduled_date.replace('Z', '+00:00'))
+    )
+    
+    doc = meet_link.model_dump()
+    doc['scheduled_date'] = doc['scheduled_date'].isoformat()
+    doc['created_at'] = doc['created_at'].isoformat()
+    await db.meet_links.insert_one(doc)
+    
+    # Create notification for student
+    await create_notification(
+        user_id=data.student_id,
+        title="📅 Nouveau cours programmé",
+        message=f"Votre professeur vous a envoyé un lien de cours: {data.title}",
+        notification_type="meet_link"
+    )
+    
+    logger.info(f"Meet link sent by teacher {current_user['id']} to student {data.student_id}")
+    return {"message": "Lien de cours envoyé", "meet_link_id": meet_link.id}
+
+@api_router.get("/student/my-meet-links")
+async def get_my_meet_links(current_user: dict = Depends(get_current_user)):
+    """Get all meet links for current student"""
+    if current_user['role'] != 'student':
+        raise HTTPException(status_code=403, detail="Student access required")
+    
+    meet_links = await db.meet_links.find(
+        {"student_id": current_user['id']},
+        {"_id": 0}
+    ).sort("scheduled_date", -1).to_list(100)
+    
+    return meet_links
+
+@api_router.put("/student/mark-meet-attended/{meet_id}")
+async def mark_meet_attended(meet_id: str, current_user: dict = Depends(get_current_user)):
+    """Mark a meet link as attended by student"""
+    result = await db.meet_links.update_one(
+        {"id": meet_id, "student_id": current_user['id']},
+        {"$set": {"attended": True, "completed": True}}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Meet link not found")
+    
+    return {"message": "Cours marqué comme suivi"}
+
+@api_router.get("/student/my-progression")
+async def get_my_progression(current_user: dict = Depends(get_current_user)):
+    """Get student progression statistics"""
+    if current_user['role'] != 'student':
+        raise HTTPException(status_code=403, detail="Student access required")
+    
+    # Get all meet links
+    all_meets = await db.meet_links.find(
+        {"student_id": current_user['id']},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    # Calculate statistics
+    total_courses = len(all_meets)
+    completed_courses = len([m for m in all_meets if m.get('attended', False)])
+    
+    # Calculate percentage
+    percentage = round((completed_courses / total_courses * 100), 1) if total_courses > 0 else 0
+    
+    # Calculate consecutive days (simplified - count unique dates of attended courses in last 30 days)
+    now = datetime.now(timezone.utc)
+    recent_attended = [
+        m for m in all_meets 
+        if m.get('attended', False) and 
+        datetime.fromisoformat(m['scheduled_date'].replace('Z', '+00:00')) > now - timedelta(days=30)
+    ]
+    
+    # Get unique dates
+    attended_dates = set()
+    for m in recent_attended:
+        date = datetime.fromisoformat(m['scheduled_date'].replace('Z', '+00:00')).date()
+        attended_dates.add(date)
+    
+    # Calculate consecutive days
+    consecutive_days = 0
+    if attended_dates:
+        sorted_dates = sorted(attended_dates, reverse=True)
+        consecutive_days = 1
+        for i in range(len(sorted_dates) - 1):
+            if (sorted_dates[i] - sorted_dates[i+1]).days == 1:
+                consecutive_days += 1
+            else:
+                break
+    
+    return {
+        "percentage": percentage,
+        "consecutive_days": consecutive_days,
+        "courses_completed": completed_courses,
+        "total_courses": total_courses
+    }
+
 # ==================== NOTIFICATIONS ENDPOINTS ====================
 
 async def create_notification(user_id: str, title: str, message: str, notification_type: str):

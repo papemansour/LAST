@@ -318,7 +318,6 @@ const AdminDashboard = () => {
     );
   }
 
-  const students = allUsers.filter(u => u.role === 'student');
   const teachers = allUsers.filter(u => u.role === 'teacher');
 
   return (

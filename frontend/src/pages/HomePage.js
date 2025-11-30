@@ -770,7 +770,7 @@ const HomePage = () => {
               </div>
               <div className="p-4 md:p-6">
                 <div className="text-center mb-4 md:mb-6">
-                  {currency === 'FCFA' && pricingData.advanced_discount_fcfa > 0 && (
+                  {currency === 'FCFA' && pricingData.advanced_discount_fcfa > 0 && new Date() < new Date('2026-01-14') && (
                     <div className="text-gray-400 line-through text-lg md:text-xl">
                       {formatPrice(pricingData.advanced_eur, pricingData.advanced_fcfa)}
                     </div>
@@ -778,10 +778,10 @@ const HomePage = () => {
                   <div className="text-2xl md:text-3xl font-bold text-teal-600">
                     {formatPriceWithSmallFCFA(
                       pricingData.advanced_eur - pricingData.advanced_discount,
-                      (pricingData.advanced_fcfa || 0) - (currency === 'FCFA' ? pricingData.advanced_discount_fcfa || 0 : 0)
+                      (pricingData.advanced_fcfa || 0) - (currency === 'FCFA' && new Date() < new Date('2026-01-14') ? pricingData.advanced_discount_fcfa || 0 : 0)
                     )}
                   </div>
-                  {currency === 'FCFA' && pricingData.advanced_discount_fcfa > 0 && (
+                  {currency === 'FCFA' && pricingData.advanced_discount_fcfa > 0 && new Date() < new Date('2026-01-14') && (
                     <div className="text-green-600 font-semibold mt-1 md:mt-2 text-sm md:text-base">
                       💰 Économisez {pricingData.advanced_discount_fcfa.toLocaleString()} FCFA
                     </div>

@@ -302,6 +302,29 @@ class ClubEventCreate(BaseModel):
     max_participants: int
     event_link: str = ""  # NEW: Lien vers l'événement
 
+class Document(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    description: str
+    file_url: str
+    file_name: str
+    file_type: str
+    sender_id: str
+    sender_name: str
+    sender_role: str  # 'admin' or 'teacher'
+    recipient_ids: List[str]  # Liste des IDs d'étudiants destinataires
+    read_by: List[str] = []  # Liste des IDs d'étudiants qui ont lu/ouvert le document
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class DocumentCreate(BaseModel):
+    title: str
+    description: str
+    file_url: str
+    file_name: str
+    file_type: str
+    recipient_ids: List[str]  # Liste des IDs d'étudiants destinataires
+
 # ============ UTILITIES ============
 
 def hash_password(password: str) -> str:

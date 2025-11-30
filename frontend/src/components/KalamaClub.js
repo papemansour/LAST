@@ -483,23 +483,14 @@ const KalamaClub = ({ userRole }) => {
                     >
                       S'inscrire
                     </Button>
-                    {user?.role === 'admin' && new Date(event.event_date) < new Date() && (
+                    {(userRole === 'admin' || userRole === 'teacher') && (
                       <Button
                         size="sm"
-                        variant="destructive"
-                        onClick={async () => {
-                          if (window.confirm('Supprimer cet événement passé ?')) {
-                            try {
-                              await apiClient.delete(`/club/events/${event.id}`);
-                              toast.success('Événement supprimé');
-                              loadEvents();
-                            } catch (error) {
-                              toast.error('Erreur lors de la suppression');
-                            }
-                          }
-                        }}
+                        variant="ghost"
+                        onClick={() => handleDeleteEvent(event.id)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
                       >
-                        🗑️ Supprimer
+                        🗑️
                       </Button>
                     )}
                   </div>

@@ -33,6 +33,7 @@ import KalamaClub from '../components/KalamaClub';
 import TeacherGames from '../components/TeacherGames';
 import TeacherVideos from '../components/TeacherVideos';
 import TeacherGroupCodeManager from '../components/TeacherGroupCodeManager';
+import DocumentsManager from '../components/DocumentsManager';
 // ActivityFeed removed
 
 const TeacherDashboard = () => {

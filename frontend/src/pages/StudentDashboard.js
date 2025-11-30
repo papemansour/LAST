@@ -38,6 +38,7 @@ const StudentDashboard = () => {
   const [links, setLinks] = useState([]);
   const [homeworks, setHomeworks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showWelcomeGift, setShowWelcomeGift] = useState(false);
   const [homeworkData, setHomeworkData] = useState({
     title: '',
     description: '',

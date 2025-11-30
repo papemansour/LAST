@@ -3505,6 +3505,50 @@ async def create_admin():
         doc['created_at'] = doc['created_at'].isoformat()
         await db.users.insert_one(doc)
         logger.info("Admin user created")
+    
+    # Initialize default badges if they don't exist
+    existing_badges = await db.badges.count_documents({})
+    if existing_badges == 0:
+        default_badges = [
+            {
+                "id": str(uuid4()),
+                "name": "Débutant",
+                "icon": "🚀",
+                "description": "Première connexion",
+                "condition_type": "first_login",
+                "condition_value": 1,
+                "created_at": datetime.now(timezone.utc).isoformat()
+            },
+            {
+                "id": str(uuid4()),
+                "name": "Étudiant Assidu",
+                "icon": "📚",
+                "description": "5 cours complétés",
+                "condition_type": "courses_completed",
+                "condition_value": 5,
+                "created_at": datetime.now(timezone.utc).isoformat()
+            },
+            {
+                "id": str(uuid4()),
+                "name": "Expert",
+                "icon": "⭐",
+                "description": "10 cours complétés",
+                "condition_type": "courses_completed",
+                "condition_value": 10,
+                "created_at": datetime.now(timezone.utc).isoformat()
+            },
+            {
+                "id": str(uuid4()),
+                "name": "Champion",
+                "icon": "🏆",
+                "description": "Niveau complété",
+                "condition_type": "level_completed",
+                "condition_value": 1,
+                "created_at": datetime.now(timezone.utc).isoformat()
+            }
+        ]
+        await db.badges.insert_many(default_badges)
+        logger.info("Default badges created")
 
 # ============ FILE UPLOAD ROUTE ============
 

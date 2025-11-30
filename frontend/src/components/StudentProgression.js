@@ -9,11 +9,13 @@ import { TrendingUp, Calendar, Award, Flame, ExternalLink, CheckCircle2 } from '
 const StudentProgression = () => {
   const [progression, setProgression] = useState(null);
   const [meetLinks, setMeetLinks] = useState([]);
+  const [badges, setBadges] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchProgression();
     fetchMeetLinks();
+    fetchBadges();
   }, []);
 
   const fetchProgression = async () => {
@@ -33,6 +35,15 @@ const StudentProgression = () => {
       setMeetLinks(res.data);
     } catch (error) {
       console.error('Error fetching meet links:', error);
+    }
+  };
+
+  const fetchBadges = async () => {
+    try {
+      const res = await apiClient.get('/student/my-badges');
+      setBadges(res.data);
+    } catch (error) {
+      console.error('Error fetching badges:', error);
     }
   };
 

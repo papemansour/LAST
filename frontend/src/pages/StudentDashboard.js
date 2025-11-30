@@ -69,6 +69,17 @@ const StudentDashboard = () => {
         setTeacher(teacherRes.data);
       }
       
+      // Get admin info for messaging
+      try {
+        const allUsersRes = await apiClient.get('/admin/all-users');
+        const adminUser = allUsersRes.data.find(u => u.role === 'admin');
+        if (adminUser) {
+          setAdmin(adminUser);
+        }
+      } catch (error) {
+        console.log('Could not fetch admin info:', error);
+      }
+      
       setLoading(false);
     } catch (error) {
       toast.error('Erreur de chargement');

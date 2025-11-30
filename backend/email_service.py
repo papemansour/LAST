@@ -547,7 +547,7 @@ class EmailService:
         elif level == "intermediate":
             content_title = "Intermédiaire"
             content_body = f"""
-                    <p>Hello <strong>{first_name}</strong>,</p>
+                    <p>Hello <strong>{first_name} {last_name}</strong>,</p>
                     
                     <p>Nous sommes ravis de vous accueillir sur <strong>MYKALMA</strong> ! Vous vous êtes inscrit avec succès à notre cours en ligne de niveau intermédiaire, et nous sommes impatients de vous accompagner dans votre apprentissage de la langue.</p>
                     

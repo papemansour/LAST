@@ -945,6 +945,11 @@ const TeacherDashboard = () => {
             <DocumentsManager userRole="teacher" />
           </TabsContent>
 
+          {/* Meet Links Tab - Cours en ligne */}
+          <TabsContent value="meet-links">
+            <TeacherMeetLinks />
+          </TabsContent>
+
           {/* Schedule Tab - Mes horaires */}
           <TabsContent value="schedule">
             <AvailabilityScheduler apiClient={apiClient} />

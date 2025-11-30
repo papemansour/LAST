@@ -601,7 +601,7 @@ const AdminDashboard = () => {
                       : `Aucun étudiant de niveau ${levelFilter}`}
                   </p>
                 ) : (
-                  <>
+                  <React.Fragment>
                     {/* Checkbox "Tout sélectionner" */}
                     <div className="mb-4 pb-3 border-b flex items-center gap-2">
                       <input

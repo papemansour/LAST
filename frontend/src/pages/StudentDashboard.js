@@ -20,6 +20,7 @@ import NewsDisplay from '../components/NewsDisplay';
 import WelcomeLetter from '../components/WelcomeLetter';
 import DonationButton from '../components/DonationButton';
 import KalamaClub from '../components/KalamaClub';
+import StudentDocuments from '../components/StudentDocuments';
 // ActivityFeed removed
 import StudentOfMonthBadge from '../components/StudentOfMonthBadge';
 import ProgressTracker from '../components/ProgressTracker';

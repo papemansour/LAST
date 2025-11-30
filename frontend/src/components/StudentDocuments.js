@@ -19,6 +19,12 @@ const StudentDocuments = () => {
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [showDocumentDialog, setShowDocumentDialog] = useState(false);
 
+  const getFullFileUrl = (fileUrl) => {
+    if (!fileUrl) return '';
+    if (fileUrl.startsWith('http')) return fileUrl;
+    return `${BACKEND_URL}${fileUrl}`;
+  };
+
   useEffect(() => {
     fetchDocuments();
   }, []);

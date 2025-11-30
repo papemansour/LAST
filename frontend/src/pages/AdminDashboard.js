@@ -565,15 +565,59 @@ const AdminDashboard = () => {
           <TabsContent value="students">
             <Card>
               <CardHeader>
-                <CardTitle>Liste des étudiants</CardTitle>
-                <CardDescription>Tous les étudiants inscrits</CardDescription>
+                <div className="flex justify-between items-center">
+                  <CardTitle>Liste des étudiants</CardTitle>
+                  <div className="flex gap-3 items-center">
+                    {/* Filtre par niveau */}
+                    <select
+                      value={levelFilter}
+                      onChange={(e) => setLevelFilter(e.target.value)}
+                      className="px-3 py-2 border rounded-md text-sm"
+                    >
+                      <option value="all">Tous les niveaux</option>
+                      <option value="beginner">Débutant</option>
+                      <option value="intermediate">Intermédiaire</option>
+                      <option value="advanced">Professionnel</option>
+                    </select>
+
+                    {/* Bouton suppression multiple */}
+                    {selectedStudents.length > 0 && (
+                      <Button
+                        onClick={deleteSelectedStudents}
+                        variant="destructive"
+                        size="sm"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Supprimer ({selectedStudents.length})
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
-                {students.length === 0 ? (
-                  <p className="text-gray-500">Aucun étudiant inscrit</p>
+                {filteredStudents.length === 0 ? (
+                  <p className="text-gray-500">
+                    {levelFilter === 'all' 
+                      ? 'Aucun étudiant inscrit' 
+                      : `Aucun étudiant de niveau ${levelFilter}`}
+                  </p>
                 ) : (
-                  <div className="space-y-4">
-                    {students.map((student) => (
+                  <>
+                    {/* Checkbox "Tout sélectionner" */}
+                    <div className="mb-4 pb-3 border-b flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedStudents.length === filteredStudents.length && filteredStudents.length > 0}
+                        onChange={toggleSelectAll}
+                        className="h-4 w-4 text-teal-600 rounded border-gray-300 focus:ring-teal-500"
+                      />
+                      <label className="text-sm font-medium text-gray-700">
+                        Tout sélectionner ({filteredStudents.length})
+                      </label>
+                    </div>
+
+                    <div className="space-y-4">
+                      {filteredStudents.map((student) => (
                       <div key={student.id} className="p-4 border rounded-lg">
                         <div className="flex justify-between items-start">
                           <div className="flex-1">

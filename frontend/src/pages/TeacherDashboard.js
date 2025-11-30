@@ -384,6 +384,10 @@ const TeacherDashboard = () => {
               <MessageCircle className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Messages</span>
             </TabsTrigger>
+            <TabsTrigger value="documents" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+              <FileText className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
+              <span className="text-xs font-semibold">Documents</span>
+            </TabsTrigger>
             <TabsTrigger value="schedule" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <Calendar className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Horaires</span>

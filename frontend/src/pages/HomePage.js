@@ -699,7 +699,7 @@ const HomePage = () => {
 
             <div className="relative overflow-hidden rounded-2xl border-2 border-teal-300 bg-white/60 backdrop-blur-lg hover:shadow-xl transition-all min-w-[280px] sm:min-w-[320px] flex-shrink-0 snap-center lg:transform lg:hover:scale-105">
               <div className="absolute top-3 md:top-4 right-3 md:right-4 flex gap-2">
-                {currency === 'FCFA' && pricingData.intermediate_discount_fcfa > 0 && (
+                {currency === 'FCFA' && pricingData.intermediate_discount_fcfa > 0 && new Date() < new Date('2026-01-14') && (
                   <span className="bg-yellow-400 text-teal-900 px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-bold animate-pulse">🎉 -10%</span>
                 )}
                 <span className="bg-teal-600 text-white px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-semibold">Populaire</span>

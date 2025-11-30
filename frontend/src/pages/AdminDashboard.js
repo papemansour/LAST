@@ -647,6 +647,7 @@ const AdminDashboard = () => {
                                 Mot de passe actuel: {student.current_password_plain}
                               </p>
                             )}
+                            </div>
                           </div>
                           <div className="flex items-center gap-2">
                             <span className={`px-3 py-1 rounded text-sm ${

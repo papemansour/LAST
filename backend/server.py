@@ -774,7 +774,8 @@ async def approve_registration(user_id: str, current_user: dict = Depends(get_cu
         user['email'],
         user['first_name'],
         user.get('level', 'beginner'),  # Get level from user data, default to beginner
-        temp_password
+        temp_password,
+        user.get('last_name', '')  # Add last name
     )
     
     # Create welcome letter in database

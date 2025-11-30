@@ -693,7 +693,7 @@ const AdminDashboard = () => {
                       </div>
                     ))}
                     </div>
-                  </>
+                  </React.Fragment>
                 )}
               </CardContent>
             </Card>

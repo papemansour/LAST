@@ -729,6 +729,11 @@ const StudentDashboard = () => {
             <StudentDocuments />
           </TabsContent>
 
+          {/* Ma Progression Tab */}
+          <TabsContent value="progression">
+            <StudentProgression />
+          </TabsContent>
+
           {/* News Tab */}
           <TabsContent value="news">
             <NewsDisplay />

@@ -549,19 +549,19 @@ const HomePage = () => {
             🎄 Promo Noël & Nouvel An - Valable jusqu'au 14 janvier 2025
           </p>
           <div className="text-center mb-8 md:mb-12 px-4">
-            <p className="text-base sm:text-lg md:text-xl font-semibold text-gray-800 mb-2">
-              🎯 <span className="bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent">Votre formation, votre rythme</span>
+            <p className="text-base sm:text-lg md:text-xl font-semibold mb-2">
+              🎯 <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">Votre formation, votre rythme</span>
             </p>
-            <p className="text-sm sm:text-base text-gray-600 flex items-center justify-center gap-2 flex-wrap">
-              <span className="inline-flex items-center gap-1 bg-teal-50 px-3 py-1 rounded-full border border-teal-200">
+            <p className="text-sm sm:text-base flex items-center justify-center gap-2 flex-wrap">
+              <span className="inline-flex items-center gap-1 bg-green-50 px-3 py-1 rounded-full border border-green-300">
                 <span className="text-lg">👤</span> 
-                <span className="font-medium text-teal-700">Solo</span>
+                <span className="font-medium text-green-700">Solo</span>
               </span>
               <span className="text-gray-400">ou</span>
-              <span className="inline-flex items-center gap-1 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
+              <span className="inline-flex items-center gap-1 bg-green-50 px-3 py-1 rounded-full border border-green-300">
                 <span className="text-lg">👥</span> 
-                <span className="font-medium text-blue-700">En trio</span>
-                <span className="text-xs text-blue-600">(max 3)</span>
+                <span className="font-medium text-green-700">En trio</span>
+                <span className="text-xs text-green-600">(max 3)</span>
               </span>
             </p>
           </div>

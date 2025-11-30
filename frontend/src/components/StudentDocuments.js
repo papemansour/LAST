@@ -209,7 +209,7 @@ const StudentDocuments = () => {
             <DialogTitle className="flex items-center justify-between">
               <span>{selectedDocument?.title}</span>
               <a
-                href={selectedDocument?.file_url}
+                href={getFullFileUrl(selectedDocument?.file_url)}
                 download={selectedDocument?.file_name}
                 onClick={(e) => e.stopPropagation()}
               >

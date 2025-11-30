@@ -535,14 +535,12 @@ class EmailService:
             content_body = f"""
                     <p>Hello <strong>{first_name}</strong>,</p>
                     
-                    <p>Nous sommes ravis de vous accueillir sur <strong>MYKALMAENGLISH</strong> ! 🎉</p>
-                    
-                    <p>Félicitations pour avoir fait le premier pas dans votre parcours d'apprentissage de l'anglais. En tant que débutant, vous trouverez que notre plateforme est conçue pour vous accompagner à chaque étape. Voici ce à quoi vous pouvez vous attendre :</p>
+                    <p>Nous sommes ravis de vous accueillir sur <strong>MYKALMA</strong> ! Vous vous êtes inscrit avec succès à notre cours en ligne de niveau débutant, et nous sommes impatients de vous accompagner dans votre apprentissage de la langue.</p>
                     
                     <ul>
-                        <li><strong>Leçons interactives :</strong> un contenu engageant adapté aux débutants pour vous aider à construire une base solide en anglais.</li>
-                        <li><strong>Apprentissage flexible :</strong> accédez à vos cours à tout moment, partout, à votre propre rythme.</li>
-                        <li><strong>Communauté de soutien :</strong> rejoignez notre communauté dynamique d'apprenants et d'instructeurs qui sont là pour vous aider à réussir.</li>
+                        <li>✅ <strong>Leçons interactives :</strong> un contenu engageant adapté à votre niveau pour vous aider à construire une base solide en anglais.</li>
+                        <li>✅ <strong>Apprentissage flexible :</strong> accédez à vos cours à tout moment, partout, à votre propre rythme.</li>
+                        <li>✅ <strong>Communauté de soutien :</strong> rejoignez notre communauté dynamique d'apprenants et d'instructeurs qui sont là pour vous aider à réussir.</li>
                     </ul>
             """
         elif level == "intermediate":

@@ -206,8 +206,8 @@ const StudentDocuments = () => {
       <Dialog open={showDocumentDialog} onOpenChange={setShowDocumentDialog}>
         <DialogContent className="max-w-4xl max-h-[90vh]">
           <DialogHeader>
-            <DialogTitle className="flex items-center justify-between">
-              <span>{selectedDocument?.title}</span>
+            <div className="flex items-center justify-between">
+              <DialogTitle>{selectedDocument?.title}</DialogTitle>
               <a
                 href={getFullFileUrl(selectedDocument?.file_url)}
                 download={selectedDocument?.file_name}
@@ -218,7 +218,7 @@ const StudentDocuments = () => {
                   Télécharger
                 </Button>
               </a>
-            </DialogTitle>
+            </div>
           </DialogHeader>
           
           <div className="overflow-auto">

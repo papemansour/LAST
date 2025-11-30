@@ -602,7 +602,7 @@ const HomePage = () => {
                       💰 Économisez {pricingData.kkid_discount_fcfa.toLocaleString()} FCFA
                     </div>
                   )}
-                  {currency === 'EUR' && (
+                  {currency === 'EUR' && new Date() < new Date('2026-01-15') && (
                     <div className="mt-2 md:mt-3 p-2 md:p-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg">
                       <div className="flex items-center justify-center gap-2 text-green-700 font-bold text-xs md:text-sm">
                         <span className="text-base md:text-lg">🎁</span>
@@ -678,7 +678,7 @@ const HomePage = () => {
                       💰 Économisez {pricingData.beginner_discount_fcfa.toLocaleString()} FCFA
                     </div>
                   )}
-                  {currency === 'EUR' && (
+                  {currency === 'EUR' && new Date() < new Date('2026-01-15') && (
                     <div className="mt-2 md:mt-3 p-2 md:p-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg">
                       <div className="flex items-center justify-center gap-2 text-green-700 font-bold text-xs md:text-sm">
                         <span className="text-base md:text-lg">🎁</span>
@@ -752,7 +752,7 @@ const HomePage = () => {
                       💰 Économisez {pricingData.intermediate_discount_fcfa.toLocaleString()} FCFA
                     </div>
                   )}
-                  {currency === 'EUR' && (
+                  {currency === 'EUR' && new Date() < new Date('2026-01-15') && (
                     <div className="mt-2 md:mt-3 p-2 md:p-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg">
                       <div className="flex items-center justify-center gap-2 text-green-700 font-bold text-xs md:text-sm">
                         <span className="text-base md:text-lg">🎁</span>
@@ -825,7 +825,7 @@ const HomePage = () => {
                       💰 Économisez {pricingData.advanced_discount_fcfa.toLocaleString()} FCFA
                     </div>
                   )}
-                  {currency === 'EUR' && (
+                  {currency === 'EUR' && new Date() < new Date('2026-01-15') && (
                     <div className="mt-2 md:mt-3 p-2 md:p-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg">
                       <div className="flex items-center justify-center gap-2 text-green-700 font-bold text-xs md:text-sm">
                         <span className="text-base md:text-lg">🎁</span>

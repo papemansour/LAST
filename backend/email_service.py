@@ -601,32 +601,22 @@ class EmailService:
                     {content_body}
                     
                     <div class="credentials">
-                        <h3>📧 VOS IDENTIFIANTS DE CONNEXION</h3>
-                        <p><strong>Email :</strong> {to_email}</p>
-                        <p><strong>Mot de passe provisoire :</strong> <code style="background: #f0f0f0; padding: 5px 10px; border-radius: 3px; font-size: 16px;">{temp_password}</code></p>
+                        <h3>Vos identifiants de connexion :</h3>
+                        <p>📧 <strong>Email :</strong> {to_email}</p>
+                        <p>🔑 <strong>Mot de passe provisoire :</strong> <code style="background: #f0f0f0; padding: 5px 10px; border-radius: 3px; font-size: 16px;">{temp_password}</code></p>
+                        <p style="margin-top: 15px; font-style: italic; color: #555;">Digita votre mot de passe pour accéder à Kalamathèque notre bibliothèque en ligne disponible depuis votre espace.</p>
                     </div>
-                    
-                    <div class="features">
-                        <h3>🎓 VOS ACCÈS</h3>
-                        <ul>
-                            <li><strong>Kalamathèque :</strong> Bibliothèque en ligne avec un accès illimité pour lire des livres</li>
-                            <li><strong>News :</strong> Section actualités et événements dans votre espace pour rester informé</li>
-                            <li><strong>Profil :</strong> Vous pouvez changer votre mot de passe provisoire dans votre espace, section Profil</li>
-                        </ul>
-                    </div>
-                    
-                    <p><strong>Pour commencer, connectez-vous simplement à votre compte et explorez les cours disponibles.</strong> Si vous avez des questions ou avez besoin d'aide, n'hésitez pas à contacter notre équipe de support.</p>
                     
                     <center>
                         <a href="{self.frontend_url}/login" class="button">
-                            🚀 Se connecter maintenant
+                            Connecte-toi sur mykalama
                         </a>
                     </center>
                     
                     <p>Nous vous souhaitons une expérience d'apprentissage enrichissante et agréable !</p>
                     
                     <p>Cordialement,<br>
-                    <strong>L'équipe MYKALMAENGLISH</strong></p>
+                    <strong>L'équipe MYKALMA</strong></p>
                 </div>
                 <div class="footer">
                     <p>MYKALMAENGLISH - Plateforme d'apprentissage de l'anglais</p>

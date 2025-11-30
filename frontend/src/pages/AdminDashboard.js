@@ -30,6 +30,7 @@ import KalamaClub from '../components/KalamaClub';
 import TestQuestionsManager from '../components/TestQuestionsManager';
 import PendingGroupRegistrations from '../components/PendingGroupRegistrations';
 import AdminTrash from '../components/AdminTrash';
+import DocumentsManager from '../components/DocumentsManager';
 // ActivityFeed removed
 
 const AdminDashboard = () => {

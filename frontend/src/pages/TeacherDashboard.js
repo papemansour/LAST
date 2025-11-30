@@ -35,6 +35,7 @@ import TeacherVideos from '../components/TeacherVideos';
 import TeacherGroupCodeManager from '../components/TeacherGroupCodeManager';
 import DocumentsManager from '../components/DocumentsManager';
 import TeacherMeetLinks from '../components/TeacherMeetLinks';
+import GiftWelcomeLetter from '../components/GiftWelcomeLetter';
 // ActivityFeed removed
 
 const TeacherDashboard = () => {

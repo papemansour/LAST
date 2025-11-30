@@ -116,6 +116,57 @@ const AdminDashboard = () => {
     }
   };
 
+  // Filtrer les étudiants par niveau
+  const students = allUsers.filter(u => u.role === 'student');
+  const filteredStudents = levelFilter === 'all' 
+    ? students 
+    : students.filter(s => s.level === levelFilter);
+
+  // Gestion de la sélection multiple
+  const toggleStudentSelection = (studentId) => {
+    setSelectedStudents(prev => 
+      prev.includes(studentId) 
+        ? prev.filter(id => id !== studentId)
+        : [...prev, studentId]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedStudents.length === filteredStudents.length) {
+      setSelectedStudents([]);
+    } else {
+      setSelectedStudents(filteredStudents.map(s => s.id));
+    }
+  };
+
+  const deleteSelectedStudents = async () => {
+    if (selectedStudents.length === 0) {
+      toast.error('Aucun étudiant sélectionné');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Êtes-vous sûr de vouloir supprimer ${selectedStudents.length} étudiant(s) ?`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      // Supprimer chaque étudiant sélectionné
+      await Promise.all(
+        selectedStudents.map(id => 
+          apiClient.delete(`/admin/delete-user/${id}`)
+        )
+      );
+      
+      toast.success(`${selectedStudents.length} étudiant(s) supprimé(s)`);
+      setSelectedStudents([]);
+      fetchData();
+    } catch (error) {
+      toast.error('Erreur lors de la suppression');
+    }
+  };
+
   const handleApprove = async (userId) => {
     try {
       const response = await apiClient.post(`/admin/approve-registration/${userId}`);

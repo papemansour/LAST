@@ -418,6 +418,8 @@ test_plan:
   test_priority: "high_first"
   completed_tests:
     - "Système de Pièces Jointes dans la Messagerie"
+  re_tested_after_fix:
+    - "Système de Pièces Jointes dans la Messagerie - RE-TEST RÉUSSI (30/11/2025)"
 
   - task: "Système Code Magique - Backend API"
     implemented: true

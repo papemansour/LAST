@@ -178,7 +178,7 @@ const StudentDocuments = () => {
                             Ouvrir
                           </Button>
                           <a
-                            href={doc.file_url}
+                            href={getFullFileUrl(doc.file_url)}
                             download={doc.file_name}
                             onClick={(e) => e.stopPropagation()}
                           >

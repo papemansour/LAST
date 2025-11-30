@@ -411,13 +411,17 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Système Code Magique - Interface Professeur"
-    - "Système Code Magique - Inscription Étudiants"
+    - "Système de Documents - Backend API"
+    - "Système de Documents - Interface Admin"
+    - "Système de Documents - Interface Professeur"
+    - "Système de Documents - Interface Étudiant"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
   completed_tests:
     - "Système de Pièces Jointes dans la Messagerie"
+    - "Système Code Magique - Interface Professeur"
+    - "Système Code Magique - Inscription Étudiants"
   re_tested_after_fix:
     - "Système de Pièces Jointes dans la Messagerie - RE-TEST RÉUSSI (30/11/2025)"
 

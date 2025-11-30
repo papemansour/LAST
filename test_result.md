@@ -484,12 +484,62 @@ test_plan:
           agent: "testing"
           comment: "🎉 RE-TEST APRÈS CORRECTION RÉUSSI! La relation professeur-étudiant a été corrigée comme annoncé. TESTS COMPLETS RÉALISÉS: ✅ PARTIE 1 ÉTUDIANT: 1) Connexion clubtest@example.com/TestClub2025 réussie, 2) Marie Martin visible comme professeur assigné, 3) Navigation vers Messages fonctionnelle, 4) Interface de conversation disponible avec icône trombone (📎), 5) Messages avec pièces jointes visibles (test_attachment.txt et test_document.txt), 6) Boutons d'action présents (œil, téléchargement, suppression), 7) Champ de saisie et envoi fonctionnels. ✅ PARTIE 2 PROFESSEUR: 1) Connexion marie.test@example.com/teacher123 réussie, 2) Dashboard montre '1 étudiant' et '1 message', 3) Navigation Messages réussie, 4) Étudiant 'Test Student' visible dans liste conversations, 5) 2 pièces jointes visibles côté professeur, 6) Bouton 'Ouvrir' fonctionne (modale s'ouvre/ferme). ✅ BACKEND VALIDÉ: API endpoints fonctionnels (upload-attachment, send, conversation). SCORE: 5/5 fonctionnalités testées avec succès (100%). Le système de pièces jointes dans la messagerie fonctionne parfaitement des deux côtés après correction de la relation professeur-étudiant."
 
+  - task: "Système de Documents - Backend API"
+    implemented: true
+    working: "NA"
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Implémenté - Endpoints pour upload documents (/documents/upload), envoi documents (/documents/send), récupération documents (/documents/my-documents), marquage lu (/documents/{id}/mark-read), suppression (/documents/{id}). Système complet admin/professeur vers étudiants. Nécessite tests complets selon spécifications review request."
+
+  - task: "Système de Documents - Interface Admin"
+    implemented: true
+    working: "NA"
+    file: "DocumentsManager.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Implémenté - Composant DocumentsManager intégré dans AdminDashboard onglet 'Documents'. Interface upload fichiers, formulaire envoi (titre, description, sélection étudiants), liste documents envoyés avec statut lecture. Nécessite tests complets selon review request."
+
+  - task: "Système de Documents - Interface Professeur"
+    implemented: true
+    working: "NA"
+    file: "DocumentsManager.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Implémenté - Composant DocumentsManager intégré dans TeacherDashboard onglet 'Documents'. Interface identique admin pour professeurs. Nécessite tests complets selon review request."
+
+  - task: "Système de Documents - Interface Étudiant"
+    implemented: true
+    working: "NA"
+    file: "StudentDocuments.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Implémenté - Composant StudentDocuments intégré dans StudentDashboard onglet 'Documents'. Interface réception documents avec badges NOUVEAU, compteur, prévisualisation, téléchargement, marquage lecture automatique. Nécessite tests complets selon review request."
+
 agent_communication:
     - agent: "testing"
       message: "🎉 ALL SECURITY TESTS PASSED! Fixed 2 critical bugs in admin password reset endpoint: 1) Undefined get_password_hash function (changed to hash_password), 2) Incorrect create_notification call signature. All security features now working correctly. Database verified clean of plain text passwords. Contact form working with proper validation."
     - agent: "testing"
       message: "🔄 NEW TEST CYCLE: Starting comprehensive testing of student dashboard password change functionality. Will test login, navigation, profile display, password change form, validation, and security verification with credentials test.student@example.com / zkpgqGzvwz"    - agent: "main"
       message: "✅ PRIORITÉ 0 COMPLETED - Bug fixes implemented: 1) Fixed 'Pack professionnel' renaming (changed 'Packs professionnels' to 'Pack professionnel' in HomePage.js and KalamathequeAdmin.js), 2) Fixed AdminDashboard crash - corrected teacher availability data structure (teacher_name, email, teacher_id instead of teacher.first_name), 3) Upload indicator already working properly in KalamathequeAdmin.js (shows 'Upload en cours...'). Admin Dashboard now loads successfully. Ready for comprehensive Kalamathèque testing."
+    - agent: "main"
+      message: "🚀 SYSTÈME DE DOCUMENTS IMPLÉMENTÉ - Nouveau système complet pour envoi documents admin/professeurs vers étudiants: 1) Backend: Endpoints upload, envoi, récupération, marquage lecture, suppression, 2) Frontend Admin: Interface DocumentsManager avec upload, sélection étudiants, suivi lectures, 3) Frontend Professeur: Interface identique admin, 4) Frontend Étudiant: Interface StudentDocuments avec badges NOUVEAU, compteur, prévisualisation, téléchargement. Système prêt pour tests complets selon spécifications review request."
     - agent: "testing"
       message: "🔍 KALAMATHÈQUE BACKEND TESTING COMPLETED - Results: ✅ File Upload (works), ✅ Access Verification (Digika code works), ✅ Book Creation (works), ✅ Book Retrieval (works), ✅ Book Deletion (works), ❌ AI Assistant (emergentintegrations import error), ❌ Text-to-Speech (emergentintegrations import error). 5/7 endpoints working. Core CRUD operations functional. AI features need import fix."
     - agent: "main"

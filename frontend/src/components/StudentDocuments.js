@@ -242,7 +242,7 @@ const StudentDocuments = () => {
                   <div className="text-6xl mb-4">📄</div>
                   <p className="text-lg font-semibold text-gray-700 mb-2">{selectedDocument?.file_name}</p>
                   <p className="text-sm text-gray-500 mb-4">
-                    Envoyé par {selectedDocument?.sender_role === 'admin' ? 'Admin KALAMA' : selectedDocument?.sender_name}
+                    Envoyé par {selectedDocument?.sender_role === &apos;admin&apos; ? &apos;Admin KALAMA&apos; : selectedDocument?.sender_name}
                   </p>
                   {selectedDocument?.description && (
                     <p className="text-sm text-gray-600 mb-4 max-w-xl mx-auto">

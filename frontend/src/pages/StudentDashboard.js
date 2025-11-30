@@ -311,7 +311,7 @@ const StudentDashboard = () => {
             
             <TabsTrigger 
               value="links" 
-              className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-green-50 border-2 border-green-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+              className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
             >
               <LinkIcon className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Liens</span>

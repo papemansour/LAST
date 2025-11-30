@@ -224,24 +224,24 @@ const StudentDocuments = () => {
           <div className="overflow-auto">
             {selectedDocument?.file_type === 'image' ? (
               <img 
-                src={selectedDocument.file_url} 
+                src={getFullFileUrl(selectedDocument.file_url)} 
                 alt={selectedDocument.file_name} 
                 className="w-full rounded-lg"
               />
             ) : selectedDocument?.file_type === 'pdf' ? (
               <iframe
-                src={selectedDocument?.file_url}
+                src={getFullFileUrl(selectedDocument?.file_url)}
                 className="w-full h-[70vh] rounded-lg"
                 title={selectedDocument?.file_name}
               />
             ) : selectedDocument?.file_type === 'video' ? (
               <video controls className="w-full rounded-lg">
-                <source src={selectedDocument.file_url} />
+                <source src={getFullFileUrl(selectedDocument.file_url)} />
                 Votre navigateur ne supporte pas la lecture vidéo.
               </video>
             ) : selectedDocument?.file_type === 'audio' ? (
               <audio controls className="w-full">
-                <source src={selectedDocument.file_url} />
+                <source src={getFullFileUrl(selectedDocument.file_url)} />
                 Votre navigateur ne supporte pas la lecture audio.
               </audio>
             ) : (

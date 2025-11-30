@@ -367,6 +367,37 @@ class StudentBadge(BaseModel):
     badge_id: str
     awarded_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+class WeeklyChallenge(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    description: str
+    challenge_type: str  # 'like_posts', 'comment_posts', 'attend_webinars'
+    target_count: int  # Number of actions needed
+    points_reward: int  # XP points to earn
+    week_start: datetime
+    week_end: datetime
+    active: bool = True
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class StudentPoints(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    student_id: str
+    total_points: int = 0
+    available_points: int = 0  # Points not yet converted to discount
+    total_discount_earned: float = 0.0  # Total discount in currency
+    last_updated: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ChallengeProgress(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    student_id: str
+    challenge_id: str
+    current_count: int = 0
+    completed: bool = False
+    completed_at: Optional[datetime] = None
+
 # ============ UTILITIES ============
 
 def hash_password(password: str) -> str:

@@ -550,15 +550,13 @@ class EmailService:
             content_body = f"""
                     <p>Hello <strong>{first_name}</strong>,</p>
                     
-                    <p>Nous sommes ravis de vous accueillir sur <strong>MYKALMAENGLISH</strong> ! Vous vous êtes inscrit avec succès à notre cours en ligne de niveau intermédiaire, et nous sommes impatients de vous accompagner dans votre apprentissage de la langue.</p>
+                    <p>Nous sommes ravis de vous accueillir sur <strong>MYKALMA</strong> ! Vous vous êtes inscrit avec succès à notre cours en ligne de niveau intermédiaire, et nous sommes impatients de vous accompagner dans votre apprentissage de la langue.</p>
                     
                     <ul>
-                        <li><strong>Leçons interactives :</strong> un contenu engageant adapté à votre niveau pour vous aider à approfondir vos connaissances en anglais.</li>
-                        <li><strong>Apprentissage flexible :</strong> accédez à vos cours à tout moment, partout, à votre propre rythme.</li>
-                        <li><strong>Communauté de soutien :</strong> rejoignez notre communauté dynamique d'apprenants et d'instructeurs qui sont là pour vous aider à réussir.</li>
+                        <li>✅ <strong>Leçons interactives :</strong> un contenu engageant adapté à votre niveau pour vous aider à approfondir vos connaissances en anglais.</li>
+                        <li>✅ <strong>Apprentissage flexible :</strong> accédez à vos cours à tout moment, partout, à votre propre rythme.</li>
+                        <li>✅ <strong>Communauté de soutien :</strong> rejoignez notre communauté dynamique d'apprenants et d'instructeurs qui sont là pour vous aider à réussir.</li>
                     </ul>
-                    
-                    <p>Sur MYKALMAENGLISH, vous trouverez une variété de ressources conçues pour améliorer vos compétences en anglais, notamment des leçons interactives, des exercices engageants et une communauté d'apprenants soudée. Nous vous encourageons à explorer la plateforme et à profiter pleinement de tout ce que nous offrons.</p>
             """
         else:  # advanced / Pack professionnel
             content_title = "Pack Professionnel"

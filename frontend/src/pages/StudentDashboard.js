@@ -22,6 +22,7 @@ import DonationButton from '../components/DonationButton';
 import KalamaClub from '../components/KalamaClub';
 import StudentDocuments from '../components/StudentDocuments';
 import StudentProgression from '../components/StudentProgression';
+import WeeklyChallenges from '../components/WeeklyChallenges';
 // ActivityFeed removed
 import StudentOfMonthBadge from '../components/StudentOfMonthBadge';
 import ProgressTracker from '../components/ProgressTracker';

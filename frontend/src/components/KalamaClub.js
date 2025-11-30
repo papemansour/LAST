@@ -325,6 +325,16 @@ const KalamaClub = ({ userRole }) => {
                         Par {post.author_name} • {new Date(post.created_at).toLocaleDateString('fr-FR')}
                       </CardDescription>
                     </div>
+                    {(userRole === 'admin' || userRole === 'teacher') && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleDeletePost(post.id)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        🗑️
+                      </Button>
+                    )}
                   </div>
                 </CardHeader>
                 <CardContent>

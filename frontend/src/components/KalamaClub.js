@@ -149,6 +149,30 @@ const KalamaClub = ({ userRole }) => {
     }
   };
 
+  const handleDeletePost = async (postId) => {
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce post ?')) return;
+    
+    try {
+      await apiClient.delete(`/club/posts/${postId}`);
+      toast.success('Post supprimé');
+      loadPosts();
+    } catch (error) {
+      toast.error('Erreur lors de la suppression du post');
+    }
+  };
+
+  const handleDeleteEvent = async (eventId) => {
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cet événement ?')) return;
+    
+    try {
+      await apiClient.delete(`/club/events/${eventId}`);
+      toast.success('Événement supprimé');
+      loadEvents();
+    } catch (error) {
+      toast.error('Erreur lors de la suppression de l\'événement');
+    }
+  };
+
   const handleCreateEvent = async (e) => {
     e.preventDefault();
     try {

@@ -834,6 +834,19 @@ async def change_password(password_data: PasswordChange, current_user: dict = De
     logger.info(f"Password changed by user {current_user['id']} - plain text stored for admin")
     return {"message": "Password changed successfully"}
 
+@api_router.post("/auth/mark-welcome-letter-opened")
+async def mark_welcome_letter_opened(current_user: dict = Depends(get_current_user)):
+    """Mark welcome letter as opened for first-time users"""
+    await db.users.update_one(
+        {"id": current_user['id']},
+        {"$set": {
+            "first_login": False,
+            "welcome_letter_opened_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    logger.info(f"Welcome letter opened by user {current_user['id']}")
+    return {"message": "Welcome letter marked as opened"}
+
 # ADMIN ROUTES
 @api_router.get("/admin/pending-registrations")
 async def get_pending_registrations(current_user: dict = Depends(get_current_user)):

@@ -1420,18 +1420,6 @@ const HomePage = () => {
                 
                 <div className="space-y-4">
                   <div className="bg-white rounded-lg p-4 shadow-sm">
-                    <p className="text-sm font-semibold text-gray-700 mb-2">
-                      💰 Montant à payer en FCFA : 
-                      <span className="text-2xl text-teal-600 font-bold ml-2">
-                        {selectedPlan ? `${Math.round(selectedPlan.price * EUR_TO_FCFA).toLocaleString('fr-FR')} FCFA` : ''}
-                      </span>
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      (Équivalent à {selectedPlan ? formatPrice(selectedPlan.price) : ''})
-                    </p>
-                  </div>
-
-                  <div className="bg-white rounded-lg p-4 shadow-sm">
                     <p className="text-sm font-semibold text-gray-700 mb-3">
                       👤 Bénéficiaire du transfert :
                     </p>

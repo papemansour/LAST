@@ -23,6 +23,7 @@ import KalamaClub from '../components/KalamaClub';
 import StudentDocuments from '../components/StudentDocuments';
 import StudentProgression from '../components/StudentProgression';
 import WeeklyChallenges from '../components/WeeklyChallenges';
+import GiftWelcomeLetter from '../components/GiftWelcomeLetter';
 // ActivityFeed removed
 import StudentOfMonthBadge from '../components/StudentOfMonthBadge';
 import ProgressTracker from '../components/ProgressTracker';

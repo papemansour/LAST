@@ -989,10 +989,39 @@ const HomePage = () => {
                           <SelectTrigger className="w-[140px]">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="+33">🇫🇷 +33</SelectItem>
-                            <SelectItem value="+221">🇸🇳 +221</SelectItem>
-                            <SelectItem value="+1">🇺🇸 +1</SelectItem>
+                          <SelectContent className="max-h-[300px]">
+                            <SelectItem value="+33">🇫🇷 France +33</SelectItem>
+                            <SelectItem value="+221">🇸🇳 Sénégal +221</SelectItem>
+                            <SelectItem value="+225">🇨🇮 Côte d'Ivoire +225</SelectItem>
+                            <SelectItem value="+223">🇲🇱 Mali +223</SelectItem>
+                            <SelectItem value="+226">🇧🇫 Burkina Faso +226</SelectItem>
+                            <SelectItem value="+229">🇧🇯 Bénin +229</SelectItem>
+                            <SelectItem value="+227">🇳🇪 Niger +227</SelectItem>
+                            <SelectItem value="+228">🇹🇬 Togo +228</SelectItem>
+                            <SelectItem value="+224">🇬🇳 Guinée +224</SelectItem>
+                            <SelectItem value="+237">🇨🇲 Cameroun +237</SelectItem>
+                            <SelectItem value="+241">🇬🇦 Gabon +241</SelectItem>
+                            <SelectItem value="+242">🇨🇬 Congo +242</SelectItem>
+                            <SelectItem value="+243">🇨🇩 RD Congo +243</SelectItem>
+                            <SelectItem value="+236">🇨🇫 Centrafrique +236</SelectItem>
+                            <SelectItem value="+235">🇹🇩 Tchad +235</SelectItem>
+                            <SelectItem value="+212">🇲🇦 Maroc +212</SelectItem>
+                            <SelectItem value="+213">🇩🇿 Algérie +213</SelectItem>
+                            <SelectItem value="+216">🇹🇳 Tunisie +216</SelectItem>
+                            <SelectItem value="+230">🇲🇺 Maurice +230</SelectItem>
+                            <SelectItem value="+234">🇳🇬 Nigeria +234</SelectItem>
+                            <SelectItem value="+233">🇬🇭 Ghana +233</SelectItem>
+                            <SelectItem value="+254">🇰🇪 Kenya +254</SelectItem>
+                            <SelectItem value="+27">🇿🇦 Afrique du Sud +27</SelectItem>
+                            <SelectItem value="+32">🇧🇪 Belgique +32</SelectItem>
+                            <SelectItem value="+41">🇨🇭 Suisse +41</SelectItem>
+                            <SelectItem value="+352">🇱🇺 Luxembourg +352</SelectItem>
+                            <SelectItem value="+1">🇺🇸 USA/Canada +1</SelectItem>
+                            <SelectItem value="+44">🇬🇧 Royaume-Uni +44</SelectItem>
+                            <SelectItem value="+49">🇩🇪 Allemagne +49</SelectItem>
+                            <SelectItem value="+34">🇪🇸 Espagne +34</SelectItem>
+                            <SelectItem value="+39">🇮🇹 Italie +39</SelectItem>
+                            <SelectItem value="+351">🇵🇹 Portugal +351</SelectItem>
                           </SelectContent>
                         </Select>
                         <Input

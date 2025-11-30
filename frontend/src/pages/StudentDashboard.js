@@ -698,11 +698,18 @@ const StudentDashboard = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-6">
-                  <ConversationChat
-                    recipientId="5a225f14-b653-4f13-91ef-c7d248ff60d6"
-                    recipientName="Admin KALAMA"
-                    currentUserId={user?.id}
-                  />
+                  {admin ? (
+                    <ConversationChat
+                      recipientId={admin.id}
+                      recipientName="Admin KALAMA"
+                      currentUserId={user?.id}
+                    />
+                  ) : (
+                    <div className="text-center py-12">
+                      <MessageCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-500 text-sm">Chargement...</p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>

@@ -652,28 +652,48 @@ const StudentDashboard = () => {
 
           {/* Conversations Tab */}
           <TabsContent value="conversations">
-            <Card className="border-teal-100">
-              <CardHeader className="bg-teal-50">
-                <CardTitle className="text-teal-800">💬 Conversations avec mon professeur</CardTitle>
-                <CardDescription>
-                  {teacher ? `Échangez avec ${teacher.first_name} ${teacher.last_name}` : 'Aucun professeur assigné'}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-6">
-                {!teacher ? (
-                  <div className="text-center py-12">
-                    <MessageCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500">Vous n&apos;avez pas encore de professeur assigné</p>
-                  </div>
-                ) : (
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Conversation avec le professeur */}
+              <Card className="border-teal-100">
+                <CardHeader className="bg-teal-50">
+                  <CardTitle className="text-teal-800">👨‍🏫 Mon Professeur</CardTitle>
+                  <CardDescription>
+                    {teacher ? `${teacher.first_name} ${teacher.last_name}` : 'Aucun professeur assigné'}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  {!teacher ? (
+                    <div className="text-center py-12">
+                      <MessageCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-500 text-sm">Vous n&apos;avez pas encore de professeur assigné</p>
+                    </div>
+                  ) : (
+                    <ConversationChat
+                      recipientId={teacher.id}
+                      recipientName={`${teacher.first_name} ${teacher.last_name}`}
+                      currentUserId={user?.id}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Conversation avec l'admin */}
+              <Card className="border-teal-100">
+                <CardHeader className="bg-teal-50">
+                  <CardTitle className="text-teal-800">👤 Administration</CardTitle>
+                  <CardDescription>
+                    Contactez l&apos;équipe MyKalama
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-6">
                   <ConversationChat
-                    recipientId={teacher.id}
-                    recipientName={`${teacher.first_name} ${teacher.last_name}`}
+                    recipientId="5a225f14-b653-4f13-91ef-c7d248ff60d6"
+                    recipientName="Admin KALAMA"
                     currentUserId={user?.id}
                   />
-                )}
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* Documents Tab */}

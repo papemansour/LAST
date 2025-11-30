@@ -325,6 +325,24 @@ class DocumentCreate(BaseModel):
     file_type: str
     recipient_ids: List[str]  # Liste des IDs d'étudiants destinataires
 
+class MeetLink(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    student_id: str
+    teacher_id: str
+    meet_link: str
+    title: str
+    scheduled_date: datetime
+    completed: bool = False
+    attended: bool = False
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class MeetLinkCreate(BaseModel):
+    student_id: str
+    meet_link: str
+    title: str
+    scheduled_date: str  # ISO format
+
 # ============ UTILITIES ============
 
 def hash_password(password: str) -> str:

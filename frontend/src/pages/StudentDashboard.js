@@ -67,6 +67,11 @@ const StudentDashboard = () => {
       setHomeworks(homeworksRes.data);
       setPricing(pricingRes.data);
       
+      // Check if first login to show welcome gift
+      if (userRes.data.first_login) {
+        setShowWelcomeGift(true);
+      }
+      
       // Get teacher info if assigned
       if (userRes.data.assigned_teacher) {
         const teacherRes = await apiClient.get(`/student/my-teacher/${userRes.data.assigned_teacher}`);

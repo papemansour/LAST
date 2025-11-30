@@ -65,6 +65,8 @@ class User(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     preferred_slots: Optional[str] = None
     referral_source: Optional[str] = None
+    first_login: bool = True  # True until user opens welcome letter
+    welcome_letter_opened_at: Optional[datetime] = None
 
 class UserCreate(BaseModel):
     email: EmailStr

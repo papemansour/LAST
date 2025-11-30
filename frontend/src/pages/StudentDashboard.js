@@ -730,14 +730,12 @@ const StudentDashboard = () => {
             <StudentDocuments />
           </TabsContent>
 
-          {/* Ma Progression Tab */}
+          {/* Ma Progression & Défis Tab (Fusionné) */}
           <TabsContent value="progression">
-            <StudentProgression />
-          </TabsContent>
-
-          {/* Weekly Challenges Tab */}
-          <TabsContent value="challenges">
-            <WeeklyChallenges />
+            <div className="space-y-6">
+              <WeeklyChallenges />
+              <StudentProgression />
+            </div>
           </TabsContent>
 
           {/* News Tab */}

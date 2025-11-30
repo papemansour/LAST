@@ -192,6 +192,14 @@ const StudentDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50">
+      {/* Gift Welcome Letter Modal */}
+      {showWelcomeGift && (
+        <GiftWelcomeLetter 
+          user={user} 
+          onClose={() => setShowWelcomeGift(false)}
+        />
+      )}
+
       {/* Navigation */}
       <nav className="bg-white shadow-sm">
         <div className="container mx-auto px-2 sm:px-4 py-3 sm:py-4 flex justify-between items-center">

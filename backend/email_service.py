@@ -522,12 +522,13 @@ class EmailService:
         to_email: str, 
         first_name: str, 
         level: str,
-        temp_password: str
+        temp_password: str,
+        last_name: str = ""
     ) -> bool:
         """
         Send level-based welcome email to newly approved student
         """
-        subject = "Bienvenue sur MYKALMAENGLISH ! 🎉"
+        subject = "Bienvenue sur MYKALMA ! 🎉"
         
         # Determine content based on level
         if level == "beginner":

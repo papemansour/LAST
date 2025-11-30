@@ -182,6 +182,11 @@ const GiftWelcomeLetter = ({ user, onClose }) => {
           to { opacity: 1; }
         }
 
+        @keyframes fadeOut {
+          from { opacity: 1; }
+          to { opacity: 0; }
+        }
+
         @keyframes fall {
           to {
             transform: translateY(100vh) rotate(360deg);
@@ -211,8 +216,40 @@ const GiftWelcomeLetter = ({ user, onClose }) => {
           50% { transform: translateY(-20px); }
         }
 
+        @keyframes dustDisappear {
+          0% {
+            opacity: 1;
+            transform: scale(1) rotate(0deg);
+            filter: blur(0px);
+          }
+          30% {
+            opacity: 0.8;
+            transform: scale(0.95) rotate(2deg);
+            filter: blur(1px);
+          }
+          60% {
+            opacity: 0.4;
+            transform: scale(0.8) rotate(-3deg);
+            filter: blur(3px);
+          }
+          80% {
+            opacity: 0.15;
+            transform: scale(0.5) rotate(5deg);
+            filter: blur(8px);
+          }
+          100% {
+            opacity: 0;
+            transform: scale(0.2) rotate(-10deg);
+            filter: blur(15px);
+          }
+        }
+
         .animate-fadeIn {
           animation: fadeIn 0.3s ease-out;
+        }
+
+        .animate-fadeOut {
+          animation: fadeOut 1s ease-out forwards;
         }
 
         .animate-fall {
@@ -229,6 +266,10 @@ const GiftWelcomeLetter = ({ user, onClose }) => {
 
         .animate-bounce-once {
           animation: bounce-once 0.6s ease-out;
+        }
+
+        .animate-dustDisappear {
+          animation: dustDisappear 1s ease-out forwards;
         }
       `}</style>
     </div>

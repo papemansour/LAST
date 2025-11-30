@@ -1488,10 +1488,6 @@ const HomePage = () => {
                       </li>
                       <li className="flex gap-3">
                         <span className="flex-shrink-0 w-6 h-6 bg-teal-600 text-white rounded-full flex items-center justify-center text-xs font-bold">6</span>
-                        <span>Entrez le montant : <strong>{selectedPlan ? `${Math.round(selectedPlan.price * EUR_TO_FCFA).toLocaleString('fr-FR')} FCFA` : ''}</strong></span>
-                      </li>
-                      <li className="flex gap-3">
-                        <span className="flex-shrink-0 w-6 h-6 bg-teal-600 text-white rounded-full flex items-center justify-center text-xs font-bold">7</span>
                         <span>Cliquez sur <strong>"Envoyer"</strong> pour finaliser le transfert</span>
                       </li>
                     </ol>

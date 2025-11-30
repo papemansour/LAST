@@ -289,10 +289,9 @@ const Kalamatheque = () => {
                 {filteredBooks.map((book) => (
                   <Card 
                     key={book.id} 
-                    className="cursor-pointer hover:shadow-xl transition"
-                    onClick={() => handleOpenBook(book)}
+                    className="hover:shadow-xl transition"
                   >
-                    <CardHeader>
+                    <CardHeader className="cursor-pointer" onClick={() => handleOpenBook(book)}>
                       {book.cover_image && (
                         <img 
                           src={book.cover_image} 
@@ -307,7 +306,30 @@ const Kalamatheque = () => {
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm text-gray-600 line-clamp-3">{book.description}</p>
+                      <p className="text-sm text-gray-600 line-clamp-3 mb-4">{book.description}</p>
+                      <div className="flex gap-2">
+                        <Button 
+                          onClick={() => handleOpenBook(book)}
+                          className="flex-1 bg-teal-600 hover:bg-teal-700"
+                          size="sm"
+                        >
+                          👁️ Ouvrir
+                        </Button>
+                        <a 
+                          href={book.file_url} 
+                          download={book.title}
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex-1"
+                        >
+                          <Button 
+                            variant="outline"
+                            className="w-full"
+                            size="sm"
+                          >
+                            ⬇️ Télécharger
+                          </Button>
+                        </a>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}

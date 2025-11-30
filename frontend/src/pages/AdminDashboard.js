@@ -620,7 +620,15 @@ const AdminDashboard = () => {
                       {filteredStudents.map((student) => (
                       <div key={student.id} className="p-4 border rounded-lg">
                         <div className="flex justify-between items-start">
-                          <div className="flex-1">
+                          <div className="flex items-start gap-3 flex-1">
+                            {/* Checkbox individuel */}
+                            <input
+                              type="checkbox"
+                              checked={selectedStudents.includes(student.id)}
+                              onChange={() => toggleStudentSelection(student.id)}
+                              className="h-4 w-4 text-teal-600 rounded border-gray-300 focus:ring-teal-500 mt-1"
+                            />
+                            <div className="flex-1">
                             <h3 className="font-semibold">{student.first_name} {student.last_name}</h3>
                             <p className="text-sm text-gray-600">{student.email}</p>
                             {student.phone && (

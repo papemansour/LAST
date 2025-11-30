@@ -557,18 +557,16 @@ class EmailService:
                     </ul>
             """
         else:  # advanced / Pack professionnel
-            content_title = "Pack Professionnel"
+            content_title = "Professionnel"
             content_body = f"""
                     <p>Hello <strong>{first_name}</strong>,</p>
                     
-                    <p>Nous sommes ravis de vous accueillir sur <strong>MYKALMAENGLISH</strong> ! Vous avez franchi une étape importante pour améliorer vos compétences en anglais professionnel, et nous sommes impatients de vous accompagner dans cette aventure.</p>
-                    
-                    <p>Notre programme de formation intensive et accélérée en anglais est conçu spécialement pour des professionnels comme vous. Voici ce que vous pouvez attendre :</p>
+                    <p>Nous sommes ravis de vous accueillir sur <strong>MYKALMA</strong> ! Vous vous êtes inscrit avec succès à notre cours en ligne de niveau professionnel, et nous sommes impatients de vous accompagner dans votre apprentissage de la langue.</p>
                     
                     <ul>
-                        <li><strong>Apprentissage complet :</strong> Engagez-vous avec un contenu adapté qui se concentre sur des applications concrètes.</li>
-                        <li><strong>Accès flexible :</strong> Apprenez à votre rythme grâce à notre plateforme en ligne, disponible à tout moment et de n'importe où.</li>
-                        <li><strong>Communauté de soutien :</strong> Connectez-vous avec d'autres apprenants et des instructeurs qui sont là pour vous soutenir.</li>
+                        <li>✅ <strong>Leçons interactives :</strong> un contenu engageant adapté à votre niveau pour vous aider à perfectionner vos compétences en anglais professionnel.</li>
+                        <li>✅ <strong>Apprentissage flexible :</strong> accédez à vos cours à tout moment, partout, à votre propre rythme.</li>
+                        <li>✅ <strong>Communauté de soutien :</strong> rejoignez notre communauté dynamique d'apprenants et d'instructeurs qui sont là pour vous aider à réussir.</li>
                     </ul>
             """
         

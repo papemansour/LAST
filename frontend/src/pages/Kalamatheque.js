@@ -6,7 +6,7 @@ import { Button } from '../components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
-import { Search, Volume2, BookOpen, LogOut, Brain } from 'lucide-react';
+import { Search, Volume2, BookOpen, LogOut, Brain, Download } from 'lucide-react';
 
 const Kalamatheque = () => {
   const navigate = useNavigate();

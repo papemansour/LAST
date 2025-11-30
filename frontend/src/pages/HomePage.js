@@ -639,7 +639,7 @@ const HomePage = () => {
 
             <div className="relative overflow-hidden rounded-2xl border-2 border-teal-200 bg-white/60 backdrop-blur-lg hover:shadow-xl transition-all min-w-[280px] sm:min-w-[320px] flex-shrink-0 snap-center">
               <div className="bg-gradient-to-br from-teal-50 to-teal-100 p-4 md:p-6 relative">
-                {pricingData.beginner_discount_fcfa > 0 && (
+                {currency === 'FCFA' && pricingData.beginner_discount_fcfa > 0 && (
                   <div className="absolute top-2 right-2 bg-yellow-400 text-teal-900 px-3 py-1 rounded-full text-xs font-bold animate-pulse">
                     🎉 PROMO -10%
                   </div>

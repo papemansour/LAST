@@ -649,7 +649,7 @@ const HomePage = () => {
               </div>
               <div className="p-4 md:p-6">
                 <div className="text-center mb-4 md:mb-6">
-                  {(pricingData.beginner_discount > 0 || pricingData.beginner_discount_fcfa > 0) && (
+                  {currency === 'FCFA' && pricingData.beginner_discount_fcfa > 0 && (
                     <div className="text-gray-400 line-through text-lg md:text-xl">
                       {formatPrice(pricingData.beginner_eur, pricingData.beginner_fcfa)}
                     </div>
@@ -657,12 +657,12 @@ const HomePage = () => {
                   <div className="text-2xl md:text-3xl font-bold text-teal-600">
                     {formatPriceWithSmallFCFA(
                       pricingData.beginner_eur - pricingData.beginner_discount,
-                      (pricingData.beginner_fcfa || 0) - (pricingData.beginner_discount_fcfa || 0)
+                      (pricingData.beginner_fcfa || 0) - (currency === 'FCFA' ? pricingData.beginner_discount_fcfa || 0 : 0)
                     )}
                   </div>
-                  {(pricingData.beginner_discount > 0 || pricingData.beginner_discount_fcfa > 0) && (
+                  {currency === 'FCFA' && pricingData.beginner_discount_fcfa > 0 && (
                     <div className="text-green-600 font-semibold mt-1 md:mt-2 text-sm md:text-base">
-                      💰 Économisez {formatPrice(pricingData.beginner_discount, pricingData.beginner_discount_fcfa)}
+                      💰 Économisez {pricingData.beginner_discount_fcfa.toLocaleString()} FCFA
                     </div>
                   )}
                 </div>

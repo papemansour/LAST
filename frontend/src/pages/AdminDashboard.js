@@ -31,6 +31,7 @@ import TestQuestionsManager from '../components/TestQuestionsManager';
 import PendingGroupRegistrations from '../components/PendingGroupRegistrations';
 import AdminTrash from '../components/AdminTrash';
 import DocumentsManager from '../components/DocumentsManager';
+import BadgesManager from '../components/BadgesManager';
 // ActivityFeed removed
 
 const AdminDashboard = () => {

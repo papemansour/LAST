@@ -47,6 +47,7 @@ const TeacherDashboard = () => {
   const [messages, setMessages] = useState([]);
   const [studentHomeworks, setStudentHomeworks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showWelcomeGift, setShowWelcomeGift] = useState(false);
   const [selectedRecipient, setSelectedRecipient] = useState(null);
   const [messageContent, setMessageContent] = useState('');
   const [isTimerRunning, setIsTimerRunning] = useState(false);

@@ -586,7 +586,7 @@ const HomePage = () => {
               </div>
               <div className="p-4 md:p-6">
                 <div className="text-center mb-4 md:mb-6">
-                  {pricingData.kkid_discount > 0 && (
+                  {(pricingData.kkid_discount > 0 || pricingData.kkid_discount_fcfa > 0) && (
                     <div className="text-gray-400 line-through text-lg md:text-xl">
                       {formatPrice(pricingData.kkid_eur, pricingData.kkid_fcfa)}
                     </div>
@@ -597,7 +597,7 @@ const HomePage = () => {
                       (pricingData.kkid_fcfa || 0) - (pricingData.kkid_discount_fcfa || 0)
                     )}
                   </div>
-                  {pricingData.kkid_discount > 0 && (
+                  {(pricingData.kkid_discount > 0 || pricingData.kkid_discount_fcfa > 0) && (
                     <div className="text-green-600 font-semibold mt-1 md:mt-2 text-sm md:text-base">
                       💰 Économisez {formatPrice(pricingData.kkid_discount, pricingData.kkid_discount_fcfa)}
                     </div>

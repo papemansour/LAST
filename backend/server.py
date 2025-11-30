@@ -2175,16 +2175,28 @@ async def get_test(level: str):
 
 @api_router.post("/tests/submit")
 async def submit_test(submission: TestSubmission):
-    if submission.level not in TEST_QUESTIONS:
-        raise HTTPException(status_code=404, detail="Test not found")
+    # Get questions from database first
+    db_questions = await db.test_questions.find({"level": submission.level, "active": True}, {"_id": 0}).to_list(100)
     
-    # Calculate score
-    correct_answers = TEST_QUESTIONS[submission.level]
-    score = 0
-    for answer in submission.answers:
-        correct = next((q for q in correct_answers if q["id"] == answer["question_id"]), None)
-        if correct and correct["correct"] == answer["selected_option"]:
-            score += 1
+    # If no questions in DB, fallback to hardcoded questions
+    if not db_questions:
+        if submission.level not in TEST_QUESTIONS:
+            raise HTTPException(status_code=404, detail="Test not found")
+        correct_answers = TEST_QUESTIONS[submission.level]
+        
+        # Calculate score with hardcoded questions
+        score = 0
+        for answer in submission.answers:
+            correct = next((q for q in correct_answers if q["id"] == answer["question_id"]), None)
+            if correct and correct["correct"] == answer["selected_option"]:
+                score += 1
+    else:
+        # Calculate score with database questions
+        score = 0
+        for answer in submission.answers:
+            correct = next((q for q in db_questions if q["id"] == answer["question_id"]), None)
+            if correct and str(correct.get("correct_answer")) == str(answer["selected_option"]):
+                score += 1
     
     # Save result
     result = TestResult(

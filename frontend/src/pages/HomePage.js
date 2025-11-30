@@ -576,7 +576,7 @@ const HomePage = () => {
             {/* Pack K-Kid - Enfants */}
             <div className="relative overflow-hidden rounded-2xl border-2 border-pink-300 bg-white/60 backdrop-blur-lg hover:shadow-xl transition-all min-w-[280px] sm:min-w-[320px] flex-shrink-0 snap-center">
               <div className="bg-gradient-to-br from-pink-50 to-pink-100 p-4 md:p-6 relative">
-                {currency === 'FCFA' && pricingData.kkid_discount_fcfa > 0 && (
+                {currency === 'FCFA' && pricingData.kkid_discount_fcfa > 0 && new Date() < new Date('2026-01-14') && (
                   <div className="absolute top-2 right-2 bg-yellow-400 text-pink-900 px-3 py-1 rounded-full text-xs font-bold animate-pulse">
                     🎉 PROMO -10%
                   </div>

@@ -97,6 +97,12 @@ const TeacherDashboard = () => {
       setStudents(studentsRes.data);
       setCourses(coursesRes.data);
       setConversations(conversationsRes.data);
+      
+      // Check if first login to show welcome gift
+      if (userRes.data.first_login) {
+        setShowWelcomeGift(true);
+      }
+      
       setLoading(false);
     } catch (error) {
       toast.error('Erreur de chargement');

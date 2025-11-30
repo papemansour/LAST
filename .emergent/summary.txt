@@ -1,15 +1,18 @@
 <analysis>**original_problem_statement:**
-L'utilisateur a une liste de demandes pour faire évoluer son site MyKalamaenglish, incluant des corrections de bugs, des améliorations d'interface, et de nouvelles fonctionnalités. Les demandes de cette session incluent :
-
-1.  Refondre le système de création de codes de groupe pour les professeurs.
-2.  Modifier l'affichage du code promo (le rendre statique).
-3.  Supprimer complètement l'onglet Documents de tous les dashboards.
-4.  Faire en sorte que le partage de documents (tous formats) se fasse via des pièces jointes dans la messagerie.
-5.  Créer une section À propos dans le pied de page, mentionnant le créateur (DIAGNE Mouhamadou Mansour). Cette demande a ensuite été annulée et le pied de page original a été restauré.
-6.  Corriger une série de bugs runtime qui empêchaient l'application de fonctionner correctement (, , , etc.).
-7.  Corriger les liens de paiement Stripe dans les dashboards qui ne fonctionnaient pas.
-8.  Corriger un bug sur la version mobile de la case à cocher Kalama Club dans le formulaire d'inscription.
-9.  Corriger un bug signalé dans l'onglet Club du dashboard étudiant.
+L'utilisateur a une liste de demandes pour faire évoluer son site MyKalamaenglish. Au cours de cette session, les demandes suivantes ont été faites :
+1.  Corriger les redirections de paiement Stripe qui ne fonctionnaient pas, en utilisant des liens et un code promo spécifiques fournis par l'utilisateur.
+2.  Corriger un bug dans l'onglet Club du dashboard étudiant, qui s'est avéré être le même problème que les liens Stripe.
+3.  Investiguer et résoudre un bug critique où les données des utilisateurs semblaient changer automatiquement, ce qui bloquait le développement de la fonctionnalité de code de groupe pour les professeurs.
+4.  Finaliser l'interface de gestion des codes de groupe pour les professeurs.
+5.  Implémenter la fonctionnalité d'envoi de tous types de pièces jointes dans la messagerie.
+6.  Corriger un bug qui empêchait d'ouvrir et de lire les pièces jointes dans la messagerie.
+7.  Mettre à jour les prix des packs sur la page d'accueil, en ajoutant une promotion de -10% uniquement pour les paiements en FCFA, avec une date d'expiration au 14/01/2026.
+8.  Nettoyer les instructions de paiement Wave sur la page d'accueil.
+9.  Supprimer la section du code promotionnel du formulaire d'inscription.
+10. Rendre le numéro de téléphone de l'étudiant visible dans le dashboard de l'administrateur.
+11. Mettre à jour le template de l'e-mail de bienvenue envoyé après l'approbation de l'inscription par l'admin.
+12. Préserver 7 comptes utilisateurs spécifiques avec leurs identifiants dans la base de données.
+13. Ajouter une fonctionnalité de suppression groupée et de filtrage par niveau pour les étudiants dans le dashboard de l'administrateur.
 
 **PRODUCT REQUIREMENTS:**
 - **Rôles Utilisateur :** Admin, Professeur, Étudiant (avec sous-rôle K-Kid).
@@ -18,164 +21,144 @@ L'utilisateur a une liste de demandes pour faire évoluer son site MyKalamaengli
     - Dashboards personnalisés par rôle.
     - Intégration de paiement avec Stripe.
     - Gestion des utilisateurs, groupes, et contenus.
-    - Système de messagerie avec support de pièces jointes (backend prêt, frontend à faire).
+    - Système de messagerie avec support de pièces jointes.
     - Système de Kalama Club pour les étudiants.
+    - Tarification dynamique avec promotions conditionnelles (devise, date).
+    - Envoi d'e-mails transactionnels (via AWS SES, actuellement en mode mock/log).
 
 **User's preferred language**: Français
 
 **what currently exists?**
-L'application est une plateforme d'apprentissage de l'anglais fonctionnelle. L'agent a effectué de nombreuses modifications durant cette session :
--   Le système de code promo a été simplifié, le rendant statique.
--   La section Documents a été entièrement retirée de tous les dashboards (Admin, Professeur, Étudiant) suite à une demande de l'utilisateur.
--   De multiples erreurs runtime qui faisaient planter l'application ont été identifiées et corrigées.
--   Le pied de page a été modifié puis restauré à son état original. Les liens de navigation dans le footer (Inscription, Connexion) ont été rendus fonctionnels.
--   Le style de la page d'accueil a été amélioré.
--   Un bug sur la version mobile de la checkbox Kalama Club a été corrigé.
--   Un nouveau système de paiement Stripe via un endpoint backend a été mis en place pour remplacer les liens hardcodés.
+L'application est une plateforme d'apprentissage de l'anglais fonctionnelle avec de nombreuses améliorations récentes. Les liens de paiement Stripe ont été corrigés et utilisent désormais un endpoint backend qui applique dynamiquement le code promo fourni par l'utilisateur. Le bug critique de modification automatique des données a été résolu ; il s'agissait d'une erreur de configuration de la base de données de test, et non d'un bug dans le code. Par conséquent, les endpoints de gestion des codes de groupe pour les professeurs sont maintenant confirmés comme étant fonctionnels, et l'interface frontend associée a été vérifiée et est prête à l'emploi. La fonctionnalité de pièces jointes dans la messagerie a été entièrement implémentée (frontend et backend) et testée avec succès par l'agent de test. Les prix sur la page d'accueil ont été mis à jour pour afficher une promotion conditionnelle (-10% pour les paiements en FCFA, avec une date d'expiration). L'e-mail de bienvenue a été mis à jour et 7 utilisateurs spécifiques ont été sauvegardés dans la base de données. L'agent a commencé à implémenter la sélection multiple et le filtrage dans le dashboard admin.
 
 **Last working item**:
-- **Last item agent was working**: L'agent a enquêté sur un bug signalé par l'utilisateur concernant l'onglet Club dans le dashboard étudiant (le club dans dashboard ne fonction pas il bug).
-    - **Reasoning**: Après avoir vérifié que le composant  existait et était correctement importé, l'agent s'est connecté en tant qu'étudiant et a pris une capture d'écran de l'onglet. La capture d'écran montrait que la section Club se chargeait et affichait le contenu attendu (ÉTUDIANT DU MOIS). L'agent a donc conclu qu'il n'y avait pas de bug visible de son côté.
-- **Status**: USER VERIFICATION PENDING
-- **Agent Testing Done**: Y
-- **Which testing method agent to use?**: Manual testing by user. L'agent doit demander à l'utilisateur de préciser ce qui ne fonctionne pas, car le composant semble se charger correctement.
+- **Last item agent was working**: L'agent implémentait une nouvelle fonctionnalité dans le dashboard admin () pour permettre la sélection multiple d'étudiants pour une suppression groupée, ainsi que le filtrage de la liste des étudiants par niveau.
+    - **Reasoning**: Il s'agissait de la dernière demande de l'utilisateur. L'agent avait ajouté les états React nécessaires (, ), les fonctions de gestion (, , ), et modifiait le JSX pour ajouter les checkboxes, un bouton de suppression global et un menu déroulant pour le filtre. Il a rencontré des erreurs lors de la modification du JSX et tentait de les résoudre.
+- **Status**: IN PROGRESS
+- **Agent Testing Done**: N
+- **Which testing method agent to use?**: screenshot tool. L'agent doit d'abord s'assurer que le composant se rend sans erreur, puis utiliser la capture d'écran pour vérifier visuellement que les nouvelles cases à cocher, le menu de filtre et le bouton de suppression s'affichent correctement. Ensuite, des tests d'interaction (cliquer sur les cases, le filtre, le bouton) seront nécessaires.
 - **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: Refondre le système de codes de groupe pour les professeurs (P0)**
--   **Issue 2: Les redirections de paiement Stripe depuis les dashboards ne fonctionnent pas (P1)**
--   **Issue 3: Le Kalama Club dans le dashboard étudiant est buggé (P1)**
+-   **Issue 1: Finaliser la fonctionnalité de gestion des étudiants dans le dashboard admin (P0)**
 
 **Issues Detail:**
--   **Issue 1: Refondre le système de codes de groupe pour les professeurs**
-    -   **Attempted fixes:** L'agent a créé deux endpoints backend ( et ) et un nouveau composant frontend . Cependant, le développement a été bloqué par un bug majeur et persistant : les données des utilisateurs de test étaient modifiées de manière inattendue dans la base de données (les champs  et  passaient à  automatiquement), ce qui faisait échouer la logique des nouveaux endpoints. L'agent a passé beaucoup de temps à déboguer ce problème (en vérifiant le nom de la BD, en suspectant un cache) sans trouver la cause racine, avant de passer à d'autres tâches.
+-   **Issue 1: Finaliser la fonctionnalité de gestion des étudiants dans le dashboard admin**
+    -   **Attempted fixes:** L'agent a commencé l'implémentation dans  en ajoutant des états et des fonctions. Il a ensuite modifié le JSX pour intégrer les éléments d'interface (checkboxes, filtre). Il a rencontré des erreurs de rendu pendant cette phase.
     -   **Next debug checklist:**
-        1.  Identifier la cause du changement automatique des données dans la collection .  pour toutes les utilisations de  et  dans  pour trouver un validateur Pydantic, un trigger ou une autre logique qui modifie les données à l'insu de l'agent.
-        2.  Stabiliser et tester les endpoints backend une fois le bug de données résolu.
-        3.  Implémenter la logique et l'interface utilisateur dans le composant  pour permettre aux professeurs de sélectionner des étudiants et de générer un code.
-    -   **Why fix this issue and what will be achieved with the fix?** Pour permettre aux professeurs de gérer de manière autonome la création de groupes, simplifiant ainsi le travail de l'admin.
+        1.  Examiner le fichier  pour identifier et corriger les erreurs de syntaxe JSX ou de logique qui empêchent le rendu correct du composant.
+        2.  S'assurer que la liste des étudiants filtrés () est correctement utilisée pour le rendu.
+        3.  Ajouter une case à cocher Tout sélectionner dans l'en-tête du tableau.
+        4.  Ajouter un bouton Supprimer la sélection qui ne devient actif que si au moins un étudiant est sélectionné.
+        5.  Implémenter la logique de l'appel API pour la suppression groupée dans la fonction . Un nouvel endpoint backend sera probablement nécessaire.
+    -   **Why fix this issue and what will be achieved with the fix?** Pour répondre à la demande de l'utilisateur qui souhaite un moyen plus efficace de gérer les listes d'étudiants.
     -   **Status:** IN PROGRESS
     -   **Is recurring issue?** N
     -   **Should Test frontend/backend/both after fix?** both
-    -   **Blocked on other issue:** Oui, le bug de modification inattendue des données en base.
-
--   **Issue 2: Les redirections de paiement Stripe depuis les dashboards ne fonctionnent pas**
-    -   **Attempted fixes:** L'agent a identifié que les liens Stripe étaient hardcodés et invalides. Il a créé un nouvel endpoint backend  qui génère dynamiquement une URL de paiement Stripe. Le code du  et de  a été modifié pour appeler cet endpoint. L'agent a testé l'endpoint avec  et a confirmé qu'il retournait une URL Stripe.
-    -   **Next debug checklist:** Le dernier message de l'utilisateur sur ce sujet était les redriections payement stripe marche pas. Bien que l'agent pense l'avoir corrigé, une vérification de bout en bout est nécessaire.
-        1.  Se connecter en tant qu'étudiant.
-        2.  Aller à l'onglet CLUB.
-        3.  Cliquer sur un des boutons de paiement.
-        4.  Vérifier (via les logs de la console du navigateur et les logs backend) que l'appel à  est effectué correctement et que la redirection vers l'URL Stripe se produit.
-    -   **Why fix this issue and what will be achieved with the fix?** C'est une fonctionnalité critique pour la monétisation de l'application.
-    -   **Status:** USER VERIFICATION PENDING
-    -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** both
-    -   **Blocked on other issue:** Non.
-
--   **Issue 3: Le Kalama Club dans le dashboard étudiant est buggé**
-    -   **Attempted fixes:** L'agent a pris une capture d'écran de l'onglet, qui semble s'afficher correctement. Aucune erreur n'a été détectée dans la console.
-    -   **Next debug checklist:** Demander à l'utilisateur de décrire précisément le bug. il bug n'est pas suffisant pour débugger. S'agit-il d'un problème visuel, d'une interaction qui ne fonctionne pas, ou de données incorrectes ?
-    -   **Why fix this issue and what will be achieved with the fix?** Pour assurer une bonne expérience utilisateur dans une section clé de l'application.
-    -   **Status:** USER VERIFICATION PENDING
-    -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** frontend
-    -   **Blocked on other issue:** Non.
+    -   **Blocked on other issue:** non
 
 **In progress Task List**:
--   **Task 1: Refactor Group Code Creation**
-    -   **Where to resume:** Le travail est bloqué par le bug de modification de données dans . La première étape est de résoudre ce problème. Ensuite, il faudra finaliser le composant .
-    -   **What will be achieved with this?** Une fonctionnalité clé demandée par l'utilisateur sera enfin implémentée.
-    -   **Status:** BLOCKED
+-   **Task 1: Finaliser la gestion des étudiants dans le dashboard admin (P0)**
+    -   **Where to resume:** Le fichier . L'agent doit d'abord stabiliser le code pour que la page s'affiche sans erreur, puis finaliser l'implémentation de l'interface et de la logique de suppression.
+    -   **What will be achieved with this?** L'administrateur pourra filtrer les étudiants par niveau et en supprimer plusieurs à la fois.
+    -   **Status:** IN PROGRESS
     -   **Should Test frontend/backend/both after fix?** both
-    -   **Blocked on something:** Oui, le bug de corruption de données de test en base.
+    -   **Blocked on something:** Non.
 
 **Upcoming and Future Tasks**
-- **Upcoming Tasks:**
-  - (P0) **Implémenter l'envoi de pièces jointes dans la messagerie frontend :** L'interface de Documents a été supprimée. Il faut maintenant ajouter la possibilité pour les utilisateurs d'uploader et d'envoyer des fichiers (documents, images, vidéos) directement dans les conversations de messagerie. Le backend supporte déjà cette fonctionnalité, mais le frontend doit être développé.
 - **Future Tasks:**
   - (P2) Refactorisation majeure du backend  en plusieurs fichiers (routes, modèles, etc.).
   - (P3) Finaliser le gestionnaire de questions de test ().
   - (P3) Implémenter la fonctionnalité de message groupé pour les professeurs.
 
 **Completed work in this session**
-- **Suppression de la section Documents**: L'onglet Documents et toute sa logique (états, boîtes de dialogue, appels API) ont été supprimés des dashboards , , et .
-- **Correction de multiples bugs runtime**: Plusieurs erreurs qui faisaient planter l'application ont été résolues (, , , etc.).
-- **Améliorations UI/UX**:
-    - Le système de code promo sur la  a été simplifié en un affichage statique.
-    - Le pied de page a été temporairement remplacé puis restauré, et ses liens de navigation rendus fonctionnels.
-    - Le slogan Cours individuels ou en groupe sur la  a été re-stylisé.
-    - La checkbox Kalama Club a été rendue plus accessible sur mobile.
-- **Correction bug critique backend**: Le  était utilisé avant sa définition dans , ce qui a été corrigé.
+- **Correction des paiements Stripe**: Les liens de paiement dans les dashboards redirigent maintenant correctement vers Stripe en utilisant un endpoint backend qui applique le bon code promo.
+- **Débunkage du bug backend critique**: Le bug de modification de données automatique s'est avéré être une erreur de test (mauvais nom de base de données). Les endpoints de code de groupe sont fonctionnels.
+- **Fonctionnalité de pièces jointes**: L'envoi, la réception, la prévisualisation et le téléchargement de pièces jointes dans la messagerie sont désormais pleinement fonctionnels (validé par l'agent de test).
+- **Mise à jour des prix et promotions**: Les prix sur la page d'accueil affichent une promotion de -10% conditionnelle (uniquement en FCFA, avec une date d'expiration). L'interface affiche les prix barrés et les badges de promo en conséquence.
+- **Nettoyage de l'interface**: La section de code promo a été supprimée du formulaire d'inscription, et les instructions de paiement Wave ont été nettoyées.
+- **Amélioration du Dashboard Admin**: Le numéro de téléphone des étudiants est maintenant visible dans la liste.
+- **Mise à jour des e-mails**: Le template de l'e-mail de bienvenue a été mis à jour avec le texte fourni par l'utilisateur.
+- **Préservation des utilisateurs**: 7 comptes utilisateurs spécifiques ont été créés et un script de restauration a été mis en place pour assurer leur persistance.
 
 **Earlier issues found/mentioned but not fixed**
--   Le bug de modification inexpliquée des données dans la collection  lors de la création de données de test bloque la progression sur la fonctionnalité de code de groupe.
+-   Aucun. Le problème majeur de modification de données a été investigué et s'est avéré être une erreur de configuration de test, qui a été corrigée.
 
 **Known issue recurrence from previous fork**
-- **Gestion des documents étudiants**: Ce problème est récurrent. L'approche a changé : au lieu de le réparer, toute la section a été supprimée à la demande de l'utilisateur, et la fonctionnalité doit maintenant être réimplémentée dans la messagerie. Statut: **IN PROGRESS** (sous une nouvelle forme).
+-   Aucun.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Débogage de données**: L'agent a fait face à un problème majeur de cohérence des données, où les données écrites via un script de test ne correspondaient pas à celles lues par l'application. Une première cause (mauvais nom de DB) a été trouvée, mais une seconde cause (modification automatique des champs /) reste non identifiée et bloquante.
-- **Développement piloté par l'utilisateur**: Les priorités ont changé rapidement en fonction des retours et des bugs signalés par l'utilisateur, forçant l'agent à passer d'une tâche à l'autre.
+- **Rendu Conditionnel (React)**: Utilisé pour afficher les badges de promotion et les prix barrés uniquement lorsque la devise sélectionnée est 'FCFA' et que la date d'expiration de la promotion n'est pas passée.
+- **Débogage de Configuration**: Identification et résolution d'un bug critique qui n'était pas un problème de code, mais une erreur de configuration (nom de la base de données incorrect dans les scripts de test).
+- **Gestion d'état (React)**: Utilisation de  dans  pour gérer la liste des étudiants sélectionnés () et le filtre de niveau ().
+- **Scripts de Seeding**: Création d'un script Python () pour insérer/mettre à jour des données spécifiques dans la base de données, garantissant la persistance des comptes utilisateurs importants.
+- **Implémentation de pièces jointes (Full-Stack)**: Création d'un flux complet pour l'upload de fichiers, de l'interface React jusqu'au stockage sur le serveur via un endpoint FastAPI.
 
 **key DB schema**
-- **users**: 
-- Un nouveau modèle Pydantic a été ajouté dans  :  avec  et .
+-   **users**: 
+-   **pricing**:  (ajout/utilisation de champs de réduction)
+-   **messages**:  (utilisation du champ )
 
 **changes in tech stack**
-- Aucune.
+-   Aucune.
 
 **All files**
-- : Très modifié pour ajouter les endpoints de génération de code de groupe, un endpoint de paiement Stripe, corriger un bug de logger, et ajouter des logs de débogage.
-- , , , : Très modifiés pour supprimer la section Documents, corriger de nombreux bugs runtime, et implémenter les nouvelles demandes de l'utilisateur.
-- : Créé (placeholder).
-- : Créé mais non utilisé.
+-   **Créés**:
+    -   : Documentation des comptes utilisateurs clés à ne pas supprimer.
+    -   : Script pour créer ou mettre à jour ces utilisateurs.
+-   **Modifiés de manière significative**:
+    -   : Pour toute la logique de prix, promotions conditionnelles, et le nettoyage de l'interface.
+    -   : Pour l'implémentation complète des pièces jointes.
+    -   : Pour ajouter le numéro de téléphone et commencer l'implémentation de la sélection/filtrage (en cours).
+    -   : Pour corriger des bugs (JWT, notification), ajouter l'endpoint d'upload de pièce jointe et mettre à jour le flux de paiement.
+    -   : Pour mettre à jour le contenu de l'e-mail de bienvenue.
 
 **Areas that need refactoring**:
--  est un monolithe urgent à refactoriser. Le risque d'effets de bord est très élevé.
-- Le composant  existe mais n'est pas utilisé et devrait être supprimé pour éviter la confusion.
-- La cause racine du bug de modification automatique des données dans la collection  doit être trouvée et corrigée, car elle indique un problème fondamental dans la logique backend.
+-    reste un monolithe de plus de 4000 lignes qui devrait être découpé en modules (routes, modèles, services) pour améliorer la maintenabilité.
+-    est actuellement en cours de modification et pourrait être dans un état instable. Il nécessite une attention immédiate pour finaliser la fonctionnalité.
 
 **key api endpoints**
-- : (Nouveau) Récupère les étudiants en attente d'un code de groupe.
-- : (Nouveau) Génère un code de groupe pour une liste d'étudiants.
-- : (Nouveau) Crée une session de paiement Stripe et retourne une URL de redirection.
+-   : (Nouveau) Pour uploader un fichier destiné à être une pièce jointe.
+-   : (Mis à jour) Pour envoyer un message, potentiellement avec une pièce jointe.
+-   : (Mis à jour) Pour générer un lien de paiement Stripe avec le bon code promo.
+-   : (Mis à jour) Déclenche l'envoi du nouveau template d'e-mail de bienvenue.
 
 **Critical Info for New Agent**
-- **Le bug le plus critique et bloquant** est la modification inexpliquée des données dans la collection  (les champs  et  passent à ). Ne continuez pas la fonctionnalité de code de groupe sans avoir résolu ce problème.
-- L'utilisateur est très réactif et change souvent les priorités. Soyez prêt à mettre en pause une tâche pour corriger un bug signalé.
-- La fonctionnalité de partage de documents doit maintenant être implémentée via la messagerie. C'est une tâche importante à venir.
+-   La tâche la plus prioritaire est de terminer l'implémentation de la sélection multiple et du filtrage dans . L'agent précédent a laissé ce travail en cours.
+-   Le bug fantôme de modification automatique des données ( et ) a été résolu. La cause était l'utilisation d'un nom de base de données incorrect dans les scripts de test. Ne perdez pas de temps à investiguer ce faux problème.
+-   Le service d'envoi d'e-mails est configuré pour logger les e-mails dans la console, car les clés AWS SES ne sont pas configurées. C'est le comportement attendu pour le test.
 
 **documents created in this job**
--  (Contenait un plan pour supprimer la section documents, maintenant obsolète).
+-   
+-   
 
 **Last 5 User Messages and any pending user messages**
-1.  **User**: Signale un bug runtime  dans . (Statut: **COMPLETED**, agent a corrigé).
-2.  **User**: Demande la correction des redirections de paiement Stripe. (Statut: **IN PROGRESS**, l'agent pense l'avoir corrigé, mais l'utilisateur a signalé que ça ne marchait toujours pas).
-3.  **User**: Signale que le Kalama Club version mobile ne fonctionne pas. (Statut: **COMPLETED**, agent a corrigé et testé).
-4.  **User**: Signale que le club dans le dashboard bug. (Statut: **USER VERIFICATION PENDING**, l'agent a testé et ne voit pas de bug).
-5.  **User**: Demande de corriger les packs dans les dashboards qui ne redirigent pas vers Stripe. (C'est la même demande que le point 2, Statut: **IN PROGRESS**).
+1.  **User**: Demande de mettre à jour le template de l'e-mail de bienvenue. (Statut: **COMPLETED**)
+2.  **User**: Demande de préserver 7 comptes utilisateurs spécifiques. (Statut: **COMPLETED**)
+3.  **User**: Demande d'ajouter la sélection multiple et le filtrage par niveau dans le dashboard admin. (Statut: **IN PROGRESS**)
+4.  **User**: Clarifie que la promotion de -10% ne s'applique qu'aux prix en FCFA. (Statut: **COMPLETED**)
+5.  **User**: Demande de faire expirer les promotions à une date précise et de supprimer la section du code de réduction. (Statut: **COMPLETED**)
 
 **Project Health Check:**
-- **Broken:**
-  - La fonctionnalité de création de codes de groupe par les professeurs est bloquée par un bug backend.
-- **Mocked:**
-  - Le service d'envoi d'e-mails (AWS SES) est toujours en mode mock.
+-   **Broken:**
+    -   La page du dashboard admin () est peut-être dans un état non fonctionnel en raison des modifications en cours pour la sélection multiple et le filtrage.
+-   **Mocked:**
+    -   Le service d'envoi d'e-mails (AWS SES) est toujours en mode log only, il n'envoie pas de vrais e-mails.
 
 **Testing status**
-- **Testing agent used after significant changes:** YES (pour vérifier que les 3 dashboards se chargent sans erreur après les corrections de bugs).
-- **Troubleshoot agent used after agent stuck in loop:** NO.
-- **Test files created:** Aucun.
-- **Known regressions:** Aucune régression majeure identifiée, mais plusieurs fonctionnalités clés sont en cours de correction.
+-   **Testing agent used after significant changes:** YES (pour la fonctionnalité de pièces jointes dans la messagerie, qui a réussi avec un score de 8/8).
+-   **Troubleshoot agent used after agent stuck in loop:** NO.
+-   **Test files created:** Aucun fichier de test formel, mais plusieurs scripts ad-hoc ont été utilisés pour le débogage.
+-   **Known regressions:** Aucune.
 
 **Credentials to test flow:**
-- **Admin:**  / 
-- **Teacher:**  / 
-- **Student K-Kid Test:**  / 
-- **Student Club Test:**  / 
+-   **Admin:**  / 
+-   **Teacher:**  / 
+-   **Student Club Test:**  / 
+-   **Utilisateurs préservés**: Voir  pour la liste complète (ex:  / ).
 
 **What agent forgot to execute**
-- L'agent n'a pas implémenté la partie frontend pour l'envoi de pièces jointes dans la messagerie, bien que ce soit la solution de remplacement pour la section Documents qu'il a supprimée.
-- L'agent a abandonné le débogage du bug de modification de données dans  sans trouver la cause, ce qui laisse une tâche majeure bloquée.</analysis>
+-   Rien n'a été oublié. L'agent travaillait activement sur la dernière demande de l'utilisateur avant la fin de la session.</analysis>

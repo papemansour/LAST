@@ -3304,6 +3304,119 @@ async def get_my_progression(current_user: dict = Depends(get_current_user)):
         "total_courses": total_courses
     }
 
+# ==================== BADGES ENDPOINTS ====================
+
+@api_router.post("/admin/create-badge")
+async def create_badge(data: BadgeCreate, current_user: dict = Depends(get_current_user)):
+    """Admin creates a new badge"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    badge = Badge(
+        name=data.name,
+        icon=data.icon,
+        description=data.description,
+        condition_type=data.condition_type,
+        condition_value=data.condition_value
+    )
+    
+    doc = badge.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    await db.badges.insert_one(doc)
+    
+    logger.info(f"Badge created by admin: {badge.name}")
+    return {"message": "Badge créé", "badge_id": badge.id}
+
+@api_router.get("/badges")
+async def get_all_badges():
+    """Get all available badges"""
+    badges = await db.badges.find({}, {"_id": 0}).to_list(100)
+    return badges
+
+@api_router.post("/admin/award-badge")
+async def award_badge(data: dict, current_user: dict = Depends(get_current_user)):
+    """Admin awards a badge to a student"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    student_id = data['student_id']
+    badge_id = data['badge_id']
+    
+    # Check if student already has this badge
+    existing = await db.student_badges.find_one({
+        "student_id": student_id,
+        "badge_id": badge_id
+    })
+    
+    if existing:
+        raise HTTPException(status_code=400, detail="Badge déjà attribué")
+    
+    student_badge = StudentBadge(
+        student_id=student_id,
+        badge_id=badge_id
+    )
+    
+    doc = student_badge.model_dump()
+    doc['awarded_at'] = doc['awarded_at'].isoformat()
+    await db.student_badges.insert_one(doc)
+    
+    # Get badge info for notification
+    badge = await db.badges.find_one({"id": badge_id}, {"_id": 0})
+    
+    # Create notification
+    await create_notification(
+        user_id=student_id,
+        title=f"🏆 Nouveau badge obtenu !",
+        message=f"Félicitations ! Vous avez reçu le badge '{badge['name']}'",
+        notification_type="badge"
+    )
+    
+    logger.info(f"Badge {badge_id} awarded to student {student_id}")
+    return {"message": "Badge attribué"}
+
+@api_router.get("/student/my-badges")
+async def get_my_badges(current_user: dict = Depends(get_current_user)):
+    """Get all badges for current student"""
+    if current_user['role'] != 'student':
+        raise HTTPException(status_code=403, detail="Student access required")
+    
+    # Get student's badge IDs
+    student_badges = await db.student_badges.find(
+        {"student_id": current_user['id']},
+        {"_id": 0}
+    ).to_list(100)
+    
+    badge_ids = [sb['badge_id'] for sb in student_badges]
+    
+    # Get all badges
+    all_badges = await db.badges.find({}, {"_id": 0}).to_list(100)
+    
+    # Mark which badges the student has
+    for badge in all_badges:
+        badge['earned'] = badge['id'] in badge_ids
+        if badge['earned']:
+            sb = next((sb for sb in student_badges if sb['badge_id'] == badge['id']), None)
+            if sb:
+                badge['awarded_at'] = sb.get('awarded_at')
+    
+    return all_badges
+
+@api_router.delete("/admin/remove-badge/{student_id}/{badge_id}")
+async def remove_badge(student_id: str, badge_id: str, current_user: dict = Depends(get_current_user)):
+    """Admin removes a badge from a student"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    result = await db.student_badges.delete_one({
+        "student_id": student_id,
+        "badge_id": badge_id
+    })
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Badge non trouvé")
+    
+    return {"message": "Badge retiré"}
+
 # ==================== NOTIFICATIONS ENDPOINTS ====================
 
 async def create_notification(user_id: str, title: str, message: str, notification_type: str):

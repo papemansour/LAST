@@ -260,7 +260,7 @@ const StudentDocuments = () => {
                 </div>
                 <div className="flex justify-center">
                   <a 
-                    href={selectedDocument?.file_url} 
+                    href={getFullFileUrl(selectedDocument?.file_url)} 
                     download={selectedDocument?.file_name}
                     className="inline-flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-semibold"
                   >

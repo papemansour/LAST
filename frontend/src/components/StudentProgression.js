@@ -228,7 +228,7 @@ const StudentProgression = () => {
         </CardContent>
       </Card>
 
-      {/* Badges Section (Placeholder for Phase 3) */}
+      {/* Badges Section */}
       <Card className="border-purple-200">
         <CardHeader className="bg-purple-50">
           <CardTitle className="text-purple-800">🏆 Collection de Badges</CardTitle>
@@ -237,10 +237,49 @@ const StudentProgression = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
-          <div className="text-center py-8 text-gray-500">
-            <Award className="w-12 h-12 mx-auto mb-2 text-gray-400" />
-            <p className="text-sm">Les badges seront bientôt disponibles</p>
-          </div>
+          {badges.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <Award className="w-12 h-12 mx-auto mb-2 text-gray-400" />
+              <p className="text-sm">Chargement des badges...</p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {badges.map((badge) => (
+                <div
+                  key={badge.id}
+                  className={`p-6 rounded-xl border-2 text-center transition-all ${
+                    badge.earned
+                      ? 'bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-300 shadow-lg'
+                      : 'bg-gray-50 border-gray-200 opacity-60'
+                  }`}
+                >
+                  <div className="text-5xl mb-3">{badge.icon}</div>
+                  <h3 className={`font-bold mb-1 ${badge.earned ? 'text-orange-700' : 'text-gray-500'}`}>
+                    {badge.name}
+                  </h3>
+                  <p className="text-xs text-gray-600 mb-2">{badge.description}</p>
+                  {badge.earned ? (
+                    <div className="mt-3">
+                      <span className="inline-block px-3 py-1 bg-green-600 text-white text-xs font-semibold rounded-full">
+                        ✓ Obtenu
+                      </span>
+                      {badge.awarded_at && (
+                        <p className="text-xs text-gray-500 mt-2">
+                          {new Date(badge.awarded_at).toLocaleDateString('fr-FR')}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="mt-3">
+                      <span className="inline-block px-3 py-1 bg-gray-300 text-gray-600 text-xs font-semibold rounded-full">
+                        🔒 Verrouillé
+                      </span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

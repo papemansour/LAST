@@ -676,6 +676,11 @@ const StudentDashboard = () => {
             </Card>
           </TabsContent>
 
+          {/* Documents Tab */}
+          <TabsContent value="documents">
+            <StudentDocuments />
+          </TabsContent>
+
           {/* News Tab */}
           <TabsContent value="news">
             <NewsDisplay />

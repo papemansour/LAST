@@ -2157,12 +2157,20 @@ async def get_all_teacher_availability(current_user: dict = Depends(get_current_
 # TEST ROUTES
 @api_router.get("/tests/{level}")
 async def get_test(level: str):
-    if level not in TEST_QUESTIONS:
-        raise HTTPException(status_code=404, detail="Test not found")
+    # Get questions from database
+    db_questions = await db.test_questions.find({"level": level, "active": True}, {"_id": 0}).to_list(100)
     
-    # Return questions without correct answers
-    questions = [{"id": q["id"], "question": q["question"], "options": q["options"]} 
-                 for q in TEST_QUESTIONS[level]]
+    # If no questions in DB, fallback to hardcoded questions
+    if not db_questions:
+        if level not in TEST_QUESTIONS:
+            raise HTTPException(status_code=404, detail="Test not found")
+        questions = [{"id": q["id"], "question": q["question"], "options": q["options"]} 
+                     for q in TEST_QUESTIONS[level]]
+    else:
+        # Return questions without correct answers
+        questions = [{"id": q["id"], "question": q["question"], "options": q.get("options", [])} 
+                     for q in db_questions]
+    
     return {"level": level, "questions": questions}
 
 @api_router.post("/tests/submit")

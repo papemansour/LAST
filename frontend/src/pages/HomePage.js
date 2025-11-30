@@ -602,6 +602,19 @@ const HomePage = () => {
                       💰 Économisez {pricingData.kkid_discount_fcfa.toLocaleString()} FCFA
                     </div>
                   )}
+                  {currency === 'EUR' && (
+                    <div className="mt-2 md:mt-3 p-2 md:p-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg">
+                      <div className="flex items-center justify-center gap-2 text-green-700 font-bold text-xs md:text-sm">
+                        <span className="text-base md:text-lg">🎁</span>
+                        <span>-15% avec le code</span>
+                      </div>
+                      <div className="text-center mt-1">
+                        <span className="inline-block bg-green-600 text-white px-3 py-1 rounded-md font-bold text-sm md:text-base tracking-wider">
+                          KALAMA15
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <ul className="space-y-2 md:space-y-3 text-sm md:text-base">
                   <li className="flex items-center gap-2">

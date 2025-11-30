@@ -1292,38 +1292,6 @@ const HomePage = () => {
                 </div>
 
                 {/* Code Promo Section - Fixed Display */}
-                <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border-2 border-green-200">
-                  <Label className="font-semibold text-green-900 mb-3 block">
-                    🎁 Code de réduction actif
-                  </Label>
-                  <div className="bg-white p-4 rounded-lg border-2 border-green-300 flex items-center justify-between">
-                    <div className="flex-1">
-                      <p className="text-xs text-gray-600 mb-1">Code promo</p>
-                      <p className="text-xl font-bold text-green-600 tracking-wider font-mono break-all">promo_1SYGM3I4faCc3GWYbdYRPXX8</p>
-                      <p className="text-sm text-green-700 mt-1">✅ Réduction automatique</p>
-                    </div>
-                    <Button
-                      type="button"
-                      onClick={() => {
-                        navigator.clipboard.writeText('promo_1SYGM3I4faCc3GWYbdYRPXX8');
-                        toast.success('Code copié !');
-                      }}
-                      className="bg-green-600 hover:bg-green-700"
-                    >
-                      Copier
-                    </Button>
-                  </div>
-                  
-                  {/* FCFA Discount Notice */}
-                  {currency === 'FCFA' && (
-                    <div className="mt-3 bg-blue-50 p-3 rounded-lg border border-blue-200">
-                      <p className="text-sm text-blue-800 font-medium">
-                        💰 Une remise de 10% est appliquée pour les paiements en FCFA
-                      </p>
-                    </div>
-                  )}
-                </div>
-
                 <Button
                   type="submit"
                   className="w-full bg-teal-600 hover:bg-teal-700"

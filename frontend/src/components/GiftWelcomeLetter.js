@@ -156,7 +156,9 @@ const GiftWelcomeLetter = ({ user, onClose }) => {
           </div>
         ) : (
           // Lettre de bienvenue avec animation
-          <div className="bg-white rounded-2xl shadow-2xl overflow-hidden animate-slideUp">
+          <div className={`bg-white rounded-2xl shadow-2xl overflow-hidden ${
+            isDisappearing ? 'animate-dustDisappear' : 'animate-slideUp'
+          }`}>
             <div className="relative">
               <Button
                 onClick={handleClose}

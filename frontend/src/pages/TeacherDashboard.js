@@ -935,6 +935,11 @@ const TeacherDashboard = () => {
             </div>
           </TabsContent>
 
+          {/* Documents Tab */}
+          <TabsContent value="documents">
+            <DocumentsManager userRole="teacher" />
+          </TabsContent>
+
           {/* Schedule Tab - Mes horaires */}
           <TabsContent value="schedule">
             <AvailabilityScheduler apiClient={apiClient} />

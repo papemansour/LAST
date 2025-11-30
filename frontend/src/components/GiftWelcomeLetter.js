@@ -35,9 +35,7 @@ const GiftWelcomeLetter = ({ user, onClose }) => {
   };
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm ${
-      isDisappearing ? 'animate-fadeOut' : 'animate-fadeIn'
-    }`}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
       {/* Confettis décoratifs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {[...Array(20)].map((_, i) => (

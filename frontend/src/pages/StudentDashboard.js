@@ -268,7 +268,7 @@ const StudentDashboard = () => {
                 
                 <TabsTrigger 
                   value="games" 
-                  className="h-24 data-[state=active]:bg-pink-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white hover:bg-pink-50 border-2 border-pink-200 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+                  className="h-24 data-[state=active]:bg-pink-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
                 >
                   <Gamepad2 className="w-8 h-8 text-pink-600 data-[state=active]:text-white" />
                   <span className="text-xs font-semibold">🎮 Jeux</span>

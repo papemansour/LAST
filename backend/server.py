@@ -343,6 +343,30 @@ class MeetLinkCreate(BaseModel):
     title: str
     scheduled_date: str  # ISO format
 
+class Badge(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    icon: str
+    description: str
+    condition_type: str  # 'first_login', 'courses_completed', 'level_completed'
+    condition_value: int  # Number needed (5 courses, 10 courses, etc.)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class BadgeCreate(BaseModel):
+    name: str
+    icon: str
+    description: str
+    condition_type: str
+    condition_value: int
+
+class StudentBadge(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    student_id: str
+    badge_id: str
+    awarded_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
 # ============ UTILITIES ============
 
 def hash_password(password: str) -> str:

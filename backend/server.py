@@ -2558,14 +2558,14 @@ async def get_my_documents(current_user: dict = Depends(get_current_user)):
     return documents
 
 @api_router.post("/teacher/send-document")
-async def send_document(doc_data: DocumentCreate, current_user: dict = Depends(get_current_user)):
+async def send_homework_document(doc_data: HomeworkDocumentCreate, current_user: dict = Depends(get_current_user)):
     if current_user['role'] != 'teacher':
         raise HTTPException(status_code=403, detail="Teacher access required")
     
     # Get teacher info
     teacher = await db.users.find_one({"id": current_user['id']}, {"_id": 0})
     
-    document = Document(
+    document = HomeworkDocument(
         teacher_id=current_user['id'],
         title=doc_data.title,
         description=doc_data.description,

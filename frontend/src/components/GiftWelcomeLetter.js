@@ -8,7 +8,6 @@ const GiftWelcomeLetter = ({ user, onClose }) => {
   const [isOpening, setIsOpening] = useState(false);
   const [isOpened, setIsOpened] = useState(false);
   const [showLetter, setShowLetter] = useState(false);
-  const [isDisappearing, setIsDisappearing] = useState(false);
 
   const handleOpenGift = async () => {
     setIsOpening(true);
@@ -32,13 +31,7 @@ const GiftWelcomeLetter = ({ user, onClose }) => {
   };
 
   const handleClose = () => {
-    // Animation de disparition en poussière
-    setIsDisappearing(true);
-    
-    // Attendre la fin de l'animation avant de fermer
-    setTimeout(() => {
-      onClose();
-    }, 1000);
+    onClose();
   };
 
   return (

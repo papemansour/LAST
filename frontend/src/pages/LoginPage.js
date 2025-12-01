@@ -19,8 +19,8 @@ const LoginPage = () => {
   
   // Check date for seasonal messages
   const currentDate = new Date();
-  const isChristmas = currentDate <= new Date('2025-12-26');
-  const isNewYear = currentDate >= new Date('2025-12-27') && currentDate <= new Date('2026-01-10');
+  const isChristmas = false; // Temporarily disabled to show New Year
+  const isNewYear = true; // Temporarily enabled to preview
 
   const handleLogin = async (e) => {
     e.preventDefault();

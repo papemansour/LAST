@@ -410,11 +410,7 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus:
-    - "Système de Documents - Backend API"
-    - "Système de Documents - Interface Admin"
-    - "Système de Documents - Interface Professeur"
-    - "Système de Documents - Interface Étudiant"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -422,8 +418,13 @@ test_plan:
     - "Système de Pièces Jointes dans la Messagerie"
     - "Système Code Magique - Interface Professeur"
     - "Système Code Magique - Inscription Étudiants"
+    - "Système de Documents - Backend API"
+    - "Système de Documents - Interface Admin"
+    - "Système de Documents - Interface Professeur"
+    - "Système de Documents - Interface Étudiant"
   re_tested_after_fix:
     - "Système de Pièces Jointes dans la Messagerie - RE-TEST RÉUSSI (30/11/2025)"
+    - "Système de Documents Complet - TESTÉ AVEC SUCCÈS (02/12/2025)"
 
   - task: "Système Code Magique - Backend API"
     implemented: true

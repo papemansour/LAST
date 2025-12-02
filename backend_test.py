@@ -64,6 +64,13 @@ class MyKalamaEnglishBackendTester:
             "magic_code_login": {"passed": False, "details": []},
             "group_system_verification": {"passed": False, "details": []},
             
+            # Document system tests (NEW)
+            "document_upload": {"passed": False, "details": []},
+            "document_send": {"passed": False, "details": []},
+            "document_access": {"passed": False, "details": []},
+            "document_retrieval": {"passed": False, "details": []},
+            "document_system": {"passed": False, "details": []},
+            
             # Overall results
             "overall_backend": {"passed": False, "details": []}
         }

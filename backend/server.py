@@ -2484,8 +2484,8 @@ async def upload_file(file: UploadFile = File(...), current_user: dict = Depends
     import os
     from pathlib import Path
     
-    # Create upload directory if it doesn't exist
-    upload_dir = Path("/app/frontend/public/uploads")
+    # Create upload directory if it doesn't exist (persistent storage)
+    upload_dir = Path("/app/uploads")
     upload_dir.mkdir(parents=True, exist_ok=True)
     
     # Generate unique filename

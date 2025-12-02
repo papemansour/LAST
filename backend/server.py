@@ -2904,8 +2904,8 @@ async def upload_message_attachment(file: UploadFile = File(...), current_user: 
     if len(contents) > MAX_FILE_SIZE:
         raise HTTPException(status_code=400, detail="File too large (max 10MB)")
     
-    # Create upload directory
-    upload_dir = Path("/app/frontend/public/uploads/messages")
+    # Create upload directory (persistent storage)
+    upload_dir = Path("/app/uploads/messages")
     upload_dir.mkdir(parents=True, exist_ok=True)
     
     # Generate unique filename

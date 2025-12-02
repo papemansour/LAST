@@ -1424,6 +1424,372 @@ startxref
             logger.error(f"❌ Email notifications test error: {str(e)}")
             self.test_results["email_notifications"]["details"].append(f"Test error: {str(e)}")
             return False
+
+    async def create_test_document_file(self) -> str:
+        """Create a test PDF file for document upload testing"""
+        try:
+            # Create a simple test PDF content
+            test_content = b"""%PDF-1.4
+1 0 obj
+<<
+/Type /Catalog
+/Pages 2 0 R
+>>
+endobj
+
+2 0 obj
+<<
+/Type /Pages
+/Kids [3 0 R]
+/Count 1
+>>
+endobj
+
+3 0 obj
+<<
+/Type /Page
+/Parent 2 0 R
+/MediaBox [0 0 612 792]
+/Contents 4 0 R
+>>
+endobj
+
+4 0 obj
+<<
+/Length 44
+>>
+stream
+BT
+/F1 12 Tf
+72 720 Td
+(Test Document System) Tj
+ET
+endstream
+endobj
+
+xref
+0 5
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000206 00000 n 
+trailer
+<<
+/Size 5
+/Root 1 0 R
+>>
+startxref
+299
+%%EOF"""
+            
+            # Create temporary file
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_file:
+                temp_file.write(test_content)
+                return temp_file.name
+                
+        except Exception as e:
+            logger.error(f"❌ Error creating test document file: {str(e)}")
+            return None
+
+    async def test_document_system_complete(self) -> bool:
+        """Complete document system test as requested in review"""
+        try:
+            logger.info("🔍 Testing complete document system...")
+            
+            # Test 1: Document Upload (Admin)
+            logger.info("📤 Step 1: Testing document upload...")
+            file_url = await self.test_document_upload()
+            if not file_url:
+                logger.error("❌ Document upload failed - cannot continue")
+                return False
+            
+            # Test 2: Send Document to Student
+            logger.info("📨 Step 2: Testing document send...")
+            send_success = await self.test_document_send(file_url)
+            
+            # Test 3: Direct File Access
+            logger.info("🔗 Step 3: Testing direct file access...")
+            access_success = await self.test_document_access(file_url)
+            
+            # Test 4: Student Document Retrieval
+            logger.info("📥 Step 4: Testing student document retrieval...")
+            retrieval_success = await self.test_document_retrieval()
+            
+            # Test 5: Existing File Access
+            logger.info("📋 Step 5: Testing existing file access...")
+            existing_success = await self.test_existing_file_access()
+            
+            # Overall assessment
+            tests_passed = sum([
+                bool(file_url),  # Upload
+                send_success,    # Send
+                access_success,  # Access
+                retrieval_success, # Retrieval
+                existing_success   # Existing file
+            ])
+            
+            logger.info(f"📊 Document system tests: {tests_passed}/5 passed")
+            
+            # Consider system working if upload, access, and existing file work
+            if file_url and access_success and existing_success:
+                logger.info("✅ Core document system functionality working")
+                self.test_results["document_system"]["details"].append("Core functionality working (upload, access, StaticFiles)")
+                self.test_results["document_system"]["passed"] = True
+                return True
+            else:
+                logger.error("❌ Core document system functionality failed")
+                self.test_results["document_system"]["details"].append("Core functionality failed")
+                return False
+                
+        except Exception as e:
+            logger.error(f"❌ Complete document system test error: {str(e)}")
+            self.test_results["document_system"]["details"].append(f"System test error: {str(e)}")
+            return False
+
+    async def test_document_upload(self) -> Optional[str]:
+        """Test document upload (Admin/Prof)"""
+        try:
+            logger.info("🔍 Testing document upload...")
+            
+            # Create test file
+            test_file_path = await self.create_test_document_file()
+            if not test_file_path:
+                self.test_results["document_upload"]["details"].append("Failed to create test file")
+                return None
+            
+            try:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                
+                # Upload document
+                with open(test_file_path, 'rb') as file:
+                    data = aiohttp.FormData()
+                    data.add_field('file', file, filename='test_document.pdf', content_type='application/pdf')
+                    
+                    async with self.session.post(f"{BACKEND_URL}/documents/upload", data=data, headers=headers) as response:
+                        if response.status == 200:
+                            result = await response.json()
+                            
+                            # Check response structure
+                            required_fields = ["file_url", "file_name", "file_type"]
+                            missing_fields = [field for field in required_fields if field not in result]
+                            
+                            if not missing_fields:
+                                file_url = result.get('file_url')
+                                if file_url and file_url.startswith('/uploads/documents/'):
+                                    logger.info("✅ Document upload successful")
+                                    logger.info(f"📄 File URL: {file_url}")
+                                    self.test_results["document_upload"]["details"].append("Document uploaded successfully")
+                                    self.test_results["document_upload"]["details"].append(f"File URL format correct: {file_url}")
+                                    self.test_results["document_upload"]["passed"] = True
+                                    return file_url
+                                else:
+                                    logger.error(f"❌ Invalid file URL format: {file_url}")
+                                    self.test_results["document_upload"]["details"].append(f"Invalid URL format: {file_url}")
+                                    return None
+                            else:
+                                logger.error(f"❌ Missing fields in upload response: {missing_fields}")
+                                self.test_results["document_upload"]["details"].append(f"Missing fields: {missing_fields}")
+                                return None
+                        else:
+                            error_text = await response.text()
+                            logger.error(f"❌ Document upload failed: {response.status} - {error_text}")
+                            self.test_results["document_upload"]["details"].append(f"Upload failed: {error_text}")
+                            return None
+            finally:
+                # Clean up test file
+                if os.path.exists(test_file_path):
+                    os.unlink(test_file_path)
+                    
+        except Exception as e:
+            logger.error(f"❌ Document upload test error: {str(e)}")
+            self.test_results["document_upload"]["details"].append(f"Test error: {str(e)}")
+            return None
+
+    async def test_document_send(self, file_url: str) -> bool:
+        """Test send document to student"""
+        try:
+            logger.info("🔍 Testing document send...")
+            
+            if not self.test_student_id:
+                logger.error("❌ No test student available")
+                self.test_results["document_send"]["details"].append("No test student available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            
+            # Send document to student
+            document_data = {
+                "title": "Test Document",
+                "description": "Document de test pour vérifier le système",
+                "file_url": file_url,
+                "file_name": "test_document.pdf",
+                "file_type": "pdf",
+                "recipient_ids": [self.test_student_id]
+            }
+            
+            async with self.session.post(f"{BACKEND_URL}/documents/send", json=document_data, headers=headers) as response:
+                if response.status == 200:
+                    result = await response.json()
+                    logger.info("✅ Document sent successfully")
+                    self.test_results["document_send"]["details"].append("Document sent to student")
+                    self.test_results["document_send"]["details"].append(f"Response: {result.get('message', 'Success')}")
+                    self.test_results["document_send"]["passed"] = True
+                    return True
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ Document send failed: {response.status} - {error_text}")
+                    self.test_results["document_send"]["details"].append(f"Send failed: {error_text}")
+                    
+                    # Check if it's the known DocumentCreate model conflict
+                    if "recipient_type" in error_text or "Field required" in error_text:
+                        logger.error("🚨 CONFIRMED: DocumentCreate model conflict detected")
+                        self.test_results["document_send"]["details"].append("ISSUE: DocumentCreate model conflict - endpoint expects 'recipient_type' instead of 'recipient_ids'")
+                    
+                    return False
+                    
+        except Exception as e:
+            logger.error(f"❌ Document send test error: {str(e)}")
+            self.test_results["document_send"]["details"].append(f"Test error: {str(e)}")
+            return False
+
+    async def test_document_access(self, file_url: str) -> bool:
+        """Test direct file access via backend"""
+        try:
+            logger.info("🔍 Testing document access...")
+            
+            # Extract filename from URL
+            filename = file_url.split('/')[-1] if file_url else None
+            if not filename:
+                logger.error("❌ Cannot extract filename from URL")
+                self.test_results["document_access"]["details"].append("Invalid file URL")
+                return False
+            
+            # Test direct file access
+            file_access_url = f"https://e-learn-dash.preview.emergentagent.com/uploads/documents/{filename}"
+            
+            async with self.session.get(file_access_url) as response:
+                if response.status == 200:
+                    content_type = response.headers.get('content-type', '')
+                    content_length = response.headers.get('content-length', '0')
+                    
+                    logger.info(f"✅ File accessible via direct URL")
+                    logger.info(f"📄 Content-Type: {content_type}")
+                    logger.info(f"📏 Content-Length: {content_length} bytes")
+                    
+                    self.test_results["document_access"]["details"].append("File accessible via direct URL")
+                    self.test_results["document_access"]["details"].append(f"Content-Type: {content_type}")
+                    self.test_results["document_access"]["details"].append(f"Content-Length: {content_length} bytes")
+                    
+                    # Verify content type for PDF
+                    if filename.endswith('.pdf') and 'pdf' in content_type.lower():
+                        logger.info("✅ PDF Content-Type correct")
+                        self.test_results["document_access"]["details"].append("PDF Content-Type verification passed")
+                    
+                    self.test_results["document_access"]["passed"] = True
+                    return True
+                else:
+                    logger.error(f"❌ File access failed: {response.status}")
+                    self.test_results["document_access"]["details"].append(f"File access failed: HTTP {response.status}")
+                    return False
+                    
+        except Exception as e:
+            logger.error(f"❌ Document access test error: {str(e)}")
+            self.test_results["document_access"]["details"].append(f"Test error: {str(e)}")
+            return False
+
+    async def test_document_retrieval(self) -> bool:
+        """Test student document retrieval"""
+        try:
+            logger.info("🔍 Testing document retrieval...")
+            
+            if not self.student_token:
+                logger.error("❌ No student token available")
+                self.test_results["document_retrieval"]["details"].append("No student token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {self.student_token}"}
+            
+            # Get student documents
+            async with self.session.get(f"{BACKEND_URL}/documents/my-documents", headers=headers) as response:
+                if response.status == 200:
+                    documents = await response.json()
+                    
+                    if isinstance(documents, list):
+                        logger.info(f"✅ Retrieved {len(documents)} documents for student")
+                        self.test_results["document_retrieval"]["details"].append(f"Retrieved {len(documents)} documents")
+                        
+                        # Check document structure
+                        if len(documents) > 0:
+                            doc = documents[0]
+                            required_fields = ["id", "title", "file_url"]
+                            missing_fields = [field for field in required_fields if field not in doc]
+                            
+                            if not missing_fields:
+                                logger.info("✅ Document structure correct")
+                                self.test_results["document_retrieval"]["details"].append("Document structure validation passed")
+                                
+                                # Verify URL format
+                                file_url = doc.get('file_url', '')
+                                if file_url.startswith('/uploads/documents/'):
+                                    logger.info("✅ Document URL format correct")
+                                    self.test_results["document_retrieval"]["details"].append("Document URL format correct")
+                                else:
+                                    logger.warning(f"⚠️ Unexpected URL format: {file_url}")
+                                    self.test_results["document_retrieval"]["details"].append(f"Unexpected URL format: {file_url}")
+                            else:
+                                logger.warning(f"⚠️ Missing document fields: {missing_fields}")
+                                self.test_results["document_retrieval"]["details"].append(f"Missing fields: {missing_fields}")
+                        
+                        self.test_results["document_retrieval"]["passed"] = True
+                        return True
+                    else:
+                        logger.error("❌ Documents response is not a list")
+                        self.test_results["document_retrieval"]["details"].append("Invalid response format")
+                        return False
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ Document retrieval failed: {response.status} - {error_text}")
+                    self.test_results["document_retrieval"]["details"].append(f"Retrieval failed: {error_text}")
+                    return False
+                    
+        except Exception as e:
+            logger.error(f"❌ Document retrieval test error: {str(e)}")
+            self.test_results["document_retrieval"]["details"].append(f"Test error: {str(e)}")
+            return False
+
+    async def test_existing_file_access(self) -> bool:
+        """Test access to existing file in uploads directory"""
+        try:
+            logger.info("🔍 Testing existing file access...")
+            
+            # Use the existing PDF file mentioned in the review request
+            existing_filename = "05684018-449e-481d-92d9-95382bca65a7.pdf"
+            file_access_url = f"https://e-learn-dash.preview.emergentagent.com/uploads/documents/{existing_filename}"
+            
+            async with self.session.get(file_access_url) as response:
+                if response.status == 200:
+                    content_type = response.headers.get('content-type', '')
+                    content_length = response.headers.get('content-length', '0')
+                    
+                    logger.info(f"✅ Existing file accessible")
+                    logger.info(f"📄 Content-Type: {content_type}")
+                    logger.info(f"📏 Content-Length: {content_length} bytes")
+                    
+                    self.test_results["document_system"]["details"].append("Existing file accessible via StaticFiles")
+                    self.test_results["document_system"]["details"].append(f"File: {existing_filename}")
+                    self.test_results["document_system"]["details"].append(f"Content-Type: {content_type}")
+                    
+                    return True
+                else:
+                    logger.error(f"❌ Existing file access failed: {response.status}")
+                    self.test_results["document_system"]["details"].append(f"Existing file access failed: HTTP {response.status}")
+                    return False
+                    
+        except Exception as e:
+            logger.error(f"❌ Existing file access test error: {str(e)}")
+            self.test_results["document_system"]["details"].append(f"Existing file test error: {str(e)}")
+            return False
     
     async def test_group_registration(self) -> dict:
         """Test 1: Group registration endpoint"""

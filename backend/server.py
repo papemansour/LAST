@@ -5072,6 +5072,12 @@ async def create_checkout_session(payment: PaymentRequest):
 
 app.include_router(api_router)
 
+# Create uploads directory if it doesn't exist
+uploads_base_path = Path("/app/uploads")
+uploads_base_path.mkdir(parents=True, exist_ok=True)
+(uploads_base_path / "documents").mkdir(exist_ok=True)
+(uploads_base_path / "messages").mkdir(exist_ok=True)
+
 # Serve uploaded files via API endpoint instead of StaticFiles (better for Kubernetes)
 @app.get("/uploads/{file_path:path}")
 async def serve_uploaded_file(file_path: str):
@@ -5082,17 +5088,22 @@ async def serve_uploaded_file(file_path: str):
     file_full_path = Path("/app/uploads") / file_path
     
     # Security check: ensure file is within uploads directory
-    if not file_full_path.resolve().is_relative_to(Path("/app/uploads").resolve()):
+    try:
+        file_full_path.resolve().relative_to(Path("/app/uploads").resolve())
+    except ValueError:
         raise HTTPException(status_code=403, detail="Access forbidden")
     
     # Check if file exists
     if not file_full_path.exists() or not file_full_path.is_file():
+        logger.warning(f"File not found: {file_full_path}")
         raise HTTPException(status_code=404, detail="File not found")
     
     # Determine MIME type
     mime_type, _ = mimetypes.guess_type(str(file_full_path))
     if mime_type is None:
         mime_type = "application/octet-stream"
+    
+    logger.info(f"Serving file: {file_path} ({mime_type})")
     
     return FileResponse(
         path=str(file_full_path),

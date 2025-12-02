@@ -490,9 +490,9 @@ test_plan:
 
   - task: "Système de Documents - Backend API"
     implemented: true
-    working: false
+    working: true
     file: "server.py"
-    stuck_count: 1
+    stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
@@ -502,6 +502,9 @@ test_plan:
         - working: false
           agent: "testing"
           comment: "❌ ERREUR IDENTIFIÉE - 'Erreur lors de l'envoi du document' confirmée. CAUSE: Conflit entre deux modèles DocumentCreate (ligne 320 vs 2268). L'endpoint /documents/send utilise le mauvais modèle qui exige 'recipient_type' au lieu de 'recipient_ids'. API retourne 422 Unprocessable Entity avec message 'Field required: recipient_type'. Upload fonctionne (✅) mais envoi échoue (❌). Frontend envoie les bonnes données mais backend attend un format différent."
+        - working: true
+          agent: "testing"
+          comment: "✅ SYSTÈME DOCUMENTS COMPLET TESTÉ AVEC SUCCÈS! Tests selon spécifications review request: 1) ✅ Upload document (admin@mykalamaenglish.com / adminco) - fichier uploadé avec URL correcte /uploads/documents/{uuid}.pdf, 2) ✅ Envoi document à étudiant (test.student@example.com / Test2025) - document envoyé avec succès, 3) ✅ Accès direct fichier via curl GET /uploads/documents/{filename} - HTTP 200, Content-Type: application/pdf correct, 4) ✅ Récupération documents étudiant GET /api/documents/my-documents - documents retournés avec bonnes URLs, 5) ✅ Fichier existant accessible (05684018-449e-481d-92d9-95382bca65a7.pdf) - StaticFiles fonctionne. STOCKAGE PERSISTANT: Fichiers bien stockés dans /app/uploads/documents/, URLs format /uploads/documents/{filename}, accessibles via backend port 8001, aucune erreur 404/403. Score: 5/5 tests réussis (100%)."
 
   - task: "Système de Documents - Interface Admin"
     implemented: true

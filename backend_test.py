@@ -2091,6 +2091,300 @@ startxref
             self.test_results["group_system_verification"]["details"].append(f"Test error: {str(e)}")
             return False
 
+    async def test_dashboard_access_complete(self) -> bool:
+        """Test complete dashboard access for all 3 roles as per review request"""
+        try:
+            logger.info("🔍 Testing complete dashboard access (Admin, Teacher, Student)...")
+            
+            # Test credentials from review request
+            test_credentials = [
+                {"email": "admin@mykalamaenglish.com", "password": "adminco", "role": "admin"},
+                {"email": "prof.test@example.com", "password": "TestProf2025", "role": "teacher"},
+                {"email": "test.student@example.com", "password": "Test2025", "role": "student"}
+            ]
+            
+            dashboard_results = []
+            
+            for creds in test_credentials:
+                logger.info(f"🔍 Testing {creds['role']} dashboard access...")
+                
+                # Login with specific credentials
+                login_data = {
+                    "email": creds["email"],
+                    "password": creds["password"]
+                }
+                
+                async with self.session.post(f"{BACKEND_URL}/auth/login", json=login_data) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        token = data.get("access_token")
+                        user_info = data.get("user", {})
+                        
+                        logger.info(f"✅ {creds['role']} login successful: {creds['email']}")
+                        
+                        # Test /api/auth/me endpoint
+                        headers = {"Authorization": f"Bearer {token}"}
+                        async with self.session.get(f"{BACKEND_URL}/auth/me", headers=headers) as me_response:
+                            if me_response.status == 200:
+                                me_data = await me_response.json()
+                                logger.info(f"✅ {creds['role']} /auth/me works - Role: {me_data.get('role')}, Level: {me_data.get('level')}")
+                                
+                                dashboard_results.append({
+                                    "role": creds['role'],
+                                    "email": creds['email'],
+                                    "login_success": True,
+                                    "auth_me_success": True,
+                                    "user_data": me_data
+                                })
+                            else:
+                                error_text = await me_response.text()
+                                logger.error(f"❌ {creds['role']} /auth/me failed: {me_response.status} - {error_text}")
+                                dashboard_results.append({
+                                    "role": creds['role'],
+                                    "email": creds['email'],
+                                    "login_success": True,
+                                    "auth_me_success": False,
+                                    "error": error_text
+                                })
+                    else:
+                        error_text = await response.text()
+                        logger.error(f"❌ {creds['role']} login failed: {response.status} - {error_text}")
+                        dashboard_results.append({
+                            "role": creds['role'],
+                            "email": creds['email'],
+                            "login_success": False,
+                            "error": error_text
+                        })
+            
+            # Check results
+            successful_logins = sum(1 for result in dashboard_results if result.get("login_success"))
+            successful_auth_me = sum(1 for result in dashboard_results if result.get("auth_me_success"))
+            
+            if successful_logins == 3 and successful_auth_me == 3:
+                logger.info("✅ All 3 dashboards accessible without errors")
+                self.test_results["dashboard_access"]["passed"] = True
+                self.test_results["dashboard_access"]["details"].append("All 3 dashboard logins successful")
+                self.test_results["dashboard_access"]["details"].append("All /auth/me endpoints working")
+                return dashboard_results
+            else:
+                logger.error(f"❌ Dashboard access issues: {successful_logins}/3 logins, {successful_auth_me}/3 auth/me")
+                self.test_results["dashboard_access"]["details"].append(f"Login issues: {successful_logins}/3 successful")
+                return False
+                
+        except Exception as e:
+            logger.error(f"❌ Dashboard access test error: {str(e)}")
+            self.test_results["dashboard_access"]["details"].append(f"Test error: {str(e)}")
+            return False
+
+    async def test_documents_section_complete(self) -> bool:
+        """Test Documents section access for all dashboards as per review request"""
+        try:
+            logger.info("🔍 Testing Documents section in all dashboards...")
+            
+            # Get tokens for all roles
+            dashboard_results = await self.test_dashboard_access_complete()
+            if not dashboard_results:
+                logger.error("❌ Cannot test documents without dashboard access")
+                return False
+            
+            documents_results = []
+            
+            for result in dashboard_results:
+                if not result.get("login_success"):
+                    continue
+                    
+                role = result["role"]
+                email = result["email"]
+                
+                logger.info(f"🔍 Testing Documents section for {role}...")
+                
+                # Login again to get fresh token
+                login_data = {"email": email, "password": self.get_password_for_email(email)}
+                
+                async with self.session.post(f"{BACKEND_URL}/auth/login", json=login_data) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        token = data.get("access_token")
+                        headers = {"Authorization": f"Bearer {token}"}
+                        
+                        # Test documents endpoints based on role
+                        if role == "student":
+                            # Test GET /api/documents/my-documents
+                            async with self.session.get(f"{BACKEND_URL}/documents/my-documents", headers=headers) as doc_response:
+                                if doc_response.status == 200:
+                                    documents = await doc_response.json()
+                                    logger.info(f"✅ {role} can access my-documents: {len(documents)} documents")
+                                    
+                                    # Test GET /api/documents/received  
+                                    async with self.session.get(f"{BACKEND_URL}/documents/received", headers=headers) as received_response:
+                                        if received_response.status == 200:
+                                            received_docs = await received_response.json()
+                                            logger.info(f"✅ {role} can access received documents: {len(received_docs)} documents")
+                                            
+                                            documents_results.append({
+                                                "role": role,
+                                                "email": email,
+                                                "my_documents_success": True,
+                                                "received_documents_success": True,
+                                                "my_documents_count": len(documents),
+                                                "received_documents_count": len(received_docs)
+                                            })
+                                        else:
+                                            error_text = await received_response.text()
+                                            logger.error(f"❌ {role} received documents failed: {received_response.status} - {error_text}")
+                                            documents_results.append({
+                                                "role": role,
+                                                "email": email,
+                                                "my_documents_success": True,
+                                                "received_documents_success": False,
+                                                "error": error_text
+                                            })
+                                else:
+                                    error_text = await doc_response.text()
+                                    logger.error(f"❌ {role} my-documents failed: {doc_response.status} - {error_text}")
+                                    documents_results.append({
+                                        "role": role,
+                                        "email": email,
+                                        "my_documents_success": False,
+                                        "error": error_text
+                                    })
+                        
+                        elif role in ["admin", "teacher"]:
+                            # Test document sending capabilities
+                            async with self.session.get(f"{BACKEND_URL}/documents/my-documents", headers=headers) as doc_response:
+                                if doc_response.status == 200:
+                                    documents = await doc_response.json()
+                                    logger.info(f"✅ {role} can access documents: {len(documents)} documents")
+                                    
+                                    documents_results.append({
+                                        "role": role,
+                                        "email": email,
+                                        "documents_access_success": True,
+                                        "documents_count": len(documents)
+                                    })
+                                else:
+                                    error_text = await doc_response.text()
+                                    logger.error(f"❌ {role} documents access failed: {doc_response.status} - {error_text}")
+                                    documents_results.append({
+                                        "role": role,
+                                        "email": email,
+                                        "documents_access_success": False,
+                                        "error": error_text
+                                    })
+            
+            # Evaluate results
+            successful_tests = sum(1 for result in documents_results if 
+                                 result.get("my_documents_success") or result.get("documents_access_success"))
+            
+            if successful_tests >= 2:  # At least 2 out of 3 roles working
+                logger.info("✅ Documents section accessible in dashboards")
+                self.test_results["documents_section"]["passed"] = True
+                self.test_results["documents_section"]["details"].append("Documents section accessible")
+                self.test_results["documents_section"]["details"].append(f"Results: {documents_results}")
+                return True
+            else:
+                logger.error("❌ Documents section access issues")
+                self.test_results["documents_section"]["details"].append("Documents access issues")
+                return False
+                
+        except Exception as e:
+            logger.error(f"❌ Documents section test error: {str(e)}")
+            self.test_results["documents_section"]["details"].append(f"Test error: {str(e)}")
+            return False
+
+    async def test_student_pack_info(self) -> bool:
+        """Test student pack information for test.student@example.com as per review request"""
+        try:
+            logger.info("🔍 Testing student pack information for test.student@example.com...")
+            
+            # Login as the specific student
+            login_data = {
+                "email": "test.student@example.com",
+                "password": "Test2025"
+            }
+            
+            async with self.session.post(f"{BACKEND_URL}/auth/login", json=login_data) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    token = data.get("access_token")
+                    user_info = data.get("user", {})
+                    
+                    logger.info("✅ Student login successful")
+                    
+                    # Get detailed user info via /auth/me
+                    headers = {"Authorization": f"Bearer {token}"}
+                    async with self.session.get(f"{BACKEND_URL}/auth/me", headers=headers) as me_response:
+                        if me_response.status == 200:
+                            student_data = await me_response.json()
+                            
+                            # Extract pack information
+                            level = student_data.get("level")
+                            phone = student_data.get("phone", "")
+                            email = student_data.get("email")
+                            
+                            # Check if phone has country code +221
+                            has_senegal_code = phone.startswith("+221")
+                            
+                            logger.info(f"✅ Student pack info retrieved:")
+                            logger.info(f"   - Email: {email}")
+                            logger.info(f"   - Level/Pack: {level}")
+                            logger.info(f"   - Phone: {phone}")
+                            logger.info(f"   - Has +221 code: {has_senegal_code}")
+                            
+                            # Get pricing for the student's level
+                            async with self.session.get(f"{BACKEND_URL}/pricing") as pricing_response:
+                                if pricing_response.status == 200:
+                                    pricing_data = await pricing_response.json()
+                                    
+                                    # Determine price based on level
+                                    price_key = f"{level}_eur" if level else "beginner_eur"
+                                    student_price = pricing_data.get(price_key, "Unknown")
+                                    
+                                    logger.info(f"   - Pack price: {student_price} EUR")
+                                    
+                                    self.test_results["student_pack_info"]["passed"] = True
+                                    self.test_results["student_pack_info"]["details"].append(f"Student: {email}")
+                                    self.test_results["student_pack_info"]["details"].append(f"Pack/Level: {level}")
+                                    self.test_results["student_pack_info"]["details"].append(f"Phone: {phone}")
+                                    self.test_results["student_pack_info"]["details"].append(f"Has +221 code: {has_senegal_code}")
+                                    self.test_results["student_pack_info"]["details"].append(f"Price: {student_price} EUR")
+                                    
+                                    return {
+                                        "email": email,
+                                        "level": level,
+                                        "phone": phone,
+                                        "has_senegal_code": has_senegal_code,
+                                        "price": student_price
+                                    }
+                                else:
+                                    logger.error("❌ Failed to get pricing information")
+                                    self.test_results["student_pack_info"]["details"].append("Pricing retrieval failed")
+                                    return False
+                        else:
+                            error_text = await me_response.text()
+                            logger.error(f"❌ Failed to get student details: {me_response.status} - {error_text}")
+                            self.test_results["student_pack_info"]["details"].append(f"Student details failed: {error_text}")
+                            return False
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ Student login failed: {response.status} - {error_text}")
+                    self.test_results["student_pack_info"]["details"].append(f"Student login failed: {error_text}")
+                    return False
+                    
+        except Exception as e:
+            logger.error(f"❌ Student pack info test error: {str(e)}")
+            self.test_results["student_pack_info"]["details"].append(f"Test error: {str(e)}")
+            return False
+
+    def get_password_for_email(self, email: str) -> str:
+        """Get password for specific email addresses"""
+        password_map = {
+            "admin@mykalamaenglish.com": "adminco",
+            "prof.test@example.com": "TestProf2025", 
+            "test.student@example.com": "Test2025"
+        }
+        return password_map.get(email, "")
+
     async def run_all_tests(self):
         """Run comprehensive backend tests for My KALAMA ENGLISH"""
         logger.info("🚀 Starting My KALAMA ENGLISH Backend Tests")

@@ -2389,7 +2389,7 @@ startxref
                     logger.info(f"    • {detail}")
         
         # Priority tests second
-        priority_tests = ["flashcard_system", "video_system", "test_questions", "pricing_independence", "admin_delete_user", "email_notifications"]
+        priority_tests = ["flashcard_system", "video_system", "test_questions", "pricing_independence", "admin_delete_user", "email_notifications", "document_system"]
         
         logger.info("\n🎯 OTHER PRIORITY TESTS (New Features):")
         for test_name in priority_tests:

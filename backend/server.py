@@ -3092,8 +3092,8 @@ async def upload_document(file: UploadFile = File(...), current_user: dict = Dep
     if len(contents) > MAX_FILE_SIZE:
         raise HTTPException(status_code=400, detail="File too large (max 50MB)")
     
-    # Create upload directory
-    upload_dir = Path("/app/frontend/public/uploads/documents")
+    # Create upload directory (persistent storage)
+    upload_dir = Path("/app/uploads/documents")
     upload_dir.mkdir(parents=True, exist_ok=True)
     
     # Generate unique filename

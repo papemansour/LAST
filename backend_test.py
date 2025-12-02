@@ -39,6 +39,11 @@ class MyKalamaEnglishBackendTester:
         self.test_student_id = None
         self.test_flashcard_set_id = None
         self.test_results = {
+            # Review Request Priority Tests
+            "dashboard_access": {"passed": False, "details": []},
+            "documents_section": {"passed": False, "details": []},
+            "student_pack_info": {"passed": False, "details": []},
+            
             # Existing Kalamathèque tests
             "file_upload": {"passed": False, "details": []},
             "access_verification": {"passed": False, "details": []},

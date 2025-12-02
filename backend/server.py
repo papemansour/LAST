@@ -3770,8 +3770,8 @@ async def create_admin():
 async def upload_file(file: UploadFile = File(...)):
     """Generic file upload endpoint"""
     try:
-        # Create uploads directory if not exists
-        upload_dir = "/app/frontend/public/uploads"
+        # Create uploads directory if not exists (persistent storage)
+        upload_dir = "/app/uploads"
         os.makedirs(upload_dir, exist_ok=True)
         
         # Generate unique filename

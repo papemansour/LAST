@@ -2400,8 +2400,48 @@ startxref
             logger.error("❌ Cannot proceed without admin login")
             return
         
-        # Create test users
-        logger.info("\n🔧 Setting up test users...")
+        # REVIEW REQUEST PRIORITY TESTS (HIGHEST PRIORITY)
+        logger.info(f"\n🎯 Running: REVIEW REQUEST PRIORITY TESTS")
+        logger.info("=" * 70)
+        
+        # Test 1: Dashboard Access for all 3 roles
+        logger.info(f"\n📋 Running: Dashboard Access Test (Admin, Teacher, Student)")
+        logger.info("-" * 50)
+        try:
+            result = await self.test_dashboard_access_complete()
+            if result:
+                logger.info(f"✅ Dashboard Access: PASSED")
+            else:
+                logger.error(f"❌ Dashboard Access: FAILED")
+        except Exception as e:
+            logger.error(f"❌ Dashboard Access: ERROR - {str(e)}")
+        
+        # Test 2: Documents Section in all dashboards
+        logger.info(f"\n📋 Running: Documents Section Test")
+        logger.info("-" * 50)
+        try:
+            result = await self.test_documents_section_complete()
+            if result:
+                logger.info(f"✅ Documents Section: PASSED")
+            else:
+                logger.error(f"❌ Documents Section: FAILED")
+        except Exception as e:
+            logger.error(f"❌ Documents Section: ERROR - {str(e)}")
+        
+        # Test 3: Student Pack Information
+        logger.info(f"\n📋 Running: Student Pack Information Test")
+        logger.info("-" * 50)
+        try:
+            result = await self.test_student_pack_info()
+            if result:
+                logger.info(f"✅ Student Pack Info: PASSED")
+            else:
+                logger.error(f"❌ Student Pack Info: FAILED")
+        except Exception as e:
+            logger.error(f"❌ Student Pack Info: ERROR - {str(e)}")
+        
+        # Create test users for other tests
+        logger.info("\n🔧 Setting up test users for additional tests...")
         teacher_info = await self.create_test_teacher()
         student_info = await self.create_test_student()
         
@@ -2411,7 +2451,7 @@ startxref
         if student_info:
             await self.login_student(student_info["email"], student_info["password"])
         
-        # GROUP REGISTRATION SYSTEM TESTS (HIGHEST PRIORITY FROM REVIEW REQUEST)
+        # GROUP REGISTRATION SYSTEM TESTS (SECONDARY PRIORITY)
         logger.info(f"\n📋 Running: Group Registration System Tests")
         logger.info("=" * 70)
         

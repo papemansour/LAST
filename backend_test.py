@@ -2267,6 +2267,18 @@ startxref
         except Exception as e:
             logger.error(f"❌ Email Notifications: ERROR - {str(e)}")
         
+        # Test 7: Document System (REVIEW REQUEST - HIGH PRIORITY)
+        logger.info(f"\n📋 Running: Complete Document System Test (REVIEW REQUEST)")
+        logger.info("-" * 50)
+        try:
+            result = await self.test_document_system_complete()
+            if result:
+                logger.info(f"✅ Document System: PASSED")
+            else:
+                logger.error(f"❌ Document System: FAILED")
+        except Exception as e:
+            logger.error(f"❌ Document System: ERROR - {str(e)}")
+        
         # EXISTING KALAMATHÈQUE TESTS (if time permits)
         logger.info(f"\n📋 Running: Kalamathèque File Upload")
         logger.info("-" * 50)

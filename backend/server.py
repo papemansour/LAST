@@ -5072,10 +5072,33 @@ async def create_checkout_session(payment: PaymentRequest):
 
 app.include_router(api_router)
 
-# Mount static files for uploads (persistent storage)
-uploads_path = Path("/app/uploads")
-uploads_path.mkdir(parents=True, exist_ok=True)
-app.mount("/uploads", StaticFiles(directory=str(uploads_path)), name="uploads")
+# Serve uploaded files via API endpoint instead of StaticFiles (better for Kubernetes)
+@app.get("/uploads/{file_path:path}")
+async def serve_uploaded_file(file_path: str):
+    """Serve uploaded files from persistent storage"""
+    from fastapi.responses import FileResponse
+    import mimetypes
+    
+    file_full_path = Path("/app/uploads") / file_path
+    
+    # Security check: ensure file is within uploads directory
+    if not file_full_path.resolve().is_relative_to(Path("/app/uploads").resolve()):
+        raise HTTPException(status_code=403, detail="Access forbidden")
+    
+    # Check if file exists
+    if not file_full_path.exists() or not file_full_path.is_file():
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    # Determine MIME type
+    mime_type, _ = mimetypes.guess_type(str(file_full_path))
+    if mime_type is None:
+        mime_type = "application/octet-stream"
+    
+    return FileResponse(
+        path=str(file_full_path),
+        media_type=mime_type,
+        filename=file_full_path.name
+    )
 
 app.add_middleware(
     CORSMiddleware,

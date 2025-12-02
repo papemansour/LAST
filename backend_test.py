@@ -2400,6 +2400,16 @@ startxref
                 for detail in results["details"]:
                     logger.info(f"    • {detail}")
         
+        logger.info("\n📄 DOCUMENT SYSTEM TESTS:")
+        document_tests = ["document_upload", "document_send", "document_access", "document_retrieval"]
+        for test_name in document_tests:
+            if test_name in self.test_results:
+                results = self.test_results[test_name]
+                status = "✅ PASSED" if results["passed"] else "❌ FAILED"
+                logger.info(f"  {test_name.upper().replace('_', ' ')}: {status}")
+                for detail in results["details"]:
+                    logger.info(f"    • {detail}")
+
         logger.info("\n📚 KALAMATHÈQUE TESTS:")
         kalamathèque_tests = ["file_upload", "access_verification", "book_creation", "book_retrieval", "ai_assistant", "text_to_speech", "book_deletion"]
         for test_name in kalamathèque_tests:

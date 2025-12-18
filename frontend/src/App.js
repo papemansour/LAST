@@ -10,6 +10,8 @@ import StudentDashboard from './pages/StudentDashboard';
 import KidDashboard from './pages/KidDashboard';
 import TeacherDashboard from './pages/TeacherDashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import SecretaryLogin from './pages/SecretaryLogin';
+import SecretaryDashboard from './pages/SecretaryDashboard';
 import TestPage from './pages/TestPage';
 import LegalPage from './pages/LegalPage';
 import CGUPage from './pages/CGUPage';

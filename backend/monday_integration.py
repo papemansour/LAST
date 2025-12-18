@@ -124,7 +124,7 @@ def send_welcome_email_via_monday(student_email: str, student_name: str) -> bool
             </ul>
             
             <div style="text-align: center; margin: 30px 0;">
-                <a href="https://e-learn-dash.preview.emergentagent.com/login" 
+                <a href="https://tutor-hub-32.preview.emergentagent.com/login" 
                    style="background: #0d9488; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">
                     Accéder à mon espace
                 </a>

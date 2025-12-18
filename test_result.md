@@ -552,6 +552,12 @@ test_plan:
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
+  review_request_completed:
+    - "Admin - Change Teacher Dialog"
+    - "Secretary Dashboard - Reports"
+    - "Secretary Dashboard - Meetings"
+    - "NewsManager for Teachers"
+    - "Monday.com CRM Integration"
   completed_tests:
     - "Système de Pièces Jointes dans la Messagerie"
     - "Système Code Magique - Interface Professeur"

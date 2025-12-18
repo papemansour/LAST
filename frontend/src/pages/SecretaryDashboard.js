@@ -299,6 +299,9 @@ const SecretaryDashboard = () => {
               <MessageCircle className="w-4 h-4 mr-2" />
               Messages
             </TabsTrigger>
+            <TabsTrigger value="billing" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">
+              💰 Facturation
+            </TabsTrigger>
           </TabsList>
 
           {/* Meetings Tab */}

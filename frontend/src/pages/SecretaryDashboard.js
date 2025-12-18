@@ -499,6 +499,109 @@ const SecretaryDashboard = () => {
             </div>
           </TabsContent>
 
+          {/* Reports Tab - Comptes Rendus des Professeurs */}
+          <TabsContent value="reports" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Plus className="w-5 h-5" />
+                  Nouveau compte rendu
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Nom du professeur *</label>
+                    <Input
+                      value={newReport.profName}
+                      onChange={(e) => setNewReport({...newReport, profName: e.target.value})}
+                      placeholder="Ex: Marie Martin"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Date du cours *</label>
+                    <Input
+                      type="date"
+                      value={newReport.date}
+                      onChange={(e) => setNewReport({...newReport, date: e.target.value})}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Compte rendu *</label>
+                  <Textarea
+                    value={newReport.content}
+                    onChange={(e) => setNewReport({...newReport, content: e.target.value})}
+                    placeholder="Contenu du cours, présence des élèves, objectifs atteints..."
+                    rows={5}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Notes supplémentaires</label>
+                  <Textarea
+                    value={newReport.notes}
+                    onChange={(e) => setNewReport({...newReport, notes: e.target.value})}
+                    placeholder="Remarques, suggestions, suivi à faire..."
+                    rows={3}
+                  />
+                </div>
+                <Button onClick={handleAddReport} className="bg-purple-600 hover:bg-purple-700">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Enregistrer le compte rendu
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Reports List */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Comptes rendus ({profReports.length})</h3>
+              {profReports.length === 0 ? (
+                <Card>
+                  <CardContent className="text-center py-12 text-gray-500">
+                    Aucun compte rendu enregistré
+                  </CardContent>
+                </Card>
+              ) : (
+                profReports.map(report => (
+                  <Card key={report.id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="pt-6">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h4 className="font-semibold text-lg">👨‍🏫 {report.profName}</h4>
+                            <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                              📅 {new Date(report.date).toLocaleDateString('fr-FR')}
+                            </span>
+                          </div>
+                          <div className="bg-purple-50 border border-purple-100 rounded-lg p-3 mb-3">
+                            <p className="text-sm text-gray-700 whitespace-pre-wrap">{report.content}</p>
+                          </div>
+                          {report.notes && (
+                            <div className="bg-gray-50 rounded-lg p-3">
+                              <p className="text-xs text-gray-500 font-medium mb-1">📝 Notes :</p>
+                              <p className="text-sm text-gray-600">{report.notes}</p>
+                            </div>
+                          )}
+                          <p className="text-xs text-gray-400 mt-3">
+                            Créé le {new Date(report.createdAt).toLocaleDateString('fr-FR')}
+                          </p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteReport(report.id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
+          </TabsContent>
+
           {/* Messages Tab */}
           <TabsContent value="messages" className="space-y-6">
             <Card>

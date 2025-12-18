@@ -1143,15 +1143,26 @@ const SecretaryDashboard = () => {
                       />
                     </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-4 gap-3">
                     <div>
-                      <label className="block text-sm font-medium mb-1">Montant (€) *</label>
+                      <label className="block text-sm font-medium mb-1">Montant *</label>
                       <Input
                         type="number"
                         value={newPayment.amount}
                         onChange={(e) => setNewPayment({...newPayment, amount: e.target.value})}
                         placeholder="500"
                       />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Devise</label>
+                      <select
+                        value={newPayment.currency}
+                        onChange={(e) => setNewPayment({...newPayment, currency: e.target.value})}
+                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm h-10"
+                      >
+                        <option value="EUR">🇪🇺 EUR</option>
+                        <option value="FCFA">🇸🇳 FCFA</option>
+                      </select>
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-1">Heures</label>
@@ -1163,7 +1174,7 @@ const SecretaryDashboard = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1">Bonus (€)</label>
+                      <label className="block text-sm font-medium mb-1">Bonus</label>
                       <Input
                         type="number"
                         value={newPayment.bonus}

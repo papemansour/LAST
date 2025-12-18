@@ -16,7 +16,7 @@ const DonationButton = ({ variant = 'default', size = 'default', className = '' 
       className={`bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-semibold shadow-lg transition-all duration-300 hover:shadow-xl ${className}`}
     >
       <Heart className="w-4 h-4 mr-2 fill-current" />
-      Faire un don (1€)
+      Faire un don (2€)
     </Button>
   );
 };

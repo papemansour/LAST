@@ -587,7 +587,7 @@ const SecretaryDashboard = () => {
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <h4 className="font-semibold text-lg">👨‍🏫 {report.profName}</h4>
+                            <h4 className="font-semibold text-lg">👨‍🏫 {report.prof_name || report.profName}</h4>
                             <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
                               📅 {new Date(report.date).toLocaleDateString('fr-FR')}
                             </span>
@@ -602,7 +602,7 @@ const SecretaryDashboard = () => {
                             </div>
                           )}
                           <p className="text-xs text-gray-400 mt-3">
-                            Créé le {new Date(report.createdAt).toLocaleDateString('fr-FR')}
+                            Créé le {new Date(report.created_at || report.createdAt).toLocaleDateString('fr-FR')}
                           </p>
                         </div>
                         <Button

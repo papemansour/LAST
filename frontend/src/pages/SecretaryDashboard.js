@@ -135,8 +135,8 @@ const SecretaryDashboard = () => {
       const [paymentsRes, receiptsRes, teachersRes, studentsRes] = await Promise.all([
         apiClient.get('/secretary/teacher-payments'),
         apiClient.get('/secretary/student-receipts'),
-        apiClient.get('/admin/teachers'),
-        apiClient.get('/admin/students')
+        apiClient.get('/secretary/teachers-list'),
+        apiClient.get('/secretary/students-list')
       ]);
       setTeacherPayments(paymentsRes.data || []);
       setStudentReceipts(receiptsRes.data || []);

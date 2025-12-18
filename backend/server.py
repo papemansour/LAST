@@ -837,8 +837,8 @@ async def secretary_login(code: str = Body(..., embed=True)):
         await db.users.insert_one(secretary)
         logger.info(f"Secretary user created with admin access via code")
     
-    # Create token with admin role
-    token = create_access_token({"sub": secretary['id'], "role": "admin"})
+    # Create token with secretary role
+    token = create_access_token({"sub": secretary['id'], "role": "secretary"})
     
     return {
         "access_token": token,

@@ -1350,6 +1350,98 @@ const SecretaryDashboard = () => {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Prestataires Section */}
+            <Card className="border-purple-200 mt-6">
+              <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50">
+                <CardTitle className="flex items-center gap-2 text-purple-700">
+                  🏢 Factures Prestataires / Organismes
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Formulaire */}
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Nom Prestataire *</label>
+                        <Input
+                          value={newPrestataire.name}
+                          onChange={(e) => setNewPrestataire({...newPrestataire, name: e.target.value})}
+                          placeholder="Ex: Organisme XYZ"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Service *</label>
+                        <Input
+                          value={newPrestataire.service}
+                          onChange={(e) => setNewPrestataire({...newPrestataire, service: e.target.value})}
+                          placeholder="Ex: Formation entreprise"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Montant *</label>
+                        <Input
+                          type="number"
+                          value={newPrestataire.amount}
+                          onChange={(e) => setNewPrestataire({...newPrestataire, amount: e.target.value})}
+                          placeholder="1000"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Devise</label>
+                        <select
+                          value={newPrestataire.currency}
+                          onChange={(e) => setNewPrestataire({...newPrestataire, currency: e.target.value})}
+                          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm h-10"
+                        >
+                          <option value="EUR">🇪🇺 EUR</option>
+                          <option value="FCFA">🇸🇳 FCFA</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Description</label>
+                      <Input
+                        value={newPrestataire.description}
+                        onChange={(e) => setNewPrestataire({...newPrestataire, description: e.target.value})}
+                        placeholder="Description du service..."
+                      />
+                    </div>
+                    <Button onClick={handleAddPrestataire} className="w-full bg-purple-600 hover:bg-purple-700">
+                      🏢 Créer la Facture Prestataire
+                    </Button>
+                  </div>
+
+                  {/* Liste des factures prestataires */}
+                  <div>
+                    <h4 className="font-semibold text-sm mb-3">Factures Prestataires ({prestataireInvoices.length})</h4>
+                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                      {prestataireInvoices.length === 0 ? (
+                        <p className="text-gray-500 text-sm text-center py-8">Aucune facture prestataire</p>
+                      ) : (
+                        prestataireInvoices.map(invoice => (
+                          <div key={invoice.id} className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+                            <div>
+                              <p className="font-medium text-sm">{invoice.name}</p>
+                              <p className="text-xs text-gray-500">{invoice.service}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-purple-600">{invoice.amount} {invoice.currency || 'EUR'}</span>
+                              <button onClick={() => handleDeletePrestataire(invoice.id)} className="text-red-500 hover:text-red-700">
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

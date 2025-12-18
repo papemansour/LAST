@@ -937,6 +937,94 @@ async def delete_secretary_report(report_id: str, current_user: dict = Depends(g
     
     return {"message": "Report deleted"}
 
+# SECRETARY BILLING ENDPOINTS
+@api_router.get("/secretary/teacher-payments")
+async def get_teacher_payments(current_user: dict = Depends(get_current_user)):
+    """Get all teacher payments"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    payments = await db.teacher_payments.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return payments
+
+@api_router.post("/secretary/teacher-payments")
+async def create_teacher_payment(payment_data: dict = Body(...), current_user: dict = Depends(get_current_user)):
+    """Create a teacher payment record"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    payment = {
+        "id": str(uuid4()),
+        "teacher_id": payment_data.get("teacherId"),
+        "teacher_name": payment_data.get("teacherName"),
+        "month": payment_data.get("month"),
+        "amount": payment_data.get("amount"),
+        "hours_worked": payment_data.get("hoursWorked", ""),
+        "bonus": payment_data.get("bonus", "0"),
+        "notes": payment_data.get("notes", ""),
+        "created_by": current_user['id'],
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.teacher_payments.insert_one(payment)
+    logger.info(f"Teacher payment created for: {payment['teacher_name']} - {payment['amount']}€")
+    return {"message": "Payment created", "id": payment['id']}
+
+@api_router.delete("/secretary/teacher-payments/{payment_id}")
+async def delete_teacher_payment(payment_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a teacher payment"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    result = await db.teacher_payments.delete_one({"id": payment_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Payment not found")
+    
+    return {"message": "Payment deleted"}
+
+@api_router.get("/secretary/student-receipts")
+async def get_student_receipts(current_user: dict = Depends(get_current_user)):
+    """Get all student receipts"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    receipts = await db.student_receipts.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return receipts
+
+@api_router.post("/secretary/student-receipts")
+async def create_student_receipt(receipt_data: dict = Body(...), current_user: dict = Depends(get_current_user)):
+    """Create a student receipt"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    receipt = {
+        "id": str(uuid4()),
+        "student_id": receipt_data.get("studentId"),
+        "student_name": receipt_data.get("studentName"),
+        "pack_type": receipt_data.get("packType"),
+        "amount": receipt_data.get("amount"),
+        "payment_method": receipt_data.get("paymentMethod", "Virement"),
+        "notes": receipt_data.get("notes", ""),
+        "created_by": current_user['id'],
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.student_receipts.insert_one(receipt)
+    logger.info(f"Student receipt created for: {receipt['student_name']} - {receipt['amount']}€")
+    return {"message": "Receipt created", "id": receipt['id']}
+
+@api_router.delete("/secretary/student-receipts/{receipt_id}")
+async def delete_student_receipt(receipt_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a student receipt"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    result = await db.student_receipts.delete_one({"id": receipt_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Receipt not found")
+    
+    return {"message": "Receipt deleted"}
+
 @api_router.get("/auth/me")
 async def get_me(current_user: dict = Depends(get_current_user)):
     return current_user

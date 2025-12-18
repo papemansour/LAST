@@ -898,10 +898,18 @@ const AdminDashboard = () => {
                   <div className="space-y-4">
                     {testResults.map((result) => (
                       <div key={result.id} className="p-4 border rounded-lg flex justify-between items-center">
-                        <div>
-                          <h3 className="font-semibold capitalize">
-                            Niveau: {result.level === 'beginner' ? 'Débutant' : result.level === 'intermediate' ? 'Intermédiaire' : 'Pack professionnel'}
+                        <div className="flex-1">
+                          <h3 className="font-bold text-lg text-purple-600 mb-1">
+                            👤 {result.candidate_name || 'Candidat anonyme'}
                           </h3>
+                          {result.candidate_email && (
+                            <p className="text-xs text-gray-500 mb-2">
+                              📧 {result.candidate_email}
+                            </p>
+                          )}
+                          <p className="text-sm font-semibold text-gray-700">
+                            Niveau: {result.level === 'beginner' ? 'Débutant' : result.level === 'intermediate' ? 'Intermédiaire' : 'Pack professionnel'}
+                          </p>
                           <p className="text-sm text-gray-600">
                             Score: {result.score} / {result.total_questions}
                           </p>

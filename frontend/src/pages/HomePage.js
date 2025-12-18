@@ -822,6 +822,7 @@ const HomePage = () => {
                       pricingData.advanced_eur - pricingData.advanced_discount,
                       (pricingData.advanced_fcfa || 0) - (currency === 'FCFA' && new Date() < new Date('2026-01-14') ? pricingData.advanced_discount_fcfa || 0 : 0)
                     )}
+                    <span className="text-base md:text-lg font-normal text-gray-600">/mois</span>
                   </div>
                   {currency === 'FCFA' && pricingData.advanced_discount_fcfa > 0 && new Date() < new Date('2026-01-14') && (
                     <div className="text-green-600 font-semibold mt-1 md:mt-2 text-sm md:text-base">

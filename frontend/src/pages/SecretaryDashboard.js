@@ -80,10 +80,12 @@ const SecretaryDashboard = () => {
     const savedMeetings = localStorage.getItem('secretary_meetings');
     const savedNotes = localStorage.getItem('secretary_notes');
     const savedMessages = localStorage.getItem('secretary_messages');
+    const savedReports = localStorage.getItem('secretary_prof_reports');
     
     if (savedMeetings) setMeetings(JSON.parse(savedMeetings));
     if (savedNotes) setNotes(JSON.parse(savedNotes));
     if (savedMessages) setMessages(JSON.parse(savedMessages));
+    if (savedReports) setProfReports(JSON.parse(savedReports));
   };
 
   // Sauvegarder dans localStorage

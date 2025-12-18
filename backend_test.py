@@ -2773,10 +2773,34 @@ startxref
         logger.info("🏁 MY KALAMA ENGLISH BACKEND TEST SUMMARY")
         logger.info("=" * 70)
         
-        # Group registration tests first (highest priority)
+        # New review request tests first (highest priority)
+        new_review_tests = ["monday_crm_integration", "newsmanager_teachers", "documents_preview", "kkid_dashboard"]
+        
+        logger.info("\n🎯 NEW REVIEW REQUEST TESTS (HIGHEST PRIORITY):")
+        for test_name in new_review_tests:
+            if test_name in self.test_results:
+                results = self.test_results[test_name]
+                status = "✅ PASSED" if results["passed"] else "❌ FAILED"
+                logger.info(f"  {test_name.upper().replace('_', ' ')}: {status}")
+                for detail in results["details"]:
+                    logger.info(f"    • {detail}")
+
+        # Previous review request tests
+        previous_review_tests = ["dashboard_access", "documents_section", "student_pack_info"]
+        
+        logger.info("\n🎯 PREVIOUS REVIEW REQUEST TESTS:")
+        for test_name in previous_review_tests:
+            if test_name in self.test_results:
+                results = self.test_results[test_name]
+                status = "✅ PASSED" if results["passed"] else "❌ FAILED"
+                logger.info(f"  {test_name.upper().replace('_', ' ')}: {status}")
+                for detail in results["details"]:
+                    logger.info(f"    • {detail}")
+
+        # Group registration tests
         group_tests = ["group_registration", "pending_group_registrations", "magic_code_generation", "magic_code_login", "group_system_verification"]
         
-        logger.info("\n🎯 GROUP REGISTRATION SYSTEM TESTS (HIGHEST PRIORITY):")
+        logger.info("\n🎯 GROUP REGISTRATION SYSTEM TESTS:")
         for test_name in group_tests:
             if test_name in self.test_results:
                 results = self.test_results[test_name]

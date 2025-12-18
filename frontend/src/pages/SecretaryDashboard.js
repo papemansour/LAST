@@ -21,7 +21,10 @@ const SecretaryDashboard = () => {
     date: '',
     time: '',
     attendees: '',
-    notes: ''
+    notes: '',
+    meetingLink: '',
+    notifyProfs: [],
+    notifyAdmin: false
   });
   
   // Notes state

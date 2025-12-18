@@ -812,15 +812,15 @@ async def login(credentials: UserLogin):
 
 @api_router.post("/auth/secretary-login")
 async def secretary_login(code: str = Body(..., embed=True)):
-    """Special login for secretary with secret code"""
+    """Special login for secretary with secret code - gives admin access"""
     if code != "secretkalama":
-        raise HTTPException(status_code=401, detail="Invalid code")
+        raise HTTPException(status_code=401, detail="Code incorrect")
     
-    # Find or create secretary user
-    secretary = await db.users.find_one({"role": "secretary"}, {"_id": 0})
+    # Find or create secretary user with admin role
+    secretary = await db.users.find_one({"email": "secretaire@mykalamaenglish.com"}, {"_id": 0})
     
     if not secretary:
-        # Create default secretary user
+        # Create secretary user with admin role
         secretary_id = str(uuid4())
         secretary = {
             "id": secretary_id,
@@ -828,17 +828,17 @@ async def secretary_login(code: str = Body(..., embed=True)):
             "first_name": "Secrétaire",
             "last_name": "KALAMA",
             "phone": "+221000000000",
-            "role": "secretary",
+            "role": "admin",  # Admin role to access admin dashboard
             "is_active": True,
             "password_hash": hash_password("secretkalama"),
             "created_at": datetime.now(timezone.utc).isoformat(),
             "first_login": False
         }
         await db.users.insert_one(secretary)
-        logger.info(f"Secretary user created with code access")
+        logger.info(f"Secretary user created with admin access via code")
     
-    # Create token
-    token = create_access_token({"sub": secretary['id'], "role": "secretary"})
+    # Create token with admin role
+    token = create_access_token({"sub": secretary['id'], "role": "admin"})
     
     return {
         "access_token": token,
@@ -848,7 +848,7 @@ async def secretary_login(code: str = Body(..., embed=True)):
             "email": secretary['email'],
             "first_name": secretary['first_name'],
             "last_name": secretary['last_name'],
-            "role": "secretary"
+            "role": "admin"  # Return admin role
         }
     }
 

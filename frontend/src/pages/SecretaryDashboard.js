@@ -480,9 +480,10 @@ const SecretaryDashboard = () => {
           <div class="party">
             <div class="party-title">📍 ÉMETTEUR</div>
             <p><strong>Société MyKalama English</strong></p>
+            <p>Paris, France</p>
             <p>Dakar, Sénégal</p>
-            <p>📞 +221 XX XXX XX XX</p>
-            <p>📧 contact@mykalamaenglish.com</p>
+            <p>📞 +221 78 260 75 49 / 78 528 68 89</p>
+            <p>📧 mykalamaenglish@gmail.com</p>
           </div>
           <div class="party">
             <div class="party-title">👤 DESTINATAIRE (Prestataire)</div>

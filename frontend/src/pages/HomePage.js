@@ -1409,9 +1409,9 @@ const HomePage = () => {
                 <Button
                   type="submit"
                   className="w-full bg-teal-600 hover:bg-teal-700"
-                  disabled={loading || (courseType === 'group' && !groupCodeInfo)}
+                  disabled={loading}
                 >
-                  {loading ? 'Envoi en cours...' : courseType === 'group' ? 'Rejoindre le groupe' : 'Confirmer mon inscription'}
+                  {loading ? 'Envoi en cours...' : courseType === 'group' ? 'Confirmer l\'inscription de groupe' : 'Confirmer mon inscription'}
                 </Button>
 
             <p className="text-sm text-gray-500 text-center">

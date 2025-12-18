@@ -470,9 +470,13 @@ test_plan:
     - "Système de Documents - Interface Admin"
     - "Système de Documents - Interface Professeur"
     - "Système de Documents - Interface Étudiant"
+    - "Login Secrétaire - Nouvelles fonctionnalités"
+    - "Cours Groupé - Bouton Confirmer l'inscription"
+    - "Tableau Assiduité (Admin)"
   re_tested_after_fix:
     - "Système de Pièces Jointes dans la Messagerie - RE-TEST RÉUSSI (30/11/2025)"
     - "Système de Documents Complet - TESTÉ AVEC SUCCÈS (02/12/2025)"
+    - "4 Nouvelles Fonctionnalités - TESTÉ AVEC SUCCÈS (18/12/2025)"
 
   - task: "Système Code Magique - Backend API"
     implemented: true

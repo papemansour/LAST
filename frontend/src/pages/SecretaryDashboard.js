@@ -54,7 +54,7 @@ const SecretaryDashboard = () => {
 
   useEffect(() => {
     fetchUserData();
-    loadLocalData();
+    loadAllData();
   }, []);
 
   const fetchUserData = async () => {
@@ -75,25 +75,35 @@ const SecretaryDashboard = () => {
     }
   };
 
-  // Charger données depuis localStorage
-  const loadLocalData = () => {
-    const savedMeetings = localStorage.getItem('secretary_meetings');
+  // Charger données depuis l'API backend
+  const loadAllData = async () => {
+    try {
+      // Charger réunions depuis l'API
+      const meetingsRes = await apiClient.get('/secretary/meetings');
+      setMeetings(meetingsRes.data || []);
+    } catch (error) {
+      // Fallback localStorage si API échoue
+      const savedMeetings = localStorage.getItem('secretary_meetings');
+      if (savedMeetings) setMeetings(JSON.parse(savedMeetings));
+    }
+    
+    try {
+      // Charger comptes rendus depuis l'API
+      const reportsRes = await apiClient.get('/secretary/reports');
+      setProfReports(reportsRes.data || []);
+    } catch (error) {
+      const savedReports = localStorage.getItem('secretary_prof_reports');
+      if (savedReports) setProfReports(JSON.parse(savedReports));
+    }
+    
+    // Notes et messages restent en localStorage (données locales)
     const savedNotes = localStorage.getItem('secretary_notes');
     const savedMessages = localStorage.getItem('secretary_messages');
-    const savedReports = localStorage.getItem('secretary_prof_reports');
-    
-    if (savedMeetings) setMeetings(JSON.parse(savedMeetings));
     if (savedNotes) setNotes(JSON.parse(savedNotes));
     if (savedMessages) setMessages(JSON.parse(savedMessages));
-    if (savedReports) setProfReports(JSON.parse(savedReports));
   };
 
-  // Sauvegarder dans localStorage
-  const saveMeetings = (data) => {
-    localStorage.setItem('secretary_meetings', JSON.stringify(data));
-    setMeetings(data);
-  };
-
+  // Sauvegarder dans localStorage (notes et messages)
   const saveNotes = (data) => {
     localStorage.setItem('secretary_notes', JSON.stringify(data));
     setNotes(data);
@@ -102,11 +112,6 @@ const SecretaryDashboard = () => {
   const saveMessages = (data) => {
     localStorage.setItem('secretary_messages', JSON.stringify(data));
     setMessages(data);
-  };
-
-  const saveReports = (data) => {
-    localStorage.setItem('secretary_prof_reports', JSON.stringify(data));
-    setProfReports(data);
   };
 
   // Meetings handlers

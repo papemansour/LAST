@@ -129,6 +129,31 @@ const SecretaryDashboard = () => {
     const savedMessages = localStorage.getItem('secretary_messages');
     if (savedNotes) setNotes(JSON.parse(savedNotes));
     if (savedMessages) setMessages(JSON.parse(savedMessages));
+    
+    // Charger données de facturation
+    try {
+      const [paymentsRes, receiptsRes, teachersRes, studentsRes] = await Promise.all([
+        apiClient.get('/secretary/teacher-payments'),
+        apiClient.get('/secretary/student-receipts'),
+        apiClient.get('/admin/teachers'),
+        apiClient.get('/admin/students')
+      ]);
+      setTeacherPayments(paymentsRes.data || []);
+      setStudentReceipts(receiptsRes.data || []);
+      setTeachers(teachersRes.data || []);
+      setStudents(studentsRes.data || []);
+      
+      // Calculer les stats
+      const totalPaid = (paymentsRes.data || []).reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+      const totalReceipts = (receiptsRes.data || []).reduce((sum, r) => sum + parseFloat(r.amount || 0), 0);
+      setBillingStats({
+        totalPaidTeachers: totalPaid,
+        totalReceipts: totalReceipts,
+        pendingPayments: (teachersRes.data || []).length - (paymentsRes.data || []).filter(p => p.month === new Date().toISOString().slice(0, 7)).length
+      });
+    } catch (error) {
+      console.log('Billing data not available yet');
+    }
   };
 
   // Sauvegarder dans localStorage (notes et messages)

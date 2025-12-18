@@ -3468,9 +3468,11 @@ startxref
             
             headers = {"Authorization": f"Bearer {self.admin_token}"}
             
-            # Create a test student registration first
+            # Create a test student registration first with unique email
+            import time
+            unique_id = str(int(time.time()))
             student_data = {
-                "email": "monday.test@example.com",
+                "email": f"monday.test.{unique_id}@example.com",
                 "first_name": "Monday",
                 "last_name": "Test",
                 "phone": "+33987654321",

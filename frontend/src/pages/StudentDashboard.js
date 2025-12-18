@@ -154,32 +154,53 @@ const StudentDashboard = () => {
     const level = user.level;
     const hasClub = user.join_kalama_club;
     
-    let basePrice = 0;
-    let discount = 0;
+    // Vérifier si l'étudiant a un indicatif africain
+    const africanCodes = ['+221', '+225', '+226', '+227', '+228', '+229', '+230', '+231', '+232', '+233', '+234', '+235', '+236', '+237', '+238', '+239', '+240', '+241', '+242', '+243', '+244', '+245', '+246', '+248', '+249', '+250', '+251', '+252', '+253', '+254', '+255', '+256', '+257', '+258', '+260', '+261', '+262', '+263', '+264', '+265', '+266', '+267', '+268', '+269', '+290', '+291'];
+    const isAfrican = user.phone && africanCodes.some(code => user.phone.startsWith(code));
+    
+    let basePriceEur = 0;
+    let basePriceFcfa = 0;
+    let discountEur = 0;
+    let discountFcfa = 0;
     
     switch(level) {
       case 'kkid':
-        basePrice = pricing.kkid_eur || 30;
-        discount = pricing.kkid_discount || 0;
+        basePriceEur = pricing.kkid_eur || 30;
+        basePriceFcfa = pricing.kkid_fcfa || 7000;
+        discountEur = pricing.kkid_discount || 0;
+        discountFcfa = pricing.kkid_discount_fcfa || 0;
         break;
       case 'beginner':
-        basePrice = pricing.beginner_eur || 76;
-        discount = pricing.beginner_discount || 0;
+        basePriceEur = pricing.beginner_eur || 76;
+        basePriceFcfa = pricing.beginner_fcfa || 15000;
+        discountEur = pricing.beginner_discount || 0;
+        discountFcfa = pricing.beginner_discount_fcfa || 0;
         break;
       case 'intermediate':
-        basePrice = pricing.intermediate_eur || 90;
-        discount = pricing.intermediate_discount || 0;
+        basePriceEur = pricing.intermediate_eur || 90;
+        basePriceFcfa = pricing.intermediate_fcfa || 25000;
+        discountEur = pricing.intermediate_discount || 0;
+        discountFcfa = pricing.intermediate_discount_fcfa || 0;
         break;
       case 'advanced':
-        basePrice = pricing.advanced_eur || 102;
-        discount = pricing.advanced_discount || 0;
+        basePriceEur = pricing.advanced_eur || 102;
+        basePriceFcfa = pricing.advanced_fcfa || 40000;
+        discountEur = pricing.advanced_discount || 0;
+        discountFcfa = pricing.advanced_discount_fcfa || 0;
         break;
       default:
-        basePrice = 76;
+        basePriceEur = 76;
+        basePriceFcfa = 15000;
     }
     
-    const finalPrice = basePrice - discount;
-    return `${finalPrice}€`;
+    // Afficher en FCFA pour les indicatifs africains, sinon en EUR
+    if (isAfrican) {
+      const finalPriceFcfa = basePriceFcfa - discountFcfa;
+      return `${finalPriceFcfa.toLocaleString()} FCFA`;
+    } else {
+      const finalPriceEur = basePriceEur - discountEur;
+      return `${finalPriceEur}€`;
+    }
   };
 
   if (loading) {

@@ -61,6 +61,14 @@ function App() {
               <AdminDashboard />
             </ProtectedRoute>
           } />
+          
+          <Route path="/secretary-login" element={<SecretaryLogin />} />
+          
+          <Route path="/secretary/*" element={
+            <ProtectedRoute allowedRoles={['secretary']}>
+              <SecretaryDashboard />
+            </ProtectedRoute>
+          } />
         </Routes>
         </BrowserRouter>
         <Toaster position="top-center" richColors />

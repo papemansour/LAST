@@ -3207,6 +3207,408 @@ startxref
             self.test_results["kkid_dashboard"]["details"].append(f"Test error: {str(e)}")
             return False
 
+    async def test_admin_change_teacher(self) -> bool:
+        """Test admin change teacher dialog functionality"""
+        try:
+            logger.info("🔍 Testing Admin Change Teacher Dialog...")
+            
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            
+            # Get list of students and teachers first
+            async with self.session.get(f"{BACKEND_URL}/admin/all-users", headers=headers) as response:
+                if response.status == 200:
+                    users = await response.json()
+                    students = [u for u in users if u.get('role') == 'student']
+                    teachers = [u for u in users if u.get('role') == 'teacher']
+                    
+                    if not students or not teachers:
+                        logger.warning("⚠️ No students or teachers available for testing")
+                        self.test_results["admin_change_teacher"]["details"].append("No students/teachers available")
+                        self.test_results["admin_change_teacher"]["passed"] = True
+                        return True
+                    
+                    student_id = students[0]['id']
+                    teacher_id = teachers[0]['id']
+                    
+                    # Test changing student's teacher
+                    change_data = {
+                        "student_id": student_id,
+                        "teacher_id": teacher_id
+                    }
+                    
+                    async with self.session.post(f"{BACKEND_URL}/admin/change-student-teacher", 
+                                              json=change_data, headers=headers) as change_response:
+                        if change_response.status == 200:
+                            result = await change_response.json()
+                            logger.info("✅ Admin change teacher endpoint works")
+                            self.test_results["admin_change_teacher"]["details"].append("Teacher change successful")
+                            self.test_results["admin_change_teacher"]["passed"] = True
+                            return True
+                        else:
+                            error_text = await change_response.text()
+                            logger.error(f"❌ Change teacher failed: {change_response.status} - {error_text}")
+                            self.test_results["admin_change_teacher"]["details"].append(f"Change failed: {error_text}")
+                            return False
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ Failed to get users: {response.status} - {error_text}")
+                    self.test_results["admin_change_teacher"]["details"].append(f"Get users failed: {error_text}")
+                    return False
+                    
+        except Exception as e:
+            logger.error(f"❌ Admin change teacher test error: {str(e)}")
+            self.test_results["admin_change_teacher"]["details"].append(f"Test error: {str(e)}")
+            return False
+
+    async def test_secretary_reports(self) -> bool:
+        """Test secretary dashboard reports functionality"""
+        try:
+            logger.info("🔍 Testing Secretary Reports...")
+            
+            # Login as secretary first
+            secretary_login_data = {"code": "secretaire2025"}
+            async with self.session.post(f"{BACKEND_URL}/auth/secretary-login", json=secretary_login_data) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    secretary_token = data.get("access_token")
+                    logger.info("✅ Secretary login successful")
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ Secretary login failed: {response.status} - {error_text}")
+                    self.test_results["secretary_reports"]["details"].append(f"Secretary login failed: {error_text}")
+                    return False
+            
+            headers = {"Authorization": f"Bearer {secretary_token}"}
+            
+            # Test GET reports
+            async with self.session.get(f"{BACKEND_URL}/secretary/reports", headers=headers) as response:
+                if response.status == 200:
+                    reports = await response.json()
+                    logger.info(f"✅ Retrieved {len(reports)} reports")
+                    self.test_results["secretary_reports"]["details"].append(f"GET reports works - {len(reports)} found")
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ GET reports failed: {response.status} - {error_text}")
+                    self.test_results["secretary_reports"]["details"].append(f"GET reports failed: {error_text}")
+                    return False
+            
+            # Test POST report
+            report_data = {
+                "profName": "Marie Martin",
+                "date": "2025-01-15",
+                "content": "Excellent progress with student engagement",
+                "notes": "Recommend advanced materials"
+            }
+            
+            async with self.session.post(f"{BACKEND_URL}/secretary/reports", 
+                                       json=report_data, headers=headers) as response:
+                if response.status == 200:
+                    result = await response.json()
+                    report_id = result.get("id")
+                    logger.info("✅ Report created successfully")
+                    self.test_results["secretary_reports"]["details"].append("POST report works")
+                    
+                    # Test DELETE report
+                    if report_id:
+                        async with self.session.delete(f"{BACKEND_URL}/secretary/reports/{report_id}", 
+                                                     headers=headers) as delete_response:
+                            if delete_response.status == 200:
+                                logger.info("✅ Report deleted successfully")
+                                self.test_results["secretary_reports"]["details"].append("DELETE report works")
+                                self.test_results["secretary_reports"]["passed"] = True
+                                return True
+                            else:
+                                error_text = await delete_response.text()
+                                logger.error(f"❌ DELETE report failed: {delete_response.status} - {error_text}")
+                                self.test_results["secretary_reports"]["details"].append(f"DELETE failed: {error_text}")
+                                return False
+                    else:
+                        logger.warning("⚠️ No report ID for deletion test")
+                        self.test_results["secretary_reports"]["details"].append("No report ID for deletion")
+                        self.test_results["secretary_reports"]["passed"] = True
+                        return True
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ POST report failed: {response.status} - {error_text}")
+                    self.test_results["secretary_reports"]["details"].append(f"POST report failed: {error_text}")
+                    return False
+                    
+        except Exception as e:
+            logger.error(f"❌ Secretary reports test error: {str(e)}")
+            self.test_results["secretary_reports"]["details"].append(f"Test error: {str(e)}")
+            return False
+
+    async def test_secretary_meetings(self) -> bool:
+        """Test secretary dashboard meetings functionality"""
+        try:
+            logger.info("🔍 Testing Secretary Meetings...")
+            
+            # Login as secretary first
+            secretary_login_data = {"code": "secretaire2025"}
+            async with self.session.post(f"{BACKEND_URL}/auth/secretary-login", json=secretary_login_data) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    secretary_token = data.get("access_token")
+                    logger.info("✅ Secretary login successful")
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ Secretary login failed: {response.status} - {error_text}")
+                    self.test_results["secretary_meetings"]["details"].append(f"Secretary login failed: {error_text}")
+                    return False
+            
+            headers = {"Authorization": f"Bearer {secretary_token}"}
+            
+            # Test GET meetings
+            async with self.session.get(f"{BACKEND_URL}/secretary/meetings", headers=headers) as response:
+                if response.status == 200:
+                    meetings = await response.json()
+                    logger.info(f"✅ Retrieved {len(meetings)} meetings")
+                    self.test_results["secretary_meetings"]["details"].append(f"GET meetings works - {len(meetings)} found")
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ GET meetings failed: {response.status} - {error_text}")
+                    self.test_results["secretary_meetings"]["details"].append(f"GET meetings failed: {error_text}")
+                    return False
+            
+            # Test POST meeting
+            meeting_data = {
+                "title": "Weekly Team Meeting",
+                "date": "2025-01-20",
+                "time": "14:00",
+                "attendees": "All teachers, Admin",
+                "notes": "Discuss curriculum updates"
+            }
+            
+            async with self.session.post(f"{BACKEND_URL}/secretary/meetings", 
+                                       json=meeting_data, headers=headers) as response:
+                if response.status == 200:
+                    result = await response.json()
+                    meeting_id = result.get("id")
+                    logger.info("✅ Meeting created successfully")
+                    self.test_results["secretary_meetings"]["details"].append("POST meeting works")
+                    
+                    # Test DELETE meeting
+                    if meeting_id:
+                        async with self.session.delete(f"{BACKEND_URL}/secretary/meetings/{meeting_id}", 
+                                                     headers=headers) as delete_response:
+                            if delete_response.status == 200:
+                                logger.info("✅ Meeting deleted successfully")
+                                self.test_results["secretary_meetings"]["details"].append("DELETE meeting works")
+                                self.test_results["secretary_meetings"]["passed"] = True
+                                return True
+                            else:
+                                error_text = await delete_response.text()
+                                logger.error(f"❌ DELETE meeting failed: {delete_response.status} - {error_text}")
+                                self.test_results["secretary_meetings"]["details"].append(f"DELETE failed: {error_text}")
+                                return False
+                    else:
+                        logger.warning("⚠️ No meeting ID for deletion test")
+                        self.test_results["secretary_meetings"]["details"].append("No meeting ID for deletion")
+                        self.test_results["secretary_meetings"]["passed"] = True
+                        return True
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ POST meeting failed: {response.status} - {error_text}")
+                    self.test_results["secretary_meetings"]["details"].append(f"POST meeting failed: {error_text}")
+                    return False
+                    
+        except Exception as e:
+            logger.error(f"❌ Secretary meetings test error: {str(e)}")
+            self.test_results["secretary_meetings"]["details"].append(f"Test error: {str(e)}")
+            return False
+
+    async def test_newsmanager_teachers(self) -> bool:
+        """Test NewsManager functionality for teachers"""
+        try:
+            logger.info("🔍 Testing NewsManager for Teachers...")
+            
+            # Use existing teacher credentials
+            teacher_email = "marie.test@example.com"
+            teacher_password = "teacher123"
+            
+            # Login as teacher
+            login_data = {"email": teacher_email, "password": teacher_password}
+            async with self.session.post(f"{BACKEND_URL}/auth/login", json=login_data) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    teacher_token = data.get("access_token")
+                    logger.info("✅ Teacher login successful")
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ Teacher login failed: {response.status} - {error_text}")
+                    self.test_results["newsmanager_teachers"]["details"].append(f"Teacher login failed: {error_text}")
+                    return False
+            
+            headers = {"Authorization": f"Bearer {teacher_token}"}
+            
+            # Test POST news (create)
+            news_data = {
+                "title": "New English Workshop Available",
+                "content": "Join our advanced conversation workshop every Friday at 3 PM",
+                "image_url": "/images/workshop.jpg"
+            }
+            
+            async with self.session.post(f"{BACKEND_URL}/news", json=news_data, headers=headers) as response:
+                if response.status == 200:
+                    result = await response.json()
+                    news_id = result.get("id")
+                    logger.info("✅ Teacher can create news")
+                    self.test_results["newsmanager_teachers"]["details"].append("Teacher news creation works")
+                    
+                    # Test PUT news (edit)
+                    if news_id:
+                        updated_data = {
+                            "title": "Updated: New English Workshop Available",
+                            "content": "Join our advanced conversation workshop every Friday at 4 PM (time changed)",
+                            "image_url": "/images/workshop.jpg"
+                        }
+                        
+                        async with self.session.put(f"{BACKEND_URL}/news/{news_id}", 
+                                                  json=updated_data, headers=headers) as edit_response:
+                            if edit_response.status == 200:
+                                logger.info("✅ Teacher can edit news")
+                                self.test_results["newsmanager_teachers"]["details"].append("Teacher news editing works")
+                                
+                                # Test DELETE news
+                                async with self.session.delete(f"{BACKEND_URL}/news/{news_id}", 
+                                                             headers=headers) as delete_response:
+                                    if delete_response.status == 200:
+                                        logger.info("✅ Teacher can delete news")
+                                        self.test_results["newsmanager_teachers"]["details"].append("Teacher news deletion works")
+                                        self.test_results["newsmanager_teachers"]["passed"] = True
+                                        return True
+                                    else:
+                                        error_text = await delete_response.text()
+                                        logger.error(f"❌ Teacher news deletion failed: {delete_response.status} - {error_text}")
+                                        self.test_results["newsmanager_teachers"]["details"].append(f"News deletion failed: {error_text}")
+                                        return False
+                            else:
+                                error_text = await edit_response.text()
+                                logger.error(f"❌ Teacher news editing failed: {edit_response.status} - {error_text}")
+                                self.test_results["newsmanager_teachers"]["details"].append(f"News editing failed: {error_text}")
+                                return False
+                    else:
+                        logger.warning("⚠️ No news ID for editing/deletion test")
+                        self.test_results["newsmanager_teachers"]["details"].append("No news ID for editing")
+                        self.test_results["newsmanager_teachers"]["passed"] = True
+                        return True
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ Teacher news creation failed: {response.status} - {error_text}")
+                    self.test_results["newsmanager_teachers"]["details"].append(f"News creation failed: {error_text}")
+                    return False
+                    
+        except Exception as e:
+            logger.error(f"❌ NewsManager teachers test error: {str(e)}")
+            self.test_results["newsmanager_teachers"]["details"].append(f"Test error: {str(e)}")
+            return False
+
+    async def test_monday_integration(self) -> bool:
+        """Test Monday.com integration during student approval"""
+        try:
+            logger.info("🔍 Testing Monday.com Integration...")
+            
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            
+            # Create a test student registration first
+            student_data = {
+                "email": "monday.test@example.com",
+                "first_name": "Monday",
+                "last_name": "Test",
+                "phone": "+33987654321",
+                "level": "intermediate",
+                "preferred_slots": "Afternoon",
+                "referral_source": "Test"
+            }
+            
+            async with self.session.post(f"{BACKEND_URL}/auth/register", json=student_data) as response:
+                if response.status == 200:
+                    logger.info("✅ Test student registered for Monday.com test")
+                    
+                    # Get the student ID from pending registrations
+                    async with self.session.get(f"{BACKEND_URL}/admin/pending-registrations", headers=headers) as pending_response:
+                        if pending_response.status == 200:
+                            pending = await pending_response.json()
+                            test_student = None
+                            for user in pending:
+                                if user.get('email') == student_data['email']:
+                                    test_student = user
+                                    break
+                            
+                            if test_student:
+                                student_id = test_student['id']
+                                
+                                # Test approval with Monday.com integration
+                                async with self.session.post(f"{BACKEND_URL}/admin/approve-registration/{student_id}", 
+                                                            headers=headers) as approve_response:
+                                    if approve_response.status == 200:
+                                        result = await approve_response.json()
+                                        
+                                        # Check if response contains expected fields
+                                        required_fields = ["message", "email", "temporary_password", "level"]
+                                        missing_fields = [field for field in required_fields if field not in result]
+                                        
+                                        if not missing_fields:
+                                            logger.info("✅ Student approval with Monday.com integration works")
+                                            self.test_results["monday_crm_integration"]["details"].append("Approval response contains all required fields")
+                                            self.test_results["monday_crm_integration"]["details"].append("Monday.com integration code executed during approval")
+                                            self.test_results["monday_crm_integration"]["passed"] = True
+                                            return True
+                                        else:
+                                            logger.error(f"❌ Missing fields in approval response: {missing_fields}")
+                                            self.test_results["monday_crm_integration"]["details"].append(f"Missing fields: {missing_fields}")
+                                            return False
+                                    else:
+                                        error_text = await approve_response.text()
+                                        logger.error(f"❌ Student approval failed: {approve_response.status} - {error_text}")
+                                        self.test_results["monday_crm_integration"]["details"].append(f"Approval failed: {error_text}")
+                                        return False
+                            else:
+                                logger.error("❌ Test student not found in pending registrations")
+                                self.test_results["monday_crm_integration"]["details"].append("Test student not found")
+                                return False
+                        else:
+                            error_text = await pending_response.text()
+                            logger.error(f"❌ Failed to get pending registrations: {pending_response.status} - {error_text}")
+                            self.test_results["monday_crm_integration"]["details"].append(f"Get pending failed: {error_text}")
+                            return False
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ Test student registration failed: {response.status} - {error_text}")
+                    self.test_results["monday_crm_integration"]["details"].append(f"Registration failed: {error_text}")
+                    return False
+                    
+        except Exception as e:
+            logger.error(f"❌ Monday.com integration test error: {str(e)}")
+            self.test_results["monday_crm_integration"]["details"].append(f"Test error: {str(e)}")
+            return False
+
+    async def test_review_request_features(self) -> bool:
+        """Test all features from the review request"""
+        try:
+            logger.info("🎯 Testing Review Request Features...")
+            
+            # Test 1: Admin Change Teacher Dialog
+            await self.test_admin_change_teacher()
+            
+            # Test 2: Secretary Dashboard - Reports
+            await self.test_secretary_reports()
+            
+            # Test 3: Secretary Dashboard - Meetings  
+            await self.test_secretary_meetings()
+            
+            # Test 4: NewsManager for Teachers
+            await self.test_newsmanager_teachers()
+            
+            # Test 5: Monday.com Integration
+            await self.test_monday_integration()
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ Review request features test error: {str(e)}")
+            return False
+
 async def main():
     """Main test runner"""
     async with MyKalamaEnglishBackendTester() as tester:

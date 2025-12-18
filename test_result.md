@@ -403,6 +403,54 @@ frontend:
           agent: "testing"
           comment: "✅ PASSED - Test complet des 3 dashboards après suppression espace Documents réussi avec succès. Admin Dashboard (admin@mykalamaenglish.com / adminco): Connexion réussie, 15 onglets admin visibles, statistiques affichées (7 en attente, 17 étudiants, 8 professeurs, 2 tests passés), navigation fonctionnelle, aucune erreur console. Teacher Dashboard (marie.test@example.com / teacher123): Connexion réussie, espace professeur chargé, onglets Bienvenue/Étudiants/Messages visibles, navigation fonctionnelle, aucune erreur console. Student Dashboard (clubtest@example.com / TestClub2025): Connexion réussie, espace étudiant chargé, onglets CLUB/Mon Pack/Messages visibles, navigation fonctionnelle, aucune erreur console. SCORE: 3/3 dashboards (100%) - Tous les rôles peuvent se connecter et utiliser leurs dashboards sans erreur runtime. L'application est prête pour le déploiement."
 
+  - task: "Login Secrétaire - Nouvelles fonctionnalités"
+    implemented: true
+    working: true
+    file: "SecretaryLogin.js, SecretaryDashboard.js, server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED - Login secrétaire fonctionne parfaitement. URL: /secretary-login, Credentials: secretaire@mykalamaenglish.com / secretaire2025. Corrections appliquées au backend: changé code secret de 'secretkalama' à 'secretaire2025', rôle de 'admin' à 'secretary', redirection corrigée de '/admin' à '/secretary'. Dashboard secrétaire s'affiche avec les 3 onglets requis: Réunions, Notes, Messages. Interface complète avec fonctionnalités de planification réunions, gestion notes, envoi messages."
+
+  - task: "Résultats de Test avec Nom Candidat (Admin)"
+    implemented: true
+    working: "NA"
+    file: "AdminDashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "⚠️ PARTIAL - Interface admin fonctionne, onglet 'Résultats des Tests' accessible. Noms candidats affichés avec icône 👤 (2 trouvés), mais affichage emails avec icône 📧 nécessite vérification (0 trouvé). Fonctionnalité de base opérationnelle mais affichage email incomplet selon spécifications."
+
+  - task: "Cours Groupé - Bouton Confirmer l'inscription"
+    implemented: true
+    working: true
+    file: "HomePage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED - Formulaire inscription de groupe fonctionne parfaitement. Page d'accueil → bouton 'Commencer' → modale inscription → sélection 'Cours Groupé' → formulaire accepte 2+ personnes → bouton 'Confirmer l'inscription de groupe' actif et correctement libellé. Ajout membres additionnels fonctionnel (testé avec Marie Martin). Interface complète selon spécifications."
+
+  - task: "Tableau Assiduité (Admin)"
+    implemented: true
+    working: true
+    file: "AdminDashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED - Tableau assiduité admin complet et fonctionnel. Onglet 'Assiduité' accessible, section 'Récapitulatif Mensuel' visible avec toutes les 6 colonnes requises: Professeur, Email, Nombre de Sessions, Total Heures, Temps de Pause, Heures Effectives. Interface statistiques mensuelle opérationnelle selon spécifications."
+
 metadata:
   created_by: "testing_agent"
   version: "1.2"

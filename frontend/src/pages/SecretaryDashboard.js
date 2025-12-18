@@ -880,6 +880,264 @@ const SecretaryDashboard = () => {
               )}
             </div>
           </TabsContent>
+
+          {/* Billing Tab - Facturation */}
+          <TabsContent value="billing" className="space-y-6">
+            {/* Stats Cards */}
+            <div className="grid md:grid-cols-3 gap-4">
+              <Card className="bg-gradient-to-br from-green-500 to-emerald-600 text-white">
+                <CardContent className="pt-6">
+                  <div className="text-center">
+                    <p className="text-green-100 text-sm">Total Payé aux Profs</p>
+                    <p className="text-3xl font-bold mt-2">{billingStats.totalPaidTeachers.toLocaleString()} €</p>
+                    <p className="text-green-200 text-xs mt-1">Ce mois</p>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
+                <CardContent className="pt-6">
+                  <div className="text-center">
+                    <p className="text-blue-100 text-sm">Reçus Générés</p>
+                    <p className="text-3xl font-bold mt-2">{billingStats.totalReceipts.toLocaleString()} €</p>
+                    <p className="text-blue-200 text-xs mt-1">{studentReceipts.length} reçus</p>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="bg-gradient-to-br from-orange-500 to-red-500 text-white">
+                <CardContent className="pt-6">
+                  <div className="text-center">
+                    <p className="text-orange-100 text-sm">Paiements en Attente</p>
+                    <p className="text-3xl font-bold mt-2">{billingStats.pendingPayments}</p>
+                    <p className="text-orange-200 text-xs mt-1">Professeurs</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid lg:grid-cols-2 gap-6">
+              {/* Teacher Payments Section */}
+              <Card className="border-green-200">
+                <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50">
+                  <CardTitle className="flex items-center gap-2 text-green-700">
+                    💰 Paiement des Professeurs
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6 space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Professeur *</label>
+                      <select
+                        value={newPayment.teacherName}
+                        onChange={(e) => {
+                          const selectedTeacher = teachers.find(t => `${t.first_name} ${t.last_name}` === e.target.value);
+                          setNewPayment({
+                            ...newPayment,
+                            teacherName: e.target.value,
+                            teacherId: selectedTeacher?.id || ''
+                          });
+                        }}
+                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                      >
+                        <option value="">Sélectionner...</option>
+                        {teachers.map(t => (
+                          <option key={t.id} value={`${t.first_name} ${t.last_name}`}>
+                            {t.first_name} {t.last_name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Mois *</label>
+                      <Input
+                        type="month"
+                        value={newPayment.month}
+                        onChange={(e) => setNewPayment({...newPayment, month: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Montant (€) *</label>
+                      <Input
+                        type="number"
+                        value={newPayment.amount}
+                        onChange={(e) => setNewPayment({...newPayment, amount: e.target.value})}
+                        placeholder="500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Heures</label>
+                      <Input
+                        type="number"
+                        value={newPayment.hoursWorked}
+                        onChange={(e) => setNewPayment({...newPayment, hoursWorked: e.target.value})}
+                        placeholder="20"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Bonus (€)</label>
+                      <Input
+                        type="number"
+                        value={newPayment.bonus}
+                        onChange={(e) => setNewPayment({...newPayment, bonus: e.target.value})}
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Notes</label>
+                    <Input
+                      value={newPayment.notes}
+                      onChange={(e) => setNewPayment({...newPayment, notes: e.target.value})}
+                      placeholder="Commentaires..."
+                    />
+                  </div>
+                  <Button onClick={handleAddTeacherPayment} className="w-full bg-green-600 hover:bg-green-700">
+                    💸 Enregistrer le Paiement
+                  </Button>
+
+                  {/* Recent Payments */}
+                  <div className="mt-4 pt-4 border-t">
+                    <h4 className="font-semibold text-sm mb-3">Paiements Récents</h4>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {teacherPayments.length === 0 ? (
+                        <p className="text-gray-500 text-sm text-center py-4">Aucun paiement enregistré</p>
+                      ) : (
+                        teacherPayments.slice(0, 5).map(payment => (
+                          <div key={payment.id} className="flex justify-between items-center p-2 bg-green-50 rounded-lg">
+                            <div>
+                              <p className="font-medium text-sm">{payment.teacher_name || payment.teacherName}</p>
+                              <p className="text-xs text-gray-500">{payment.month}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-green-600">{payment.amount} €</span>
+                              <button onClick={() => handleDeletePayment(payment.id)} className="text-red-500 hover:text-red-700">
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Student Receipts Section */}
+              <Card className="border-blue-200">
+                <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50">
+                  <CardTitle className="flex items-center gap-2 text-blue-700">
+                    🧾 Reçus de Paiement (Élèves)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6 space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Étudiant *</label>
+                      <select
+                        value={newReceipt.studentName}
+                        onChange={(e) => {
+                          const selectedStudent = students.find(s => `${s.first_name} ${s.last_name}` === e.target.value);
+                          setNewReceipt({
+                            ...newReceipt,
+                            studentName: e.target.value,
+                            studentId: selectedStudent?.id || ''
+                          });
+                        }}
+                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                      >
+                        <option value="">Sélectionner...</option>
+                        {students.map(s => (
+                          <option key={s.id} value={`${s.first_name} ${s.last_name}`}>
+                            {s.first_name} {s.last_name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Pack *</label>
+                      <select
+                        value={newReceipt.packType}
+                        onChange={(e) => setNewReceipt({...newReceipt, packType: e.target.value})}
+                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                      >
+                        <option value="">Sélectionner...</option>
+                        <option value="K-Débutant">K-Débutant</option>
+                        <option value="K-Intermédiaire">K-Intermédiaire</option>
+                        <option value="K-Professionnel">K-Professionnel</option>
+                        <option value="K-Kids">K-Kids</option>
+                        <option value="Pack Trio">Pack Trio</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Montant (€) *</label>
+                      <Input
+                        type="number"
+                        value={newReceipt.amount}
+                        onChange={(e) => setNewReceipt({...newReceipt, amount: e.target.value})}
+                        placeholder="76"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Mode de paiement</label>
+                      <select
+                        value={newReceipt.paymentMethod}
+                        onChange={(e) => setNewReceipt({...newReceipt, paymentMethod: e.target.value})}
+                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                      >
+                        <option value="Virement">Virement Bancaire</option>
+                        <option value="Carte">Carte Bancaire</option>
+                        <option value="Mobile Money">Mobile Money</option>
+                        <option value="Espèces">Espèces</option>
+                        <option value="Stripe">Stripe</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Notes</label>
+                    <Input
+                      value={newReceipt.notes}
+                      onChange={(e) => setNewReceipt({...newReceipt, notes: e.target.value})}
+                      placeholder="Détails supplémentaires..."
+                    />
+                  </div>
+                  <Button onClick={handleAddStudentReceipt} className="w-full bg-blue-600 hover:bg-blue-700">
+                    📝 Générer le Reçu
+                  </Button>
+
+                  {/* Recent Receipts */}
+                  <div className="mt-4 pt-4 border-t">
+                    <h4 className="font-semibold text-sm mb-3">Reçus Récents</h4>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {studentReceipts.length === 0 ? (
+                        <p className="text-gray-500 text-sm text-center py-4">Aucun reçu généré</p>
+                      ) : (
+                        studentReceipts.slice(0, 5).map(receipt => (
+                          <div key={receipt.id} className="flex justify-between items-center p-2 bg-blue-50 rounded-lg">
+                            <div>
+                              <p className="font-medium text-sm">{receipt.student_name || receipt.studentName}</p>
+                              <p className="text-xs text-gray-500">{receipt.pack_type || receipt.packType}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-blue-600">{receipt.amount} €</span>
+                              <button onClick={() => printReceipt(receipt)} className="text-purple-500 hover:text-purple-700" title="Imprimer">
+                                🖨️
+                              </button>
+                              <button onClick={() => handleDeleteReceipt(receipt.id)} className="text-red-500 hover:text-red-700">
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
         </Tabs>
       </div>
     </div>

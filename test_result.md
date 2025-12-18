@@ -463,9 +463,45 @@ frontend:
           agent: "testing"
           comment: "✅ PASSED - Monday.com CRM integration works correctly. When admin approves student registration via POST /api/admin/approve-registration/{user_id}, the create_monday_item function is called with correct data. Board ID 5089020316 configured. All required response fields present (message, email, temporary_password, level). CRM integration code executed successfully during approval process."
 
+  - task: "Admin - Change Teacher Dialog"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED - Admin change teacher dialog functionality works correctly. POST /api/admin/change-student-teacher endpoint accepts correct parameters (student_id, new_teacher_id) and successfully updates student-teacher assignments. Endpoint properly validates admin access and returns success message."
+
+  - task: "Secretary Dashboard - Reports"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED - Secretary reports functionality fully operational. All CRUD operations work: GET /api/secretary/reports (retrieves existing reports), POST /api/secretary/reports (creates new reports with profName, date, content, notes), DELETE /api/secretary/reports/{report_id} (removes reports). Secretary login with code 'secretaire2025' works correctly."
+
+  - task: "Secretary Dashboard - Meetings"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED - Secretary meetings functionality fully operational. All CRUD operations work: GET /api/secretary/meetings (retrieves existing meetings), POST /api/secretary/meetings (creates new meetings with title, date, time, attendees, notes), DELETE /api/secretary/meetings/{meeting_id} (removes meetings). Secretary authentication and permissions working correctly."
+
   - task: "NewsManager for Teachers"
     implemented: true
-    working: false
+    working: true
     file: "server.py"
     stuck_count: 0
     priority: "high"
@@ -474,6 +510,9 @@ frontend:
         - working: false
           agent: "testing"
           comment: "❌ FAILED - Teachers cannot access NewsManager functionality. News endpoints (POST /api/news, PUT /api/news/{id}, DELETE /api/news/{id}) are restricted to admin-only (403 Admin access required). Teachers can read news (GET /api/news works) but cannot create, edit, or delete news. Need to modify endpoint permissions to allow teacher role access for NewsManager functionality."
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED - NewsManager for Teachers now fully functional! Teachers can successfully create, edit, and delete news. All endpoints work: POST /api/news (creates news with title, content, image_url), PUT /api/news/{id} (edits existing news), DELETE /api/news/{id} (removes news). Teacher authentication (marie.test@example.com / teacher123) works correctly. Complete CRUD operations available for teachers."
 
   - task: "Documents Preview"
     implemented: true

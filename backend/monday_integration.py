@@ -3,6 +3,7 @@ Monday.com CRM Integration
 """
 import requests
 import logging
+import json
 from typing import Dict, Any, Optional
 
 logger = logging.getLogger(__name__)
@@ -65,7 +66,7 @@ def create_monday_item(student_data: Dict[str, Any]) -> Optional[str]:
     variables = {
         "boardId": MONDAY_BOARD_ID,
         "itemName": item_name,
-        "columnValues": str(column_values).replace("'", '"')
+        "columnValues": json.dumps(column_values)
     }
     
     try:

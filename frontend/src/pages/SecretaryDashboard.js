@@ -1209,7 +1209,10 @@ const SecretaryDashboard = () => {
                               <p className="text-xs text-gray-500">{payment.month}</p>
                             </div>
                             <div className="flex items-center gap-2">
-                              <span className="font-bold text-green-600">{payment.amount} €</span>
+                              <span className="font-bold text-green-600">{payment.amount} {payment.currency || 'EUR'}</span>
+                              <button onClick={() => printTeacherInvoice(payment)} className="text-purple-500 hover:text-purple-700" title="Imprimer facture">
+                                📄
+                              </button>
                               <button onClick={() => handleDeletePayment(payment.id)} className="text-red-500 hover:text-red-700">
                                 <Trash2 className="w-4 h-4" />
                               </button>

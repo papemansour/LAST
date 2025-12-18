@@ -1016,6 +1016,7 @@ async def create_student_receipt(receipt_data: dict = Body(...), current_user: d
         "student_name": receipt_data.get("studentName"),
         "pack_type": receipt_data.get("packType"),
         "amount": receipt_data.get("amount"),
+        "currency": receipt_data.get("currency", "EUR"),
         "payment_method": receipt_data.get("paymentMethod", "Virement"),
         "notes": receipt_data.get("notes", ""),
         "created_by": current_user['id'],
@@ -1023,7 +1024,15 @@ async def create_student_receipt(receipt_data: dict = Body(...), current_user: d
     }
     
     await db.student_receipts.insert_one(receipt)
-    logger.info(f"Student receipt created for: {receipt['student_name']} - {receipt['amount']}€")
+    
+    # Sync to Monday.com
+    try:
+        from monday_integration import create_invoice_in_monday
+        create_invoice_in_monday(receipt, "student")
+    except Exception as e:
+        logger.warning(f"Could not sync student receipt to Monday: {e}")
+    
+    logger.info(f"Student receipt created for: {receipt['student_name']} - {receipt['amount']} {receipt['currency']}")
     return {"message": "Receipt created", "id": receipt['id']}
 
 @api_router.delete("/secretary/student-receipts/{receipt_id}")

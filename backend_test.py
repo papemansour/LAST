@@ -3191,7 +3191,7 @@ startxref
                     # Test changing student's teacher
                     change_data = {
                         "student_id": student_id,
-                        "teacher_id": teacher_id
+                        "new_teacher_id": teacher_id
                     }
                     
                     async with self.session.post(f"{BACKEND_URL}/admin/change-student-teacher", 

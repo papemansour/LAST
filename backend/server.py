@@ -5081,8 +5081,8 @@ uploads_base_path.mkdir(parents=True, exist_ok=True)
 # Serve uploaded files via API endpoint instead of StaticFiles (better for Kubernetes)
 @app.get("/uploads/{file_path:path}")
 async def serve_uploaded_file(file_path: str):
-    """Serve uploaded files from persistent storage"""
-    from fastapi.responses import FileResponse
+    """Serve uploaded files from persistent storage with proper headers for iframe embedding"""
+    from fastapi.responses import FileResponse, Response
     import mimetypes
     
     file_full_path = Path("/app/uploads") / file_path
@@ -5105,10 +5105,22 @@ async def serve_uploaded_file(file_path: str):
     
     logger.info(f"Serving file: {file_path} ({mime_type})")
     
-    return FileResponse(
-        path=str(file_full_path),
+    # Read file content
+    with open(file_full_path, "rb") as f:
+        content = f.read()
+    
+    # Return response with headers that allow iframe embedding
+    return Response(
+        content=content,
         media_type=mime_type,
-        filename=file_full_path.name
+        headers={
+            "Content-Disposition": f'inline; filename="{file_full_path.name}"',
+            "X-Content-Type-Options": "nosniff",
+            "Cache-Control": "public, max-age=3600",
+            # Allow embedding in iframes
+            "X-Frame-Options": "SAMEORIGIN",
+            "Content-Security-Policy": "frame-ancestors 'self' https://*.emergentagent.com"
+        }
     )
 
 app.add_middleware(

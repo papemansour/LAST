@@ -1934,7 +1934,7 @@ const AdminDashboard = () => {
                   <SelectValue placeholder="Choisir un professeur..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">❌ Retirer le professeur</SelectItem>
+                  <SelectItem value="none">❌ Retirer le professeur</SelectItem>
                   {teachers.map(teacher => (
                     <SelectItem key={teacher.id} value={teacher.id}>
                       👨‍🏫 {teacher.first_name} {teacher.last_name}
@@ -1953,7 +1953,8 @@ const AdminDashboard = () => {
               <Button 
                 onClick={async () => {
                   if (studentToChangeTeacher) {
-                    await handleChangeTeacher(studentToChangeTeacher.id, newTeacherForStudent || null);
+                    const teacherId = newTeacherForStudent === 'none' ? null : newTeacherForStudent;
+                    await handleChangeTeacher(studentToChangeTeacher.id, teacherId);
                     setShowChangeTeacherDialog(false);
                     setStudentToChangeTeacher(null);
                   }

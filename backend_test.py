@@ -40,6 +40,9 @@ class MyKalamaEnglishBackendTester:
         self.test_flashcard_set_id = None
         self.test_results = {
             # Review Request Priority Tests - NEW FOCUS
+            "admin_change_teacher": {"passed": False, "details": []},
+            "secretary_reports": {"passed": False, "details": []},
+            "secretary_meetings": {"passed": False, "details": []},
             "monday_crm_integration": {"passed": False, "details": []},
             "newsmanager_teachers": {"passed": False, "details": []},
             "documents_preview": {"passed": False, "details": []},

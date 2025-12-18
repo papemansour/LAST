@@ -5,7 +5,7 @@ import { Heart } from 'lucide-react';
 const DonationButton = ({ variant = 'default', size = 'default', className = '' }) => {
   const handleDonation = () => {
     // Open Stripe donation link in new tab
-    window.open('https://buy.stripe.com/aFabJ1gYb9Fz3Bl1dOenS03', '_blank');
+    window.open('https://buy.stripe.com/5kQeVdbDR1937RB3lWenS09', '_blank');
   };
 
   return (

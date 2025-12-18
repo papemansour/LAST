@@ -2406,8 +2406,60 @@ startxref
             logger.error("❌ Cannot proceed without admin login")
             return
         
-        # REVIEW REQUEST PRIORITY TESTS (HIGHEST PRIORITY)
-        logger.info(f"\n🎯 Running: REVIEW REQUEST PRIORITY TESTS")
+        # NEW REVIEW REQUEST TESTS (HIGHEST PRIORITY)
+        logger.info(f"\n🎯 Running: NEW REVIEW REQUEST TESTS")
+        logger.info("=" * 70)
+        
+        # Test 1: Monday.com CRM Integration
+        logger.info(f"\n📋 Running: Monday.com CRM Integration Test")
+        logger.info("-" * 50)
+        try:
+            result = await self.test_monday_crm_integration()
+            if result:
+                logger.info(f"✅ Monday.com CRM Integration: PASSED")
+            else:
+                logger.error(f"❌ Monday.com CRM Integration: FAILED")
+        except Exception as e:
+            logger.error(f"❌ Monday.com CRM Integration: ERROR - {str(e)}")
+        
+        # Test 2: NewsManager for Teachers
+        logger.info(f"\n📋 Running: NewsManager for Teachers Test")
+        logger.info("-" * 50)
+        try:
+            result = await self.test_newsmanager_teachers()
+            if result:
+                logger.info(f"✅ NewsManager for Teachers: PASSED")
+            else:
+                logger.error(f"❌ NewsManager for Teachers: FAILED")
+        except Exception as e:
+            logger.error(f"❌ NewsManager for Teachers: ERROR - {str(e)}")
+        
+        # Test 3: Documents Preview
+        logger.info(f"\n📋 Running: Documents Preview Test")
+        logger.info("-" * 50)
+        try:
+            result = await self.test_documents_preview()
+            if result:
+                logger.info(f"✅ Documents Preview: PASSED")
+            else:
+                logger.error(f"❌ Documents Preview: FAILED")
+        except Exception as e:
+            logger.error(f"❌ Documents Preview: ERROR - {str(e)}")
+        
+        # Test 4: K-Kid Dashboard
+        logger.info(f"\n📋 Running: K-Kid Dashboard Test")
+        logger.info("-" * 50)
+        try:
+            result = await self.test_kkid_dashboard()
+            if result:
+                logger.info(f"✅ K-Kid Dashboard: PASSED")
+            else:
+                logger.error(f"❌ K-Kid Dashboard: FAILED")
+        except Exception as e:
+            logger.error(f"❌ K-Kid Dashboard: ERROR - {str(e)}")
+
+        # PREVIOUS REVIEW REQUEST TESTS (SECONDARY PRIORITY)
+        logger.info(f"\n🎯 Running: PREVIOUS REVIEW REQUEST TESTS")
         logger.info("=" * 70)
         
         # Test 1: Dashboard Access for all 3 roles

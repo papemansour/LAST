@@ -230,62 +230,59 @@ const StudentDocuments = () => {
               />
             ) : selectedDocument?.file_type === 'pdf' ? (
               <div className="space-y-4">
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <FileText className="w-8 h-8 text-blue-600" />
-                    <div>
-                      <p className="font-semibold text-blue-900">{selectedDocument?.file_name}</p>
-                      <p className="text-sm text-blue-600">Document PDF</p>
+                {/* Actions principales bien visibles */}
+                <div className="bg-gradient-to-r from-blue-50 to-teal-50 border border-blue-200 rounded-xl p-5">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-3 bg-blue-100 rounded-lg">
+                        <FileText className="w-8 h-8 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-blue-900 text-lg">{selectedDocument?.file_name}</p>
+                        <p className="text-sm text-blue-600">Document PDF</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-3 w-full sm:w-auto">
+                      <a
+                        href={getFullFileUrl(selectedDocument?.file_url)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex-1 sm:flex-none"
+                      >
+                        <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white">
+                          <Eye className="w-4 h-4 mr-2" />
+                          Ouvrir
+                        </Button>
+                      </a>
+                      <a
+                        href={getFullFileUrl(selectedDocument?.file_url)}
+                        download={selectedDocument?.file_name}
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex-1 sm:flex-none"
+                      >
+                        <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                          <Download className="w-4 h-4 mr-2" />
+                          Télécharger
+                        </Button>
+                      </a>
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    <a
-                      href={getFullFileUrl(selectedDocument?.file_url)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Button variant="outline" className="bg-white">
-                        <Eye className="w-4 h-4 mr-2" />
-                        Ouvrir dans un nouvel onglet
-                      </Button>
-                    </a>
-                    <a
-                      href={getFullFileUrl(selectedDocument?.file_url)}
-                      download={selectedDocument?.file_name}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Button variant="outline" className="bg-white">
-                        <Download className="w-4 h-4 mr-2" />
-                        Télécharger
-                      </Button>
-                    </a>
+                </div>
+                
+                {/* Aperçu du PDF avec iframe - fonctionne dans la plupart des navigateurs modernes */}
+                <div className="relative rounded-xl overflow-hidden border-2 border-gray-200 bg-gray-100">
+                  <iframe
+                    src={getFullFileUrl(selectedDocument?.file_url)}
+                    className="w-full h-[55vh]"
+                    title={selectedDocument?.file_name}
+                    style={{ border: 'none' }}
+                  />
+                  {/* Message d'aide si le PDF ne s'affiche pas */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-gray-900/80 to-transparent p-4 text-white text-center text-sm">
+                    Si le PDF ne s&apos;affiche pas, utilisez les boutons ci-dessus pour l&apos;ouvrir ou le télécharger
                   </div>
                 </div>
-                {/* Utiliser object au lieu de iframe pour une meilleure compatibilité PDF */}
-                <object
-                  data={`${getFullFileUrl(selectedDocument?.file_url)}#toolbar=1&navpanes=0&scrollbar=1`}
-                  type="application/pdf"
-                  className="w-full h-[60vh] rounded-lg border-2 border-gray-200"
-                >
-                  {/* Fallback si object ne fonctionne pas */}
-                  <embed
-                    src={`${getFullFileUrl(selectedDocument?.file_url)}#toolbar=1&navpanes=0`}
-                    type="application/pdf"
-                    className="w-full h-[60vh]"
-                  />
-                  <p className="text-center py-8 text-gray-600">
-                    Votre navigateur ne peut pas afficher ce PDF.{' '}
-                    <a 
-                      href={getFullFileUrl(selectedDocument?.file_url)} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-blue-600 underline"
-                    >
-                      Cliquez ici pour le télécharger
-                    </a>
-                  </p>
-                </object>
               </div>
             ) : selectedDocument?.file_type === 'video' ? (
               <video controls className="w-full rounded-lg">

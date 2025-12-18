@@ -31,15 +31,15 @@ def create_monday_item(student_data: Dict[str, Any]) -> Optional[str]:
     # Construire le nom de l'item (Prénom)
     item_name = student_data.get('first_name', '')
     
-    # Mapper le niveau en français pour Monday.com
+    # Mapper le niveau vers les labels Monday.com existants
     level_mapping = {
-        'beginner': 'Débutant',
-        'intermediate': 'Intermédiaire', 
-        'advanced': 'Avancé',
-        'professional': 'Professionnel',
-        'kkid': 'K-Kid'
+        'beginner': 'K-Débutant',
+        'intermediate': 'K-Intermédiaire', 
+        'advanced': 'K-Professionnel',
+        'professional': 'K-Professionnel',
+        'kkid': 'K-Kids'
     }
-    level_label = level_mapping.get(student_data.get('level', 'beginner'), 'Débutant')
+    level_label = level_mapping.get(student_data.get('level', 'beginner'), 'K-Débutant')
     
     # Construire les valeurs des colonnes avec les IDs réels du board
     column_values = {

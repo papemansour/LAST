@@ -852,6 +852,91 @@ async def secretary_login(code: str = Body(..., embed=True)):
         }
     }
 
+# SECRETARY ENDPOINTS
+@api_router.get("/secretary/meetings")
+async def get_secretary_meetings(current_user: dict = Depends(get_current_user)):
+    """Get all meetings created by secretary"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    meetings = await db.secretary_meetings.find({}, {"_id": 0}).sort("date", -1).to_list(100)
+    return meetings
+
+@api_router.post("/secretary/meetings")
+async def create_secretary_meeting(meeting_data: dict = Body(...), current_user: dict = Depends(get_current_user)):
+    """Create a new meeting"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    meeting = {
+        "id": str(uuid4()),
+        "title": meeting_data.get("title"),
+        "date": meeting_data.get("date"),
+        "time": meeting_data.get("time"),
+        "attendees": meeting_data.get("attendees", ""),
+        "notes": meeting_data.get("notes", ""),
+        "meeting_link": meeting_data.get("meetingLink", ""),
+        "created_by": current_user['id'],
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.secretary_meetings.insert_one(meeting)
+    logger.info(f"Meeting created by secretary: {meeting['title']}")
+    return {"message": "Meeting created", "id": meeting['id']}
+
+@api_router.delete("/secretary/meetings/{meeting_id}")
+async def delete_secretary_meeting(meeting_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a meeting"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    result = await db.secretary_meetings.delete_one({"id": meeting_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Meeting not found")
+    
+    return {"message": "Meeting deleted"}
+
+@api_router.get("/secretary/reports")
+async def get_secretary_reports(current_user: dict = Depends(get_current_user)):
+    """Get all teacher reports"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    reports = await db.teacher_reports.find({}, {"_id": 0}).sort("date", -1).to_list(100)
+    return reports
+
+@api_router.post("/secretary/reports")
+async def create_secretary_report(report_data: dict = Body(...), current_user: dict = Depends(get_current_user)):
+    """Create a new teacher report"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    report = {
+        "id": str(uuid4()),
+        "prof_name": report_data.get("profName"),
+        "date": report_data.get("date"),
+        "content": report_data.get("content"),
+        "notes": report_data.get("notes", ""),
+        "created_by": current_user['id'],
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.teacher_reports.insert_one(report)
+    logger.info(f"Teacher report created for: {report['prof_name']}")
+    return {"message": "Report created", "id": report['id']}
+
+@api_router.delete("/secretary/reports/{report_id}")
+async def delete_secretary_report(report_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a teacher report"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    result = await db.teacher_reports.delete_one({"id": report_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Report not found")
+    
+    return {"message": "Report deleted"}
+
 @api_router.get("/auth/me")
 async def get_me(current_user: dict = Depends(get_current_user)):
     return current_user

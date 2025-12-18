@@ -1913,6 +1913,59 @@ const AdminDashboard = () => {
       </div>
       
       {/* Document Preview Dialog */}
+      
+      {/* Change Teacher Dialog */}
+      <Dialog open={showChangeTeacherDialog} onOpenChange={setShowChangeTeacherDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>🔄 Changer de Professeur</DialogTitle>
+            <DialogDescription>
+              Étudiant: {studentToChangeTeacher?.first_name} {studentToChangeTeacher?.last_name}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Sélectionner un professeur</Label>
+              <Select 
+                value={newTeacherForStudent} 
+                onValueChange={setNewTeacherForStudent}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Choisir un professeur..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">❌ Retirer le professeur</SelectItem>
+                  {teachers.map(teacher => (
+                    <SelectItem key={teacher.id} value={teacher.id}>
+                      👨‍🏫 {teacher.first_name} {teacher.last_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowChangeTeacherDialog(false)}
+              >
+                Annuler
+              </Button>
+              <Button 
+                onClick={async () => {
+                  if (studentToChangeTeacher) {
+                    await handleChangeTeacher(studentToChangeTeacher.id, newTeacherForStudent || null);
+                    setShowChangeTeacherDialog(false);
+                    setStudentToChangeTeacher(null);
+                  }
+                }}
+                className="bg-teal-600 hover:bg-teal-700"
+              >
+                Confirmer
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

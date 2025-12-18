@@ -179,6 +179,31 @@ const SecretaryDashboard = () => {
     }
   };
 
+  // Comptes rendus handlers
+  const handleAddReport = () => {
+    if (!newReport.profName || !newReport.date || !newReport.content) {
+      toast.error('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+
+    const report = {
+      id: Date.now(),
+      ...newReport,
+      createdAt: new Date().toISOString()
+    };
+
+    saveReports([...profReports, report]);
+    setNewReport({ profName: '', date: '', content: '', notes: '' });
+    toast.success('Compte rendu ajouté !');
+  };
+
+  const handleDeleteReport = (id) => {
+    if (window.confirm('Supprimer ce compte rendu ?')) {
+      saveReports(profReports.filter(r => r.id !== id));
+      toast.success('Compte rendu supprimé');
+    }
+  };
+
   // Messages handler
   const handleSendMessage = async () => {
     if (!newMessage.recipient || !newMessage.subject || !newMessage.content) {

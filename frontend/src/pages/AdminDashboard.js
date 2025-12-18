@@ -169,6 +169,20 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleChangeTeacher = async (studentId, newTeacherId) => {
+    try {
+      await apiClient.post(`/admin/change-student-teacher`, {
+        student_id: studentId,
+        new_teacher_id: newTeacherId
+      });
+      toast.success('Professeur changé avec succès !');
+      fetchData();
+    } catch (error) {
+      console.error('Error changing teacher:', error);
+      toast.error('Erreur lors du changement de professeur');
+    }
+  };
+
   const handleApprove = async (userId) => {
     try {
       const response = await apiClient.post(`/admin/approve-registration/${userId}`);

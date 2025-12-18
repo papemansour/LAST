@@ -813,7 +813,7 @@ async def login(credentials: UserLogin):
 @api_router.post("/auth/secretary-login")
 async def secretary_login(code: str = Body(..., embed=True)):
     """Special login for secretary with secret code - gives admin access"""
-    if code != "secretkalama":
+    if code != "secretaire2025":
         raise HTTPException(status_code=401, detail="Code incorrect")
     
     # Find or create secretary user with admin role

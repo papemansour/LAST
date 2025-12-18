@@ -1025,6 +1025,30 @@ async def delete_student_receipt(receipt_id: str, current_user: dict = Depends(g
     
     return {"message": "Receipt deleted"}
 
+@api_router.get("/secretary/teachers-list")
+async def get_teachers_list_for_secretary(current_user: dict = Depends(get_current_user)):
+    """Get list of all teachers for secretary billing"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    teachers = await db.users.find(
+        {"role": "teacher", "is_active": True}, 
+        {"_id": 0, "id": 1, "first_name": 1, "last_name": 1, "email": 1}
+    ).to_list(100)
+    return teachers
+
+@api_router.get("/secretary/students-list")
+async def get_students_list_for_secretary(current_user: dict = Depends(get_current_user)):
+    """Get list of all students for secretary billing"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    students = await db.users.find(
+        {"role": "student", "is_active": True}, 
+        {"_id": 0, "id": 1, "first_name": 1, "last_name": 1, "email": 1, "level": 1}
+    ).to_list(500)
+    return students
+
 @api_router.get("/auth/me")
 async def get_me(current_user: dict = Depends(get_current_user)):
     return current_user

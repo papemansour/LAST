@@ -114,37 +114,44 @@ const SecretaryDashboard = () => {
     setMessages(data);
   };
 
-  // Meetings handlers
-  const handleAddMeeting = () => {
+  // Meetings handlers - API Backend
+  const handleAddMeeting = async () => {
     if (!newMeeting.title || !newMeeting.date || !newMeeting.time) {
       toast.error('Veuillez remplir tous les champs obligatoires');
       return;
     }
 
-    const meeting = {
-      id: Date.now(),
-      ...newMeeting,
-      createdAt: new Date().toISOString()
-    };
-
-    saveMeetings([...meetings, meeting]);
-    setNewMeeting({ 
-      title: '', 
-      date: '', 
-      time: '', 
-      attendees: '', 
-      notes: '',
-      meetingLink: '',
-      notifyProfs: [],
-      notifyAdmin: false
-    });
-    toast.success('Réunion ajoutée !');
+    try {
+      await apiClient.post('/secretary/meetings', newMeeting);
+      const res = await apiClient.get('/secretary/meetings');
+      setMeetings(res.data || []);
+      setNewMeeting({ 
+        title: '', 
+        date: '', 
+        time: '', 
+        attendees: '', 
+        notes: '',
+        meetingLink: '',
+        notifyProfs: [],
+        notifyAdmin: false
+      });
+      toast.success('Réunion ajoutée !');
+    } catch (error) {
+      console.error('Error adding meeting:', error);
+      toast.error('Erreur lors de l\'ajout de la réunion');
+    }
   };
 
-  const handleDeleteMeeting = (id) => {
+  const handleDeleteMeeting = async (id) => {
     if (window.confirm('Supprimer cette réunion ?')) {
-      saveMeetings(meetings.filter(m => m.id !== id));
-      toast.success('Réunion supprimée');
+      try {
+        await apiClient.delete(`/secretary/meetings/${id}`);
+        setMeetings(meetings.filter(m => m.id !== id));
+        toast.success('Réunion supprimée');
+      } catch (error) {
+        console.error('Error deleting meeting:', error);
+        toast.error('Erreur lors de la suppression');
+      }
     }
   };
 

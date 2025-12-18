@@ -657,6 +657,27 @@ const AdminDashboard = () => {
                               </p>
                             )}
                             <p className="text-sm text-gray-500">Niveau: {student.level}</p>
+                            {student.assigned_teacher && (
+                              <p className="text-sm text-gray-600 flex items-center gap-2 mt-1">
+                                👨‍🏫 Professeur: {teachers.find(t => t.id === student.assigned_teacher)?.first_name || 'Non assigné'}
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => {
+                                    const newTeacherId = prompt(
+                                      'Entrez l\'ID du nouveau professeur (ou laissez vide pour retirer) :\n\n' +
+                                      teachers.map(t => `${t.first_name} ${t.last_name}: ${t.id}`).join('\n')
+                                    );
+                                    if (newTeacherId !== null) {
+                                      handleChangeTeacher(student.id, newTeacherId || null);
+                                    }
+                                  }}
+                                  className="text-blue-600 hover:text-blue-700 p-1 h-6"
+                                >
+                                  🔄
+                                </Button>
+                              </p>
+                            )}
                             {student.temporary_password && (
                               <p className="text-xs text-orange-600 font-semibold mt-1">
                                 Mot de passe provisoire: {student.temporary_password}

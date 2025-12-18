@@ -272,6 +272,10 @@ const SecretaryDashboard = () => {
               <FileText className="w-4 h-4 mr-2" />
               Notes
             </TabsTrigger>
+            <TabsTrigger value="reports" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+              <FileText className="w-4 h-4 mr-2" />
+              Comptes Rendus
+            </TabsTrigger>
             <TabsTrigger value="messages" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
               <MessageCircle className="w-4 h-4 mr-2" />
               Messages

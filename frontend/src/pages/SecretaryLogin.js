@@ -27,8 +27,8 @@ const SecretaryLogin = () => {
       localStorage.setItem('token', response.data.access_token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
       
-      toast.success('Accès autorisé !');
-      navigate('/secretary');
+      toast.success('Accès admin autorisé !');
+      navigate('/admin');
     } catch (error) {
       console.error('Login error:', error);
       toast.error(error.response?.data?.detail || 'Code incorrect');

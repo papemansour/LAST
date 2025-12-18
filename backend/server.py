@@ -4083,9 +4083,9 @@ async def get_news_by_id(news_id: str):
 
 @api_router.post("/news")
 async def create_news(news_data: NewsCreate, current_user: dict = Depends(get_current_user)):
-    """Create news (Admin only)"""
-    if current_user['role'] != 'admin':
-        raise HTTPException(status_code=403, detail="Admin access required")
+    """Create news (Admin and Teacher)"""
+    if current_user['role'] not in ['admin', 'teacher']:
+        raise HTTPException(status_code=403, detail="Admin or teacher access required")
     
     news = News(
         title=news_data.title,
@@ -4122,9 +4122,9 @@ async def create_news(news_data: NewsCreate, current_user: dict = Depends(get_cu
 
 @api_router.put("/news/{news_id}")
 async def update_news(news_id: str, news_data: NewsCreate, current_user: dict = Depends(get_current_user)):
-    """Update news (Admin only)"""
-    if current_user['role'] != 'admin':
-        raise HTTPException(status_code=403, detail="Admin access required")
+    """Update news (Admin and Teacher)"""
+    if current_user['role'] not in ['admin', 'teacher']:
+        raise HTTPException(status_code=403, detail="Admin or teacher access required")
     
     existing_news = await db.news.find_one({"id": news_id})
     if not existing_news:
@@ -4144,9 +4144,9 @@ async def update_news(news_id: str, news_data: NewsCreate, current_user: dict = 
 
 @api_router.delete("/news/{news_id}")
 async def delete_news(news_id: str, current_user: dict = Depends(get_current_user)):
-    """Delete news (Admin only)"""
-    if current_user['role'] != 'admin':
-        raise HTTPException(status_code=403, detail="Admin access required")
+    """Delete news (Admin and Teacher)"""
+    if current_user['role'] not in ['admin', 'teacher']:
+        raise HTTPException(status_code=403, detail="Admin or teacher access required")
     
     result = await db.news.delete_one({"id": news_id})
     if result.deleted_count == 0:

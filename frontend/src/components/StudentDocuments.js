@@ -250,13 +250,42 @@ const StudentDocuments = () => {
                         Ouvrir dans un nouvel onglet
                       </Button>
                     </a>
+                    <a
+                      href={getFullFileUrl(selectedDocument?.file_url)}
+                      download={selectedDocument?.file_name}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Button variant="outline" className="bg-white">
+                        <Download className="w-4 h-4 mr-2" />
+                        Télécharger
+                      </Button>
+                    </a>
                   </div>
                 </div>
-                <iframe
-                  src={getFullFileUrl(selectedDocument?.file_url)}
+                {/* Utiliser object au lieu de iframe pour une meilleure compatibilité PDF */}
+                <object
+                  data={`${getFullFileUrl(selectedDocument?.file_url)}#toolbar=1&navpanes=0&scrollbar=1`}
+                  type="application/pdf"
                   className="w-full h-[60vh] rounded-lg border-2 border-gray-200"
-                  title={selectedDocument?.file_name}
-                />
+                >
+                  {/* Fallback si object ne fonctionne pas */}
+                  <embed
+                    src={`${getFullFileUrl(selectedDocument?.file_url)}#toolbar=1&navpanes=0`}
+                    type="application/pdf"
+                    className="w-full h-[60vh]"
+                  />
+                  <p className="text-center py-8 text-gray-600">
+                    Votre navigateur ne peut pas afficher ce PDF.{' '}
+                    <a 
+                      href={getFullFileUrl(selectedDocument?.file_url)} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 underline"
+                    >
+                      Cliquez ici pour le télécharger
+                    </a>
+                  </p>
+                </object>
               </div>
             ) : selectedDocument?.file_type === 'video' ? (
               <video controls className="w-full rounded-lg">

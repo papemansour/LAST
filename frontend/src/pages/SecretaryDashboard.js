@@ -55,15 +55,22 @@ const SecretaryDashboard = () => {
   // Facturation state
   const [teacherPayments, setTeacherPayments] = useState([]);
   const [studentReceipts, setStudentReceipts] = useState([]);
+  const [prestataireInvoices, setPrestataireInvoices] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [students, setStudents] = useState([]);
+  const [billingTab, setBillingTab] = useState('teachers'); // teachers, students, prestataires
   const [newPayment, setNewPayment] = useState({
     teacherId: '',
     teacherName: '',
+    teacherEmail: '',
+    teacherAddress: '',
     month: new Date().toISOString().slice(0, 7),
     amount: '',
+    currency: 'EUR',
     hoursWorked: '',
+    hourlyRate: '',
     bonus: '0',
+    description: 'Cours de langue anglaise',
     notes: ''
   });
   const [newReceipt, setNewReceipt] = useState({
@@ -71,14 +78,27 @@ const SecretaryDashboard = () => {
     studentName: '',
     packType: '',
     amount: '',
+    currency: 'EUR',
     paymentMethod: 'Virement',
+    notes: ''
+  });
+  const [newPrestataire, setNewPrestataire] = useState({
+    name: '',
+    service: '',
+    amount: '',
+    currency: 'EUR',
+    description: '',
     notes: ''
   });
   const [billingStats, setBillingStats] = useState({
     totalPaidTeachers: 0,
     totalReceipts: 0,
+    totalPrestataires: 0,
     pendingPayments: 0
   });
+
+  // Taux de conversion EUR -> FCFA
+  const EUR_TO_FCFA = 656;
 
   useEffect(() => {
     fetchUserData();

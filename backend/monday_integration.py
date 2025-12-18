@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 MONDAY_API_KEY = "eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjU5OTA0ODM3NSwiYWFpIjoxMSwidWlkIjo5NzM5OTY1MywiaWFkIjoiMjAyNS0xMi0xOFQwMTowNzoxOC42ODZaIiwicGVyIjoibWU6d3JpdGUiLCJhY3RpZCI6MzI5Mjg2NjYsInJnbiI6ImV1YzEifQ.FgB7cs9lMjYIfg5ENGwMHesoGMQ4VT0e0H9koQOOtzc"
 MONDAY_API_URL = "https://api.monday.com/v2"
-MONDAY_BOARD_ID = "YOUR_BOARD_ID"  # À remplacer par l'ID de votre board
+MONDAY_BOARD_ID = "5089020316"
 
 def create_monday_item(student_data: Dict[str, Any]) -> Optional[str]:
     """

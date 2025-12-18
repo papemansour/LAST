@@ -451,6 +451,54 @@ frontend:
           agent: "testing"
           comment: "✅ PASSED - Tableau assiduité admin complet et fonctionnel. Onglet 'Assiduité' accessible, section 'Récapitulatif Mensuel' visible avec toutes les 6 colonnes requises: Professeur, Email, Nombre de Sessions, Total Heures, Temps de Pause, Heures Effectives. Interface statistiques mensuelle opérationnelle selon spécifications."
 
+  - task: "Monday.com CRM Integration"
+    implemented: true
+    working: true
+    file: "server.py, monday_integration.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED - Monday.com CRM integration works correctly. When admin approves student registration via POST /api/admin/approve-registration/{user_id}, the create_monday_item function is called with correct data. Board ID 5089020316 configured. All required response fields present (message, email, temporary_password, level). CRM integration code executed successfully during approval process."
+
+  - task: "NewsManager for Teachers"
+    implemented: true
+    working: false
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ FAILED - Teachers cannot access NewsManager functionality. News endpoints (POST /api/news, PUT /api/news/{id}, DELETE /api/news/{id}) are restricted to admin-only (403 Admin access required). Teachers can read news (GET /api/news works) but cannot create, edit, or delete news. Need to modify endpoint permissions to allow teacher role access for NewsManager functionality."
+
+  - task: "Documents Preview"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED - Documents preview functionality works correctly. Students can access documents list via GET /api/documents/my-documents. Document files are accessible via GET /uploads/documents/{filename} with correct content-type. Student credentials test.student@example.com / Test2025 work properly. File access and document retrieval both functional."
+
+  - task: "K-Kid Dashboard"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED - K-Kid dashboard functionality works correctly. K-Kid login successful with credentials etudiant.test@example.com / KKid2025. User level confirmed as 'kkid'. All 3 dashboard tabs accessible: Vidéos (GET /api/student/my-videos), Jeux (GET /api/student/my-games), and Cadeaux (profile access via GET /api/auth/me). Simplified dashboard layout working as expected for K-Kid students."
+
 metadata:
   created_by: "testing_agent"
   version: "1.2"

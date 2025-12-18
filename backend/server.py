@@ -810,6 +810,48 @@ async def login(credentials: UserLogin):
         }
     }
 
+@api_router.post("/auth/secretary-login")
+async def secretary_login(code: str = Body(..., embed=True)):
+    """Special login for secretary with secret code"""
+    if code != "secretkalama":
+        raise HTTPException(status_code=401, detail="Invalid code")
+    
+    # Find or create secretary user
+    secretary = await db.users.find_one({"role": "secretary"}, {"_id": 0})
+    
+    if not secretary:
+        # Create default secretary user
+        secretary_id = str(uuid4())
+        secretary = {
+            "id": secretary_id,
+            "email": "secretaire@mykalamaenglish.com",
+            "first_name": "Secrétaire",
+            "last_name": "KALAMA",
+            "phone": "+221000000000",
+            "role": "secretary",
+            "is_active": True,
+            "password_hash": hash_password("secretkalama"),
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "first_login": False
+        }
+        await db.users.insert_one(secretary)
+        logger.info(f"Secretary user created with code access")
+    
+    # Create token
+    token = create_access_token({"sub": secretary['id'], "role": "secretary"})
+    
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "user": {
+            "id": secretary['id'],
+            "email": secretary['email'],
+            "first_name": secretary['first_name'],
+            "last_name": secretary['last_name'],
+            "role": "secretary"
+        }
+    }
+
 @api_router.get("/auth/me")
 async def get_me(current_user: dict = Depends(get_current_user)):
     return current_user

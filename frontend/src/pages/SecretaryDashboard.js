@@ -276,6 +276,135 @@ const SecretaryDashboard = () => {
     }
   };
 
+  // Facturation handlers
+  const handleAddTeacherPayment = async () => {
+    if (!newPayment.teacherName || !newPayment.month || !newPayment.amount) {
+      toast.error('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+
+    try {
+      await apiClient.post('/secretary/teacher-payments', newPayment);
+      const res = await apiClient.get('/secretary/teacher-payments');
+      setTeacherPayments(res.data || []);
+      setNewPayment({
+        teacherId: '',
+        teacherName: '',
+        month: new Date().toISOString().slice(0, 7),
+        amount: '',
+        hoursWorked: '',
+        bonus: '0',
+        notes: ''
+      });
+      toast.success('💰 Paiement enregistré !');
+    } catch (error) {
+      console.error('Error adding payment:', error);
+      toast.error('Erreur lors de l\'enregistrement du paiement');
+    }
+  };
+
+  const handleAddStudentReceipt = async () => {
+    if (!newReceipt.studentName || !newReceipt.packType || !newReceipt.amount) {
+      toast.error('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+
+    try {
+      await apiClient.post('/secretary/student-receipts', newReceipt);
+      const res = await apiClient.get('/secretary/student-receipts');
+      setStudentReceipts(res.data || []);
+      setNewReceipt({
+        studentId: '',
+        studentName: '',
+        packType: '',
+        amount: '',
+        paymentMethod: 'Virement',
+        notes: ''
+      });
+      toast.success('🧾 Reçu généré !');
+    } catch (error) {
+      console.error('Error adding receipt:', error);
+      toast.error('Erreur lors de la génération du reçu');
+    }
+  };
+
+  const handleDeletePayment = async (id) => {
+    if (window.confirm('Supprimer ce paiement ?')) {
+      try {
+        await apiClient.delete(`/secretary/teacher-payments/${id}`);
+        setTeacherPayments(teacherPayments.filter(p => p.id !== id));
+        toast.success('Paiement supprimé');
+      } catch (error) {
+        toast.error('Erreur lors de la suppression');
+      }
+    }
+  };
+
+  const handleDeleteReceipt = async (id) => {
+    if (window.confirm('Supprimer ce reçu ?')) {
+      try {
+        await apiClient.delete(`/secretary/student-receipts/${id}`);
+        setStudentReceipts(studentReceipts.filter(r => r.id !== id));
+        toast.success('Reçu supprimé');
+      } catch (error) {
+        toast.error('Erreur lors de la suppression');
+      }
+    }
+  };
+
+  const printReceipt = (receipt) => {
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Reçu de Paiement - MyKalama English</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 40px; max-width: 600px; margin: 0 auto; }
+          .header { text-align: center; border-bottom: 3px solid #7c3aed; padding-bottom: 20px; margin-bottom: 30px; }
+          .logo { font-size: 28px; font-weight: bold; color: #7c3aed; }
+          .receipt-number { color: #666; font-size: 14px; margin-top: 10px; }
+          .details { margin: 20px 0; }
+          .row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+          .label { color: #666; }
+          .value { font-weight: bold; }
+          .amount { font-size: 24px; color: #059669; text-align: center; margin: 30px 0; padding: 20px; background: #ecfdf5; border-radius: 10px; }
+          .footer { text-align: center; margin-top: 40px; color: #666; font-size: 12px; }
+          .stamp { text-align: center; margin-top: 30px; }
+          .stamp-text { display: inline-block; padding: 10px 30px; border: 3px solid #059669; border-radius: 10px; color: #059669; font-weight: bold; transform: rotate(-5deg); }
+          @media print { body { print-color-adjust: exact; } }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="logo">🎓 MyKalama English</div>
+          <div class="receipt-number">Reçu N° ${receipt.id?.slice(0, 8).toUpperCase() || 'XXXXX'}</div>
+        </div>
+        <div class="details">
+          <div class="row"><span class="label">Étudiant:</span><span class="value">${receipt.student_name || receipt.studentName}</span></div>
+          <div class="row"><span class="label">Pack:</span><span class="value">${receipt.pack_type || receipt.packType}</span></div>
+          <div class="row"><span class="label">Mode de paiement:</span><span class="value">${receipt.payment_method || receipt.paymentMethod}</span></div>
+          <div class="row"><span class="label">Date:</span><span class="value">${new Date(receipt.created_at || Date.now()).toLocaleDateString('fr-FR')}</span></div>
+          ${receipt.notes ? `<div class="row"><span class="label">Notes:</span><span class="value">${receipt.notes}</span></div>` : ''}
+        </div>
+        <div class="amount">
+          <div style="font-size: 14px; color: #666;">Montant payé</div>
+          <div style="font-size: 32px; font-weight: bold;">${receipt.amount} €</div>
+        </div>
+        <div class="stamp">
+          <span class="stamp-text">✓ PAYÉ</span>
+        </div>
+        <div class="footer">
+          <p>MyKalama English - Formation en Anglais</p>
+          <p>contact@mykalamaenglish.com</p>
+        </div>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+  };
+
   // Messages handler
   const handleSendMessage = async () => {
     if (!newMessage.recipient || !newMessage.subject || !newMessage.content) {

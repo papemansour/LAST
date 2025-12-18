@@ -104,6 +104,11 @@ const SecretaryDashboard = () => {
     setMessages(data);
   };
 
+  const saveReports = (data) => {
+    localStorage.setItem('secretary_prof_reports', JSON.stringify(data));
+    setProfReports(data);
+  };
+
   // Meetings handlers
   const handleAddMeeting = () => {
     if (!newMeeting.title || !newMeeting.date || !newMeeting.time) {

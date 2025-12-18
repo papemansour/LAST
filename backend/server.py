@@ -828,9 +828,9 @@ async def secretary_login(code: str = Body(..., embed=True)):
             "first_name": "Secrétaire",
             "last_name": "KALAMA",
             "phone": "+221000000000",
-            "role": "admin",  # Admin role to access admin dashboard
+            "role": "secretary",  # Secretary role to access secretary dashboard
             "is_active": True,
-            "password_hash": hash_password("secretkalama"),
+            "password_hash": hash_password("secretaire2025"),
             "created_at": datetime.now(timezone.utc).isoformat(),
             "first_login": False
         }

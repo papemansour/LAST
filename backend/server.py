@@ -2363,7 +2363,26 @@ async def get_all_test_results(current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=403, detail="Admin access required")
     
     results = await db.test_results.find({}, {"_id": 0}).to_list(1000)
-    return results
+    
+    # Enrichir avec les noms des candidats
+    enriched_results = []
+    for result in results:
+        user = await db.users.find_one(
+            {"id": result.get('user_id')},
+            {"_id": 0, "first_name": 1, "last_name": 1, "email": 1}
+        )
+        
+        result_with_user = {**result}
+        if user:
+            result_with_user['candidate_name'] = f"{user.get('first_name', '')} {user.get('last_name', '')}".strip()
+            result_with_user['candidate_email'] = user.get('email', '')
+        else:
+            result_with_user['candidate_name'] = 'Candidat anonyme'
+            result_with_user['candidate_email'] = ''
+        
+        enriched_results.append(result_with_user)
+    
+    return enriched_results
 
 # TEACHER ROUTES
 @api_router.get("/teacher/my-students")

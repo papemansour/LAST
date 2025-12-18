@@ -957,17 +957,30 @@ async def create_teacher_payment(payment_data: dict = Body(...), current_user: d
         "id": str(uuid4()),
         "teacher_id": payment_data.get("teacherId"),
         "teacher_name": payment_data.get("teacherName"),
+        "teacher_email": payment_data.get("teacherEmail", ""),
+        "teacher_address": payment_data.get("teacherAddress", ""),
         "month": payment_data.get("month"),
         "amount": payment_data.get("amount"),
+        "currency": payment_data.get("currency", "EUR"),
         "hours_worked": payment_data.get("hoursWorked", ""),
+        "hourly_rate": payment_data.get("hourlyRate", ""),
         "bonus": payment_data.get("bonus", "0"),
+        "description": payment_data.get("description", "Cours de langue anglaise"),
         "notes": payment_data.get("notes", ""),
         "created_by": current_user['id'],
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     
     await db.teacher_payments.insert_one(payment)
-    logger.info(f"Teacher payment created for: {payment['teacher_name']} - {payment['amount']}€")
+    
+    # Sync to Monday.com
+    try:
+        from monday_integration import create_invoice_in_monday
+        create_invoice_in_monday(payment, "teacher")
+    except Exception as e:
+        logger.warning(f"Could not sync teacher payment to Monday: {e}")
+    
+    logger.info(f"Teacher payment created for: {payment['teacher_name']} - {payment['amount']} {payment['currency']}")
     return {"message": "Payment created", "id": payment['id']}
 
 @api_router.delete("/secretary/teacher-payments/{payment_id}")

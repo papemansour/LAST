@@ -947,59 +947,62 @@ async def approve_registration(user_id: str, current_user: dict = Depends(get_cu
     if current_user['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
     
-    user = await db.users.find_one({"id": user_id}, {"_id": 0})
-    if not user:
+    # Update user status to active
+    result = await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"is_active": True}}
+    )
+    
+    if result.modified_count == 0:
         raise HTTPException(status_code=404, detail="User not found")
     
-    # Generate temporary password
-    temp_password = f"Kalama{user_id[:6]}"
-    password_hash = hash_password(temp_password)
+    # Get user data
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
     
-    await db.users.update_one(
-        {"id": user_id},
-        {"$set": {"is_active": True, "password_hash": password_hash, "temporary_password": temp_password}}
-    )
+    if user:
+        # Envoyer les infos à Monday.com CRM
+        try:
+            from monday_integration import create_monday_item, send_welcome_email_via_monday
+            
+            # Créer l'item dans Monday.com
+            monday_item_id = create_monday_item({
+                'first_name': user.get('first_name', ''),
+                'last_name': user.get('last_name', ''),
+                'email': user.get('email', ''),
+                'phone': user.get('phone', ''),
+                'level': user.get('level', 'beginner'),
+            })
+            
+            if monday_item_id:
+                logger.info(f"Student {user_id} added to Monday.com: {monday_item_id}")
+                
+                # Sauvegarder l'ID Monday.com dans la base
+                await db.users.update_one(
+                    {"id": user_id},
+                    {"$set": {"monday_item_id": monday_item_id}}
+                )
+            
+            # Envoyer email de bienvenue via Monday.com
+            send_welcome_email_via_monday(
+                user['email'],
+                f"{user.get('first_name', '')} {user.get('last_name', '')}"
+            )
+            
+        except Exception as e:
+            logger.error(f"Monday.com integration error: {e}")
+        
+        # Envoyer email de bienvenue classique aussi
+        try:
+            send_welcome_email(
+                user['email'],
+                user['first_name'],
+                user.get('temporary_password', ''),
+                user['role']
+            )
+        except Exception as e:
+            logger.error(f"Failed to send welcome email: {e}")
     
-    # Send level-based welcome email
-    await email_service.send_level_based_welcome_email(
-        user['email'],
-        user['first_name'],
-        user.get('level', 'beginner'),  # Get level from user data, default to beginner
-        temp_password,
-        user.get('last_name', '')  # Add last name
-    )
-    
-    # Create welcome letter in database
-    letter_content = generate_welcome_letter_content(
-        user['first_name'],
-        user.get('level', 'beginner'),
-        'student',
-        user['email'],
-        temp_password
-    )
-    
-    welcome_letter = WelcomeLetter(
-        user_id=user_id,
-        user_email=user['email'],
-        user_name=f"{user['first_name']} {user['last_name']}",
-        user_level=user.get('level', 'beginner'),
-        user_role='student',
-        temp_password=temp_password,
-        content=letter_content
-    )
-    
-    letter_doc = welcome_letter.model_dump()
-    letter_doc['created_at'] = letter_doc['created_at'].isoformat()
-    await db.welcome_letters.insert_one(letter_doc)
-    
-    logger.info(f"User {user_id} approved, email and welcome letter created (Level: {user.get('level', 'beginner')})")
-    
-    return {
-        "message": "User approved, welcome email and letter created",
-        "email": user['email'],
-        "temporary_password": temp_password,
-        "level": user.get('level', 'beginner')
-    }
+    return {"message": "User approved successfully"}
 
 @api_router.post("/admin/create-teacher")
 async def create_teacher(teacher_data: TeacherCreate, current_user: dict = Depends(get_current_user)):

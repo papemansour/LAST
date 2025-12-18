@@ -39,6 +39,8 @@ const LoginPage = () => {
       
       if (role === 'admin') {
         navigate('/admin');
+      } else if (role === 'secretary') {
+        navigate('/secretary');
       } else if (role === 'teacher') {
         navigate('/teacher');
       } else if (role === 'student') {

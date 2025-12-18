@@ -1334,7 +1334,7 @@ const SecretaryDashboard = () => {
                               <p className="text-xs text-gray-500">{receipt.pack_type || receipt.packType}</p>
                             </div>
                             <div className="flex items-center gap-2">
-                              <span className="font-bold text-blue-600">{receipt.amount} €</span>
+                              <span className="font-bold text-blue-600">{receipt.amount} {receipt.currency || 'EUR'}</span>
                               <button onClick={() => printReceipt(receipt)} className="text-purple-500 hover:text-purple-700" title="Imprimer">
                                 🖨️
                               </button>

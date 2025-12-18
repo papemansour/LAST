@@ -42,6 +42,15 @@ const SecretaryDashboard = () => {
     subject: '',
     content: ''
   });
+  
+  // Comptes rendus prof state
+  const [profReports, setProfReports] = useState([]);
+  const [newReport, setNewReport] = useState({
+    profName: '',
+    date: '',
+    content: '',
+    notes: ''
+  });
 
   useEffect(() => {
     fetchUserData();

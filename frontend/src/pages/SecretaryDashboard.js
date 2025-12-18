@@ -1272,9 +1272,9 @@ const SecretaryDashboard = () => {
                       </select>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-3 gap-3">
                     <div>
-                      <label className="block text-sm font-medium mb-1">Montant (€) *</label>
+                      <label className="block text-sm font-medium mb-1">Montant *</label>
                       <Input
                         type="number"
                         value={newReceipt.amount}
@@ -1283,14 +1283,25 @@ const SecretaryDashboard = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1">Mode de paiement</label>
+                      <label className="block text-sm font-medium mb-1">Devise</label>
+                      <select
+                        value={newReceipt.currency}
+                        onChange={(e) => setNewReceipt({...newReceipt, currency: e.target.value})}
+                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm h-10"
+                      >
+                        <option value="EUR">🇪🇺 EUR</option>
+                        <option value="FCFA">🇸🇳 FCFA</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Mode paiement</label>
                       <select
                         value={newReceipt.paymentMethod}
                         onChange={(e) => setNewReceipt({...newReceipt, paymentMethod: e.target.value})}
-                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm h-10"
                       >
-                        <option value="Virement">Virement Bancaire</option>
-                        <option value="Carte">Carte Bancaire</option>
+                        <option value="Virement">Virement</option>
+                        <option value="Carte">Carte</option>
                         <option value="Mobile Money">Mobile Money</option>
                         <option value="Espèces">Espèces</option>
                         <option value="Stripe">Stripe</option>

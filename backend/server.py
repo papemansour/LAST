@@ -1231,27 +1231,59 @@ async def approve_registration(user_id: str, current_user: dict = Depends(get_cu
         {"$set": {"is_active": True, "password_hash": password_hash, "temporary_password": temp_password}}
     )
     
-    # Envoyer les infos à Monday.com CRM
+    # Générer le mot de passe Digika pour la bibliothèque
+    digika_password = f"DIGIKA{user_id[:4].upper()}"
+    
+    # Sauvegarder le Digika dans la base
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"digika_password": digika_password}}
+    )
+    
+    # Envoyer les infos à Monday.com CRM avec mot de passe et Digika
     try:
-        from monday_integration import create_monday_item
+        from monday_integration import create_monday_item, generate_welcome_email_html
         
-        # Créer l'item dans Monday.com
+        # Créer l'item dans Monday.com avec le mot de passe et Digika
         monday_item_id = create_monday_item({
             'first_name': user.get('first_name', ''),
             'last_name': user.get('last_name', ''),
             'email': user.get('email', ''),
             'phone': user.get('phone', ''),
             'level': user.get('level', 'beginner'),
+            'temporary_password': temp_password,
+            'digika_password': digika_password,
         })
         
         if monday_item_id:
-            logger.info(f"Student {user_id} added to Monday.com: {monday_item_id}")
+            logger.info(f"Student {user_id} added to Monday.com with credentials: {monday_item_id}")
             
             # Sauvegarder l'ID Monday.com dans la base
             await db.users.update_one(
                 {"id": user_id},
                 {"$set": {"monday_item_id": monday_item_id}}
             )
+            
+            # Générer le contenu HTML de l'email de bienvenue
+            welcome_email_html = generate_welcome_email_html({
+                'first_name': user.get('first_name', ''),
+                'last_name': user.get('last_name', ''),
+                'email': user.get('email', ''),
+                'level': user.get('level', 'beginner'),
+                'temporary_password': temp_password,
+                'digika_password': digika_password,
+            })
+            
+            # Sauvegarder l'email HTML pour envoi via Monday automation
+            await db.pending_welcome_emails.insert_one({
+                "id": str(uuid4()),
+                "user_id": user_id,
+                "email": user.get('email', ''),
+                "html_content": welcome_email_html,
+                "subject": f"Hello and Welcome to MyKalama - {user.get('first_name', '')}!",
+                "status": "pending",
+                "created_at": datetime.now(timezone.utc).isoformat()
+            })
         
     except Exception as e:
         logger.error(f"Monday.com integration error: {e}")

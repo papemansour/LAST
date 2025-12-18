@@ -191,28 +191,35 @@ const SecretaryDashboard = () => {
     }
   };
 
-  // Comptes rendus handlers
-  const handleAddReport = () => {
+  // Comptes rendus handlers - API Backend
+  const handleAddReport = async () => {
     if (!newReport.profName || !newReport.date || !newReport.content) {
       toast.error('Veuillez remplir tous les champs obligatoires');
       return;
     }
 
-    const report = {
-      id: Date.now(),
-      ...newReport,
-      createdAt: new Date().toISOString()
-    };
-
-    saveReports([...profReports, report]);
-    setNewReport({ profName: '', date: '', content: '', notes: '' });
-    toast.success('Compte rendu ajouté !');
+    try {
+      await apiClient.post('/secretary/reports', newReport);
+      const res = await apiClient.get('/secretary/reports');
+      setProfReports(res.data || []);
+      setNewReport({ profName: '', date: '', content: '', notes: '' });
+      toast.success('Compte rendu ajouté !');
+    } catch (error) {
+      console.error('Error adding report:', error);
+      toast.error('Erreur lors de l\'ajout du compte rendu');
+    }
   };
 
-  const handleDeleteReport = (id) => {
+  const handleDeleteReport = async (id) => {
     if (window.confirm('Supprimer ce compte rendu ?')) {
-      saveReports(profReports.filter(r => r.id !== id));
-      toast.success('Compte rendu supprimé');
+      try {
+        await apiClient.delete(`/secretary/reports/${id}`);
+        setProfReports(profReports.filter(r => r.id !== id));
+        toast.success('Compte rendu supprimé');
+      } catch (error) {
+        console.error('Error deleting report:', error);
+        toast.error('Erreur lors de la suppression');
+      }
     }
   };
 

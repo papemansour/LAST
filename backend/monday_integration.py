@@ -27,15 +27,25 @@ def create_monday_item(student_data: Dict[str, Any]) -> Optional[str]:
         "Content-Type": "application/json"
     }
     
-    # Construire le nom de l'item
-    item_name = f"{student_data.get('first_name', '')} {student_data.get('last_name', '')}"
+    # Construire le nom de l'item (Prénom)
+    item_name = student_data.get('first_name', '')
     
-    # Construire les valeurs des colonnes
+    # Mapper le niveau en français pour Monday.com
+    level_mapping = {
+        'beginner': 'Débutant',
+        'intermediate': 'Intermédiaire', 
+        'advanced': 'Avancé',
+        'professional': 'Professionnel',
+        'kkid': 'K-Kid'
+    }
+    level_label = level_mapping.get(student_data.get('level', 'beginner'), 'Débutant')
+    
+    # Construire les valeurs des colonnes avec les IDs réels du board
     column_values = {
-        "text": student_data.get('email', ''),  # Colonne Email
-        "phone": student_data.get('phone', ''),  # Colonne Téléphone
-        "status": {"label": "Nouveau"},  # Statut
-        "text4": student_data.get('level', 'beginner'),  # Niveau
+        "text_mkyn39my": student_data.get('last_name', ''),  # Colonne Nom
+        "contact_email": {"email": student_data.get('email', ''), "text": student_data.get('email', '')},  # E-mail
+        "contact_phone": {"phone": student_data.get('phone', ''), "countryShortName": "SN"},  # Téléphone
+        "status": {"label": level_label},  # Niveau
     }
     
     # Query GraphQL pour créer l'item

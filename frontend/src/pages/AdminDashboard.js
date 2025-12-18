@@ -47,6 +47,9 @@ const AdminDashboard = () => {
   });
   const [selectedStudent, setSelectedStudent] = useState('');
   const [selectedTeacher, setSelectedTeacher] = useState('');
+  const [showChangeTeacherDialog, setShowChangeTeacherDialog] = useState(false);
+  const [studentToChangeTeacher, setStudentToChangeTeacher] = useState(null);
+  const [newTeacherForStudent, setNewTeacherForStudent] = useState('');
   const [sessions, setSessions] = useState([]);
   const [teacherSessions, setTeacherSessions] = useState([]);
   const [teacherAvailability, setTeacherAvailability] = useState([]);

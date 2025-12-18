@@ -905,6 +905,43 @@ async def get_pending_registrations(current_user: dict = Depends(get_current_use
 
 # Email sending is now handled by email_service.py
 
+@api_router.post("/admin/change-student-teacher")
+async def change_student_teacher(
+    data: dict = Body(...),
+    current_user: dict = Depends(get_current_user)
+):
+    """Change the assigned teacher for a student"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    student_id = data.get('student_id')
+    new_teacher_id = data.get('new_teacher_id')
+    
+    if not student_id:
+        raise HTTPException(status_code=400, detail="Student ID required")
+    
+    # Update student's assigned teacher
+    update_data = {"assigned_teacher": new_teacher_id} if new_teacher_id else {"assigned_teacher": None}
+    
+    result = await db.users.update_one(
+        {"id": student_id, "role": "student"},
+        {"$set": update_data}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Student not found")
+    
+    # If new teacher assigned, update teacher's students list
+    if new_teacher_id:
+        await db.users.update_one(
+            {"id": new_teacher_id, "role": "teacher"},
+            {"$addToSet": {"students": student_id}}
+        )
+    
+    logger.info(f"Admin {current_user['id']} changed teacher for student {student_id} to {new_teacher_id}")
+    
+    return {"message": "Teacher changed successfully"}
+
 @api_router.post("/admin/approve-registration/{user_id}")
 async def approve_registration(user_id: str, current_user: dict = Depends(get_current_user)):
     if current_user['role'] != 'admin':

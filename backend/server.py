@@ -5116,10 +5116,8 @@ async def serve_uploaded_file(file_path: str):
         headers={
             "Content-Disposition": f'inline; filename="{file_full_path.name}"',
             "X-Content-Type-Options": "nosniff",
-            "Cache-Control": "public, max-age=3600",
-            # Allow embedding in iframes
-            "X-Frame-Options": "SAMEORIGIN",
-            "Content-Security-Policy": "frame-ancestors 'self' https://*.emergentagent.com"
+            "Cache-Control": "public, max-age=3600"
+            # Removed X-Frame-Options to allow embedding from any origin
         }
     )
 

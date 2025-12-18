@@ -848,7 +848,7 @@ async def secretary_login(code: str = Body(..., embed=True)):
             "email": secretary['email'],
             "first_name": secretary['first_name'],
             "last_name": secretary['last_name'],
-            "role": "admin"  # Return admin role
+            "role": "secretary"  # Return secretary role
         }
     }
 

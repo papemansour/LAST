@@ -123,7 +123,16 @@ const SecretaryDashboard = () => {
     };
 
     saveMeetings([...meetings, meeting]);
-    setNewMeeting({ title: '', date: '', time: '', attendees: '', notes: '' });
+    setNewMeeting({ 
+      title: '', 
+      date: '', 
+      time: '', 
+      attendees: '', 
+      notes: '',
+      meetingLink: '',
+      notifyProfs: [],
+      notifyAdmin: false
+    });
     toast.success('Réunion ajoutée !');
   };
 

@@ -52,6 +52,34 @@ const SecretaryDashboard = () => {
     notes: ''
   });
 
+  // Facturation state
+  const [teacherPayments, setTeacherPayments] = useState([]);
+  const [studentReceipts, setStudentReceipts] = useState([]);
+  const [teachers, setTeachers] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [newPayment, setNewPayment] = useState({
+    teacherId: '',
+    teacherName: '',
+    month: new Date().toISOString().slice(0, 7),
+    amount: '',
+    hoursWorked: '',
+    bonus: '0',
+    notes: ''
+  });
+  const [newReceipt, setNewReceipt] = useState({
+    studentId: '',
+    studentName: '',
+    packType: '',
+    amount: '',
+    paymentMethod: 'Virement',
+    notes: ''
+  });
+  const [billingStats, setBillingStats] = useState({
+    totalPaidTeachers: 0,
+    totalReceipts: 0,
+    pendingPayments: 0
+  });
+
   useEffect(() => {
     fetchUserData();
     loadAllData();

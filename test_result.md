@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Tester l'application MyKalamaenglish - Focus sur: 1) Intégration Monday.com CRM (nouveaux étudiants ajoutés au board), 2) Prévisualisation documents PDF améliorée, 3) NewsManager pour professeurs (écrire/publier), 4) Dashboard K-Kid"
+user_problem_statement: "Tester les nouvelles fonctionnalités MyKalamaenglish: 1) Modale changement professeur (Admin), 2) Dashboard Secrétaire - Comptes Rendus (API backend), 3) Réunions secrétaire, 4) NewsManager professeurs, 5) Intégration Monday.com"
 
 backend:
   - task: "Password Security Fix - Remove Plain Text Storage"

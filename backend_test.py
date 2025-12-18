@@ -39,7 +39,13 @@ class MyKalamaEnglishBackendTester:
         self.test_student_id = None
         self.test_flashcard_set_id = None
         self.test_results = {
-            # Review Request Priority Tests
+            # Review Request Priority Tests - NEW FOCUS
+            "monday_crm_integration": {"passed": False, "details": []},
+            "newsmanager_teachers": {"passed": False, "details": []},
+            "documents_preview": {"passed": False, "details": []},
+            "kkid_dashboard": {"passed": False, "details": []},
+            
+            # Previous tests
             "dashboard_access": {"passed": False, "details": []},
             "documents_section": {"passed": False, "details": []},
             "student_pack_info": {"passed": False, "details": []},

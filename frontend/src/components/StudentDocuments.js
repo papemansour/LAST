@@ -229,11 +229,35 @@ const StudentDocuments = () => {
                 className="w-full rounded-lg"
               />
             ) : selectedDocument?.file_type === 'pdf' ? (
-              <iframe
-                src={getFullFileUrl(selectedDocument?.file_url)}
-                className="w-full h-[70vh] rounded-lg"
-                title={selectedDocument?.file_name}
-              />
+              <div className="space-y-4">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <FileText className="w-8 h-8 text-blue-600" />
+                    <div>
+                      <p className="font-semibold text-blue-900">{selectedDocument?.file_name}</p>
+                      <p className="text-sm text-blue-600">Document PDF</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <a
+                      href={getFullFileUrl(selectedDocument?.file_url)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Button variant="outline" className="bg-white">
+                        <Eye className="w-4 h-4 mr-2" />
+                        Ouvrir dans un nouvel onglet
+                      </Button>
+                    </a>
+                  </div>
+                </div>
+                <iframe
+                  src={getFullFileUrl(selectedDocument?.file_url)}
+                  className="w-full h-[60vh] rounded-lg border-2 border-gray-200"
+                  title={selectedDocument?.file_name}
+                />
+              </div>
             ) : selectedDocument?.file_type === 'video' ? (
               <video controls className="w-full rounded-lg">
                 <source src={getFullFileUrl(selectedDocument.file_url)} />

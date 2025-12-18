@@ -425,6 +425,174 @@ const SecretaryDashboard = () => {
     printWindow.print();
   };
 
+  // Imprimer facture professeur
+  const printTeacherInvoice = (payment) => {
+    const currency = payment.currency || 'EUR';
+    const amount = parseFloat(payment.amount || 0);
+    const bonus = parseFloat(payment.bonus || 0);
+    const totalHT = amount + bonus;
+    const tva = totalHT * 0.20;
+    const totalTTC = totalHT + tva;
+    const invoiceNumber = `FAC-PROF-${payment.id?.slice(0, 8).toUpperCase() || 'XXXXX'}`;
+    
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Facture Professeur - MyKalama English</title>
+        <style>
+          body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; color: #333; }
+          .header { display: flex; justify-content: space-between; border-bottom: 3px solid #059669; padding-bottom: 20px; margin-bottom: 30px; }
+          .logo { font-size: 24px; font-weight: bold; color: #059669; }
+          .invoice-info { text-align: right; }
+          .invoice-number { font-size: 20px; font-weight: bold; color: #059669; }
+          .parties { display: flex; justify-content: space-between; margin: 30px 0; }
+          .party { width: 45%; }
+          .party-title { font-weight: bold; color: #059669; margin-bottom: 10px; border-bottom: 2px solid #d1fae5; padding-bottom: 5px; }
+          .party p { margin: 5px 0; font-size: 14px; }
+          table { width: 100%; border-collapse: collapse; margin: 30px 0; }
+          th { background: #059669; color: white; padding: 12px; text-align: left; }
+          td { padding: 12px; border-bottom: 1px solid #e5e7eb; }
+          .totals { width: 300px; margin-left: auto; }
+          .totals tr td { padding: 8px 12px; }
+          .totals .total-row { background: #d1fae5; font-weight: bold; font-size: 18px; }
+          .footer { margin-top: 50px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #666; }
+          .stamp { text-align: center; margin: 30px 0; }
+          .stamp-text { display: inline-block; padding: 15px 40px; border: 3px solid #059669; border-radius: 10px; color: #059669; font-weight: bold; font-size: 18px; transform: rotate(-3deg); }
+          @media print { body { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div>
+            <div class="logo">🎓 MyKalama English</div>
+            <p style="margin-top: 10px; color: #666;">Société de Formation en Langues</p>
+          </div>
+          <div class="invoice-info">
+            <div class="invoice-number">FACTURE</div>
+            <p><strong>N° :</strong> ${invoiceNumber}</p>
+            <p><strong>Date :</strong> ${new Date(payment.created_at || Date.now()).toLocaleDateString('fr-FR')}</p>
+          </div>
+        </div>
+        
+        <div class="parties">
+          <div class="party">
+            <div class="party-title">📍 ÉMETTEUR</div>
+            <p><strong>Société MyKalama English</strong></p>
+            <p>Dakar, Sénégal</p>
+            <p>📞 +221 XX XXX XX XX</p>
+            <p>📧 contact@mykalamaenglish.com</p>
+          </div>
+          <div class="party">
+            <div class="party-title">👤 DESTINATAIRE (Prestataire)</div>
+            <p><strong>${payment.teacher_name || payment.teacherName}</strong></p>
+            <p>${payment.teacher_email || 'Email non spécifié'}</p>
+            <p>${payment.teacher_address || 'Adresse non spécifiée'}</p>
+          </div>
+        </div>
+        
+        <table>
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Quantité</th>
+              <th>Prix Unitaire</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>${payment.description || 'Cours de langue anglaise'}</td>
+              <td>${payment.hours_worked || payment.hoursWorked || '1'} h</td>
+              <td>${payment.hourly_rate || payment.hourlyRate || amount} ${currency}</td>
+              <td>${amount.toFixed(2)} ${currency}</td>
+            </tr>
+            ${bonus > 0 ? `
+            <tr>
+              <td>Bonus / Prime</td>
+              <td>1</td>
+              <td>${bonus.toFixed(2)} ${currency}</td>
+              <td>${bonus.toFixed(2)} ${currency}</td>
+            </tr>
+            ` : ''}
+          </tbody>
+        </table>
+        
+        <table class="totals">
+          <tr>
+            <td>Total HT :</td>
+            <td style="text-align: right;">${totalHT.toFixed(2)} ${currency}</td>
+          </tr>
+          <tr>
+            <td>TVA (20%) :</td>
+            <td style="text-align: right;">${tva.toFixed(2)} ${currency}</td>
+          </tr>
+          <tr class="total-row">
+            <td>Total TTC :</td>
+            <td style="text-align: right;">${totalTTC.toFixed(2)} ${currency}</td>
+          </tr>
+        </table>
+        
+        <div class="stamp">
+          <span class="stamp-text">✓ PAYÉ</span>
+        </div>
+        
+        <div class="footer">
+          <p><strong>Conditions de paiement :</strong> Paiement à réception de facture</p>
+          <p><strong>Mode de paiement :</strong> Virement bancaire / Mobile Money</p>
+          <p style="margin-top: 20px; text-align: center;">
+            <em>Merci pour votre confiance !</em>
+          </p>
+          <p style="text-align: center; margin-top: 10px;">
+            © 2025 MyKalama English - Tous droits réservés
+          </p>
+        </div>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+  };
+
+  // Handler pour prestataires
+  const handleAddPrestataire = async () => {
+    if (!newPrestataire.name || !newPrestataire.service || !newPrestataire.amount) {
+      toast.error('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+
+    try {
+      await apiClient.post('/secretary/prestataire-invoices', newPrestataire);
+      const res = await apiClient.get('/secretary/prestataire-invoices');
+      setPrestataireInvoices(res.data || []);
+      setNewPrestataire({
+        name: '',
+        service: '',
+        amount: '',
+        currency: 'EUR',
+        description: '',
+        notes: ''
+      });
+      toast.success('🏢 Facture prestataire créée !');
+    } catch (error) {
+      console.error('Error adding prestataire invoice:', error);
+      toast.error('Erreur lors de la création');
+    }
+  };
+
+  const handleDeletePrestataire = async (id) => {
+    if (window.confirm('Supprimer cette facture prestataire ?')) {
+      try {
+        await apiClient.delete(`/secretary/prestataire-invoices/${id}`);
+        setPrestataireInvoices(prestataireInvoices.filter(p => p.id !== id));
+        toast.success('Facture supprimée');
+      } catch (error) {
+        toast.error('Erreur lors de la suppression');
+      }
+    }
+  };
+
   // Messages handler
   const handleSendMessage = async () => {
     if (!newMessage.recipient || !newMessage.subject || !newMessage.content) {

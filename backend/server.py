@@ -1025,6 +1025,58 @@ async def delete_student_receipt(receipt_id: str, current_user: dict = Depends(g
     
     return {"message": "Receipt deleted"}
 
+# Prestataire invoices endpoints
+@api_router.get("/secretary/prestataire-invoices")
+async def get_prestataire_invoices(current_user: dict = Depends(get_current_user)):
+    """Get all prestataire invoices"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    invoices = await db.prestataire_invoices.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return invoices
+
+@api_router.post("/secretary/prestataire-invoices")
+async def create_prestataire_invoice(invoice_data: dict = Body(...), current_user: dict = Depends(get_current_user)):
+    """Create a prestataire invoice"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    invoice = {
+        "id": str(uuid4()),
+        "name": invoice_data.get("name"),
+        "service": invoice_data.get("service"),
+        "amount": invoice_data.get("amount"),
+        "currency": invoice_data.get("currency", "EUR"),
+        "description": invoice_data.get("description", ""),
+        "notes": invoice_data.get("notes", ""),
+        "created_by": current_user['id'],
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.prestataire_invoices.insert_one(invoice)
+    
+    # Sync to Monday.com
+    try:
+        from monday_integration import create_invoice_in_monday
+        create_invoice_in_monday(invoice, "prestataire")
+    except Exception as e:
+        logger.warning(f"Could not sync prestataire invoice to Monday: {e}")
+    
+    logger.info(f"Prestataire invoice created for: {invoice['name']} - {invoice['amount']} {invoice['currency']}")
+    return {"message": "Invoice created", "id": invoice['id']}
+
+@api_router.delete("/secretary/prestataire-invoices/{invoice_id}")
+async def delete_prestataire_invoice(invoice_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a prestataire invoice"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    result = await db.prestataire_invoices.delete_one({"id": invoice_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    
+    return {"message": "Invoice deleted"}
+
 @api_router.get("/secretary/teachers-list")
 async def get_teachers_list_for_secretary(current_user: dict = Depends(get_current_user)):
     """Get list of all teachers for secretary billing"""

@@ -431,7 +431,7 @@ const SecretaryDashboard = () => {
     const amount = parseFloat(payment.amount || 0);
     const bonus = parseFloat(payment.bonus || 0);
     const totalHT = amount + bonus;
-    const tva = totalHT * 0.20;
+    const tva = 0; // TVA à 0%
     const totalTTC = totalHT + tva;
     const invoiceNumber = `FAC-PROF-${payment.id?.slice(0, 8).toUpperCase() || 'XXXXX'}`;
     
@@ -526,8 +526,8 @@ const SecretaryDashboard = () => {
             <td style="text-align: right;">${totalHT.toFixed(2)} ${currency}</td>
           </tr>
           <tr>
-            <td>TVA (20%) :</td>
-            <td style="text-align: right;">${tva.toFixed(2)} ${currency}</td>
+            <td>TVA (0%) :</td>
+            <td style="text-align: right;">0.00 ${currency}</td>
           </tr>
           <tr class="total-row">
             <td>Total TTC :</td>

@@ -1486,12 +1486,12 @@ const SecretaryDashboard = () => {
                       <select
                         value={newReceipt.packType}
                         onChange={(e) => {
+                          // Prix identiques au site
                           const packPrices = {
-                            'K-Débutant': { EUR: 76, FCFA: 49856 },
-                            'K-Intermédiaire': { EUR: 90, FCFA: 59040 },
-                            'K-Professionnel': { EUR: 106, FCFA: 69536 },
-                            'K-Kids': { EUR: 70, FCFA: 45920 },
-                            'Pack Trio': { EUR: 240, FCFA: 157440 }
+                            'K-Kids': { EUR: 30, FCFA: 7000 },
+                            'K-Débutant': { EUR: 76, FCFA: 15000 },
+                            'K-Intermédiaire': { EUR: 90, FCFA: 25000 },
+                            'K-Professionnel': { EUR: 102, FCFA: 40000 }
                           };
                           const selectedPack = e.target.value;
                           const price = packPrices[selectedPack];
@@ -1508,11 +1508,10 @@ const SecretaryDashboard = () => {
                         className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                       >
                         <option value="">Sélectionner...</option>
-                        <option value="K-Débutant">K-Débutant (76€ / 49 856 FCFA)</option>
-                        <option value="K-Intermédiaire">K-Intermédiaire (90€ / 59 040 FCFA)</option>
-                        <option value="K-Professionnel">K-Professionnel (106€ / 69 536 FCFA)</option>
-                        <option value="K-Kids">K-Kids (70€ / 45 920 FCFA)</option>
-                        <option value="Pack Trio">Pack Trio (240€ / 157 440 FCFA)</option>
+                        <option value="K-Kids">K-Kids (30€ / 7 000 FCFA)</option>
+                        <option value="K-Débutant">K-Débutant (76€ / 15 000 FCFA)</option>
+                        <option value="K-Intermédiaire">K-Intermédiaire (90€ / 25 000 FCFA)</option>
+                        <option value="K-Professionnel">K-Professionnel (102€ / 40 000 FCFA)</option>
                       </select>
                     </div>
                   </div>

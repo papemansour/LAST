@@ -1225,6 +1225,47 @@ async def reset_billing_stats(current_user: dict = Depends(get_current_user)):
         }
     }
 
+
+@api_router.delete("/secretary/teacher-payments/{payment_id}")
+async def delete_teacher_payment(payment_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a teacher payment"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    result = await db.teacher_payments.delete_one({"id": payment_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Payment not found")
+    
+    logger.info(f"Teacher payment {payment_id} deleted by {current_user['id']}")
+    return {"message": "Paiement supprimé avec succès"}
+
+@api_router.delete("/secretary/student-receipts/{receipt_id}")
+async def delete_student_receipt(receipt_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a student receipt"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    result = await db.student_receipts.delete_one({"id": receipt_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Receipt not found")
+    
+    logger.info(f"Student receipt {receipt_id} deleted by {current_user['id']}")
+    return {"message": "Reçu supprimé avec succès"}
+
+@api_router.delete("/secretary/prestataire-invoices/{invoice_id}")
+async def delete_prestataire_invoice(invoice_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a prestataire invoice"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    result = await db.prestataire_invoices.delete_one({"id": invoice_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    
+    logger.info(f"Prestataire invoice {invoice_id} deleted by {current_user['id']}")
+    return {"message": "Facture supprimée avec succès"}
+
+
 @api_router.get("/secretary/teachers-list")
 async def get_teachers_list_for_secretary(current_user: dict = Depends(get_current_user)):
     """Get list of all teachers for secretary billing"""

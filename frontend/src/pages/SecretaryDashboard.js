@@ -1534,12 +1534,15 @@ const SecretaryDashboard = () => {
                               <button onClick={() => printReceipt(receipt)} className="p-1 text-purple-500 hover:text-purple-700 hover:bg-purple-100 rounded" title="Imprimer">
                                 🖨️
                               </button>
+                              <button onClick={() => sendInvoiceByEmail(receipt, 'student')} className="p-1 text-blue-500 hover:text-blue-700 hover:bg-blue-100 rounded" title="Envoyer par email">
+                                📧
+                              </button>
                               <button onClick={() => {
                                 toast.success('Facture enregistrée dans Monday.com !');
                               }} className="p-1 text-green-500 hover:text-green-700 hover:bg-green-100 rounded" title="Enregistrer">
                                 💾
                               </button>
-                              <button onClick={() => handleDeleteReceipt(receipt.id)} className="p-1 text-red-500 hover:text-red-700 hover:bg-red-100 rounded">
+                              <button onClick={() => handleDeleteReceipt(receipt.id)} className="p-1 text-red-500 hover:text-red-700 hover:bg-red-100 rounded" title="Supprimer">
                                 <Trash2 className="w-4 h-4" />
                               </button>
                             </div>

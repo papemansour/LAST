@@ -444,17 +444,14 @@ const SecretaryDashboard = () => {
   const printReceipt = (receipt) => {
     const currency = receipt.currency || 'EUR';
     const amount = parseFloat(receipt.amount || 0);
-    const tvaRate = currency === 'EUR' ? 0.20 : 0.18; // 20% EUR, 18% FCFA
-    const tva = amount * tvaRate;
-    const totalTTC = amount + tva;
-    const invoiceNumber = `FAC-ETU-${receipt.id?.slice(0, 8).toUpperCase() || 'XXXXX'}`;
+    const invoiceNumber = `REC-ETU-${receipt.id?.slice(0, 8).toUpperCase() || 'XXXXX'}`;
     
     const printWindow = window.open('', '_blank');
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Facture Étudiant - MyKalama English</title>
+        <title>Reçu Étudiant - MyKalama English</title>
         <style>
           body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; color: #333; }
           .header { display: flex; justify-content: space-between; border-bottom: 3px solid #3b82f6; padding-bottom: 20px; margin-bottom: 30px; }
@@ -484,7 +481,7 @@ const SecretaryDashboard = () => {
             <p style="margin-top: 10px; color: #666;">Société de Formation en Langues</p>
           </div>
           <div class="invoice-info">
-            <div class="invoice-number">FACTURE</div>
+            <div class="invoice-number">REÇU DE PAIEMENT</div>
             <p><strong>N° :</strong> ${invoiceNumber}</p>
             <p><strong>Date :</strong> ${new Date(receipt.created_at || Date.now()).toLocaleDateString('fr-FR')}</p>
           </div>
@@ -526,17 +523,9 @@ const SecretaryDashboard = () => {
         </table>
         
         <table class="totals">
-          <tr>
-            <td>Total HT :</td>
-            <td style="text-align: right;">${amount.toFixed(2)} ${currency}</td>
-          </tr>
-          <tr>
-            <td>TVA (${currency === 'EUR' ? '20' : '18'}%) :</td>
-            <td style="text-align: right;">${tva.toFixed(2)} ${currency}</td>
-          </tr>
           <tr class="total-row">
-            <td>Total TTC :</td>
-            <td style="text-align: right;">${totalTTC.toFixed(2)} ${currency}</td>
+            <td>💰 TOTAL PAYÉ :</td>
+            <td style="text-align: right;">${amount.toFixed(2)} ${currency}</td>
           </tr>
         </table>
         

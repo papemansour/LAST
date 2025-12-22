@@ -3722,6 +3722,9 @@ startxref
         try:
             logger.info("🎯 Testing Review Request Features...")
             
+            # Test 0: Secretary Billing Delete Endpoints (NEW)
+            await self.test_secretary_billing_delete_endpoints()
+            
             # Test 1: Admin Change Teacher Dialog
             await self.test_admin_change_teacher()
             

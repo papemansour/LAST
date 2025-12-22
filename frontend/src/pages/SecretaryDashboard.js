@@ -218,11 +218,6 @@ const SecretaryDashboard = () => {
     setNotes(data);
   };
 
-  const saveMessages = (data) => {
-    localStorage.setItem('secretary_messages', JSON.stringify(data));
-    setMessages(data);
-  };
-
   // Meetings handlers - API Backend
   const handleAddMeeting = async () => {
     if (!newMeeting.title || !newMeeting.date || !newMeeting.time) {

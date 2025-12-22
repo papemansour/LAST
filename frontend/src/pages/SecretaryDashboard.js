@@ -533,12 +533,12 @@ const SecretaryDashboard = () => {
             <td style="text-align: right;">${amount.toFixed(2)} ${currency}</td>
           </tr>
           <tr>
-            <td>TVA (0%) :</td>
-            <td style="text-align: right;">0.00 ${currency}</td>
+            <td>TVA (${currency === 'EUR' ? '20' : '18'}%) :</td>
+            <td style="text-align: right;">${tva.toFixed(2)} ${currency}</td>
           </tr>
           <tr class="total-row">
             <td>Total TTC :</td>
-            <td style="text-align: right;">${amount.toFixed(2)} ${currency}</td>
+            <td style="text-align: right;">${totalTTC.toFixed(2)} ${currency}</td>
           </tr>
         </table>
         

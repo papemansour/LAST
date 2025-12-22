@@ -21,7 +21,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 # Backend URL from environment
-BACKEND_URL = "https://tutor-hub-32.preview.emergentagent.com/api"
+BACKEND_URL = "https://mykalama-finance.preview.emergentagent.com/api"
 
 # Test credentials
 ADMIN_EMAIL = "admin@mykalamaenglish.com"
@@ -1680,7 +1680,7 @@ startxref
                 return False
             
             # Test direct file access
-            file_access_url = f"https://tutor-hub-32.preview.emergentagent.com/uploads/documents/{filename}"
+            file_access_url = f"https://mykalama-finance.preview.emergentagent.com/uploads/documents/{filename}"
             
             async with self.session.get(file_access_url) as response:
                 if response.status == 200:
@@ -1779,7 +1779,7 @@ startxref
             
             # Use the existing PDF file mentioned in the review request
             existing_filename = "05684018-449e-481d-92d9-95382bca65a7.pdf"
-            file_access_url = f"https://tutor-hub-32.preview.emergentagent.com/uploads/documents/{existing_filename}"
+            file_access_url = f"https://mykalama-finance.preview.emergentagent.com/uploads/documents/{existing_filename}"
             
             async with self.session.get(file_access_url) as response:
                 if response.status == 200:
@@ -3035,7 +3035,7 @@ startxref
                             # Extract filename and test direct access
                             if '/uploads/documents/' in file_url:
                                 filename = file_url.split('/uploads/documents/')[-1]
-                                full_url = f"https://tutor-hub-32.preview.emergentagent.com/uploads/documents/{filename}"
+                                full_url = f"https://mykalama-finance.preview.emergentagent.com/uploads/documents/{filename}"
                                 
                                 async with self.session.get(full_url) as file_response:
                                     if file_response.status == 200:

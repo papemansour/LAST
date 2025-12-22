@@ -1111,10 +1111,10 @@ async def send_invoice_by_email(data: dict = Body(...), current_user: dict = Dep
     amount = data.get("amount", 0)
     currency = data.get("currency", "EUR")
     
-    # Calculer TVA
-    tva_rate = 0.20 if currency == "EUR" else 0.18
-    tva = float(amount) * tva_rate
-    total_ttc = float(amount) + tva
+    # TVA à 0% comme demandé par l'utilisateur
+    tva_rate = 0
+    tva = 0
+    total_ttc = float(amount)
     
     # Générer le contenu de l'email
     subject = f"Facture MyKalama English - {recipient_name}"
@@ -1133,15 +1133,11 @@ async def send_invoice_by_email(data: dict = Body(...), current_user: dict = Dep
                 
                 <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
                     <tr style="background: #f3f4f6;">
-                        <td style="padding: 12px; border: 1px solid #e5e7eb;"><strong>Montant HT</strong></td>
+                        <td style="padding: 12px; border: 1px solid #e5e7eb;"><strong>Montant</strong></td>
                         <td style="padding: 12px; border: 1px solid #e5e7eb; text-align: right;">{amount} {currency}</td>
                     </tr>
-                    <tr>
-                        <td style="padding: 12px; border: 1px solid #e5e7eb;"><strong>TVA ({int(tva_rate*100)}%)</strong></td>
-                        <td style="padding: 12px; border: 1px solid #e5e7eb; text-align: right;">{tva:.2f} {currency}</td>
-                    </tr>
                     <tr style="background: #d1fae5;">
-                        <td style="padding: 12px; border: 1px solid #e5e7eb;"><strong>Total TTC</strong></td>
+                        <td style="padding: 12px; border: 1px solid #e5e7eb;"><strong>Total à payer</strong></td>
                         <td style="padding: 12px; border: 1px solid #e5e7eb; text-align: right; font-weight: bold; font-size: 18px;">{total_ttc:.2f} {currency}</td>
                     </tr>
                 </table>
@@ -1158,19 +1154,67 @@ async def send_invoice_by_email(data: dict = Body(...), current_user: dict = Dep
     </html>
     """
     
-    # Sauvegarder l'email dans la base (pour envoi via service externe ou Monday)
+    text_content = f"""
+    Facture MyKalama English - {recipient_name}
+    
+    Bonjour {recipient_name},
+    
+    Veuillez trouver ci-dessous le détail de votre facture :
+    
+    Montant: {amount} {currency}
+    Total à payer: {total_ttc:.2f} {currency}
+    
+    Cordialement,
+    L'équipe MyKalama English
+    
+    📞 +221 78 260 75 49 / 78 528 68 89
+    📧 mykalamaenglish@gmail.com
+    """
+    
+    # Envoyer via le service email
+    email_sent = await email_service.send_invoice_email(
+        recipient_email,
+        recipient_name,
+        subject,
+        html_content,
+        text_content
+    )
+    
+    # Sauvegarder l'email dans la base
     await db.pending_emails.insert_one({
         "id": str(uuid4()),
         "to": recipient_email,
         "subject": subject,
         "html_content": html_content,
         "invoice_type": invoice_type,
-        "status": "sent",
+        "status": "sent" if email_sent else "pending",
         "created_at": datetime.now(timezone.utc).isoformat()
     })
     
-    logger.info(f"Invoice email prepared for: {recipient_email}")
-    return {"message": "Invoice email sent", "recipient": recipient_email}
+    logger.info(f"Invoice email {'sent' if email_sent else 'prepared'} for: {recipient_email}")
+    return {"message": "Invoice email sent" if email_sent else "Invoice email queued", "recipient": recipient_email, "sent": email_sent}
+
+@api_router.post("/secretary/reset-billing-stats")
+async def reset_billing_stats(current_user: dict = Depends(get_current_user)):
+    """Reset all billing statistics (delete all payments, receipts, invoices)"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    # Delete all billing data
+    deleted_payments = await db.teacher_payments.delete_many({})
+    deleted_receipts = await db.student_receipts.delete_many({})
+    deleted_invoices = await db.prestataire_invoices.delete_many({})
+    
+    logger.info(f"Billing stats reset by {current_user['id']}: {deleted_payments.deleted_count} payments, {deleted_receipts.deleted_count} receipts, {deleted_invoices.deleted_count} invoices")
+    
+    return {
+        "message": "Statistiques de facturation remises à zéro",
+        "deleted": {
+            "teacher_payments": deleted_payments.deleted_count,
+            "student_receipts": deleted_receipts.deleted_count,
+            "prestataire_invoices": deleted_invoices.deleted_count
+        }
+    }
 
 @api_router.get("/secretary/teachers-list")
 async def get_teachers_list_for_secretary(current_user: dict = Depends(get_current_user)):

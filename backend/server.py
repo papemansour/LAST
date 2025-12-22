@@ -1234,7 +1234,7 @@ async def delete_teacher_payment(payment_id: str, current_user: dict = Depends(g
     
     result = await db.teacher_payments.delete_one({"id": payment_id})
     if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Payment not found")
+        raise HTTPException(status_code=404, detail="Paiement non trouvé")
     
     logger.info(f"Teacher payment {payment_id} deleted by {current_user['id']}")
     return {"message": "Paiement supprimé avec succès"}
@@ -1247,7 +1247,7 @@ async def delete_student_receipt(receipt_id: str, current_user: dict = Depends(g
     
     result = await db.student_receipts.delete_one({"id": receipt_id})
     if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Receipt not found")
+        raise HTTPException(status_code=404, detail="Reçu non trouvé")
     
     logger.info(f"Student receipt {receipt_id} deleted by {current_user['id']}")
     return {"message": "Reçu supprimé avec succès"}
@@ -1260,7 +1260,7 @@ async def delete_prestataire_invoice(invoice_id: str, current_user: dict = Depen
     
     result = await db.prestataire_invoices.delete_one({"id": invoice_id})
     if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Invoice not found")
+        raise HTTPException(status_code=404, detail="Facture non trouvée")
     
     logger.info(f"Prestataire invoice {invoice_id} deleted by {current_user['id']}")
     return {"message": "Facture supprimée avec succès"}

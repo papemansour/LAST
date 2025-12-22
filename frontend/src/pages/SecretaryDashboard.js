@@ -35,13 +35,10 @@ const SecretaryDashboard = () => {
   });
   const [editingNote, setEditingNote] = useState(null);
   
-  // Messages state
-  const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState({
-    recipient: '',
-    subject: '',
-    content: ''
-  });
+  // Messagerie Admin state
+  const [adminConversation, setAdminConversation] = useState([]);
+  const [newAdminMessage, setNewAdminMessage] = useState('');
+  const [adminInfo, setAdminInfo] = useState(null);
   
   // Comptes rendus prof state
   const [profReports, setProfReports] = useState([]);

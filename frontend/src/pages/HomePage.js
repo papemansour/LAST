@@ -560,7 +560,7 @@ const HomePage = () => {
               <span className="text-gray-400">ou</span>
               <span className="inline-flex items-center gap-1 bg-green-50 px-3 py-1 rounded-full border border-green-300">
                 <span className="text-lg">👥</span> 
-                <span className="font-medium text-green-700">Groupé</span>
+                <span className="font-medium text-green-700">Groupé (80€/pers)</span>
               </span>
             </p>
           </div>

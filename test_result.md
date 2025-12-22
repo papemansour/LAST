@@ -553,6 +553,18 @@ frontend:
           agent: "testing"
           comment: "✅ PASSED - Secretary billing dashboard functionality fully operational. All 6 tests from review request completed successfully: 1) Secretary Login (POST /api/auth/secretary-login with code 'secretaire2025') - access_token received, secretary role confirmed, 2) Create Teacher Payment (POST /api/secretary/teacher-payments) - payment created with all required fields (teacher_id, amount, currency, month, hours, bonus, notes), 3) Reset Billing Stats (POST /api/secretary/reset-billing-stats) - successfully deleted 1 payment, 0 receipts, 0 invoices, 4) Send Invoice Email (POST /api/secretary/send-invoice-email) - invoice email prepared for test@example.com with proper formatting, 5) Get Teachers List (GET /api/secretary/teachers-list) - retrieved array of teachers with required fields, 6) Admin All Users (GET /api/admin/all-users) - admin login successful, all users retrieved including secretary role verification. Monday.com integration working (invoice created: FAC-TEA-20251222-85387f). Email service logging correctly (AWS SES not configured). All endpoints responding with 200 OK status. Secretary billing system fully functional."
 
+  - task: "Secretary Billing Dashboard Delete Endpoints"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED - Secretary billing delete endpoints fully functional. All 5 tests from review request completed successfully: 1) Secretary Login (POST /api/auth/secretary-login with code 'secretaire2025') - access_token received, 2) Create and Delete Teacher Payment (POST/DELETE /api/secretary/teacher-payments) - payment created and deleted with correct message 'Payment deleted', 3) Create and Delete Student Receipt (POST/DELETE /api/secretary/student-receipts) - receipt created and deleted with correct message 'Receipt deleted', 4) Create and Delete Prestataire Invoice (POST/DELETE /api/secretary/prestataire-invoices) - invoice created and deleted with correct message 'Invoice deleted', 5) Delete Non-existent Payment (DELETE /api/secretary/teacher-payments/non-existent-id) - properly returns 404 error. All CRUD operations for secretary billing working correctly with proper authentication and error handling."
+
 metadata:
   created_by: "testing_agent"
   version: "1.2"

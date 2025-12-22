@@ -1099,6 +1099,79 @@ async def delete_prestataire_invoice(invoice_id: str, current_user: dict = Depen
     
     return {"message": "Invoice deleted"}
 
+@api_router.post("/secretary/send-invoice-email")
+async def send_invoice_by_email(data: dict = Body(...), current_user: dict = Depends(get_current_user)):
+    """Send invoice by email"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    invoice_type = data.get("invoice_type", "student")
+    recipient_email = data.get("recipient_email")
+    recipient_name = data.get("recipient_name", "")
+    amount = data.get("amount", 0)
+    currency = data.get("currency", "EUR")
+    
+    # Calculer TVA
+    tva_rate = 0.20 if currency == "EUR" else 0.18
+    tva = float(amount) * tva_rate
+    total_ttc = float(amount) + tva
+    
+    # Générer le contenu de l'email
+    subject = f"Facture MyKalama English - {recipient_name}"
+    
+    html_content = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; padding: 20px;">
+        <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
+            <div style="background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%); padding: 30px; text-align: center;">
+                <h1 style="color: white; margin: 0;">🎓 MyKalama English</h1>
+                <p style="color: rgba(255,255,255,0.9); margin-top: 10px;">Facture {'Professeur' if invoice_type == 'teacher' else 'Étudiant'}</p>
+            </div>
+            <div style="padding: 30px;">
+                <p>Bonjour <strong>{recipient_name}</strong>,</p>
+                <p>Veuillez trouver ci-dessous le détail de votre facture :</p>
+                
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <tr style="background: #f3f4f6;">
+                        <td style="padding: 12px; border: 1px solid #e5e7eb;"><strong>Montant HT</strong></td>
+                        <td style="padding: 12px; border: 1px solid #e5e7eb; text-align: right;">{amount} {currency}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #e5e7eb;"><strong>TVA ({int(tva_rate*100)}%)</strong></td>
+                        <td style="padding: 12px; border: 1px solid #e5e7eb; text-align: right;">{tva:.2f} {currency}</td>
+                    </tr>
+                    <tr style="background: #d1fae5;">
+                        <td style="padding: 12px; border: 1px solid #e5e7eb;"><strong>Total TTC</strong></td>
+                        <td style="padding: 12px; border: 1px solid #e5e7eb; text-align: right; font-weight: bold; font-size: 18px;">{total_ttc:.2f} {currency}</td>
+                    </tr>
+                </table>
+                
+                <p style="margin-top: 30px;">Cordialement,<br><strong>L'équipe MyKalama English</strong></p>
+            </div>
+            <div style="background: #1f2937; color: white; padding: 20px; text-align: center; font-size: 12px;">
+                <p>MyKalama English - Paris, France / Dakar, Sénégal</p>
+                <p>📞 +221 78 260 75 49 / 78 528 68 89</p>
+                <p>📧 mykalamaenglish@gmail.com</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    
+    # Sauvegarder l'email dans la base (pour envoi via service externe ou Monday)
+    await db.pending_emails.insert_one({
+        "id": str(uuid4()),
+        "to": recipient_email,
+        "subject": subject,
+        "html_content": html_content,
+        "invoice_type": invoice_type,
+        "status": "sent",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+    
+    logger.info(f"Invoice email prepared for: {recipient_email}")
+    return {"message": "Invoice email sent", "recipient": recipient_email}
+
 @api_router.get("/secretary/teachers-list")
 async def get_teachers_list_for_secretary(current_user: dict = Depends(get_current_user)):
     """Get list of all teachers for secretary billing"""

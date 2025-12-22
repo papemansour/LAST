@@ -601,12 +601,11 @@ const SecretaryDashboard = () => {
           td { padding: 12px; border-bottom: 1px solid #e5e7eb; }
           .totals { width: 350px; margin-left: auto; }
           .totals tr td { padding: 8px 12px; }
-          .totals .total-row { background: #fee2e2; font-weight: bold; }
+          .totals .total-row { background: #f3f4f6; }
           .totals .net-row { background: #d1fae5; font-weight: bold; font-size: 18px; }
           .footer { margin-top: 50px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #666; }
           .stamp { text-align: center; margin: 30px 0; }
           .stamp-text { display: inline-block; padding: 15px 40px; border: 3px solid #059669; border-radius: 10px; color: #059669; font-weight: bold; font-size: 18px; transform: rotate(-3deg); }
-          .tva-note { background: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0; font-size: 13px; border-left: 4px solid #f59e0b; }
           @media print { body { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }
         </style>
       </head>
@@ -635,8 +634,7 @@ const SecretaryDashboard = () => {
           <div class="party">
             <div class="party-title">👤 DESTINATAIRE (Prestataire)</div>
             <p><strong>${payment.teacher_name || payment.teacherName}</strong></p>
-            <p>${payment.teacher_email || 'Email non spécifié'}</p>
-            <p>${payment.teacher_address || 'Adresse non spécifiée'}</p>
+            <p>📧 ${payment.teacher_email || payment.teacherEmail || 'Email non spécifié'}</p>
           </div>
         </div>
         
@@ -667,11 +665,6 @@ const SecretaryDashboard = () => {
           </tbody>
         </table>
         
-        <div class="tva-note">
-          ⚠️ <strong>Note TVA :</strong> Le montant brut de ${totalBrut.toFixed(2)} ${currency} inclut la TVA de ${currency === 'EUR' ? '20' : '18'}%. 
-          Après déduction de la TVA, le prestataire reçoit <strong>${montantNet.toFixed(2)} ${currency}</strong>.
-        </div>
-        
         <table class="totals">
           <tr>
             <td>Montant brut (TTC) :</td>
@@ -679,7 +672,7 @@ const SecretaryDashboard = () => {
           </tr>
           <tr class="total-row">
             <td>TVA déduite (${currency === 'EUR' ? '20' : '18'}%) :</td>
-            <td style="text-align: right; color: #dc2626;">- ${tvaAmount.toFixed(2)} ${currency}</td>
+            <td style="text-align: right;">- ${tvaAmount.toFixed(2)} ${currency}</td>
           </tr>
           <tr class="net-row">
             <td>💰 MONTANT NET À PAYER :</td>

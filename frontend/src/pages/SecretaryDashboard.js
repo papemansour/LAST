@@ -737,6 +737,27 @@ const SecretaryDashboard = () => {
     }
   };
 
+  // Envoyer facture par email
+  const sendInvoiceByEmail = async (invoice, type) => {
+    const email = prompt(`Entrez l'email du destinataire pour la facture ${type === 'teacher' ? 'professeur' : 'étudiant'}:`);
+    if (!email) return;
+    
+    try {
+      await apiClient.post('/secretary/send-invoice-email', {
+        invoice_id: invoice.id,
+        invoice_type: type,
+        recipient_email: email,
+        recipient_name: type === 'teacher' ? (invoice.teacher_name || invoice.teacherName) : (invoice.student_name || invoice.studentName),
+        amount: invoice.amount,
+        currency: invoice.currency || 'EUR'
+      });
+      toast.success(`📧 Facture envoyée à ${email} !`);
+    } catch (error) {
+      console.error('Error sending invoice:', error);
+      toast.error('Erreur lors de l\'envoi de la facture');
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');

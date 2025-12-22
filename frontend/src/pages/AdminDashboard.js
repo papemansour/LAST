@@ -1608,7 +1608,7 @@ const AdminDashboard = () => {
                   <CardHeader>
                     <CardTitle>Tous les contacts</CardTitle>
                     <CardDescription>
-                      {allUsers.filter(u => u.role === 'teacher' || u.role === 'student').length} contact(s) - Professeurs & Étudiants
+                      {allUsers.filter(u => u.role === 'teacher' || u.role === 'student' || u.role === 'secretary').length} contact(s) - Secrétaire, Professeurs & Étudiants
                     </CardDescription>
                   </CardHeader>
                   <CardContent>

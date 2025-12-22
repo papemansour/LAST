@@ -1075,79 +1075,85 @@ const SecretaryDashboard = () => {
             </div>
           </TabsContent>
 
-          {/* Messages Tab */}
+          {/* Messages Tab - Messagerie Admin ↔ Secrétaire */}
           <TabsContent value="messages" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+            <Card className="border-purple-200">
+              <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50">
+                <CardTitle className="flex items-center gap-2 text-purple-700">
                   <MessageCircle className="w-5 h-5" />
-                  Envoyer un message
+                  💬 Messagerie avec l'Administration
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Destinataire *</label>
-                  <Input
-                    value={newMessage.recipient}
-                    onChange={(e) => setNewMessage({...newMessage, recipient: e.target.value})}
-                    placeholder="Email ou nom du destinataire"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Sujet *</label>
-                  <Input
-                    value={newMessage.subject}
-                    onChange={(e) => setNewMessage({...newMessage, subject: e.target.value})}
-                    placeholder="Sujet du message"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Message *</label>
-                  <Textarea
-                    value={newMessage.content}
-                    onChange={(e) => setNewMessage({...newMessage, content: e.target.value})}
-                    placeholder="Votre message..."
-                    rows={5}
-                  />
-                </div>
-                <Button onClick={handleSendMessage} className="bg-purple-600 hover:bg-purple-700">
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Envoyer le message
-                </Button>
+              <CardContent className="pt-6">
+                {adminInfo ? (
+                  <div className="space-y-4">
+                    {/* Info Admin */}
+                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 flex items-center gap-3">
+                      <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                        👨‍💼
+                      </div>
+                      <div>
+                        <p className="font-semibold text-purple-800">{adminInfo.first_name} {adminInfo.last_name}</p>
+                        <p className="text-xs text-purple-600">Administrateur</p>
+                      </div>
+                    </div>
+
+                    {/* Messages */}
+                    <div className="h-80 overflow-y-auto border rounded-lg p-4 bg-gray-50 space-y-3">
+                      {adminConversation.length === 0 ? (
+                        <div className="text-center text-gray-500 py-12">
+                          <MessageCircle className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                          <p>Aucun message. Commencez la conversation !</p>
+                        </div>
+                      ) : (
+                        adminConversation.map((msg, idx) => (
+                          <div 
+                            key={idx} 
+                            className={`flex ${msg.sender_id === user?.id ? 'justify-end' : 'justify-start'}`}
+                          >
+                            <div 
+                              className={`max-w-[70%] rounded-2xl px-4 py-2 ${
+                                msg.sender_id === user?.id 
+                                  ? 'bg-purple-600 text-white rounded-br-md' 
+                                  : 'bg-white border border-gray-200 rounded-bl-md'
+                              }`}
+                            >
+                              <p className="text-sm">{msg.content}</p>
+                              <p className={`text-xs mt-1 ${msg.sender_id === user?.id ? 'text-purple-200' : 'text-gray-400'}`}>
+                                {new Date(msg.created_at).toLocaleString('fr-FR', { 
+                                  hour: '2-digit', 
+                                  minute: '2-digit',
+                                  day: '2-digit',
+                                  month: 'short'
+                                })}
+                              </p>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+
+                    {/* Input */}
+                    <div className="flex gap-2">
+                      <Input
+                        value={newAdminMessage}
+                        onChange={(e) => setNewAdminMessage(e.target.value)}
+                        placeholder="Écrire un message à l'admin..."
+                        className="flex-1"
+                        onKeyPress={(e) => e.key === 'Enter' && sendMessageToAdmin()}
+                      />
+                      <Button onClick={sendMessageToAdmin} className="bg-purple-600 hover:bg-purple-700">
+                        📤 Envoyer
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-12 text-gray-500">
+                    <p>Chargement de la messagerie...</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
-
-            {/* Messages History */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Messages envoyés ({messages.length})</h3>
-              {messages.length === 0 ? (
-                <Card>
-                  <CardContent className="text-center py-12 text-gray-500">
-                    Aucun message envoyé
-                  </CardContent>
-                </Card>
-              ) : (
-                messages.map(message => (
-                  <Card key={message.id} className="hover:shadow-md transition-shadow">
-                    <CardContent className="pt-6">
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <p className="font-semibold">À: {message.recipient}</p>
-                          <p className="text-sm text-gray-600 font-medium">{message.subject}</p>
-                        </div>
-                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
-                          {message.status}
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-700 mt-3 whitespace-pre-wrap">{message.content}</p>
-                      <p className="text-xs text-gray-400 mt-3">
-                        {new Date(message.sentAt).toLocaleString('fr-FR')}
-                      </p>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
           </TabsContent>
 
           {/* Billing Tab - Facturation */}

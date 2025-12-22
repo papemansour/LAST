@@ -1169,8 +1169,6 @@ async def send_invoice_by_email(data: dict = Body(...), current_user: dict = Dep
     TVA déduite ({int(tva_rate*100)}%): -{tva_amount:.2f} {currency}
     Montant net à recevoir: {montant_net:.2f} {currency}
     
-    Note: Le montant brut inclut la TVA de {int(tva_rate*100)}%.
-    
     Cordialement,
     L'équipe MyKalama English
     

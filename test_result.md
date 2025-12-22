@@ -582,6 +582,7 @@ test_plan:
     - "Secretary Dashboard - Meetings"
     - "NewsManager for Teachers"
     - "Monday.com CRM Integration"
+    - "Secretary Billing Dashboard Delete Endpoints"
   completed_tests:
     - "Système de Pièces Jointes dans la Messagerie"
     - "Système Code Magique - Interface Professeur"

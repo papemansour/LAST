@@ -446,6 +446,9 @@ const SecretaryDashboard = () => {
   const printReceipt = (receipt) => {
     const currency = receipt.currency || 'EUR';
     const amount = parseFloat(receipt.amount || 0);
+    const tvaRate = currency === 'EUR' ? 0.20 : 0.18; // 20% EUR, 18% FCFA
+    const tva = amount * tvaRate;
+    const totalTTC = amount + tva;
     const invoiceNumber = `FAC-ETU-${receipt.id?.slice(0, 8).toUpperCase() || 'XXXXX'}`;
     
     const printWindow = window.open('', '_blank');

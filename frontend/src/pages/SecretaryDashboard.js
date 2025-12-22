@@ -1223,36 +1223,72 @@ const SecretaryDashboard = () => {
 
           {/* Billing Tab - Facturation */}
           <TabsContent value="billing" className="space-y-6">
-            {/* Stats Cards */}
-            <div className="grid md:grid-cols-3 gap-4">
-              <Card className="bg-gradient-to-br from-green-500 to-emerald-600 text-white">
-                <CardContent className="pt-6">
-                  <div className="text-center">
-                    <p className="text-green-100 text-sm">Total Payé aux Profs</p>
-                    <p className="text-3xl font-bold mt-2">{billingStats.totalPaidTeachers.toLocaleString()} €</p>
-                    <p className="text-green-200 text-xs mt-1">Ce mois</p>
+            {/* Stats Cards with Secret Code */}
+            {!showStats ? (
+              <Card className="bg-gradient-to-r from-gray-700 to-gray-800 text-white">
+                <CardContent className="pt-6 pb-6">
+                  <div className="text-center space-y-4">
+                    <p className="text-lg">🔒 Statistiques protégées</p>
+                    <p className="text-gray-300 text-sm">Entrez le code pour voir les chiffres</p>
+                    <div className="flex justify-center gap-2 max-w-xs mx-auto">
+                      <Input
+                        type="password"
+                        value={codeInput}
+                        onChange={(e) => setCodeInput(e.target.value)}
+                        placeholder="Code secret"
+                        className="text-black"
+                        onKeyPress={(e) => e.key === 'Enter' && handleCodeSubmit()}
+                      />
+                      <Button onClick={handleCodeSubmit} className="bg-green-600 hover:bg-green-700">
+                        🔓 Voir
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
-              <Card className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
-                <CardContent className="pt-6">
-                  <div className="text-center">
-                    <p className="text-blue-100 text-sm">Reçus Générés</p>
-                    <p className="text-3xl font-bold mt-2">{billingStats.totalReceipts.toLocaleString()} €</p>
-                    <p className="text-blue-200 text-xs mt-1">{studentReceipts.length} reçus</p>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="bg-gradient-to-br from-orange-500 to-red-500 text-white">
-                <CardContent className="pt-6">
-                  <div className="text-center">
-                    <p className="text-orange-100 text-sm">Paiements en Attente</p>
-                    <p className="text-3xl font-bold mt-2">{billingStats.pendingPayments}</p>
-                    <p className="text-orange-200 text-xs mt-1">Professeurs</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex justify-end">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setShowStats(false)}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    🔒 Masquer les chiffres
+                  </Button>
+                </div>
+                <div className="grid md:grid-cols-3 gap-4">
+                  <Card className="bg-gradient-to-br from-green-500 to-emerald-600 text-white">
+                    <CardContent className="pt-6">
+                      <div className="text-center">
+                        <p className="text-green-100 text-sm">Total Payé aux Profs</p>
+                        <p className="text-3xl font-bold mt-2">{billingStats.totalPaidTeachers.toLocaleString('fr-FR', {minimumFractionDigits: 2})} €</p>
+                        <p className="text-green-200 text-xs mt-1">Ce mois</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
+                    <CardContent className="pt-6">
+                      <div className="text-center">
+                        <p className="text-blue-100 text-sm">Reçus Générés</p>
+                        <p className="text-3xl font-bold mt-2">{billingStats.totalReceipts.toLocaleString('fr-FR', {minimumFractionDigits: 2})} €</p>
+                        <p className="text-blue-200 text-xs mt-1">{studentReceipts.length} reçus</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-gradient-to-br from-orange-500 to-red-500 text-white">
+                    <CardContent className="pt-6">
+                      <div className="text-center">
+                        <p className="text-orange-100 text-sm">Paiements en Attente</p>
+                        <p className="text-3xl font-bold mt-2">{billingStats.pendingPayments}</p>
+                        <p className="text-orange-200 text-xs mt-1">Professeurs</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            )}
 
             <div className="grid lg:grid-cols-2 gap-6">
               {/* Teacher Payments Section */}

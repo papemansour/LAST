@@ -196,9 +196,8 @@ const SecretaryDashboard = () => {
 
     try {
       await apiClient.post('/messages/send', {
-        recipient_id: adminInfo.id,
-        content: newAdminMessage,
-        message_type: 'text'
+        to_user_id: adminInfo.id,
+        content: newAdminMessage
       });
       
       // Recharger la conversation

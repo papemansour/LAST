@@ -272,29 +272,20 @@ const StudentDocuments = () => {
                       </div>
                     </div>
                     <div className="flex gap-3 w-full sm:w-auto">
-                      <a
-                        href={getFullFileUrl(selectedDocument?.file_url)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="flex-1 sm:flex-none"
+                      <Button 
+                        onClick={() => handleOpenNewTab(selectedDocument)}
+                        className="flex-1 sm:flex-none bg-teal-600 hover:bg-teal-700 text-white"
                       >
-                        <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white">
-                          <Eye className="w-4 h-4 mr-2" />
-                          Ouvrir
-                        </Button>
-                      </a>
-                      <a
-                        href={getFullFileUrl(selectedDocument?.file_url)}
-                        download={selectedDocument?.file_name}
-                        onClick={(e) => e.stopPropagation()}
-                        className="flex-1 sm:flex-none"
+                        <Eye className="w-4 h-4 mr-2" />
+                        Ouvrir
+                      </Button>
+                      <Button 
+                        onClick={() => handleDownload(selectedDocument)}
+                        className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white"
                       >
-                        <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                          <Download className="w-4 h-4 mr-2" />
-                          Télécharger
-                        </Button>
-                      </a>
+                        <Download className="w-4 h-4 mr-2" />
+                        Télécharger
+                      </Button>
                     </div>
                   </div>
                 </div>

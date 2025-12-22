@@ -654,6 +654,19 @@ class EmailService:
         """
         
         return await self._send_email(to_email, subject, html_body, text_body)
+    
+    async def send_invoice_email(
+        self,
+        to_email: str,
+        recipient_name: str,
+        subject: str,
+        html_content: str,
+        text_content: str
+    ) -> bool:
+        """
+        Send invoice email to teacher or student
+        """
+        return await self._send_email(to_email, subject, html_content, text_content)
 
 # Singleton instance
 email_service = EmailService()

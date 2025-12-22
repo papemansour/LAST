@@ -1806,6 +1806,179 @@ startxref
             self.test_results["document_system"]["details"].append(f"Existing file test error: {str(e)}")
             return False
     
+    async def test_secretary_billing_delete_endpoints(self) -> bool:
+        """Test secretary billing delete endpoints as per review request"""
+        try:
+            logger.info("🔍 Testing secretary billing delete endpoints...")
+            
+            # Test 1: Secretary Login
+            logger.info("📝 Test 1: Secretary Login")
+            secretary_login_data = {"code": "secretaire2025"}
+            
+            async with self.session.post(f"{BACKEND_URL}/auth/secretary-login", json=secretary_login_data) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    secretary_token = data.get("access_token")
+                    if secretary_token:
+                        logger.info("✅ Test 1 PASSED: Secretary login successful, access_token received")
+                        self.test_results["secretary_billing_delete"]["details"].append("✅ Secretary login works")
+                    else:
+                        logger.error("❌ Test 1 FAILED: No access_token in response")
+                        self.test_results["secretary_billing_delete"]["details"].append("❌ Secretary login missing token")
+                        return False
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ Test 1 FAILED: Secretary login failed: {response.status} - {error_text}")
+                    self.test_results["secretary_billing_delete"]["details"].append(f"❌ Secretary login failed: {error_text}")
+                    return False
+            
+            headers = {"Authorization": f"Bearer {secretary_token}"}
+            
+            # Test 2: Create and Delete Teacher Payment
+            logger.info("📝 Test 2: Create and Delete Teacher Payment")
+            teacher_payment_data = {
+                "teacherId": "test-teacher-id",
+                "teacherName": "Marie Dupont",
+                "teacherEmail": "marie.dupont@example.com",
+                "month": "2025-12",
+                "amount": 500,
+                "currency": "EUR",
+                "hoursWorked": "20",
+                "bonus": "50",
+                "notes": "Test payment for deletion"
+            }
+            
+            # Create teacher payment
+            async with self.session.post(f"{BACKEND_URL}/secretary/teacher-payments", json=teacher_payment_data, headers=headers) as response:
+                if response.status == 200:
+                    payment_result = await response.json()
+                    payment_id = payment_result.get("id")
+                    logger.info("✅ Teacher payment created successfully")
+                    
+                    # Delete teacher payment
+                    async with self.session.delete(f"{BACKEND_URL}/secretary/teacher-payments/{payment_id}", headers=headers) as delete_response:
+                        if delete_response.status == 200:
+                            delete_result = await delete_response.json()
+                            if delete_result.get("message") == "Paiement supprimé avec succès":
+                                logger.info("✅ Test 2 PASSED: Teacher payment deleted with correct message")
+                                self.test_results["secretary_billing_delete"]["details"].append("✅ Teacher payment delete works")
+                            else:
+                                logger.error(f"❌ Test 2 FAILED: Wrong delete message: {delete_result.get('message')}")
+                                self.test_results["secretary_billing_delete"]["details"].append("❌ Teacher payment wrong delete message")
+                                return False
+                        else:
+                            error_text = await delete_response.text()
+                            logger.error(f"❌ Test 2 FAILED: Teacher payment delete failed: {delete_response.status} - {error_text}")
+                            self.test_results["secretary_billing_delete"]["details"].append(f"❌ Teacher payment delete failed: {error_text}")
+                            return False
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ Test 2 FAILED: Teacher payment creation failed: {response.status} - {error_text}")
+                    self.test_results["secretary_billing_delete"]["details"].append(f"❌ Teacher payment creation failed: {error_text}")
+                    return False
+            
+            # Test 3: Create and Delete Student Receipt
+            logger.info("📝 Test 3: Create and Delete Student Receipt")
+            student_receipt_data = {
+                "studentId": "test-student-id",
+                "studentName": "Jean Martin",
+                "packType": "Beginner",
+                "amount": 76,
+                "currency": "EUR",
+                "paymentMethod": "Virement",
+                "notes": "Test receipt for deletion"
+            }
+            
+            # Create student receipt
+            async with self.session.post(f"{BACKEND_URL}/secretary/student-receipts", json=student_receipt_data, headers=headers) as response:
+                if response.status == 200:
+                    receipt_result = await response.json()
+                    receipt_id = receipt_result.get("id")
+                    logger.info("✅ Student receipt created successfully")
+                    
+                    # Delete student receipt
+                    async with self.session.delete(f"{BACKEND_URL}/secretary/student-receipts/{receipt_id}", headers=headers) as delete_response:
+                        if delete_response.status == 200:
+                            delete_result = await delete_response.json()
+                            if delete_result.get("message") == "Reçu supprimé avec succès":
+                                logger.info("✅ Test 3 PASSED: Student receipt deleted with correct message")
+                                self.test_results["secretary_billing_delete"]["details"].append("✅ Student receipt delete works")
+                            else:
+                                logger.error(f"❌ Test 3 FAILED: Wrong delete message: {delete_result.get('message')}")
+                                self.test_results["secretary_billing_delete"]["details"].append("❌ Student receipt wrong delete message")
+                                return False
+                        else:
+                            error_text = await delete_response.text()
+                            logger.error(f"❌ Test 3 FAILED: Student receipt delete failed: {delete_response.status} - {error_text}")
+                            self.test_results["secretary_billing_delete"]["details"].append(f"❌ Student receipt delete failed: {error_text}")
+                            return False
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ Test 3 FAILED: Student receipt creation failed: {response.status} - {error_text}")
+                    self.test_results["secretary_billing_delete"]["details"].append(f"❌ Student receipt creation failed: {error_text}")
+                    return False
+            
+            # Test 4: Create and Delete Prestataire Invoice
+            logger.info("📝 Test 4: Create and Delete Prestataire Invoice")
+            prestataire_invoice_data = {
+                "name": "Tech Solutions SARL",
+                "service": "Développement web",
+                "amount": 1200,
+                "currency": "EUR",
+                "description": "Services de développement",
+                "notes": "Test invoice for deletion"
+            }
+            
+            # Create prestataire invoice
+            async with self.session.post(f"{BACKEND_URL}/secretary/prestataire-invoices", json=prestataire_invoice_data, headers=headers) as response:
+                if response.status == 200:
+                    invoice_result = await response.json()
+                    invoice_id = invoice_result.get("id")
+                    logger.info("✅ Prestataire invoice created successfully")
+                    
+                    # Delete prestataire invoice
+                    async with self.session.delete(f"{BACKEND_URL}/secretary/prestataire-invoices/{invoice_id}", headers=headers) as delete_response:
+                        if delete_response.status == 200:
+                            delete_result = await delete_response.json()
+                            if delete_result.get("message") == "Facture supprimée avec succès":
+                                logger.info("✅ Test 4 PASSED: Prestataire invoice deleted with correct message")
+                                self.test_results["secretary_billing_delete"]["details"].append("✅ Prestataire invoice delete works")
+                            else:
+                                logger.error(f"❌ Test 4 FAILED: Wrong delete message: {delete_result.get('message')}")
+                                self.test_results["secretary_billing_delete"]["details"].append("❌ Prestataire invoice wrong delete message")
+                                return False
+                        else:
+                            error_text = await delete_response.text()
+                            logger.error(f"❌ Test 4 FAILED: Prestataire invoice delete failed: {delete_response.status} - {error_text}")
+                            self.test_results["secretary_billing_delete"]["details"].append(f"❌ Prestataire invoice delete failed: {error_text}")
+                            return False
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ Test 4 FAILED: Prestataire invoice creation failed: {response.status} - {error_text}")
+                    self.test_results["secretary_billing_delete"]["details"].append(f"❌ Prestataire invoice creation failed: {error_text}")
+                    return False
+            
+            # Test 5: Delete Non-existent Payment (should fail)
+            logger.info("📝 Test 5: Delete Non-existent Payment (should fail)")
+            async with self.session.delete(f"{BACKEND_URL}/secretary/teacher-payments/non-existent-id", headers=headers) as response:
+                if response.status == 404:
+                    logger.info("✅ Test 5 PASSED: Non-existent payment properly returns 404")
+                    self.test_results["secretary_billing_delete"]["details"].append("✅ Non-existent payment 404 error works")
+                else:
+                    logger.error(f"❌ Test 5 FAILED: Expected 404 but got {response.status}")
+                    self.test_results["secretary_billing_delete"]["details"].append(f"❌ Non-existent payment wrong status: {response.status}")
+                    return False
+            
+            # All tests passed
+            logger.info("🎉 ALL SECRETARY BILLING DELETE TESTS PASSED!")
+            self.test_results["secretary_billing_delete"]["passed"] = True
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ Secretary billing delete test error: {str(e)}")
+            self.test_results["secretary_billing_delete"]["details"].append(f"Test error: {str(e)}")
+            return False
+    
     async def test_group_registration(self) -> dict:
         """Test 1: Group registration endpoint"""
         try:

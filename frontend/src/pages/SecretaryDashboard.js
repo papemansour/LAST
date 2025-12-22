@@ -171,9 +171,48 @@ const SecretaryDashboard = () => {
     } catch (error) {
       console.log('Billing data not available yet');
     }
+    
+    // Charger la conversation avec l'admin
+    try {
+      // Trouver l'admin
+      const adminRes = await apiClient.get('/secretary/admin-info');
+      if (adminRes.data) {
+        setAdminInfo(adminRes.data);
+        // Charger les messages avec l'admin
+        const messagesRes = await apiClient.get(`/messages/conversation/${adminRes.data.id}`);
+        setAdminConversation(messagesRes.data || []);
+      }
+    } catch (error) {
+      console.log('Admin conversation not available');
+    }
   };
 
-  // Sauvegarder dans localStorage (notes et messages)
+  // Envoyer un message à l'admin
+  const sendMessageToAdmin = async () => {
+    if (!newAdminMessage.trim() || !adminInfo) {
+      toast.error('Veuillez écrire un message');
+      return;
+    }
+
+    try {
+      await apiClient.post('/messages/send', {
+        recipient_id: adminInfo.id,
+        content: newAdminMessage,
+        message_type: 'text'
+      });
+      
+      // Recharger la conversation
+      const messagesRes = await apiClient.get(`/messages/conversation/${adminInfo.id}`);
+      setAdminConversation(messagesRes.data || []);
+      setNewAdminMessage('');
+      toast.success('Message envoyé !');
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast.error('Erreur lors de l\'envoi');
+    }
+  };
+
+  // Sauvegarder dans localStorage (notes)
   const saveNotes = (data) => {
     localStorage.setItem('secretary_notes', JSON.stringify(data));
     setNotes(data);

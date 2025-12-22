@@ -96,6 +96,27 @@ const SecretaryDashboard = () => {
 
   // Taux de conversion EUR -> FCFA
   const EUR_TO_FCFA = 656;
+  
+  // Code secret pour voir les chiffres
+  const [showStats, setShowStats] = useState(false);
+  const [codeInput, setCodeInput] = useState('');
+  const SECRET_CODE = '2811';
+
+  const handleCodeSubmit = () => {
+    if (codeInput === SECRET_CODE) {
+      setShowStats(true);
+      toast.success('Accès autorisé !');
+    } else {
+      toast.error('Code incorrect');
+    }
+    setCodeInput('');
+  };
+
+  // Calculer TVA selon la devise
+  const calculateTVA = (amount, currency) => {
+    const rate = currency === 'EUR' ? 0.20 : 0.18; // 20% EUR, 18% FCFA
+    return parseFloat(amount || 0) * rate;
+  };
 
   useEffect(() => {
     fetchUserData();

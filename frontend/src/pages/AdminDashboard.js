@@ -1614,11 +1614,12 @@ const AdminDashboard = () => {
                   <CardContent>
                     <div className="space-y-2 max-h-[600px] overflow-y-auto">
                       {allUsers
-                        .filter(u => u.role === 'teacher' || u.role === 'student')
+                        .filter(u => u.role === 'teacher' || u.role === 'student' || u.role === 'secretary')
                         .sort((a, b) => {
-                          // Tri par rôle (profs d'abord) puis par nom
+                          // Tri par rôle (secrétaire d'abord, puis profs, puis étudiants) puis par nom
+                          const roleOrder = { secretary: 0, teacher: 1, student: 2 };
                           if (a.role !== b.role) {
-                            return a.role === 'teacher' ? -1 : 1;
+                            return (roleOrder[a.role] || 3) - (roleOrder[b.role] || 3);
                           }
                           return (a.first_name + ' ' + a.last_name).localeCompare(b.first_name + ' ' + b.last_name);
                         })
@@ -1633,13 +1634,13 @@ const AdminDashboard = () => {
                             }`}
                           >
                             <div className="flex items-center gap-3">
-                              <div className={`w-10 h-10 rounded-full ${contact.role === 'teacher' ? 'bg-blue-600' : 'bg-teal-600'} text-white flex items-center justify-center font-bold`}>
+                              <div className={`w-10 h-10 rounded-full ${contact.role === 'secretary' ? 'bg-purple-600' : contact.role === 'teacher' ? 'bg-blue-600' : 'bg-teal-600'} text-white flex items-center justify-center font-bold`}>
                                 {contact.first_name?.charAt(0)}{contact.last_name?.charAt(0)}
                               </div>
                               <div className="flex-1">
                                 <p className="font-semibold text-sm">{contact.first_name} {contact.last_name}</p>
                                 <p className="text-xs text-gray-500">
-                                  {contact.role === 'teacher' ? '👨‍🏫 Professeur' : '🎓 Étudiant'}
+                                  {contact.role === 'secretary' ? '📋 Secrétaire' : contact.role === 'teacher' ? '👨‍🏫 Professeur' : '🎓 Étudiant'}
                                 </p>
                               </div>
                             </div>

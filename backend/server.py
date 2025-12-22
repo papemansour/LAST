@@ -1136,20 +1136,15 @@ async def send_invoice_by_email(data: dict = Body(...), current_user: dict = Dep
                         <td style="padding: 12px; border: 1px solid #e5e7eb;"><strong>Montant brut (TTC)</strong></td>
                         <td style="padding: 12px; border: 1px solid #e5e7eb; text-align: right;">{amount:.2f} {currency}</td>
                     </tr>
-                    <tr style="background: #fee2e2;">
+                    <tr style="background: #f3f4f6;">
                         <td style="padding: 12px; border: 1px solid #e5e7eb;"><strong>TVA déduite ({int(tva_rate*100)}%)</strong></td>
-                        <td style="padding: 12px; border: 1px solid #e5e7eb; text-align: right; color: #dc2626;">- {tva_amount:.2f} {currency}</td>
+                        <td style="padding: 12px; border: 1px solid #e5e7eb; text-align: right;">- {tva_amount:.2f} {currency}</td>
                     </tr>
                     <tr style="background: #d1fae5;">
                         <td style="padding: 12px; border: 1px solid #e5e7eb;"><strong>💰 Montant net à recevoir</strong></td>
                         <td style="padding: 12px; border: 1px solid #e5e7eb; text-align: right; font-weight: bold; font-size: 18px;">{montant_net:.2f} {currency}</td>
                     </tr>
                 </table>
-                
-                <p style="background: #fef3c7; padding: 12px; border-radius: 8px; font-size: 13px; border-left: 4px solid #f59e0b;">
-                    ⚠️ <strong>Note :</strong> Le montant brut de {amount:.2f} {currency} inclut la TVA de {int(tva_rate*100)}%. 
-                    Après déduction, vous recevez <strong>{montant_net:.2f} {currency}</strong>.
-                </p>
                 
                 <p style="margin-top: 30px;">Cordialement,<br><strong>L'équipe MyKalama English</strong></p>
             </div>

@@ -1522,7 +1522,7 @@ const SecretaryDashboard = () => {
                         type="number"
                         value={newReceipt.amount}
                         onChange={(e) => setNewReceipt({...newReceipt, amount: e.target.value})}
-                        placeholder={newReceipt.currency === 'FCFA' ? '49856' : '76'}
+                        placeholder={newReceipt.currency === 'FCFA' ? '15000' : '76'}
                       />
                     </div>
                     <div>
@@ -1531,12 +1531,12 @@ const SecretaryDashboard = () => {
                         value={newReceipt.currency}
                         onChange={(e) => {
                           const newCurrency = e.target.value;
+                          // Prix identiques au site
                           const packPrices = {
-                            'K-Débutant': { EUR: 76, FCFA: 49856 },
-                            'K-Intermédiaire': { EUR: 90, FCFA: 59040 },
-                            'K-Professionnel': { EUR: 106, FCFA: 69536 },
-                            'K-Kids': { EUR: 70, FCFA: 45920 },
-                            'Pack Trio': { EUR: 240, FCFA: 157440 }
+                            'K-Kids': { EUR: 30, FCFA: 7000 },
+                            'K-Débutant': { EUR: 76, FCFA: 15000 },
+                            'K-Intermédiaire': { EUR: 90, FCFA: 25000 },
+                            'K-Professionnel': { EUR: 102, FCFA: 40000 }
                           };
                           const price = packPrices[newReceipt.packType];
                           if (price) {

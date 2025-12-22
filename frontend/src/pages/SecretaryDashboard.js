@@ -373,50 +373,118 @@ const SecretaryDashboard = () => {
   };
 
   const printReceipt = (receipt) => {
+    const currency = receipt.currency || 'EUR';
+    const amount = parseFloat(receipt.amount || 0);
+    const invoiceNumber = `FAC-ETU-${receipt.id?.slice(0, 8).toUpperCase() || 'XXXXX'}`;
+    
     const printWindow = window.open('', '_blank');
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Reçu de Paiement - MyKalama English</title>
+        <title>Facture Étudiant - MyKalama English</title>
         <style>
-          body { font-family: Arial, sans-serif; padding: 40px; max-width: 600px; margin: 0 auto; }
-          .header { text-align: center; border-bottom: 3px solid #7c3aed; padding-bottom: 20px; margin-bottom: 30px; }
-          .logo { font-size: 28px; font-weight: bold; color: #7c3aed; }
-          .receipt-number { color: #666; font-size: 14px; margin-top: 10px; }
-          .details { margin: 20px 0; }
-          .row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
-          .label { color: #666; }
-          .value { font-weight: bold; }
-          .amount { font-size: 24px; color: #059669; text-align: center; margin: 30px 0; padding: 20px; background: #ecfdf5; border-radius: 10px; }
-          .footer { text-align: center; margin-top: 40px; color: #666; font-size: 12px; }
-          .stamp { text-align: center; margin-top: 30px; }
-          .stamp-text { display: inline-block; padding: 10px 30px; border: 3px solid #059669; border-radius: 10px; color: #059669; font-weight: bold; transform: rotate(-5deg); }
-          @media print { body { print-color-adjust: exact; } }
+          body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; color: #333; }
+          .header { display: flex; justify-content: space-between; border-bottom: 3px solid #3b82f6; padding-bottom: 20px; margin-bottom: 30px; }
+          .logo { font-size: 24px; font-weight: bold; color: #3b82f6; }
+          .invoice-info { text-align: right; }
+          .invoice-number { font-size: 20px; font-weight: bold; color: #3b82f6; }
+          .parties { display: flex; justify-content: space-between; margin: 30px 0; }
+          .party { width: 45%; }
+          .party-title { font-weight: bold; color: #3b82f6; margin-bottom: 10px; border-bottom: 2px solid #dbeafe; padding-bottom: 5px; }
+          .party p { margin: 5px 0; font-size: 14px; }
+          table { width: 100%; border-collapse: collapse; margin: 30px 0; }
+          th { background: #3b82f6; color: white; padding: 12px; text-align: left; }
+          td { padding: 12px; border-bottom: 1px solid #e5e7eb; }
+          .totals { width: 300px; margin-left: auto; }
+          .totals tr td { padding: 8px 12px; }
+          .totals .total-row { background: #dbeafe; font-weight: bold; font-size: 18px; }
+          .footer { margin-top: 50px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #666; }
+          .stamp { text-align: center; margin: 30px 0; }
+          .stamp-text { display: inline-block; padding: 15px 40px; border: 3px solid #3b82f6; border-radius: 10px; color: #3b82f6; font-weight: bold; font-size: 18px; transform: rotate(-3deg); }
+          @media print { body { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }
         </style>
       </head>
       <body>
         <div class="header">
-          <div class="logo">🎓 MyKalama English</div>
-          <div class="receipt-number">Reçu N° ${receipt.id?.slice(0, 8).toUpperCase() || 'XXXXX'}</div>
+          <div>
+            <div class="logo">🎓 MyKalama English</div>
+            <p style="margin-top: 10px; color: #666;">Société de Formation en Langues</p>
+          </div>
+          <div class="invoice-info">
+            <div class="invoice-number">FACTURE</div>
+            <p><strong>N° :</strong> ${invoiceNumber}</p>
+            <p><strong>Date :</strong> ${new Date(receipt.created_at || Date.now()).toLocaleDateString('fr-FR')}</p>
+          </div>
         </div>
-        <div class="details">
-          <div class="row"><span class="label">Étudiant:</span><span class="value">${receipt.student_name || receipt.studentName}</span></div>
-          <div class="row"><span class="label">Pack:</span><span class="value">${receipt.pack_type || receipt.packType}</span></div>
-          <div class="row"><span class="label">Mode de paiement:</span><span class="value">${receipt.payment_method || receipt.paymentMethod}</span></div>
-          <div class="row"><span class="label">Date:</span><span class="value">${new Date(receipt.created_at || Date.now()).toLocaleDateString('fr-FR')}</span></div>
-          ${receipt.notes ? `<div class="row"><span class="label">Notes:</span><span class="value">${receipt.notes}</span></div>` : ''}
+        
+        <div class="parties">
+          <div class="party">
+            <div class="party-title">📍 ÉMETTEUR</div>
+            <p><strong>Société MyKalama English</strong></p>
+            <p>Paris, France</p>
+            <p>Dakar, Sénégal</p>
+            <p>📞 +221 78 260 75 49 / 78 528 68 89</p>
+            <p>📧 mykalamaenglish@gmail.com</p>
+          </div>
+          <div class="party">
+            <div class="party-title">👤 CLIENT (Étudiant)</div>
+            <p><strong>${receipt.student_name || receipt.studentName}</strong></p>
+            <p>Pack : ${receipt.pack_type || receipt.packType}</p>
+          </div>
         </div>
-        <div class="amount">
-          <div style="font-size: 14px; color: #666;">Montant payé</div>
-          <div style="font-size: 32px; font-weight: bold;">${receipt.amount} €</div>
-        </div>
+        
+        <table>
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Quantité</th>
+              <th>Prix Unitaire</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Formation ${receipt.pack_type || receipt.packType}</td>
+              <td>1 mois</td>
+              <td>${amount.toFixed(2)} ${currency}</td>
+              <td>${amount.toFixed(2)} ${currency}</td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <table class="totals">
+          <tr>
+            <td>Total HT :</td>
+            <td style="text-align: right;">${amount.toFixed(2)} ${currency}</td>
+          </tr>
+          <tr>
+            <td>TVA (0%) :</td>
+            <td style="text-align: right;">0.00 ${currency}</td>
+          </tr>
+          <tr class="total-row">
+            <td>Total TTC :</td>
+            <td style="text-align: right;">${amount.toFixed(2)} ${currency}</td>
+          </tr>
+        </table>
+        
         <div class="stamp">
           <span class="stamp-text">✓ PAYÉ</span>
         </div>
+        
+        <p style="text-align: center; font-size: 14px; color: #666;">
+          <strong>Mode de paiement :</strong> ${receipt.payment_method || receipt.paymentMethod}
+        </p>
+        ${receipt.notes ? `<p style="text-align: center; font-size: 12px; color: #888;">Notes : ${receipt.notes}</p>` : ''}
+        
         <div class="footer">
-          <p>MyKalama English - Formation en Anglais</p>
-          <p>contact@mykalamaenglish.com</p>
+          <p><strong>Conditions de paiement :</strong> Paiement à réception</p>
+          <p style="margin-top: 20px; text-align: center;">
+            <em>Merci pour votre confiance !</em>
+          </p>
+          <p style="text-align: center; margin-top: 10px;">
+            © 2025 MyKalama English - Tous droits réservés
+          </p>
         </div>
       </body>
       </html>

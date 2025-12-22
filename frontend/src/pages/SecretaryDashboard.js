@@ -693,25 +693,6 @@ const SecretaryDashboard = () => {
     }
   };
 
-  // Messages handler
-  const handleSendMessage = async () => {
-    if (!newMessage.recipient || !newMessage.subject || !newMessage.content) {
-      toast.error('Veuillez remplir tous les champs');
-      return;
-    }
-
-    const message = {
-      id: Date.now(),
-      ...newMessage,
-      sentAt: new Date().toISOString(),
-      status: 'envoyé'
-    };
-
-    saveMessages([...messages, message]);
-    setNewMessage({ recipient: '', subject: '', content: '' });
-    toast.success('Message envoyé !');
-  };
-
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');

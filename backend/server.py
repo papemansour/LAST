@@ -1123,6 +1123,20 @@ async def get_students_list_for_secretary(current_user: dict = Depends(get_curre
     ).to_list(500)
     return students
 
+@api_router.get("/secretary/admin-info")
+async def get_admin_info_for_secretary(current_user: dict = Depends(get_current_user)):
+    """Get admin info for secretary messaging"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    admin = await db.users.find_one(
+        {"role": "admin", "is_active": True}, 
+        {"_id": 0, "id": 1, "first_name": 1, "last_name": 1, "email": 1}
+    )
+    if not admin:
+        raise HTTPException(status_code=404, detail="Admin not found")
+    return admin
+
 @api_router.get("/auth/me")
 async def get_me(current_user: dict = Depends(get_current_user)):
     return current_user

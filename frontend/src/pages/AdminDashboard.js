@@ -1687,7 +1687,7 @@ const AdminDashboard = () => {
                   <CardHeader>
                     <CardTitle>Tous les contacts</CardTitle>
                     <CardDescription>
-                      Sélection multiple - {allUsers.filter(u => u.role === 'teacher' || u.role === 'student').length} contact(s)
+                      Sélection multiple - {allUsers.filter(u => u.role === 'teacher' || u.role === 'student' || u.role === 'secretary').length} contact(s)
                     </CardDescription>
                   </CardHeader>
                   <CardContent>

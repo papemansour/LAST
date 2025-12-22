@@ -1248,7 +1248,34 @@ const SecretaryDashboard = () => {
               </Card>
             ) : (
               <div className="space-y-4">
-                <div className="flex justify-end">
+                <div className="flex justify-between items-center">
+                  <Button 
+                    variant="destructive" 
+                    size="sm" 
+                    onClick={async () => {
+                      if (window.confirm('⚠️ ATTENTION !\n\nCette action va supprimer définitivement :\n- Tous les paiements aux professeurs\n- Tous les reçus étudiants\n- Toutes les factures prestataires\n\nÊtes-vous sûr de vouloir remettre les chiffres à zéro ?')) {
+                        try {
+                          await apiClient.post('/secretary/reset-billing-stats');
+                          // Recharger les données
+                          setTeacherPayments([]);
+                          setStudentReceipts([]);
+                          setPrestataireInvoices([]);
+                          setBillingStats({
+                            totalPaidTeachers: 0,
+                            totalReceipts: 0,
+                            totalPrestataires: 0,
+                            pendingPayments: teachers.length
+                          });
+                          toast.success('🔄 Statistiques remises à zéro !');
+                        } catch (error) {
+                          toast.error('Erreur lors de la remise à zéro');
+                        }
+                      }
+                    }}
+                    className="bg-red-600 hover:bg-red-700"
+                  >
+                    🔄 Remettre à zéro
+                  </Button>
                   <Button 
                     variant="ghost" 
                     size="sm" 

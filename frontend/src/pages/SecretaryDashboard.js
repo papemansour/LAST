@@ -162,11 +162,9 @@ const SecretaryDashboard = () => {
       if (savedReports) setProfReports(JSON.parse(savedReports));
     }
     
-    // Notes et messages restent en localStorage (données locales)
+    // Notes restent en localStorage (données locales)
     const savedNotes = localStorage.getItem('secretary_notes');
-    const savedMessages = localStorage.getItem('secretary_messages');
     if (savedNotes) setNotes(JSON.parse(savedNotes));
-    if (savedMessages) setMessages(JSON.parse(savedMessages));
     
     // Charger données de facturation
     try {

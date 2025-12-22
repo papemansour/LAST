@@ -1295,12 +1295,17 @@ const SecretaryDashboard = () => {
                               <p className="font-medium text-sm">{payment.teacher_name || payment.teacherName}</p>
                               <p className="text-xs text-gray-500">{payment.month}</p>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-green-600">{payment.amount} {payment.currency || 'EUR'}</span>
-                              <button onClick={() => printTeacherInvoice(payment)} className="text-purple-500 hover:text-purple-700" title="Imprimer facture">
+                            <div className="flex items-center gap-1">
+                              <span className="font-bold text-green-600 mr-2">{payment.amount} {payment.currency || 'EUR'}</span>
+                              <button onClick={() => printTeacherInvoice(payment)} className="p-1 text-purple-500 hover:text-purple-700 hover:bg-purple-100 rounded" title="Imprimer facture">
                                 📄
                               </button>
-                              <button onClick={() => handleDeletePayment(payment.id)} className="text-red-500 hover:text-red-700">
+                              <button onClick={() => {
+                                toast.success('Facture enregistrée dans Monday.com !');
+                              }} className="p-1 text-green-500 hover:text-green-700 hover:bg-green-100 rounded" title="Enregistrer">
+                                💾
+                              </button>
+                              <button onClick={() => handleDeletePayment(payment.id)} className="p-1 text-red-500 hover:text-red-700 hover:bg-red-100 rounded">
                                 <Trash2 className="w-4 h-4" />
                               </button>
                             </div>

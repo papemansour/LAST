@@ -170,24 +170,44 @@ const SecretaryDashboard = () => {
     
     // Charger données de facturation
     try {
-      const [paymentsRes, receiptsRes, teachersRes, studentsRes] = await Promise.all([
+      const [paymentsRes, receiptsRes, prestataireRes, teachersRes, studentsRes] = await Promise.all([
         apiClient.get('/secretary/teacher-payments'),
         apiClient.get('/secretary/student-receipts'),
+        apiClient.get('/secretary/prestataire-invoices'),
         apiClient.get('/secretary/teachers-list'),
         apiClient.get('/secretary/students-list')
       ]);
       setTeacherPayments(paymentsRes.data || []);
       setStudentReceipts(receiptsRes.data || []);
+      setPrestataireInvoices(prestataireRes.data || []);
       setTeachers(teachersRes.data || []);
       setStudents(studentsRes.data || []);
       
-      // Calculer les stats
-      const totalPaid = (paymentsRes.data || []).reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
-      const totalReceipts = (receiptsRes.data || []).reduce((sum, r) => sum + parseFloat(r.amount || 0), 0);
+      // Calculer les stats du mois en cours
+      const currentMonth = new Date().toISOString().slice(0, 7);
+      const currentMonthPayments = (paymentsRes.data || []).filter(p => p.month === currentMonth);
+      const currentMonthReceipts = (receiptsRes.data || []).filter(r => (r.created_at || '').startsWith(currentMonth));
+      
+      const totalPaidThisMonth = currentMonthPayments.reduce((sum, p) => {
+        const amount = parseFloat(p.amount || 0);
+        // Convertir en EUR si FCFA
+        return sum + (p.currency === 'FCFA' ? amount / EUR_TO_FCFA : amount);
+      }, 0);
+      
+      const totalReceiptsThisMonth = currentMonthReceipts.reduce((sum, r) => {
+        const amount = parseFloat(r.amount || 0);
+        return sum + (r.currency === 'FCFA' ? amount / EUR_TO_FCFA : amount);
+      }, 0);
+      
+      // Nombre de profs non payés ce mois
+      const paidTeacherIds = currentMonthPayments.map(p => p.teacher_id || p.teacherId);
+      const pendingCount = (teachersRes.data || []).filter(t => !paidTeacherIds.includes(t.id)).length;
+      
       setBillingStats({
-        totalPaidTeachers: totalPaid,
-        totalReceipts: totalReceipts,
-        pendingPayments: (teachersRes.data || []).length - (paymentsRes.data || []).filter(p => p.month === new Date().toISOString().slice(0, 7)).length
+        totalPaidTeachers: totalPaidThisMonth,
+        totalReceipts: totalReceiptsThisMonth,
+        totalPrestataires: (prestataireRes.data || []).length,
+        pendingPayments: pendingCount
       });
     } catch (error) {
       console.log('Billing data not available yet');

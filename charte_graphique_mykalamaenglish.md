@@ -1,361 +1,247 @@
-# 🎨 Charte Graphique - MyKalama English
+# 🎓 Charte Graphique - MyKalama English
 
-## 📋 Informations Générales
+## 📌 Identité Visuelle
 
-**Nom de la marque :** MyKalama English  
-**Slogan :** "Apprendre l'anglais facilement"  
-**Secteur :** Éducation / Formation en ligne  
-**Public cible :** Étudiants francophones (enfants, adolescents, adultes)
+### Logo
+- **Logo principal** : 🎓 MyKalama English
+- **Favicon** : Emoji graduation cap 🎓
+- **Slogan** : "Votre aventure linguistique commence ici"
 
 ---
 
 ## 🎨 Palette de Couleurs
 
 ### Couleurs Principales
+| Nom | Hex | RGB | Utilisation |
+|-----|-----|-----|-------------|
+| **Teal Primary** | `#0d9488` | rgb(13, 148, 136) | Boutons principaux, liens, accents |
+| **Teal Light** | `#14b8a6` | rgb(20, 184, 166) | Dégradés, hover states |
+| **Teal Dark** | `#0f766e` | rgb(15, 118, 110) | Textes importants, headers |
 
-**Teal/Turquoise (Couleur dominante)**
-- **Teal 600** : `#0d9488` - Boutons principaux, titres
-- **Teal 700** : `#0f766e` - Hover states
-- **Teal 800** : `#115e59` - Textes importants
-- **Teal 50** : `#f0fdfa` - Arrière-plans clairs
-
-**Rose/Pink (Couleur secondaire - Pack K-Kid)**
-- **Pink 500** : `#ec4899` - Accents enfants
-- **Pink 600** : `#db2777` - Hover states
-
-### Couleurs d'Accentuation
-
-**Vert (Succès, Promos)**
-- **Green 600** : `#16a34a` - Messages de succès
-- **Green 50** : `#f0fdf4` - Fonds de promo
-
-**Orange/Jaune (Nouvel An, Alertes)**
-- **Orange 500** : `#f97316` - Badges "NOUVEAU"
-- **Yellow 500** : `#eab308` - Alertes importantes
-
-**Bleu (Informations)**
-- **Blue 600** : `#2563eb` - Liens, informations
-- **Blue 50** : `#eff6ff` - Fonds informatifs
-
-**Violet (Admin)**
-- **Purple 600** : `#9333ea` - Interface admin
-- **Purple 100** : `#f3e8ff` - Fonds admin
+### Couleurs Secondaires
+| Nom | Hex | RGB | Utilisation |
+|-----|-----|-----|-------------|
+| **Purple** | `#7c3aed` | rgb(124, 58, 237) | Secrétariat, administration |
+| **Blue** | `#3b82f6` | rgb(59, 130, 246) | Étudiants, informations |
+| **Green** | `#059669` | rgb(5, 150, 105) | Succès, validations, paiements |
+| **Orange** | `#f59e0b` | rgb(245, 158, 11) | Alertes, promotions |
+| **Pink** | `#ec4899` | rgb(236, 72, 153) | K-Kids, enfants |
 
 ### Couleurs Neutres
-
-- **Gray 50** : `#f9fafb` - Arrière-plans
-- **Gray 100** : `#f3f4f6` - Cartes secondaires
-- **Gray 600** : `#4b5563` - Textes secondaires
-- **Gray 900** : `#111827` - Textes principaux
-- **White** : `#ffffff` - Fonds blancs
-
----
-
-## ✍️ Typographie
-
-### Polices
-
-**Police Principale :** System Font Stack (San Francisco, Segoe UI, Roboto, Arial)
-```css
-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 
-             'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-```
-
-### Hiérarchie des Tailles
-
-**Titres H1 (Hero)**
-- Mobile : `text-4xl` (36px)
-- Desktop : `text-6xl` (60px)
-- Font-weight : `bold` (700)
-
-**Titres H2 (Sections)**
-- Mobile : `text-2xl` (24px)
-- Desktop : `text-4xl` (36px)
-- Font-weight : `bold` (700)
-
-**Titres H3 (Sous-sections)**
-- Mobile : `text-xl` (20px)
-- Desktop : `text-2xl` (24px)
-- Font-weight : `semibold` (600)
-
-**Corps de Texte**
-- Standard : `text-base` (16px)
-- Font-weight : `normal` (400)
-
-**Texte Secondaire**
-- Taille : `text-sm` (14px)
-- Couleur : Gray 600
+| Nom | Hex | Utilisation |
+|-----|-----|-------------|
+| **Gray 50** | `#f9fafb` | Backgrounds légers |
+| **Gray 100** | `#f3f4f6` | Cards backgrounds |
+| **Gray 600** | `#4b5563` | Texte secondaire |
+| **Gray 900** | `#1f2937` | Texte principal |
 
 ---
 
-## 🧩 Composants UI
+## 📝 Typographie
+
+### Police Principale
+- **Font Family** : `'Segoe UI', Arial, sans-serif`
+- **Alternative** : Inter, system-ui
+
+### Hiérarchie des Titres
+| Élément | Taille | Poids | Couleur |
+|---------|--------|-------|---------|
+| H1 | 2.5rem (40px) | Bold (700) | Gray 900 |
+| H2 | 2rem (32px) | Semibold (600) | Gray 900 |
+| H3 | 1.5rem (24px) | Semibold (600) | Gray 800 |
+| H4 | 1.25rem (20px) | Medium (500) | Gray 700 |
+| Body | 1rem (16px) | Normal (400) | Gray 600 |
+| Small | 0.875rem (14px) | Normal (400) | Gray 500 |
+
+---
+
+## 🔘 Composants UI
 
 ### Boutons
+```css
+/* Bouton Principal */
+.btn-primary {
+  background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+  color: white;
+  border-radius: 0.75rem (12px);
+  padding: 12px 24px;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(13, 148, 136, 0.4);
+}
 
-**Bouton Principal (Call-to-Action)**
-```
-Couleur : Teal 600 (#0d9488)
-Hover : Teal 700 (#0f766e)
-Padding : px-6 py-3
-Border-radius : rounded-lg (8px)
-Font-weight : semibold (600)
-```
+/* Bouton Secondaire */
+.btn-secondary {
+  background: white;
+  border: 2px solid #0d9488;
+  color: #0d9488;
+  border-radius: 0.75rem;
+}
 
-**Bouton Secondaire (Outline)**
-```
-Border : 2px solid Teal 600
-Couleur texte : Teal 600
-Hover : Background Teal 50
-```
+/* Bouton Succès */
+.btn-success {
+  background: #059669;
+  color: white;
+}
 
-**Bouton Don**
-```
-Gradient : Pink 500 → Red 500
-Icon : Heart (❤️)
-Shadow : lg
-```
-
-### Cartes (Cards)
-
-**Style Standard**
-```
-Background : White
-Border : 1px solid Gray 200
-Border-radius : rounded-xl (12px)
-Shadow : shadow-lg
-Padding : p-6
+/* Bouton Danger */
+.btn-danger {
+  background: #dc2626;
+  color: white;
+}
 ```
 
-**Effet Glace (Dashboards)**
-```
-Background : rgba(255, 255, 255, 0.1)
-Backdrop-filter : blur(10px)
-Border : 1px solid rgba(255, 255, 255, 0.2)
+### Cards
+```css
+.card {
+  background: white;
+  border-radius: 1rem (16px);
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+  border-bottom: 1px solid #99f6e4;
+}
 ```
 
-### Badges
+### Inputs
+```css
+.input {
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem (8px);
+  padding: 10px 14px;
+  font-size: 14px;
+}
 
-**Nouveau**
-```
-Background : Orange 500
-Couleur : White
-Padding : px-2 py-1
-Border-radius : rounded-full
-Font-size : text-xs
-```
-
-**Promo**
-```
-Background : Green 600
-Couleur : White
-Font-weight : bold
+.input:focus {
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+}
 ```
 
 ---
 
-## 🎭 Éléments Saisonniers
+## 📐 Espacements
 
-### Noël (jusqu'au 26 décembre)
-- Emojis : 🎄 🎅 ❄️ ⛄ 🎁
-- Couleurs : Rouge (#dc2626), Vert (#16a34a), Or (#fbbf24)
-- Bannière : Background rouge pulsant
+### Grille
+- **Container max-width** : 1280px
+- **Gutter** : 24px (gap-6)
+- **Padding sections** : 64px vertical, 24px horizontal
 
-### Nouvel An (27 déc - 10 jan)
-- Emojis : 🎉 🎊 🥳 🎆 ✨ 🎈
-- Couleurs : Jaune → Orange gradient
-- Animation : bounce, pulse
+### Marges Standards
+| Nom | Valeur | Utilisation |
+|-----|--------|-------------|
+| xs | 4px | Entre icône et texte |
+| sm | 8px | Entre éléments proches |
+| md | 16px | Entre sections de carte |
+| lg | 24px | Entre cartes |
+| xl | 48px | Entre sections majeures |
+
+---
+
+## 🎭 Iconographie
+
+### Emojis Officiels
+| Contexte | Emoji |
+|----------|-------|
+| Logo/Brand | 🎓 |
+| Étudiants | 👤 👥 |
+| Professeurs | 👨‍🏫 👩‍🏫 |
+| Admin | 👨‍💼 |
+| Secrétaire | 📋 |
+| K-Kids | 🦄 ⭐ 🎮 |
+| Succès | ✅ ✓ |
+| Documents | 📄 📁 |
+| Messages | 💬 📧 |
+| Paiements | 💰 💸 🧾 |
+| Téléphone | 📞 |
+| Email | 📧 |
+| Calendrier | 📅 |
+
+### Icônes Lucide (lucide-react)
+- Navigation : `Home, Users, Settings, LogOut`
+- Actions : `Plus, Trash2, Edit, Eye, Download`
+- Communication : `MessageCircle, Send, Bell`
+- Documents : `FileText, Upload, FolderOpen`
 
 ---
 
 ## 📱 Responsive Design
 
-### Breakpoints TailwindCSS
+### Breakpoints
+| Taille | Min-width | Usage |
+|--------|-----------|-------|
+| Mobile | 0px | Design mobile-first |
+| SM | 640px | Petits appareils |
+| MD | 768px | Tablettes |
+| LG | 1024px | Laptops |
+| XL | 1280px | Desktops |
 
-- **Mobile** : < 640px (défaut)
-- **Tablet** : ≥ 768px (md:)
-- **Desktop** : ≥ 1024px (lg:)
-- **Large Desktop** : ≥ 1280px (xl:)
-
-### Règles Responsive
-
-1. **Mobile First** : Design conçu d'abord pour mobile
-2. **Touch Targets** : Minimum 44x44px pour les boutons
-3. **Font Scaling** : Utilisation de `text-base` → `md:text-lg` → `lg:text-xl`
-4. **Spacing** : Padding et margins adaptatifs avec `p-4` → `md:p-6` → `lg:p-8`
-
----
-
-## 🎯 Identité Visuelle par Rôle
-
-### 🎓 **Étudiant**
-- Couleur principale : **Teal 600**
-- Style : Moderne, épuré, encourageant
-- Emojis : 📚 ✨ 🎯 🏆
-
-### 👨‍🏫 **Professeur**
-- Couleur principale : **Teal 700**
-- Style : Professionnel, organisé
-- Emojis : 📝 👥 📊 📧
-
-### ⚙️ **Admin**
-- Couleur principale : **Purple 600**
-- Style : Fonctionnel, puissant
-- Emojis : 🔧 📊 👥 📈
-
-### 👶 **K-Kid (Enfants)**
-- Couleur principale : **Pink 500**
-- Style : Ludique, coloré, doux
-- Emojis : 🎨 🎮 🌈 ⭐
+### Règles
+1. **Mobile-first** : Toujours commencer par le design mobile
+2. **Touch targets** : Minimum 44x44px pour les boutons
+3. **Font-size** : Minimum 14px pour la lisibilité
+4. **Spacing** : Réduire de 25% sur mobile
 
 ---
 
-## 🌟 Icônes et Illustrations
+## 🏢 Informations Société
 
-### Bibliothèque d'Icônes
-**Lucide React** - Style minimaliste, cohérent
+### Coordonnées
+- **Société** : MyKalama English
+- **Localisations** : Paris, France / Dakar, Sénégal
+- **Téléphone** : +221 78 260 75 49 / 78 528 68 89
+- **Email** : mykalamaenglish@gmail.com
+- **Site web** : https://mykalamaenglish.com
 
-**Icônes Principales :**
-- Navigation : `Home`, `Menu`, `User`, `LogOut`
-- Actions : `Send`, `Download`, `Upload`, `Edit`, `Trash2`
-- Contenus : `FileText`, `Image`, `Video`, `Book`
-- Social : `MessageCircle`, `Users`, `Heart`
-
-### Style des Icônes
-- Stroke width : 2px
-- Taille standard : `w-5 h-5` (20px)
-- Taille grande : `w-6 h-6` (24px)
-- Couleur : Hérite du texte parent
+### Mentions Légales
+- TVA : 0% (non applicable)
+- Année de création : 2024
 
 ---
 
-## 📐 Espacements et Grilles
-
-### Système de Spacing (Tailwind)
-- **xs** : `space-1` = 4px
-- **sm** : `space-2` = 8px
-- **md** : `space-4` = 16px
-- **lg** : `space-6` = 24px
-- **xl** : `space-8` = 32px
-
-### Layout Grid
-```
-Container : max-w-7xl (1280px)
-Padding : px-4 md:px-6 lg:px-8
-Gap : gap-4 md:gap-6 lg:gap-8
-```
-
----
-
-## 🎬 Animations
+## ✨ Animations
 
 ### Transitions Standards
 ```css
-transition-all duration-300 ease-in-out
-```
+.transition-default {
+  transition: all 0.3s ease;
+}
 
-### Animations Utilisées
+.hover-scale {
+  transform: scale(1.02);
+}
 
-**Fade In**
-```css
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+.hover-shadow {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
 }
 ```
 
-**Slide Up**
-```css
-@keyframes slideUp {
-  from { 
-    opacity: 0;
-    transform: translateY(100px) scale(0.9);
-  }
-  to { 
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-```
-
-**Bounce** (Emojis saisonniers)
-```css
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-20px); }
-}
-```
-
-**Pulse** (Bannières promos)
-```css
-animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-```
+### Animations Spéciales
+- **Pulse** : Pour les promotions et alertes importantes
+- **Fade-in** : Pour les modales et dialogues
+- **Slide-up** : Pour les toasts et notifications
 
 ---
 
-## 💎 Principes de Design
+## 📋 Templates Factures
 
-### 1. **Clarté**
-- Interface épurée, sans encombrement
-- Hiérarchie visuelle claire
-- Espaces blancs généreux
+### Facture Professeur
+- Numéro : FAC-PROF-XXXXXXXX
+- Couleur : Vert (#059669)
+- TVA : 0%
 
-### 2. **Accessibilité**
-- Contraste minimum WCAG AA (4.5:1)
-- Labels descriptifs sur tous les éléments interactifs
-- Navigation au clavier supportée
+### Facture Étudiant
+- Numéro : FAC-ETU-XXXXXXXX
+- Couleur : Bleu (#3b82f6)
+- TVA : 0%
 
-### 3. **Cohérence**
-- Utilisation systématique des composants définis
-- Palette de couleurs respectée
-- Espacements uniformes
-
-### 4. **Performance**
-- Images optimisées
-- Lazy loading pour les contenus lourds
-- Animations GPU-accelerated
-
-### 5. **Feedback Utilisateur**
-- Toast notifications pour les actions
-- Loading states visibles
-- Messages d'erreur clairs et utiles
+### Facture Prestataire
+- Numéro : FAC-PRE-XXXXXXXX
+- Couleur : Violet (#7c3aed)
+- TVA : 0%
 
 ---
 
-## 📄 Footer
-
-### Contenu
-- Logo MyKalama English
-- Navigation secondaire
-- Réseaux sociaux (Instagram, Facebook, Snapchat, TikTok)
-- Copyright © 2025 MyKalama English
-
-### Style
-```
-Background : Teal 900
-Couleur texte : White/Gray 300
-Padding : py-12
-```
-
----
-
-## 🔗 Liens Utiles
-
-**Site Web :** https://tutor-hub-32.preview.emergentagent.com  
-**Email Contact :** info@mykalamaenglish.com  
-**Réseaux Sociaux :**
-- Instagram : [@mykalamaenglish]
-- Facebook : [MyKalama English]
-- TikTok : [@mykalamaenglish]
-- Snapchat : [@mykalamaenglish]
-
----
-
-## 📝 Notes de Mise à Jour
-
-**Version 1.0** - Décembre 2025
-- Charte graphique initiale
-- Définition des couleurs et typographie
-- Documentation des composants UI
-
-**Dernière mise à jour :** Décembre 2025  
-**Créé par :** MyKalama English Team
+© 2025 MyKalama English - Tous droits réservés

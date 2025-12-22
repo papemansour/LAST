@@ -1445,9 +1445,7 @@ const SecretaryDashboard = () => {
                               <button onClick={() => sendInvoiceByEmail(payment, 'teacher')} className="p-1 text-blue-500 hover:text-blue-700 hover:bg-blue-100 rounded" title="Envoyer par email">
                                 📧
                               </button>
-                              <button onClick={() => {
-                                toast.success('Facture enregistrée dans Monday.com !');
-                              }} className="p-1 text-green-500 hover:text-green-700 hover:bg-green-100 rounded" title="Enregistrer">
+                              <button onClick={() => saveInvoice(payment, 'teacher')} className="p-1 text-green-500 hover:text-green-700 hover:bg-green-100 rounded" title="Enregistrer PDF">
                                 💾
                               </button>
                               <button onClick={() => handleDeletePayment(payment.id)} className="p-1 text-red-500 hover:text-red-700 hover:bg-red-100 rounded" title="Supprimer">

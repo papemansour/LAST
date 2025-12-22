@@ -570,7 +570,8 @@ const SecretaryDashboard = () => {
     const amount = parseFloat(payment.amount || 0);
     const bonus = parseFloat(payment.bonus || 0);
     const totalHT = amount + bonus;
-    const tva = 0; // TVA à 0%
+    const tvaRate = currency === 'EUR' ? 0.20 : 0.18; // 20% EUR, 18% FCFA
+    const tva = totalHT * tvaRate;
     const totalTTC = totalHT + tva;
     const invoiceNumber = `FAC-PROF-${payment.id?.slice(0, 8).toUpperCase() || 'XXXXX'}`;
     

@@ -1485,15 +1485,34 @@ const SecretaryDashboard = () => {
                       <label className="block text-sm font-medium mb-1">Pack *</label>
                       <select
                         value={newReceipt.packType}
-                        onChange={(e) => setNewReceipt({...newReceipt, packType: e.target.value})}
+                        onChange={(e) => {
+                          const packPrices = {
+                            'K-Débutant': { EUR: 76, FCFA: 49856 },
+                            'K-Intermédiaire': { EUR: 90, FCFA: 59040 },
+                            'K-Professionnel': { EUR: 106, FCFA: 69536 },
+                            'K-Kids': { EUR: 70, FCFA: 45920 },
+                            'Pack Trio': { EUR: 240, FCFA: 157440 }
+                          };
+                          const selectedPack = e.target.value;
+                          const price = packPrices[selectedPack];
+                          if (price) {
+                            setNewReceipt({
+                              ...newReceipt, 
+                              packType: selectedPack,
+                              amount: newReceipt.currency === 'FCFA' ? price.FCFA : price.EUR
+                            });
+                          } else {
+                            setNewReceipt({...newReceipt, packType: selectedPack});
+                          }
+                        }}
                         className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                       >
                         <option value="">Sélectionner...</option>
-                        <option value="K-Débutant">K-Débutant</option>
-                        <option value="K-Intermédiaire">K-Intermédiaire</option>
-                        <option value="K-Professionnel">K-Professionnel</option>
-                        <option value="K-Kids">K-Kids</option>
-                        <option value="Pack Trio">Pack Trio</option>
+                        <option value="K-Débutant">K-Débutant (76€ / 49 856 FCFA)</option>
+                        <option value="K-Intermédiaire">K-Intermédiaire (90€ / 59 040 FCFA)</option>
+                        <option value="K-Professionnel">K-Professionnel (106€ / 69 536 FCFA)</option>
+                        <option value="K-Kids">K-Kids (70€ / 45 920 FCFA)</option>
+                        <option value="Pack Trio">Pack Trio (240€ / 157 440 FCFA)</option>
                       </select>
                     </div>
                   </div>

@@ -1859,7 +1859,7 @@ startxref
                     async with self.session.delete(f"{BACKEND_URL}/secretary/teacher-payments/{payment_id}", headers=headers) as delete_response:
                         if delete_response.status == 200:
                             delete_result = await delete_response.json()
-                            if delete_result.get("message") == "Paiement supprimé avec succès":
+                            if delete_result.get("message") == "Payment deleted":
                                 logger.info("✅ Test 2 PASSED: Teacher payment deleted with correct message")
                                 self.test_results["secretary_billing_delete"]["details"].append("✅ Teacher payment delete works")
                             else:

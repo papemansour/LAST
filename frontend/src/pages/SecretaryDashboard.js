@@ -1523,14 +1523,33 @@ const SecretaryDashboard = () => {
                         type="number"
                         value={newReceipt.amount}
                         onChange={(e) => setNewReceipt({...newReceipt, amount: e.target.value})}
-                        placeholder="76"
+                        placeholder={newReceipt.currency === 'FCFA' ? '49856' : '76'}
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-1">Devise</label>
                       <select
                         value={newReceipt.currency}
-                        onChange={(e) => setNewReceipt({...newReceipt, currency: e.target.value})}
+                        onChange={(e) => {
+                          const newCurrency = e.target.value;
+                          const packPrices = {
+                            'K-Débutant': { EUR: 76, FCFA: 49856 },
+                            'K-Intermédiaire': { EUR: 90, FCFA: 59040 },
+                            'K-Professionnel': { EUR: 106, FCFA: 69536 },
+                            'K-Kids': { EUR: 70, FCFA: 45920 },
+                            'Pack Trio': { EUR: 240, FCFA: 157440 }
+                          };
+                          const price = packPrices[newReceipt.packType];
+                          if (price) {
+                            setNewReceipt({
+                              ...newReceipt, 
+                              currency: newCurrency,
+                              amount: newCurrency === 'FCFA' ? price.FCFA : price.EUR
+                            });
+                          } else {
+                            setNewReceipt({...newReceipt, currency: newCurrency});
+                          }
+                        }}
                         className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm h-10"
                       >
                         <option value="EUR">🇪🇺 EUR</option>

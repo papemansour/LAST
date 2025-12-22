@@ -1940,7 +1940,7 @@ startxref
                     async with self.session.delete(f"{BACKEND_URL}/secretary/prestataire-invoices/{invoice_id}", headers=headers) as delete_response:
                         if delete_response.status == 200:
                             delete_result = await delete_response.json()
-                            if delete_result.get("message") == "Facture supprimée avec succès":
+                            if delete_result.get("message") == "Invoice deleted":
                                 logger.info("✅ Test 4 PASSED: Prestataire invoice deleted with correct message")
                                 self.test_results["secretary_billing_delete"]["details"].append("✅ Prestataire invoice delete works")
                             else:

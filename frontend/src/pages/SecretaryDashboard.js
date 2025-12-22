@@ -739,6 +739,18 @@ const SecretaryDashboard = () => {
     }
   };
 
+  // Fonction pour enregistrer/télécharger la facture
+  const saveInvoice = (data, type) => {
+    // Ouvrir la facture dans une nouvelle fenêtre avec option d'impression/PDF
+    if (type === 'teacher') {
+      printTeacherInvoice(data);
+      toast.success('💾 Utilisez Ctrl+P puis "Enregistrer en PDF" pour sauvegarder');
+    } else if (type === 'student') {
+      printReceipt(data);
+      toast.success('💾 Utilisez Ctrl+P puis "Enregistrer en PDF" pour sauvegarder');
+    }
+  };
+
   // Envoyer facture par email
   const sendInvoiceByEmail = async (invoice, type) => {
     const email = prompt(`Entrez l'email du destinataire pour la facture ${type === 'teacher' ? 'professeur' : 'étudiant'}:`);

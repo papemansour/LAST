@@ -22,7 +22,36 @@ const StudentDocuments = () => {
   const getFullFileUrl = (fileUrl) => {
     if (!fileUrl) return '';
     if (fileUrl.startsWith('http')) return fileUrl;
+    // Les fichiers sont servis via /uploads/ (pas /api/uploads/)
     return `${BACKEND_URL}${fileUrl}`;
+  };
+
+  // Fonction de téléchargement forcé
+  const handleDownload = async (doc) => {
+    try {
+      const fileUrl = getFullFileUrl(doc.file_url);
+      const response = await fetch(fileUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = doc.file_name || 'document';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success('Téléchargement démarré !');
+    } catch (error) {
+      console.error('Download error:', error);
+      // Fallback: ouvrir dans un nouvel onglet
+      window.open(getFullFileUrl(doc.file_url), '_blank');
+    }
+  };
+
+  // Fonction d'ouverture dans nouvel onglet
+  const handleOpenNewTab = (doc) => {
+    const fileUrl = getFullFileUrl(doc.file_url);
+    window.open(fileUrl, '_blank');
   };
 
   useEffect(() => {

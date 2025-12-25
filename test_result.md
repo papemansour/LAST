@@ -553,6 +553,66 @@ frontend:
           agent: "testing"
           comment: "✅ PASSED - Secretary billing dashboard functionality fully operational. All 6 tests from review request completed successfully: 1) Secretary Login (POST /api/auth/secretary-login with code 'secretaire2025') - access_token received, secretary role confirmed, 2) Create Teacher Payment (POST /api/secretary/teacher-payments) - payment created with all required fields (teacher_id, amount, currency, month, hours, bonus, notes), 3) Reset Billing Stats (POST /api/secretary/reset-billing-stats) - successfully deleted 1 payment, 0 receipts, 0 invoices, 4) Send Invoice Email (POST /api/secretary/send-invoice-email) - invoice email prepared for test@example.com with proper formatting, 5) Get Teachers List (GET /api/secretary/teachers-list) - retrieved array of teachers with required fields, 6) Admin All Users (GET /api/admin/all-users) - admin login successful, all users retrieved including secretary role verification. Monday.com integration working (invoice created: FAC-TEA-20251222-85387f). Email service logging correctly (AWS SES not configured). All endpoints responding with 200 OK status. Secretary billing system fully functional."
 
+  - task: "Group Courses - Get All Endpoint"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED - GET /api/group-courses endpoint works correctly. Retrieved 6 group courses as array. Endpoint responds with proper JSON array format and at least 1 course exists as expected."
+
+  - task: "Group Courses - Create Endpoint (Admin)"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED - POST /api/group-courses endpoint works correctly as admin. Successfully created group course with title='Test Group', level='beginner', max_students=5. Response includes course_id as expected. Admin authentication working properly."
+
+  - task: "Student Points - Get My Points Endpoint"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED - GET /api/student/my-points endpoint works correctly. Student login successful (test.student@example.com). Response contains all required fields: total_points (0), available_points (0), rewards object with tiers (4 tiers). Student authentication and points system working properly."
+
+  - task: "Delete All Teacher Sessions (Admin)"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED - DELETE /api/admin/teacher-sessions endpoint works correctly. Admin authentication successful. Endpoint returns 200 OK with count of deleted sessions (0 sessions deleted). Response format correct with count information."
+
+  - task: "Reset Billing Stats (Secretary)"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED - POST /api/secretary/reset-billing-stats endpoint works correctly. Secretary login successful with code 'secretaire2025'. Endpoint returns 200 OK with deleted counts: teacher_payments (0), student_receipts (0), prestataire_invoices (0). Secretary authentication and billing reset functionality working properly."
+
   - task: "Secretary Billing Dashboard Delete Endpoints"
     implemented: true
     working: true

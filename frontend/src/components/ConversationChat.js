@@ -167,7 +167,7 @@ const ConversationChat = ({ recipientId, recipientName, currentUserId }) => {
                           <Eye className="w-4 h-4" />
                         </button>
                         <a
-                          href={msg.attachment.file_url}
+                          href={getFileUrl(msg.attachment.file_url)}
                           download={msg.attachment.filename}
                           className={`p-1 rounded hover:bg-opacity-80 ${isOwn ? 'hover:bg-teal-800' : 'hover:bg-gray-200'}`}
                           title="Télécharger"

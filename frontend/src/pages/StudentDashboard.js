@@ -243,25 +243,30 @@ const StudentDashboard = () => {
       </nav>
 
       <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-12 max-w-7xl">
+        {/* Lettre de bienvenue K-Kids */}
+        {user.level === 'kkid' && <KidsWelcomeLetter user={user} />}
+        
         {/* Student of the Month Badge - Affichage ÉNORME pour célébrer */}
         <div className="mb-4 sm:mb-8 flex justify-center">
           <StudentOfMonthBadge showInProfile={true} />
         </div>
 
-        {/* Header avec info prof */}
+        {/* Header avec info prof - version K-Kids ou normale */}
         <div className="mb-4 sm:mb-8">
-          <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-2 sm:mb-4">Espace Étudiant</h2>
+          <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-2 sm:mb-4">
+            {user.level === 'kkid' ? '🎨 Espace K-Kids' : 'Espace Étudiant'}
+          </h2>
           <div className="grid md:grid-cols-2 gap-4">
-            <Card className="border-teal-100 bg-gradient-to-r from-teal-50 to-blue-50">
+            <Card className={user.level === 'kkid' ? 'border-pink-200 bg-gradient-to-r from-pink-50 to-purple-50' : 'border-teal-100 bg-gradient-to-r from-teal-50 to-blue-50'}>
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-teal-600 rounded-full flex items-center justify-center">
+                  <div className={`w-12 h-12 ${user.level === 'kkid' ? 'bg-pink-500' : 'bg-teal-600'} rounded-full flex items-center justify-center`}>
                     <User className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Votre professeur</p>
+                    <p className="text-sm text-gray-600">{user.level === 'kkid' ? 'Ton professeur' : 'Votre professeur'}</p>
                     {teacher ? (
-                      <p className="text-lg font-bold text-teal-800">
+                      <p className={`text-lg font-bold ${user.level === 'kkid' ? 'text-pink-700' : 'text-teal-800'}`}>
                         {teacher.first_name} {teacher.last_name}
                       </p>
                     ) : (

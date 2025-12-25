@@ -401,6 +401,37 @@ class ChallengeProgress(BaseModel):
     completed: bool = False
     completed_at: Optional[datetime] = None
 
+class GroupCourse(BaseModel):
+    """Modèle pour les cours groupés"""
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    description: str = ""
+    teacher_id: str
+    level: str  # beginner, intermediate, advanced
+    max_students: int = 6
+    current_students: List[str] = []  # List of student IDs
+    scheduled_days: List[str] = []  # ["monday", "wednesday", "friday"]
+    scheduled_time: str = ""  # "18:00"
+    price_per_person_eur: float = 80.0
+    price_per_person_fcfa: float = 50000.0
+    discount_4_plus: int = 10  # 10% discount for 4+ students
+    meet_link: str = ""
+    status: str = "open"  # open, full, in_progress, completed
+    start_date: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class GroupCourseEnrollment(BaseModel):
+    """Inscription à un cours groupé"""
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    group_course_id: str
+    student_id: str
+    enrolled_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    payment_status: str = "pending"  # pending, paid, cancelled
+    amount_paid: float = 0.0
+    currency: str = "EUR"
+
 # ============ UTILITIES ============
 
 def hash_password(password: str) -> str:

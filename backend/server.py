@@ -3972,6 +3972,13 @@ async def send_meet_link(data: MeetLinkCreate, current_user: dict = Depends(get_
         notification_type="meet_link"
     )
     
+    # 🎁 Coffre aux Trésors: Ajouter +2 points pour chaque lien de cours reçu
+    await add_student_points(
+        student_id=data.student_id, 
+        points=2, 
+        reason=f"Lien de cours reçu: {data.title}"
+    )
+    
     logger.info(f"Meet link sent by teacher {current_user['id']} to student {data.student_id}")
     return {"message": "Lien de cours envoyé", "meet_link_id": meet_link.id}
 

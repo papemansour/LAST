@@ -926,6 +926,16 @@ const StudentDashboard = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* Coffre aux Trésors Tab */}
+          <TabsContent value="treasure">
+            <TreasureChest />
+          </TabsContent>
+
+          {/* Cours Groupés Tab */}
+          <TabsContent value="group-courses">
+            <GroupCourses userRole="student" />
+          </TabsContent>
           </div>
         </Tabs>
       </div>

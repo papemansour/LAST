@@ -22,8 +22,10 @@ const StudentDocuments = () => {
   const getFullFileUrl = (fileUrl) => {
     if (!fileUrl) return '';
     if (fileUrl.startsWith('http')) return fileUrl;
-    // Les fichiers sont servis via /uploads/ (pas /api/uploads/)
-    return `${BACKEND_URL}${fileUrl}`;
+    // Les fichiers sont servis via /api/uploads/ pour passer par l'ingress Kubernetes
+    // Remplacer /uploads/ par /api/uploads/ si nécessaire
+    const cleanUrl = fileUrl.startsWith('/uploads/') ? fileUrl.replace('/uploads/', '/api/uploads/') : `/api${fileUrl}`;
+    return `${BACKEND_URL}${cleanUrl}`;
   };
 
   // Fonction de téléchargement forcé

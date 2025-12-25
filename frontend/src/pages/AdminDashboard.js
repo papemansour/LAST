@@ -1161,7 +1161,7 @@ const AdminDashboard = () => {
                         
                         <div className="mt-3 pt-3 border-t">
                           <p className="text-xs text-gray-500">
-                            Enregistré le {new Date(session.created_at).toLocaleString('fr-FR')}
+                            Enregistré le {session.created_at ? new Date(session.created_at).toLocaleString('fr-FR') : 'Date non disponible'}
                           </p>
                         </div>
                       </div>
@@ -1185,7 +1185,7 @@ const AdminDashboard = () => {
                   <div className="mb-6">
                     <h3 className="text-lg font-bold text-pink-600 mb-4 flex items-center gap-2">
                       <span className="text-2xl">👶</span>
-                      Pack K-Kid - Spécial Enfants (3-9 ans)
+                      Pack K-Kid - Spécial Enfants (3-10 ans)
                     </h3>
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-4 p-6 bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl border-2 border-pink-300 shadow-sm">

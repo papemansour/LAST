@@ -140,7 +140,7 @@ const BookReader = () => {
                       <div className="mt-4 p-4 bg-blue-50 rounded">
                         <p className="text-sm text-blue-800">
                           📄 Pour afficher le contenu complet, le fichier doit être chargé depuis l'URL: 
-                          <a href={book.file_url} target="_blank" rel="noopener noreferrer" className="underline ml-1">
+                          <a href={getFileUrl(book.file_url)} target="_blank" rel="noopener noreferrer" className="underline ml-1">
                             Ouvrir le fichier
                           </a>
                         </p>
@@ -151,7 +151,7 @@ const BookReader = () => {
                       <BookOpen className="mx-auto h-16 w-16 text-gray-400 mb-4" />
                       <p className="text-gray-600 mb-4">Ce livre est au format {book.file_type.toUpperCase()}</p>
                       <a 
-                        href={book.file_url} 
+                        href={getFileUrl(book.file_url)} 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="inline-block px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition"

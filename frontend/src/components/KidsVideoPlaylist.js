@@ -60,7 +60,7 @@ const youtubePlaylist = {
       {
         id: 'yt-num-2',
         title: 'Count to 100',
-        description: 'Apprends à compter jusqu\'à 100!',
+        description: 'Compte de 1 à 100!',
         thumbnail: 'https://img.youtube.com/vi/SxgCA1qOW20/mqdefault.jpg',
         videoId: 'SxgCA1qOW20'
       },

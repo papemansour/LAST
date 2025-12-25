@@ -175,11 +175,16 @@ const KidsFlashcards = () => {
   useEffect(() => {
     const saved = localStorage.getItem('kkid_flashcard_progress');
     if (saved) {
-      const data = JSON.parse(saved);
-      setKnownCards(data.known || []);
-      setUnknownCards(data.unknown || []);
-      setFavorites(data.favorites || []);
+      try {
+        const data = JSON.parse(saved);
+        if (data.known) setKnownCards(data.known);
+        if (data.unknown) setUnknownCards(data.unknown);
+        if (data.favorites) setFavorites(data.favorites);
+      } catch (e) {
+        console.log('Error loading flashcard progress:', e);
+      }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Save progress

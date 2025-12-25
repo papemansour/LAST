@@ -623,6 +623,58 @@ TEST_QUESTIONS = {
     ]
 }
 
+# ============ HELPER FUNCTIONS ============
+
+async def add_student_points(student_id: str, points: int, reason: str = ""):
+    """Add points to a student's treasure chest (Coffre aux Trésors)"""
+    try:
+        # Get or create points record
+        points_record = await db.student_points.find_one({"student_id": student_id})
+        
+        if points_record:
+            # Update existing record
+            new_total = points_record.get('total_points', 0) + points
+            new_available = points_record.get('available_points', 0) + points
+            await db.student_points.update_one(
+                {"student_id": student_id},
+                {
+                    "$set": {
+                        "total_points": new_total,
+                        "available_points": new_available,
+                        "last_updated": datetime.now(timezone.utc).isoformat()
+                    }
+                }
+            )
+        else:
+            # Create new record
+            new_record = {
+                "id": str(uuid4()),
+                "student_id": student_id,
+                "total_points": points,
+                "available_points": points,
+                "total_discount_earned": 0.0,
+                "last_updated": datetime.now(timezone.utc).isoformat()
+            }
+            await db.student_points.insert_one(new_record)
+        
+        logger.info(f"Added {points} points to student {student_id}: {reason}")
+        
+        # Check if student reached 50 points milestone
+        updated_record = await db.student_points.find_one({"student_id": student_id})
+        if updated_record and updated_record.get('available_points', 0) >= 50:
+            # Create notification for unlocked rewards
+            await create_notification(
+                user_id=student_id,
+                title="🎁 Récompenses débloquées !",
+                message="Félicitations ! Vous avez atteint 50 points. Vos réductions sont maintenant actives dans votre Coffre aux Trésors !",
+                notification_type="reward"
+            )
+        
+        return True
+    except Exception as e:
+        logger.error(f"Error adding points to student {student_id}: {str(e)}")
+        return False
+
 # ============ ROUTES ============
 
 @api_router.get("/uploads/{file_path:path}")

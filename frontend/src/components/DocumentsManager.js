@@ -6,7 +6,8 @@ import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
-import { Upload, FileText, Trash2, Users, CheckCircle2, Send, X } from 'lucide-react';
+import { getFileUrl } from '../utils/fileUrl';
+import { Upload, FileText, Trash2, Users, CheckCircle2, Send, X, Download, Eye } from 'lucide-react';
 import {
   Dialog,
   DialogContent,

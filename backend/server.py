@@ -4190,7 +4190,7 @@ async def get_current_challenges():
 
 @api_router.get("/student/my-points")
 async def get_my_points(current_user: dict = Depends(get_current_user)):
-    """Get student's points and discount"""
+    """Get student's points and discount - Coffre aux Trésors"""
     if current_user['role'] != 'student':
         raise HTTPException(status_code=403, detail="Student access required")
     
@@ -4205,15 +4205,46 @@ async def get_my_points(current_user: dict = Depends(get_current_user)):
         await db.student_points.insert_one(doc)
         points_record = doc
     
-    # Calculate discount (50 points = 1€ or 100 FCFA)
-    euro_discount = (points_record['available_points'] // 50) * 1
-    fcfa_discount = (points_record['available_points'] // 50) * 100
+    available_points = points_record.get('available_points', 0)
+    
+    # Système de récompenses par paliers
+    rewards = {
+        "unlocked": available_points >= 50,  # Réductions actives à partir de 50 points
+        "current_tier": 0,
+        "tiers": [
+            {"points": 50, "discount_eur": 5, "discount_fcfa": 3000, "label": "🥉 Bronze", "unlocked": available_points >= 50},
+            {"points": 100, "discount_eur": 12, "discount_fcfa": 7500, "label": "🥈 Argent", "unlocked": available_points >= 100},
+            {"points": 200, "discount_eur": 25, "discount_fcfa": 15000, "label": "🥇 Or", "unlocked": available_points >= 200},
+            {"points": 500, "discount_eur": 70, "discount_fcfa": 45000, "label": "💎 Diamant", "unlocked": available_points >= 500}
+        ],
+        "next_tier_points": 50 if available_points < 50 else (100 if available_points < 100 else (200 if available_points < 200 else (500 if available_points < 500 else None)))
+    }
+    
+    # Déterminer le palier actuel
+    if available_points >= 500:
+        rewards["current_tier"] = 4
+    elif available_points >= 200:
+        rewards["current_tier"] = 3
+    elif available_points >= 100:
+        rewards["current_tier"] = 2
+    elif available_points >= 50:
+        rewards["current_tier"] = 1
+    
+    # Calculer la réduction actuelle basée sur le palier
+    current_discount_eur = 0
+    current_discount_fcfa = 0
+    if rewards["current_tier"] > 0:
+        tier_index = rewards["current_tier"] - 1
+        current_discount_eur = rewards["tiers"][tier_index]["discount_eur"]
+        current_discount_fcfa = rewards["tiers"][tier_index]["discount_fcfa"]
     
     return {
-        "total_points": points_record['total_points'],
-        "available_points": points_record['available_points'],
-        "euro_discount": euro_discount,
-        "fcfa_discount": fcfa_discount,
+        "total_points": points_record.get('total_points', 0),
+        "available_points": available_points,
+        "rewards": rewards,
+        "current_discount_eur": current_discount_eur,
+        "current_discount_fcfa": current_discount_fcfa,
+        "points_to_next_tier": (rewards["next_tier_points"] - available_points) if rewards["next_tier_points"] else 0,
         "total_discount_earned": points_record.get('total_discount_earned', 0)
     }
 

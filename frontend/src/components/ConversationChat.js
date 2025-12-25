@@ -256,26 +256,26 @@ const ConversationChat = ({ recipientId, recipientName, currentUserId }) => {
           </DialogHeader>
           <div className="overflow-auto">
             {(selectedFile?.file_type === 'image' || selectedFile?.file_type?.startsWith('image/')) ? (
-              <img src={selectedFile.file_url} alt={selectedFile.filename} className="w-full" />
+              <img src={getFileUrl(selectedFile.file_url)} alt={selectedFile.filename} className="w-full" />
             ) : selectedFile?.file_type === 'pdf' ? (
               <iframe
-                src={selectedFile?.file_url}
+                src={getFileUrl(selectedFile?.file_url)}
                 className="w-full h-[70vh]"
                 title={selectedFile?.filename}
               />
             ) : selectedFile?.file_type === 'video' ? (
               <video controls className="w-full">
-                <source src={selectedFile.file_url} />
+                <source src={getFileUrl(selectedFile.file_url)} />
                 Votre navigateur ne supporte pas la lecture vidéo.
               </video>
             ) : selectedFile?.file_type === 'audio' ? (
               <audio controls className="w-full">
-                <source src={selectedFile.file_url} />
+                <source src={getFileUrl(selectedFile.file_url)} />
                 Votre navigateur ne supporte pas la lecture audio.
               </audio>
             ) : selectedFile?.file_type === 'document' || selectedFile?.file_type === 'spreadsheet' ? (
               <iframe
-                src={`https://docs.google.com/viewer?url=${encodeURIComponent(window.location.origin + selectedFile?.file_url)}&embedded=true`}
+                src={`https://docs.google.com/viewer?url=${encodeURIComponent(getFileUrl(selectedFile?.file_url))}&embedded=true`}
                 className="w-full h-[70vh]"
                 title={selectedFile?.filename}
               />
@@ -288,7 +288,7 @@ const ConversationChat = ({ recipientId, recipientName, currentUserId }) => {
                 </div>
                 <div className="flex justify-center">
                   <a 
-                    href={selectedFile?.file_url} 
+                    href={getFileUrl(selectedFile?.file_url)} 
                     download={selectedFile?.filename}
                     className="inline-flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-semibold"
                   >

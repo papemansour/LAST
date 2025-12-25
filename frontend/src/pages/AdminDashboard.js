@@ -1068,20 +1068,37 @@ const AdminDashboard = () => {
                 <CardDescription>Pointages des cours terminés avec statistiques complètes</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button 
-                  onClick={async () => {
-                    try {
-                      const res = await apiClient.get('/admin/teacher-sessions');
-                      setTeacherSessions(res.data);
-                      toast.success('Statistiques actualisées');
-                    } catch (error) {
-                      toast.error('Erreur de chargement');
-                    }
-                  }}
-                  className="mb-4"
-                >
-                  🔄 Actualiser les statistiques
-                </Button>
+                <div className="flex gap-2 mb-4">
+                  <Button 
+                    onClick={async () => {
+                      try {
+                        const res = await apiClient.get('/admin/teacher-sessions');
+                        setTeacherSessions(res.data);
+                        toast.success('Statistiques actualisées');
+                      } catch (error) {
+                        toast.error('Erreur de chargement');
+                      }
+                    }}
+                  >
+                    🔄 Actualiser
+                  </Button>
+                  <Button 
+                    variant="destructive"
+                    onClick={async () => {
+                      if (window.confirm('⚠️ Supprimer TOUTES les assiduités passées ?\n\nCette action est irréversible.')) {
+                        try {
+                          await apiClient.delete('/admin/teacher-sessions');
+                          setTeacherSessions([]);
+                          toast.success('✅ Toutes les assiduités ont été supprimées');
+                        } catch (error) {
+                          toast.error('Erreur lors de la suppression');
+                        }
+                      }
+                    }}
+                  >
+                    🗑️ Supprimer tout
+                  </Button>
+                </div>
                 {teacherSessions.length === 0 ? (
                   <p className="text-gray-500">Aucune session enregistrée</p>
                 ) : (
@@ -1094,9 +1111,29 @@ const AdminDashboard = () => {
                             <p className="text-sm text-gray-600">{session.teacher_email}</p>
                             <p className="text-xs text-gray-500">Session ID: {session.id}</p>
                           </div>
-                          <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
-                            ✓ Terminé
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
+                              ✓ Terminé
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                              onClick={async () => {
+                                if (window.confirm('Supprimer cette session ?')) {
+                                  try {
+                                    await apiClient.delete(`/admin/teacher-sessions/${session.id}`);
+                                    setTeacherSessions(teacherSessions.filter(s => s.id !== session.id));
+                                    toast.success('Session supprimée');
+                                  } catch (error) {
+                                    toast.error('Erreur lors de la suppression');
+                                  }
+                                }
+                              }}
+                            >
+                              🗑️
+                            </Button>
+                          </div>
                         </div>
                         
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3">

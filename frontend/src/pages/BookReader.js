@@ -6,6 +6,7 @@ import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
+import { getFileUrl } from '../utils/fileUrl';
 import { ArrowLeft, Search, Volume2, Brain, BookOpen } from 'lucide-react';
 
 const BookReader = () => {

@@ -6,6 +6,7 @@ import { Button } from '../components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
+import { getFileUrl } from '../utils/fileUrl';
 import { Search, Volume2, BookOpen, LogOut, Brain, Download } from 'lucide-react';
 
 const Kalamatheque = () => {

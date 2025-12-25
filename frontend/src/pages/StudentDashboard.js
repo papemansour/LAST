@@ -625,6 +625,114 @@ const StudentDashboard = () => {
           </TabsContent>
 
           {/* Documents Tab */}
+          {/* K-Kid Quiz Tab */}
+          {user.level === 'kkid' && (
+            <TabsContent value="quiz">
+              <Card className="border-pink-200">
+                <CardHeader className="bg-gradient-to-r from-pink-100 to-purple-100">
+                  <CardTitle className="flex items-center gap-2">
+                    <Trophy className="w-6 h-6 text-pink-600" />
+                    🧠 Quiz Interactifs
+                  </CardTitle>
+                  <CardDescription>Teste tes connaissances en anglais !</CardDescription>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {/* Quiz pour enfants - Couleurs */}
+                    <Card className="border-2 border-yellow-300 hover:shadow-lg transition-all cursor-pointer bg-gradient-to-br from-yellow-50 to-orange-50">
+                      <CardContent className="p-6 text-center">
+                        <div className="text-5xl mb-3">🎨</div>
+                        <h3 className="font-bold text-lg text-yellow-700">Les Couleurs</h3>
+                        <p className="text-sm text-gray-600 mt-2">Apprends les couleurs en anglais</p>
+                        <Button 
+                          className="mt-4 bg-yellow-500 hover:bg-yellow-600 w-full"
+                          onClick={() => toast.info('Quiz des couleurs en préparation!')}
+                        >
+                          🎯 Jouer
+                        </Button>
+                      </CardContent>
+                    </Card>
+                    
+                    {/* Quiz pour enfants - Animaux */}
+                    <Card className="border-2 border-green-300 hover:shadow-lg transition-all cursor-pointer bg-gradient-to-br from-green-50 to-emerald-50">
+                      <CardContent className="p-6 text-center">
+                        <div className="text-5xl mb-3">🦁</div>
+                        <h3 className="font-bold text-lg text-green-700">Les Animaux</h3>
+                        <p className="text-sm text-gray-600 mt-2">Découvre les animaux en anglais</p>
+                        <Button 
+                          className="mt-4 bg-green-500 hover:bg-green-600 w-full"
+                          onClick={() => toast.info('Quiz des animaux en préparation!')}
+                        >
+                          🎯 Jouer
+                        </Button>
+                      </CardContent>
+                    </Card>
+                    
+                    {/* Quiz pour enfants - Chiffres */}
+                    <Card className="border-2 border-blue-300 hover:shadow-lg transition-all cursor-pointer bg-gradient-to-br from-blue-50 to-cyan-50">
+                      <CardContent className="p-6 text-center">
+                        <div className="text-5xl mb-3">🔢</div>
+                        <h3 className="font-bold text-lg text-blue-700">Les Chiffres</h3>
+                        <p className="text-sm text-gray-600 mt-2">Compte de 1 à 20 en anglais</p>
+                        <Button 
+                          className="mt-4 bg-blue-500 hover:bg-blue-600 w-full"
+                          onClick={() => toast.info('Quiz des chiffres en préparation!')}
+                        >
+                          🎯 Jouer
+                        </Button>
+                      </CardContent>
+                    </Card>
+                    
+                    {/* Quiz pour enfants - Famille */}
+                    <Card className="border-2 border-purple-300 hover:shadow-lg transition-all cursor-pointer bg-gradient-to-br from-purple-50 to-pink-50">
+                      <CardContent className="p-6 text-center">
+                        <div className="text-5xl mb-3">👨‍👩‍👧‍👦</div>
+                        <h3 className="font-bold text-lg text-purple-700">La Famille</h3>
+                        <p className="text-sm text-gray-600 mt-2">Les membres de la famille</p>
+                        <Button 
+                          className="mt-4 bg-purple-500 hover:bg-purple-600 w-full"
+                          onClick={() => toast.info('Quiz de la famille en préparation!')}
+                        >
+                          🎯 Jouer
+                        </Button>
+                      </CardContent>
+                    </Card>
+                    
+                    {/* Quiz pour enfants - Nourriture */}
+                    <Card className="border-2 border-red-300 hover:shadow-lg transition-all cursor-pointer bg-gradient-to-br from-red-50 to-orange-50">
+                      <CardContent className="p-6 text-center">
+                        <div className="text-5xl mb-3">🍎</div>
+                        <h3 className="font-bold text-lg text-red-700">La Nourriture</h3>
+                        <p className="text-sm text-gray-600 mt-2">Fruits, légumes et repas</p>
+                        <Button 
+                          className="mt-4 bg-red-500 hover:bg-red-600 w-full"
+                          onClick={() => toast.info('Quiz de la nourriture en préparation!')}
+                        >
+                          🎯 Jouer
+                        </Button>
+                      </CardContent>
+                    </Card>
+                    
+                    {/* Quiz pour enfants - Corps */}
+                    <Card className="border-2 border-teal-300 hover:shadow-lg transition-all cursor-pointer bg-gradient-to-br from-teal-50 to-cyan-50">
+                      <CardContent className="p-6 text-center">
+                        <div className="text-5xl mb-3">🧍</div>
+                        <h3 className="font-bold text-lg text-teal-700">Le Corps</h3>
+                        <p className="text-sm text-gray-600 mt-2">Les parties du corps</p>
+                        <Button 
+                          className="mt-4 bg-teal-500 hover:bg-teal-600 w-full"
+                          onClick={() => toast.info('Quiz du corps en préparation!')}
+                        >
+                          🎯 Jouer
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
+
           {/* K-Kid Videos Tab */}
           {user.level === 'kkid' && (
             <TabsContent value="videos">
@@ -693,19 +801,23 @@ const StudentDashboard = () => {
             </TabsContent>
           )}
           
-          {/* Gifts Tab for K-Kids */}
+          {/* Rewards Tab for K-Kids */}
           {user.level === 'kkid' && (
-            <TabsContent value="gifts">
-              <Card>
-                <CardHeader>
+            <TabsContent value="rewards">
+              <Card className="border-pink-200">
+                <CardHeader className="bg-gradient-to-r from-amber-100 to-yellow-100">
                   <CardTitle className="flex items-center gap-2">
-                    <Heart className="w-6 h-6 text-pink-600" />
-                    🎁 Mes Cadeaux
+                    <Gift className="w-6 h-6 text-amber-600" />
+                    🎁 Mes Récompenses
                   </CardTitle>
-                  <CardDescription>Découvre les cadeaux du weekend!</CardDescription>
+                  <CardDescription>Tes cadeaux et récompenses pour ton travail!</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <WeekendGifts user={user} />
+                <CardContent className="p-6">
+                  <TreasureChest />
+                  <div className="mt-6">
+                    <h4 className="font-semibold text-lg mb-4 text-pink-700">🎉 Cadeaux du Weekend</h4>
+                    <WeekendGifts user={user} />
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>

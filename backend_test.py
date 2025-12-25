@@ -2590,16 +2590,19 @@ startxref
             logger.error("❌ Cannot proceed without admin login")
             return
         
-        # NEW REVIEW REQUEST TESTS (HIGHEST PRIORITY)
-        logger.info(f"\n🎯 Running: NEW REVIEW REQUEST TESTS")
+        # CURRENT REVIEW REQUEST TESTS (HIGHEST PRIORITY)
+        logger.info(f"\n🎯 Running: CURRENT REVIEW REQUEST TESTS")
         logger.info("=" * 70)
         
-        # Run all review request features
-        await self.test_review_request_features()
+        # Run current review request features
+        await self.test_current_review_request_features()
 
         # PREVIOUS REVIEW REQUEST TESTS (SECONDARY PRIORITY)
         logger.info(f"\n🎯 Running: PREVIOUS REVIEW REQUEST TESTS")
         logger.info("=" * 70)
+        
+        # Run all previous review request features
+        await self.test_review_request_features()
         
         # Test 1: Dashboard Access for all 3 roles
         logger.info(f"\n📋 Running: Dashboard Access Test (Admin, Teacher, Student)")

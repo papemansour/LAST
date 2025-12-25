@@ -410,6 +410,20 @@ const StudentDashboard = () => {
               <UserCircle className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Profil</span>
             </TabsTrigger>
+            <TabsTrigger 
+              value="treasure" 
+              className="h-24 data-[state=active]:bg-amber-500 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+            >
+              <Gift className="w-8 h-8 text-amber-500 data-[state=active]:text-white" />
+              <span className="text-xs font-semibold">Coffre</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="group-courses" 
+              className="h-24 data-[state=active]:bg-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+            >
+              <Users className="w-8 h-8 text-cyan-600 data-[state=active]:text-white" />
+              <span className="text-xs font-semibold">Groupés</span>
+            </TabsTrigger>
               </>
             )}
           </TabsList>

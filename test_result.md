@@ -637,6 +637,11 @@ test_plan:
   test_all: false
   test_priority: "high_first"
   review_request_completed:
+    - "Group Courses - Get All Endpoint"
+    - "Group Courses - Create Endpoint (Admin)"
+    - "Student Points - Get My Points Endpoint"
+    - "Delete All Teacher Sessions (Admin)"
+    - "Reset Billing Stats (Secretary)"
     - "Admin - Change Teacher Dialog"
     - "Secretary Dashboard - Reports"
     - "Secretary Dashboard - Meetings"

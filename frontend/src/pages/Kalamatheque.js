@@ -317,7 +317,7 @@ const Kalamatheque = () => {
                           👁️ Ouvrir
                         </Button>
                         <a 
-                          href={book.file_url} 
+                          href={getFileUrl(book.file_url)} 
                           download={book.title}
                           onClick={(e) => e.stopPropagation()}
                           className="flex-1"

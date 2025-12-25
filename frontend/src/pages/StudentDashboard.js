@@ -14,7 +14,7 @@ import {
 } from '../components/ui/dialog';
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
-import { LogOut, BookOpen, FileText, Link as LinkIcon, Upload, Send, User, Mail, MessageCircle, Heart, Sparkles, Eye, GraduationCap, Gamepad2, Newspaper, Library, UserCircle, Video, TrendingUp, Trophy, Gift, Users } from 'lucide-react';
+import { LogOut, BookOpen, FileText, Link as LinkIcon, Upload, Send, User, Mail, MessageCircle, Heart, Sparkles, Eye, GraduationCap, Gamepad2, Newspaper, Library, UserCircle, Video, TrendingUp, Trophy, Gift } from 'lucide-react';
 import ConversationChat from '../components/ConversationChat';
 import NewsDisplay from '../components/NewsDisplay';
 import WelcomeLetter from '../components/WelcomeLetter';
@@ -31,7 +31,6 @@ import LiveNotifications from '../components/LiveNotifications';
 import StudentGames from '../components/StudentGamesAdvanced';
 import WeekendGifts from '../components/WeekendGifts';
 import TreasureChest from '../components/TreasureChest';
-import GroupCourses from '../components/GroupCourses';
 const StudentDashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);

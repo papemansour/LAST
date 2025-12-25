@@ -4,6 +4,7 @@ import { Input } from './ui/input';
 import { Card } from './ui/card';
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
+import { getFileUrl } from '../utils/fileUrl';
 import { Send, Paperclip, X, Download, Eye, Trash2, FileText, Image as ImageIcon, File } from 'lucide-react';
 import {
   Dialog,

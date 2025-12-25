@@ -3,6 +3,7 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
+import { getFileUrl } from '../utils/fileUrl';
 import { FileText, Download, Eye, File, Image as ImageIcon, Clock } from 'lucide-react';
 import {
   Dialog,
@@ -11,22 +12,13 @@ import {
   DialogTitle,
 } from './ui/dialog';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
-
 const StudentDocuments = () => {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [showDocumentDialog, setShowDocumentDialog] = useState(false);
 
-  const getFullFileUrl = (fileUrl) => {
-    if (!fileUrl) return '';
-    if (fileUrl.startsWith('http')) return fileUrl;
-    // Les fichiers sont servis via /api/uploads/ pour passer par l'ingress Kubernetes
-    // Remplacer /uploads/ par /api/uploads/ si nécessaire
-    const cleanUrl = fileUrl.startsWith('/uploads/') ? fileUrl.replace('/uploads/', '/api/uploads/') : `/api${fileUrl}`;
-    return `${BACKEND_URL}${cleanUrl}`;
-  };
+  const getFullFileUrl = getFileUrl; // Use centralized function
 
   // Fonction de téléchargement forcé
   const handleDownload = async (doc) => {

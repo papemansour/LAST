@@ -289,34 +289,34 @@ const StudentDashboard = () => {
           </div>
         </div>
 
-        <Tabs defaultValue={user.level === 'kkid' ? 'videos' : 'welcome'} className="space-y-6">
+        <Tabs defaultValue={user.level === 'kkid' ? 'quiz' : 'welcome'} className="space-y-6">
           {/* Grid Navigation Cards */}
           <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-3 h-auto bg-transparent p-0">
-            {/* K-Kid Dashboard Simplifié : Seulement Vidéos, Jeux, Cadeaux */}
+            {/* K-Kid Dashboard : Quiz, Vidéo, Récompense */}
             {user.level === 'kkid' ? (
               <>
+                <TabsTrigger 
+                  value="quiz" 
+                  className="h-24 data-[state=active]:bg-pink-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Trophy className="w-8 h-8 text-pink-600 data-[state=active]:text-white" />
+                  <span className="text-xs font-semibold">🧠 Quiz</span>
+                </TabsTrigger>
+                
                 <TabsTrigger 
                   value="videos" 
                   className="h-24 data-[state=active]:bg-pink-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
                 >
                   <Video className="w-8 h-8 text-pink-600 data-[state=active]:text-white" />
-                  <span className="text-xs font-semibold">🎥 Vidéos</span>
+                  <span className="text-xs font-semibold">🎥 Vidéo</span>
                 </TabsTrigger>
                 
                 <TabsTrigger 
-                  value="games" 
+                  value="rewards" 
                   className="h-24 data-[state=active]:bg-pink-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
                 >
-                  <Gamepad2 className="w-8 h-8 text-pink-600 data-[state=active]:text-white" />
-                  <span className="text-xs font-semibold">🎮 Jeux</span>
-                </TabsTrigger>
-                
-                <TabsTrigger 
-                  value="gifts" 
-                  className="h-24 data-[state=active]:bg-pink-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
-                >
-                  <Heart className="w-8 h-8 text-pink-600 data-[state=active]:text-white" />
-                  <span className="text-xs font-semibold">🎁 Cadeaux</span>
+                  <Gift className="w-8 h-8 text-pink-600 data-[state=active]:text-white" />
+                  <span className="text-xs font-semibold">🎁 Récompense</span>
                 </TabsTrigger>
               </>
             ) : (

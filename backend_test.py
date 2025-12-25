@@ -39,7 +39,14 @@ class MyKalamaEnglishBackendTester:
         self.test_student_id = None
         self.test_flashcard_set_id = None
         self.test_results = {
-            # Review Request Priority Tests - NEW FOCUS
+            # NEW REVIEW REQUEST TESTS - CURRENT FOCUS
+            "group_courses_get_all": {"passed": False, "details": []},
+            "group_courses_create": {"passed": False, "details": []},
+            "student_points_get": {"passed": False, "details": []},
+            "delete_teacher_sessions": {"passed": False, "details": []},
+            "reset_billing_stats": {"passed": False, "details": []},
+            
+            # Review Request Priority Tests - PREVIOUS
             "secretary_billing_delete": {"passed": False, "details": []},
             "admin_change_teacher": {"passed": False, "details": []},
             "secretary_reports": {"passed": False, "details": []},

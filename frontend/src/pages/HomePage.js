@@ -962,11 +962,167 @@ const HomePage = () => {
               {selectedPlan ? `Inscription - ${selectedPlan.name}` : 'Rejoignez My KALAMA English'}
             </DialogTitle>
             <DialogDescription>
-              {selectedPlan ? `Inscrivez-vous et payez ${formatPrice(selectedPlan.price)}` : 'Inscrivez-vous maintenant et commencez votre parcours d\'apprentissage'}
+              {selectedPlan?.level === 'kkid' 
+                ? '🎨 Inscrivez votre enfant à l\'aventure K-Kids !'
+                : selectedPlan ? `Inscrivez-vous et payez ${formatPrice(selectedPlan.price)}` : 'Inscrivez-vous maintenant et commencez votre parcours d\'apprentissage'}
             </DialogDescription>
           </DialogHeader>
           
           <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Formulaire spécial K-Kids */}
+                {selectedPlan?.level === 'kkid' ? (
+                  <>
+                    <div className="bg-gradient-to-r from-pink-100 to-purple-100 p-4 rounded-lg border-2 border-pink-300">
+                      <div className="flex items-center gap-3">
+                        <span className="text-4xl">🧒</span>
+                        <div>
+                          <h3 className="font-bold text-pink-700">Pack K-Kids</h3>
+                          <p className="text-sm text-gray-600">Cours d'anglais ludiques pour les enfants de 5 à 12 ans</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <h3 className="font-semibold text-lg border-b pb-2 text-pink-700">👶 Informations de l'enfant</h3>
+                    
+                    <div className="space-y-4">
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="child_first_name">Prénom de l'enfant *</Label>
+                          <Input
+                            id="child_first_name"
+                            required
+                            value={formData.first_name}
+                            onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                            placeholder="Ex: Léo"
+                            className="border-pink-200"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="child_last_name">Nom de l'enfant *</Label>
+                          <Input
+                            id="child_last_name"
+                            required
+                            value={formData.last_name}
+                            onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                            placeholder="Ex: Dupont"
+                            className="border-pink-200"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="child_age">Âge de l'enfant *</Label>
+                        <Select
+                          value={formData.child_age || ''}
+                          onValueChange={(value) => setFormData({ ...formData, child_age: value })}
+                        >
+                          <SelectTrigger className="border-pink-200">
+                            <SelectValue placeholder="Sélectionnez l'âge" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="5">5 ans</SelectItem>
+                            <SelectItem value="6">6 ans</SelectItem>
+                            <SelectItem value="7">7 ans</SelectItem>
+                            <SelectItem value="8">8 ans</SelectItem>
+                            <SelectItem value="9">9 ans</SelectItem>
+                            <SelectItem value="10">10 ans</SelectItem>
+                            <SelectItem value="11">11 ans</SelectItem>
+                            <SelectItem value="12">12 ans</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <h3 className="font-semibold text-lg border-b pb-2 mt-6 text-teal-700">👨‍👩‍👧 Informations du parent</h3>
+
+                    <div className="space-y-4">
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="parent_first_name">Prénom du parent *</Label>
+                          <Input
+                            id="parent_first_name"
+                            required
+                            value={formData.parent_first_name || ''}
+                            onChange={(e) => setFormData({ ...formData, parent_first_name: e.target.value })}
+                            placeholder="Ex: Marie"
+                            className="border-gray-200"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="parent_last_name">Nom du parent *</Label>
+                          <Input
+                            id="parent_last_name"
+                            required
+                            value={formData.parent_last_name || ''}
+                            onChange={(e) => setFormData({ ...formData, parent_last_name: e.target.value })}
+                            placeholder="Ex: Dupont"
+                            className="border-gray-200"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="parent_email">Email du parent *</Label>
+                        <Input
+                          id="parent_email"
+                          type="email"
+                          required
+                          value={formData.email}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          placeholder="parent@email.com"
+                          className="border-gray-200"
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="parent_phone">Téléphone du parent *</Label>
+                        <div className="flex gap-2">
+                          <Select
+                            value={formData.country_code}
+                            onValueChange={(value) => setFormData({ ...formData, country_code: value })}
+                          >
+                            <SelectTrigger className="w-[140px]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="max-h-[300px]">
+                              <SelectItem value="+33">🇫🇷 +33</SelectItem>
+                              <SelectItem value="+221">🇸🇳 +221</SelectItem>
+                              <SelectItem value="+225">🇨🇮 +225</SelectItem>
+                              <SelectItem value="+223">🇲🇱 +223</SelectItem>
+                              <SelectItem value="+237">🇨🇲 +237</SelectItem>
+                              <SelectItem value="+1">🇺🇸 +1</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Input
+                            id="parent_phone"
+                            required
+                            value={formData.phone}
+                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                            placeholder="6 12 34 56 78"
+                            className="flex-1"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Info Box K-Kids */}
+                    <div className="bg-yellow-50 p-4 rounded-lg border-2 border-yellow-300 mt-4">
+                      <div className="flex items-start gap-3">
+                        <span className="text-2xl">🎉</span>
+                        <div className="text-sm">
+                          <p className="font-semibold text-yellow-800">Ce que votre enfant va découvrir :</p>
+                          <ul className="mt-2 space-y-1 text-yellow-700">
+                            <li>🧠 Quiz interactifs et amusants</li>
+                            <li>🎥 Vidéos éducatives adaptées</li>
+                            <li>🎁 Système de récompenses et points</li>
+                            <li>👩‍🏫 Suivi personnalisé par un professeur</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                <>
                 {/* Type de cours */}
                 <div className="bg-teal-50 p-4 rounded-lg">
                   <Label className="text-base font-semibold mb-2 block">Type de cours *</Label>

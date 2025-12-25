@@ -1,164 +1,172 @@
 <analysis>**original_problem_statement:**
-L'utilisateur a une liste de demandes pour faire évoluer son site MyKalamaenglish. Au cours de cette session, les demandes suivantes ont été faites :
-1.  Corriger les redirections de paiement Stripe qui ne fonctionnaient pas, en utilisant des liens et un code promo spécifiques fournis par l'utilisateur.
-2.  Corriger un bug dans l'onglet Club du dashboard étudiant, qui s'est avéré être le même problème que les liens Stripe.
-3.  Investiguer et résoudre un bug critique où les données des utilisateurs semblaient changer automatiquement, ce qui bloquait le développement de la fonctionnalité de code de groupe pour les professeurs.
-4.  Finaliser l'interface de gestion des codes de groupe pour les professeurs.
-5.  Implémenter la fonctionnalité d'envoi de tous types de pièces jointes dans la messagerie.
-6.  Corriger un bug qui empêchait d'ouvrir et de lire les pièces jointes dans la messagerie.
-7.  Mettre à jour les prix des packs sur la page d'accueil, en ajoutant une promotion de -10% uniquement pour les paiements en FCFA, avec une date d'expiration au 14/01/2026.
-8.  Nettoyer les instructions de paiement Wave sur la page d'accueil.
-9.  Supprimer la section du code promotionnel du formulaire d'inscription.
-10. Rendre le numéro de téléphone de l'étudiant visible dans le dashboard de l'administrateur.
-11. Mettre à jour le template de l'e-mail de bienvenue envoyé après l'approbation de l'inscription par l'admin.
-12. Préserver 7 comptes utilisateurs spécifiques avec leurs identifiants dans la base de données.
-13. Ajouter une fonctionnalité de suppression groupée et de filtrage par niveau pour les étudiants dans le dashboard de l'administrateur.
-
-**PRODUCT REQUIREMENTS:**
-- **Rôles Utilisateur :** Admin, Professeur, Étudiant (avec sous-rôle K-Kid).
-- **Architecture Technique :** Application full-stack avec un frontend React et un backend FastAPI + MongoDB.
-- **Fonctionnalités Clés :**
-    - Dashboards personnalisés par rôle.
-    - Intégration de paiement avec Stripe.
-    - Gestion des utilisateurs, groupes, et contenus.
-    - Système de messagerie avec support de pièces jointes.
-    - Système de Kalama Club pour les étudiants.
-    - Tarification dynamique avec promotions conditionnelles (devise, date).
-    - Envoi d'e-mails transactionnels (via AWS SES, actuellement en mode mock/log).
+L'utilisateur a demandé une série de nouvelles fonctionnalités et de corrections de bugs :
+1.  **Messagerie :** L'administrateur doit pouvoir voir et contacter le secrétaire dans sa liste de contacts.
+2.  **Facturation :**
+    *   La TVA doit être **incluse** dans le montant saisi pour les professeurs et **déduite** pour calculer le montant net (ex: 100€ TTC -> 83,33€ net), au lieu d'être ajoutée.
+    *   Le bug de l'envoi d'e-mail des factures depuis l'espace secrétaire doit être corrigé.
+    *   Ajouter une option pour Remettre à zéro les statistiques de facturation (Total payé, Reçus générés, Paiements en attente).
+    *   Supprimer la note de TVA et la couleur rouge sur les factures des professeurs.
+    *   Dans les reçus élèves, afficher les prix des packs en FCFA en plus de l'EUR, en utilisant les prix réels de la base de données.
+    *   Les boutons Supprimer et Enregistrer des factures, qui ne fonctionnaient pas, doivent être implémentés.
+    *   Supprimer la TVA pour les reçus des étudiants.
+3.  **Bug Critique :** Le bug récurrent de téléchargement/visualisation des documents (Static file not found ou document non disponible) doit être corrigé de manière définitive.
+4.  **Espace Étudiant (K-Kids) :**
+    *   Mettre en place un système de récompenses Mon Coffre aux Trésors : l'étudiant gagne **+2 points** à chaque lien de cours reçu, et des réductions s'activent à **50 points**.
+    *   Remplacer l'onglet Groupés par un espace K-Kid amélioré avec trois onglets : **Quiz, Vidéo, Récompense**.
+    *   Créer un formulaire d'inscription spécifique pour le pack K-Kids sur la page d'accueil avec les champs : nom/prénom/âge de l'enfant (3-10 ans), et nom/prénom/email/téléphone d'un parent.
+    *   Ajouter une lettre de bienvenue amusante pour les nouveaux inscrits K-Kids.
+    *   Dans l'espace K-Kids :
+        *   Créer une playlist de vidéos (alphabet, chiffres, famille) avec images et prononciation.
+        *   Créer un jeu de flashcards (type swipe gauche/droite) avec les options Je connais, Je ne connais pas, Favori.
+        *   Permettre au professeur assigné d'envoyer des vidéos visibles uniquement par son étudiant K-Kid.
+5.  **Gestion Admin :**
+    *   Ajouter une option pour supprimer les enregistrements d'assiduité passés.
+    *   Corriger l'affichage Invalid Date sur les fiches d'assiduité.
 
 **User's preferred language**: Français
 
 **what currently exists?**
-L'application est une plateforme d'apprentissage de l'anglais fonctionnelle avec de nombreuses améliorations récentes. Les liens de paiement Stripe ont été corrigés et utilisent désormais un endpoint backend qui applique dynamiquement le code promo fourni par l'utilisateur. Le bug critique de modification automatique des données a été résolu ; il s'agissait d'une erreur de configuration de la base de données de test, et non d'un bug dans le code. Par conséquent, les endpoints de gestion des codes de groupe pour les professeurs sont maintenant confirmés comme étant fonctionnels, et l'interface frontend associée a été vérifiée et est prête à l'emploi. La fonctionnalité de pièces jointes dans la messagerie a été entièrement implémentée (frontend et backend) et testée avec succès par l'agent de test. Les prix sur la page d'accueil ont été mis à jour pour afficher une promotion conditionnelle (-10% pour les paiements en FCFA, avec une date d'expiration). L'e-mail de bienvenue a été mis à jour et 7 utilisateurs spécifiques ont été sauvegardés dans la base de données. L'agent a commencé à implémenter la sélection multiple et le filtrage dans le dashboard admin.
+L'application est une plateforme d'e-learning full-stack (React/FastAPI/MongoDB). Le dashboard secrétaire dispose d'un module de facturation très complet. Le bug de suppression des factures a été corrigé, et la logique de calcul de TVA inversée comme demandé. Un système de points basique existe et a été étendu pour donner des points lors de l'envoi de liens de cours. L'espace étudiant a été modifié pour inclure une section K-Kids avec des onglets dédiés (Quiz, Vidéo, Récompense) et une lettre de bienvenue. Un nouveau formulaire d'inscription K-Kids a été implémenté sur la page d'accueil. Le backend a été refactorisé pour servir les fichiers via un endpoint API  afin de résoudre un bug de déploiement, et une fonction utilitaire  a été créée côté frontend. Des endpoints pour supprimer l'assiduité ont été ajoutés.
 
 **Last working item**:
-- **Last item agent was working**: L'agent implémentait une nouvelle fonctionnalité dans le dashboard admin () pour permettre la sélection multiple d'étudiants pour une suppression groupée, ainsi que le filtrage de la liste des étudiants par niveau.
-    - **Reasoning**: Il s'agissait de la dernière demande de l'utilisateur. L'agent avait ajouté les états React nécessaires (, ), les fonctions de gestion (, , ), et modifiait le JSX pour ajouter les checkboxes, un bouton de suppression global et un menu déroulant pour le filtre. Il a rencontré des erreurs lors de la modification du JSX et tentait de les résoudre.
+- **Last item agent was working**: L'agent se préparait à implémenter une série de fonctionnalités avancées pour l'espace K-Kids, suite à une nouvelle demande de l'utilisateur. Cela inclut la création d'une playlist de vidéos personnalisée, un jeu de flashcards interactif, et la possibilité pour les professeurs d'envoyer des vidéos à leurs étudiants K-Kids. L'agent venait juste de terminer la création du formulaire d'inscription K-Kids et de la lettre de bienvenue.
 - **Status**: IN PROGRESS
-- **Agent Testing Done**: N
-- **Which testing method agent to use?**: screenshot tool. L'agent doit d'abord s'assurer que le composant se rend sans erreur, puis utiliser la capture d'écran pour vérifier visuellement que les nouvelles cases à cocher, le menu de filtre et le bouton de suppression s'affichent correctement. Ensuite, des tests d'interaction (cliquer sur les cases, le filtre, le bouton) seront nécessaires.
+- **Agent Testing Done**: Y (Vérification par capture d'écran du nouveau formulaire K-Kids)
+- **Which testing method agent to use?**: both (L'agent de test frontend est nécessaire pour valider les nouvelles interfaces K-Kids complexes comme le jeu de flashcards et le lecteur vidéo. L'agent de test backend est requis pour les nouveaux endpoints liés à l'envoi de vidéos par les professeurs.)
 - **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: Finaliser la fonctionnalité de gestion des étudiants dans le dashboard admin (P0)**
+- **Issue 1: Bug de prévisualisation/téléchargement des documents (P0 - CRITIQUE ET RÉCURRENT)**
+- **Issue 2: Invalid Date affiché sur les enregistrements d'assiduité (P2)**
 
 **Issues Detail:**
--   **Issue 1: Finaliser la fonctionnalité de gestion des étudiants dans le dashboard admin**
-    -   **Attempted fixes:** L'agent a commencé l'implémentation dans  en ajoutant des états et des fonctions. Il a ensuite modifié le JSX pour intégrer les éléments d'interface (checkboxes, filtre). Il a rencontré des erreurs de rendu pendant cette phase.
-    -   **Next debug checklist:**
-        1.  Examiner le fichier  pour identifier et corriger les erreurs de syntaxe JSX ou de logique qui empêchent le rendu correct du composant.
-        2.  S'assurer que la liste des étudiants filtrés () est correctement utilisée pour le rendu.
-        3.  Ajouter une case à cocher Tout sélectionner dans l'en-tête du tableau.
-        4.  Ajouter un bouton Supprimer la sélection qui ne devient actif que si au moins un étudiant est sélectionné.
-        5.  Implémenter la logique de l'appel API pour la suppression groupée dans la fonction . Un nouvel endpoint backend sera probablement nécessaire.
-    -   **Why fix this issue and what will be achieved with the fix?** Pour répondre à la demande de l'utilisateur qui souhaite un moyen plus efficace de gérer les listes d'étudiants.
-    -   **Status:** IN PROGRESS
-    -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** both
-    -   **Blocked on other issue:** non
+- **Issue 1: Bug de prévisualisation/téléchargement des documents**
+    - **Attempted fixes**: Le backend a été modifié pour servir les fichiers via  au lieu d'un dossier statique, ce qui a corrigé le problème de routage Ingress. Une fonction  a été créée et plusieurs composants ont été mis à jour. Cependant, l'utilisateur signale que le bug persiste (Static file not found). L'agent a identifié que le composant clé  n'a pas été mis à jour pour utiliser la nouvelle fonction.
+    - **Next debug checklist**:
+        1.  **Modifier  pour importer et utiliser la fonction  afin de construire les URLs des documents.**
+        2.  Faire un  sur tout le projet frontend pour trouver et remplacer toute instance restante d'URL de fichier construite manuellement.
+        3.  Demander à l'utilisateur de vérifier la console de son navigateur (onglet Réseau) lors d'une tentative de téléchargement pour voir l'URL exacte et le code de statut de l'erreur.
+    - **Why fix this issue and what will be achieved with the fix?** C'est une fonctionnalité fondamentale et le bug le plus persistant et frustrant pour l'utilisateur. Sa résolution est la priorité absolue.
+    - **Status**: IN PROGRESS
+    - **Is recurring issue?** Y
+    - **Should Test frontend/backend/both after fix?** both
+- **Issue 2: Invalid Date affiché sur les enregistrements d'assiduité**
+    - **Attempted fixes**: Aucun. L'agent a implémenté la suppression des assiduités mais n'a pas traité ce bug d'affichage.
+    - **Next debug checklist**:
+        1.  Identifier le composant qui affiche la liste des assiduités dans .
+        2.  Inspecter la valeur de la date .
+        3.  S'assurer que la date est correctement formatée en utilisant  et que la  est dans un format standard (ISO 8601).
+    - **Why fix this issue and what will be achieved with the fix?** Corrigera un bug visuel qui dégrade la crédibilité de l'interface admin.
+    - **Status**: NOT STARTED
+    - **Is recurring issue?** N
+    - **Should Test frontend/backend/both after fix?** frontend
 
 **In progress Task List**:
--   **Task 1: Finaliser la gestion des étudiants dans le dashboard admin (P0)**
-    -   **Where to resume:** Le fichier . L'agent doit d'abord stabiliser le code pour que la page s'affiche sans erreur, puis finaliser l'implémentation de l'interface et de la logique de suppression.
-    -   **What will be achieved with this?** L'administrateur pourra filtrer les étudiants par niveau et en supprimer plusieurs à la fois.
-    -   **Status:** IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?** both
-    -   **Blocked on something:** Non.
+- **Task 1: Développer les fonctionnalités avancées de l'espace K-Kids (P0)**
+    - **Where to resume**: Le plan est défini, il faut commencer l'implémentation.
+        1.  **Backend**: Créer les modèles et les endpoints pour une playlist vidéo par enfant et pour un jeu de flashcards. Créer un endpoint sécurisé pour que le professeur assigné puisse ajouter des vidéos à la playlist de son élève K-Kid.
+        2.  **Frontend**:
+            *   Modifier le formulaire K-Kids dans  pour que l'âge aille de 3 à 10 ans.
+            *   Dans , sous l'onglet Vidéo, développer l'interface de la playlist.
+            *   Sous l'onglet Quiz, développer le jeu de flashcards avec la mécanique de swipe et les boutons d'action.
+    - **What will be achieved with this?** Transformer le pack K-Kids en une expérience d'apprentissage riche et interactive, répondant à une demande majeure de l'utilisateur.
+    - **Status**: NOT STARTED
+    - **Should Test frontend/backend/both after fix?** both
 
 **Upcoming and Future Tasks**
-- **Future Tasks:**
-  - (P2) Refactorisation majeure du backend  en plusieurs fichiers (routes, modèles, etc.).
-  - (P3) Finaliser le gestionnaire de questions de test ().
-  - (P3) Implémenter la fonctionnalité de message groupé pour les professeurs.
+-   **Upcoming Tasks:**
+    -   (P1) **Stratégie pour les cours groupés**: Le backend a été préparé mais le besoin utilisateur reste flou (surprends-moi). Il faudra proposer une stratégie (ex: un forum de groupe, un calendrier de sessions partagées) et la valider.
+    -   (P1) **Synchroniser les factures avec Monday.com**: Demande initiale, non commencée.
+-   **Future Tasks:**
+    -   (P0) **Refactorisation de **: Priorité absolue. Le fichier approche les 6000 lignes et devient inmaintenable.
+    -   (P0) **Refactorisation de **: Priorité absolue. Le composant est extrêmement volumineux et complexe.
+    -   (P1) **Refactorisation de  et **: Ces fichiers sont également très volumineux et gagneraient à être découpés.
 
 **Completed work in this session**
-- **Correction des paiements Stripe**: Les liens de paiement dans les dashboards redirigent maintenant correctement vers Stripe en utilisant un endpoint backend qui applique le bon code promo.
-- **Débunkage du bug backend critique**: Le bug de modification de données automatique s'est avéré être une erreur de test (mauvais nom de base de données). Les endpoints de code de groupe sont fonctionnels.
-- **Fonctionnalité de pièces jointes**: L'envoi, la réception, la prévisualisation et le téléchargement de pièces jointes dans la messagerie sont désormais pleinement fonctionnels (validé par l'agent de test).
-- **Mise à jour des prix et promotions**: Les prix sur la page d'accueil affichent une promotion de -10% conditionnelle (uniquement en FCFA, avec une date d'expiration). L'interface affiche les prix barrés et les badges de promo en conséquence.
-- **Nettoyage de l'interface**: La section de code promo a été supprimée du formulaire d'inscription, et les instructions de paiement Wave ont été nettoyées.
-- **Amélioration du Dashboard Admin**: Le numéro de téléphone des étudiants est maintenant visible dans la liste.
-- **Mise à jour des e-mails**: Le template de l'e-mail de bienvenue a été mis à jour avec le texte fourni par l'utilisateur.
-- **Préservation des utilisateurs**: 7 comptes utilisateurs spécifiques ont été créés et un script de restauration a été mis en place pour assurer leur persistance.
-
-**Earlier issues found/mentioned but not fixed**
--   Aucun. Le problème majeur de modification de données a été investigué et s'est avéré être une erreur de configuration de test, qui a été corrigée.
-
-**Known issue recurrence from previous fork**
--   Aucun.
+-   **Messagerie Admin/Secrétaire**: L'admin peut maintenant voir le secrétaire dans ses contacts.
+-   **Améliorations Facturation Secrétaire**:
+    -   Le calcul de la TVA a été corrigé (déduction d'un montant TTC).
+    -   Le bug d'envoi d'email de facture a été résolu.
+    -   Un bouton Remettre à zéro les statistiques a été ajouté et est fonctionnel.
+    -   Les boutons Supprimer les factures sont maintenant fonctionnels avec leurs endpoints backend.
+    -   Le bouton Enregistrer déclenche maintenant l'impression en PDF.
+    -   Les prix des packs dans le formulaire de reçu élève sont désormais corrects et dynamiques (EUR/FCFA).
+    -   La TVA a été retirée des reçus étudiants.
+-   **Gestion des Étudiants et Admin**:
+    -   Un système de points (+2 par lien de cours) et de récompenses (dès 50 points) a été implémenté au backend.
+    -   La suppression des fiches d'assiduité est désormais possible pour l'admin.
+-   **Nouvel Espace K-Kids**:
+    -   Création d'un formulaire d'inscription sur mesure pour les K-Kids sur la .
+    -   L'espace étudiant K-Kids a été restructuré avec les onglets Quiz, Vidéo, Récompense.
+    -   Une lettre de bienvenue personnalisée () a été créée et intégrée.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Rendu Conditionnel (React)**: Utilisé pour afficher les badges de promotion et les prix barrés uniquement lorsque la devise sélectionnée est 'FCFA' et que la date d'expiration de la promotion n'est pas passée.
-- **Débogage de Configuration**: Identification et résolution d'un bug critique qui n'était pas un problème de code, mais une erreur de configuration (nom de la base de données incorrect dans les scripts de test).
-- **Gestion d'état (React)**: Utilisation de  dans  pour gérer la liste des étudiants sélectionnés () et le filtre de niveau ().
-- **Scripts de Seeding**: Création d'un script Python () pour insérer/mettre à jour des données spécifiques dans la base de données, garantissant la persistance des comptes utilisateurs importants.
-- **Implémentation de pièces jointes (Full-Stack)**: Création d'un flux complet pour l'upload de fichiers, de l'interface React jusqu'au stockage sur le serveur via un endpoint FastAPI.
+-   **Logique conditionnelle complexe (Frontend)**:  et  affichent maintenant des interfaces radicalement différentes en fonction du plan de l'utilisateur (K-Kid vs autres).
+-   **Gamification**: Implémentation d'un système de points et de récompenses au backend, déclenché par des actions spécifiques (envoi de lien de cours).
+-   **Refactorisation d'endpoint**: Déplacement de la route de service des fichiers de  à  pour se conformer à l'architecture de déploiement (Kubernetes Ingress).
+-   **Gestion d'état centralisée (partielle)**: Création d'un utilitaire  pour tenter de standardiser la construction des URL de fichiers.
 
 **key DB schema**
--   **users**: 
--   **pricing**:  (ajout/utilisation de champs de réduction)
--   **messages**:  (utilisation du champ )
+-   **collections nouvelles (implicites)**: , , .
+-   **points_system**: collection existante, maintenant utilisée pour ajouter des points via la nouvelle fonction .
 
-**changes in tech stack**
--   Aucune.
-
-**All files**
--   **Créés**:
-    -   : Documentation des comptes utilisateurs clés à ne pas supprimer.
-    -   : Script pour créer ou mettre à jour ces utilisateurs.
--   **Modifiés de manière significative**:
-    -   : Pour toute la logique de prix, promotions conditionnelles, et le nettoyage de l'interface.
-    -   : Pour l'implémentation complète des pièces jointes.
-    -   : Pour ajouter le numéro de téléphone et commencer l'implémentation de la sélection/filtrage (en cours).
-    -   : Pour corriger des bugs (JWT, notification), ajouter l'endpoint d'upload de pièce jointe et mettre à jour le flux de paiement.
-    -   : Pour mettre à jour le contenu de l'e-mail de bienvenue.
+**All files of reference**
+-   **Critiques et à revoir**:
+    -   : N'a pas été mis à jour pour utiliser , c'est la cause la plus probable du bug de documents persistant.
+    -   : De nouveaux endpoints ont été ajoutés (suppression assiduité, cours groupés, points), augmentant encore sa taille et sa complexité.
+    -   : A été lourdement modifié pour inclure le formulaire K-Kids conditionnel.
+    -   : Contient maintenant la logique pour afficher l'espace K-Kids ou le dashboard normal.
+    -   : A été modifié pour corriger la suppression, l'enregistrement et les prix des packs.
 
 **Areas that need refactoring**:
--    reste un monolithe de plus de 4000 lignes qui devrait être découpé en modules (routes, modèles, services) pour améliorer la maintenabilité.
--    est actuellement en cours de modification et pourrait être dans un état instable. Il nécessite une attention immédiate pour finaliser la fonctionnalité.
+-   ** (P0)**: Absolument critique. Doit être découpé par fonctionnalité (ex: , , ).
+-   ** (P0)**: Ingerable. Doit être décomposé en sous-composants pour chaque onglet et formulaire.
+-   ** (P1)**: Le  d'inscription est devenu un composant massif avec une logique conditionnelle complexe qui devrait être extraite.
 
 **key api endpoints**
--   : (Nouveau) Pour uploader un fichier destiné à être une pièce jointe.
--   : (Mis à jour) Pour envoyer un message, potentiellement avec une pièce jointe.
--   : (Mis à jour) Pour générer un lien de paiement Stripe avec le bon code promo.
--   : (Mis à jour) Déclenche l'envoi du nouveau template d'e-mail de bienvenue.
+-   **Nouveaux endpoints**:
+    -   
+    -   , , 
+    -   , 
+    -    (modifié pour ajouter des points)
+    -    (modifié pour inclure les récompenses)
+    -   ,  (et autres endpoints liés)
+-   **Endpoint refactorisé**:
+    -    (remplace )
 
 **Critical Info for New Agent**
--   La tâche la plus prioritaire est de terminer l'implémentation de la sélection multiple et du filtrage dans . L'agent précédent a laissé ce travail en cours.
--   Le bug fantôme de modification automatique des données ( et ) a été résolu. La cause était l'utilisation d'un nom de base de données incorrect dans les scripts de test. Ne perdez pas de temps à investiguer ce faux problème.
--   Le service d'envoi d'e-mails est configuré pour logger les e-mails dans la console, car les clés AWS SES ne sont pas configurées. C'est le comportement attendu pour le test.
+-   **Priorité Absolue :** Le bug des documents (Static file not found) est la priorité numéro 1. La piste la plus probable est le composant  qui n'a pas été mis à jour. Réparez-le avant toute autre chose.
+-   **Risque Technique :** Les fichiers ,  et  sont des bombes à retardement monolithiques. Soyez extrêmement prudent lors des modifications et proposez agressivement une refactorisation à l'utilisateur.
+-   **Demandes Utilisateur Complexes :** L'utilisateur demande des fonctionnalités riches et complexes (surprends-moi). Il est vital de bien décomposer le travail en étapes, de clarifier les attentes et de valider le plan avant de coder.
 
-**documents created in this job**
--   
--   
-
-**Last 5 User Messages and any pending user messages**
-1.  **User**: Demande de mettre à jour le template de l'e-mail de bienvenue. (Statut: **COMPLETED**)
-2.  **User**: Demande de préserver 7 comptes utilisateurs spécifiques. (Statut: **COMPLETED**)
-3.  **User**: Demande d'ajouter la sélection multiple et le filtrage par niveau dans le dashboard admin. (Statut: **IN PROGRESS**)
-4.  **User**: Clarifie que la promotion de -10% ne s'applique qu'aux prix en FCFA. (Statut: **COMPLETED**)
-5.  **User**: Demande de faire expirer les promotions à une date précise et de supprimer la section du code de réduction. (Statut: **COMPLETED**)
+**Last 10 User Messages and any pending HUMAN messages**
+-   **User**: L'âge dans le formulaire K-Kid est de 3 à 10 ans. créé dans chaque espace K did une playlist de vidéos alphabet, chiffres, les membres de la famille avec image et prononciation en anglais et la partie jeux créent des flashcards avec option Je connais, je connais pas, favoris, en mode swipe gauche droite, surprends-moi. Le prof assigné par un étudiant K-Kid a seul la possibilité d'envoyer des vidéos visualisables par le Kid depuis son espace. Surprends-moi.
+-   **User**: montre-moi l'espace enfant et dans le pack K-Kids le formulaire nom, prénom, âge de l'enfant, mail, prénom et nom d'un parent et numéro de téléphone. Donc dès qu'on s'inscrit sur ce pack K-Kids en euro ou en FCFA, on a un espace K-Kids avec les trois onglets avec une lettre de bienvenue amusante.
+-   **User**: supprime groupé dans pack étudiant. Le pack Kid doit être impérativement pareil comme le Kidtest.avec trois onglet quiz, vidéo et récompence
+-   **User**: c'est pas +10 point mais +2 points et procède avec ce plan
+-   **User**: Le document envoyé met Static file not found. Mets une stratégie pour les cours groupés. Actuellement il n'y a pas trop d'utilité, surprends-moi et explique. Dans le système de récompense étudiant Mon Coffre aux Trésors Collecte des points pour débloquer des récompenses avec les réductions, il s'active à chaque fois que l'étudiant reçoit un lien de cours envoyé par le prof et dès qu'il atteint 50 points les réductions s'activent. Quand on remet à zéro dans le secrétariat le total payé aux profs et les reçus générés et paiement en attente seront zéro. met une option de supprimer les assidutés passé et supprime ces assiduté Session ID: ... Enregistré le Invalid Date
+-   **User**: Les documents envoyés ne sont pas disponibles ni téléchargeable ni pouvoir être ouvert dans le site après déploiement.
+-   **User**: POUR LE RECU DES 2TUDIANT ENLEVE LE TVA
+-   **User**: dans secrétaire dans Reçus de Paiement (Élèves) montre les prix des packs en FCFA LESPRIX DES PACKS QUE SE SOIT EN EURO OU EN FCFA MET LES MEME PRIX SUR LE SITE ? LE BOUTON SUPPRIMER NE FONCTION PAS A COT2 D4ENREGISTER NE FONCTIONE PAS
+-   **User**: supprime dans les factures ⚠️ Note TVA : Le montant brut de 100.00 EUR inclut la TVA de 20%. Après déduction de la TVA, le prestataire reçoit 83.33 EUR et supprime la couleur rouge sur tva et sur la facture met le mail du destinataire et supprime adresse
+-   **User**: le tva est incus dans le paiement donc par exemple Si le prof doit recevoir 100 euros incluent la TVA il reçoit reçoit environ 83,33 euros par ce que le tva est de 20% fait pareil si le devise du payement du professeur est en FCFA le tva est inclu au paiement qui est de 18% par exemple si le prof doit recevoir 30000fcfa il recoit 24 600 FCFA après déduction de la TVA.
 
 **Project Health Check:**
 -   **Broken:**
-    -   La page du dashboard admin () est peut-être dans un état non fonctionnel en raison des modifications en cours pour la sélection multiple et le filtrage.
+    -   La prévisualisation/téléchargement des documents (problème récurrent Static file not found).
+    -   L'affichage de la date sur les fiches d'assiduité (Invalid Date).
 -   **Mocked:**
-    -   Le service d'envoi d'e-mails (AWS SES) est toujours en mode log only, il n'envoie pas de vrais e-mails.
+    -   Les nouveaux onglets Quiz et Vidéo de l'espace K-Kids sont des coquilles vides en attente de développement.
 
-**Testing status**
--   **Testing agent used after significant changes:** YES (pour la fonctionnalité de pièces jointes dans la messagerie, qui a réussi avec un score de 8/8).
--   **Troubleshoot agent used after agent stuck in loop:** NO.
--   **Test files created:** Aucun fichier de test formel, mais plusieurs scripts ad-hoc ont été utilisés pour le débogage.
--   **Known regressions:** Aucune.
-
-**Credentials to test flow:**
--   **Admin:**  / 
--   **Teacher:**  / 
--   **Student Club Test:**  / 
--   **Utilisateurs préservés**: Voir  pour la liste complète (ex:  / ).
+**3rd Party Integrations**
+-   **Stripe (Payments):** Existant et fonctionnel.
+-   **Monday.com (CRM):** Utilisé pour la synchronisation des étudiants. L'intégration des factures est demandée mais non implémentée.
 
 **What agent forgot to execute**
--   Rien n'a été oublié. L'agent travaillait activement sur la dernière demande de l'utilisateur avant la fin de la session.</analysis>
+-   N'a pas corrigé le bug Invalid Date sur les fiches d'assiduité.
+-   N'a pas mis à jour le composant crucial , ce qui est la cause la plus probable de la persistance du bug de téléchargement de documents.
+-   N'a pas mis à jour l'âge dans le formulaire K-Kids de 3-9 à 3-10 ans comme demandé.
+-   N'a pas encore commencé l'implémentation de la playlist vidéo et du jeu de flashcards pour les K-Kids.</analysis>

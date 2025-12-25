@@ -31,6 +31,7 @@ import LiveNotifications from '../components/LiveNotifications';
 import StudentGames from '../components/StudentGamesAdvanced';
 import WeekendGifts from '../components/WeekendGifts';
 import TreasureChest from '../components/TreasureChest';
+import KidsWelcomeLetter from '../components/KidsWelcomeLetter';
 const StudentDashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);

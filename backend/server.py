@@ -3536,6 +3536,35 @@ async def get_teacher_sessions(current_user: dict = Depends(get_current_user)):
     
     return sessions
 
+@api_router.delete("/admin/teacher-sessions/{session_id}")
+async def delete_teacher_session(session_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a specific teacher attendance session"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    result = await db.teacher_sessions.delete_one({"id": session_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Session non trouvée")
+    
+    # Also delete the notification if exists
+    await db.admin_notifications.delete_one({"session_id": session_id})
+    
+    logger.info(f"Session {session_id} deleted by admin {current_user['id']}")
+    return {"message": "Session supprimée avec succès"}
+
+@api_router.delete("/admin/teacher-sessions")
+async def delete_all_teacher_sessions(current_user: dict = Depends(get_current_user)):
+    """Delete all teacher attendance sessions"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    result = await db.teacher_sessions.delete_many({})
+    await db.admin_notifications.delete_many({"type": "session_completed"})
+    
+    logger.info(f"All {result.deleted_count} sessions deleted by admin {current_user['id']}")
+    return {"message": f"{result.deleted_count} sessions supprimées"}
+
+
 @api_router.post("/admin/manual-session")
 async def create_manual_session(session_data: dict, current_user: dict = Depends(get_current_user)):
     """Enregistrer manuellement les heures d'un professeur"""

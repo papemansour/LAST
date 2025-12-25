@@ -1020,14 +1020,14 @@ const HomePage = () => {
                             <SelectValue placeholder="Sélectionnez l'âge" />
                           </SelectTrigger>
                           <SelectContent>
+                            <SelectItem value="3">3 ans</SelectItem>
+                            <SelectItem value="4">4 ans</SelectItem>
                             <SelectItem value="5">5 ans</SelectItem>
                             <SelectItem value="6">6 ans</SelectItem>
                             <SelectItem value="7">7 ans</SelectItem>
                             <SelectItem value="8">8 ans</SelectItem>
                             <SelectItem value="9">9 ans</SelectItem>
                             <SelectItem value="10">10 ans</SelectItem>
-                            <SelectItem value="11">11 ans</SelectItem>
-                            <SelectItem value="12">12 ans</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>

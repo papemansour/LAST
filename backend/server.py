@@ -4308,6 +4308,215 @@ async def get_my_points(current_user: dict = Depends(get_current_user)):
         "total_discount_earned": points_record.get('total_discount_earned', 0)
     }
 
+
+# ============ COURS GROUPÉS (GROUP COURSES) ============
+
+@api_router.get("/group-courses")
+async def get_group_courses():
+    """Get all available group courses"""
+    courses = await db.group_courses.find(
+        {"status": {"$in": ["open", "in_progress"]}},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    
+    # Enrich with teacher info and student count
+    for course in courses:
+        teacher = await db.users.find_one(
+            {"id": course['teacher_id']},
+            {"_id": 0, "first_name": 1, "last_name": 1}
+        )
+        if teacher:
+            course['teacher_name'] = f"{teacher['first_name']} {teacher['last_name']}"
+        course['enrolled_count'] = len(course.get('current_students', []))
+        course['spots_left'] = course['max_students'] - course['enrolled_count']
+        # Apply discount for 4+ students
+        if course['enrolled_count'] >= 4:
+            course['discount_applied'] = True
+            course['final_price_eur'] = course['price_per_person_eur'] * (1 - course['discount_4_plus'] / 100)
+            course['final_price_fcfa'] = course['price_per_person_fcfa'] * (1 - course['discount_4_plus'] / 100)
+        else:
+            course['discount_applied'] = False
+            course['final_price_eur'] = course['price_per_person_eur']
+            course['final_price_fcfa'] = course['price_per_person_fcfa']
+    
+    return courses
+
+@api_router.post("/group-courses")
+async def create_group_course(course_data: dict = Body(...), current_user: dict = Depends(get_current_user)):
+    """Create a new group course (admin or teacher)"""
+    if current_user['role'] not in ['admin', 'teacher']:
+        raise HTTPException(status_code=403, detail="Admin or teacher access required")
+    
+    course = GroupCourse(
+        title=course_data['title'],
+        description=course_data.get('description', ''),
+        teacher_id=course_data.get('teacher_id', current_user['id']),
+        level=course_data['level'],
+        max_students=course_data.get('max_students', 6),
+        scheduled_days=course_data.get('scheduled_days', []),
+        scheduled_time=course_data.get('scheduled_time', ''),
+        price_per_person_eur=course_data.get('price_per_person_eur', 80.0),
+        price_per_person_fcfa=course_data.get('price_per_person_fcfa', 50000.0),
+        discount_4_plus=course_data.get('discount_4_plus', 10),
+        meet_link=course_data.get('meet_link', ''),
+        start_date=course_data.get('start_date')
+    )
+    
+    doc = course.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    await db.group_courses.insert_one(doc)
+    
+    logger.info(f"Group course created: {course.title} by {current_user['id']}")
+    return {"message": "Cours groupé créé", "course_id": course.id}
+
+@api_router.post("/group-courses/{course_id}/enroll")
+async def enroll_in_group_course(course_id: str, current_user: dict = Depends(get_current_user)):
+    """Enroll in a group course"""
+    if current_user['role'] != 'student':
+        raise HTTPException(status_code=403, detail="Student access required")
+    
+    course = await db.group_courses.find_one({"id": course_id}, {"_id": 0})
+    if not course:
+        raise HTTPException(status_code=404, detail="Cours non trouvé")
+    
+    if course['status'] == 'full':
+        raise HTTPException(status_code=400, detail="Ce cours est complet")
+    
+    if current_user['id'] in course.get('current_students', []):
+        raise HTTPException(status_code=400, detail="Vous êtes déjà inscrit à ce cours")
+    
+    # Add student to course
+    current_students = course.get('current_students', [])
+    current_students.append(current_user['id'])
+    
+    # Update status if full
+    new_status = 'full' if len(current_students) >= course['max_students'] else 'open'
+    
+    await db.group_courses.update_one(
+        {"id": course_id},
+        {"$set": {"current_students": current_students, "status": new_status}}
+    )
+    
+    # Create enrollment record
+    enrollment = GroupCourseEnrollment(
+        group_course_id=course_id,
+        student_id=current_user['id']
+    )
+    enrollment_doc = enrollment.model_dump()
+    enrollment_doc['enrolled_at'] = enrollment_doc['enrolled_at'].isoformat()
+    await db.group_course_enrollments.insert_one(enrollment_doc)
+    
+    # Notify student
+    await create_notification(
+        user_id=current_user['id'],
+        title="✅ Inscription au cours groupé",
+        message=f"Vous êtes inscrit au cours: {course['title']}",
+        notification_type="group_course"
+    )
+    
+    # 🎁 Coffre aux Trésors: +2 points pour inscription cours groupé
+    await add_student_points(
+        student_id=current_user['id'],
+        points=2,
+        reason=f"Inscription cours groupé: {course['title']}"
+    )
+    
+    logger.info(f"Student {current_user['id']} enrolled in group course {course_id}")
+    return {"message": "Inscription réussie", "enrollment_id": enrollment.id}
+
+@api_router.get("/student/my-group-courses")
+async def get_my_group_courses(current_user: dict = Depends(get_current_user)):
+    """Get all group courses the student is enrolled in"""
+    if current_user['role'] != 'student':
+        raise HTTPException(status_code=403, detail="Student access required")
+    
+    # Find courses where student is enrolled
+    courses = await db.group_courses.find(
+        {"current_students": current_user['id']},
+        {"_id": 0}
+    ).to_list(100)
+    
+    for course in courses:
+        teacher = await db.users.find_one(
+            {"id": course['teacher_id']},
+            {"_id": 0, "first_name": 1, "last_name": 1}
+        )
+        if teacher:
+            course['teacher_name'] = f"{teacher['first_name']} {teacher['last_name']}"
+        
+        # Get other students in the group (for social features)
+        course['group_members'] = []
+        for student_id in course.get('current_students', []):
+            if student_id != current_user['id']:
+                student = await db.users.find_one(
+                    {"id": student_id},
+                    {"_id": 0, "first_name": 1, "last_name": 1}
+                )
+                if student:
+                    course['group_members'].append(f"{student['first_name']} {student['last_name'][0]}.")
+    
+    return courses
+
+@api_router.get("/teacher/my-group-courses")
+async def get_teacher_group_courses(current_user: dict = Depends(get_current_user)):
+    """Get all group courses taught by the teacher"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    courses = await db.group_courses.find(
+        {"teacher_id": current_user['id']},
+        {"_id": 0}
+    ).to_list(100)
+    
+    for course in courses:
+        course['enrolled_count'] = len(course.get('current_students', []))
+        # Get student details
+        course['students'] = []
+        for student_id in course.get('current_students', []):
+            student = await db.users.find_one(
+                {"id": student_id},
+                {"_id": 0, "first_name": 1, "last_name": 1, "email": 1}
+            )
+            if student:
+                course['students'].append(student)
+    
+    return courses
+
+@api_router.post("/teacher/group-courses/{course_id}/send-link")
+async def send_group_meet_link(course_id: str, data: dict = Body(...), current_user: dict = Depends(get_current_user)):
+    """Send meet link to all students in a group course"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    course = await db.group_courses.find_one({"id": course_id, "teacher_id": current_user['id']}, {"_id": 0})
+    if not course:
+        raise HTTPException(status_code=404, detail="Cours non trouvé")
+    
+    # Update course meet link
+    await db.group_courses.update_one(
+        {"id": course_id},
+        {"$set": {"meet_link": data.get('meet_link', '')}}
+    )
+    
+    # Send notification and points to each student
+    for student_id in course.get('current_students', []):
+        await create_notification(
+            user_id=student_id,
+            title="📅 Cours groupé - Nouveau lien",
+            message=f"Votre professeur a partagé le lien pour: {course['title']}",
+            notification_type="meet_link"
+        )
+        # 🎁 +2 points pour chaque lien reçu
+        await add_student_points(
+            student_id=student_id,
+            points=2,
+            reason=f"Lien cours groupé: {course['title']}"
+        )
+    
+    logger.info(f"Group meet link sent to {len(course.get('current_students', []))} students for course {course_id}")
+    return {"message": f"Lien envoyé à {len(course.get('current_students', []))} étudiants"}
+
+
 @api_router.get("/student/my-challenge-progress")
 async def get_my_challenge_progress(current_user: dict = Depends(get_current_user)):
     """Get student's progress on current challenges"""

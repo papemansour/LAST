@@ -1531,8 +1531,11 @@ const HomePage = () => {
                     </SelectContent>
                   </Select>
                 </div>
+                </>
+                )}
 
-                {/* KALAMA CLUB Option - Mobile Optimized */}
+                {/* KALAMA CLUB Option - Mobile Optimized - uniquement pour non K-Kids */}
+                {selectedPlan?.level !== 'kkid' && (
                 <div className="bg-gradient-to-r from-cyan-50 to-teal-50 p-3 sm:p-4 rounded-lg border-2 border-cyan-200">
                   <label 
                     className="flex items-start gap-2 sm:gap-3 cursor-pointer"

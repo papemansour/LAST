@@ -625,6 +625,48 @@ TEST_QUESTIONS = {
 
 # ============ ROUTES ============
 
+@api_router.get("/uploads/{file_path:path}")
+async def serve_uploaded_file_api(file_path: str):
+    """Serve uploaded files from persistent storage via /api/uploads/ route"""
+    from fastapi.responses import Response
+    import mimetypes
+    
+    file_full_path = Path("/app/uploads") / file_path
+    
+    # Security check: ensure file is within uploads directory
+    try:
+        file_full_path.resolve().relative_to(Path("/app/uploads").resolve())
+    except ValueError:
+        raise HTTPException(status_code=403, detail="Access forbidden")
+    
+    # Check if file exists
+    if not file_full_path.exists() or not file_full_path.is_file():
+        logger.warning(f"File not found: {file_full_path}")
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    # Determine MIME type
+    mime_type, _ = mimetypes.guess_type(str(file_full_path))
+    if mime_type is None:
+        mime_type = "application/octet-stream"
+    
+    logger.info(f"Serving file via API: {file_path} ({mime_type})")
+    
+    # Read file content
+    with open(file_full_path, "rb") as f:
+        content = f.read()
+    
+    # Return response with download headers
+    return Response(
+        content=content,
+        media_type=mime_type,
+        headers={
+            "Content-Disposition": f'attachment; filename="{file_full_path.name}"',
+            "X-Content-Type-Options": "nosniff",
+            "Cache-Control": "public, max-age=3600",
+            "Access-Control-Allow-Origin": "*"
+        }
+    )
+
 @api_router.get("/")
 async def root():
     return {"message": "KALAMAENGLISH API"}

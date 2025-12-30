@@ -716,11 +716,19 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "Course Summaries - Teacher Side"
+    - "Course Summaries - Student Side"
+    - "Teacher Answer Questions"
+    - "K-Kids Video System"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
   review_request_completed:
+    - "Course Summaries - Teacher Side"
+    - "Course Summaries - Student Side"
+    - "Teacher Answer Questions"
+    - "K-Kids Video System"
     - "Group Courses - Get All Endpoint"
     - "Group Courses - Create Endpoint (Admin)"
     - "Student Points - Get My Points Endpoint"

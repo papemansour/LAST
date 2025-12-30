@@ -453,7 +453,7 @@ const KidsVideoPlaylist = () => {
           <Card className="border-dashed border-2 border-gray-300">
             <CardContent className="p-8 text-center">
               <Video className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-              <p className="text-gray-500">Ton professeur n'a pas encore envoyé de vidéos</p>
+              <p className="text-gray-500">Ton professeur n&apos;a pas encore envoyé de vidéos</p>
               <p className="text-sm text-gray-400 mt-1">Les vidéos apparaîtront ici quand ton professeur les enverra</p>
             </CardContent>
           </Card>

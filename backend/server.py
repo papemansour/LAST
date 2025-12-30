@@ -2025,7 +2025,7 @@ async def create_course_summary(summary_data: dict, current_user: dict = Depends
         )
     
     logger.info(f"Course summary created by teacher {current_user['id']}: {summary_data['title']}")
-    return {"message": "Résumé de cours créé avec succès", "summary": summary}
+    return {"message": "Résumé de cours créé avec succès", "summary_id": summary["id"]}
 
 @api_router.get("/teacher/my-course-summaries")
 async def get_teacher_course_summaries(current_user: dict = Depends(get_current_user)):

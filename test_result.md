@@ -274,6 +274,42 @@ backend:
           comment: "✅ PASSED - TTS endpoint now works without authentication. Direct API test successful: POST /api/kalamatheque/text-to-speech returns base64 encoded MP3 audio (18,579 characters of audio data for 'Hello world'). No 403 errors, authentication requirement successfully removed."
 
 frontend:
+  - task: "K-Kids Dashboard"
+    implemented: true
+    working: "NA"
+    file: "KKidDashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "⚠️ NOT TESTED - Frontend testing skipped per instructions (backend focus only). Backend K-Kids video system tested and working. Frontend K-Kids dashboard with Quiz tab (flashcard game), Video tab (YouTube categories), and flashcard interaction requires separate frontend testing by main agent."
+
+  - task: "Teacher Dashboard - Résumés Tab"
+    implemented: true
+    working: "NA"
+    file: "TeacherDashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "⚠️ NOT TESTED - Frontend testing skipped per instructions (backend focus only). Backend course summary teacher endpoints tested and working. Frontend teacher dashboard Résumés tab with 'Nouveau résumé' button and rich text formatting requires separate frontend testing by main agent."
+
+  - task: "Student Dashboard - Résumés Tab"
+    implemented: true
+    working: "NA"
+    file: "StudentDashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "⚠️ NOT TESTED - Frontend testing skipped per instructions (backend focus only). Backend course summary student endpoints tested and working. Frontend student dashboard Résumés tab with summaries list and question asking functionality requires separate frontend testing by main agent."
+
   - task: "Kalamathèque Access Code Verification"
     implemented: true
     working: true

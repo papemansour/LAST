@@ -763,6 +763,11 @@ const StudentDashboard = () => {
             <StudentDocuments />
           </TabsContent>
 
+          {/* Résumés de Cours Tab */}
+          <TabsContent value="summaries">
+            <StudentCourseSummaries />
+          </TabsContent>
+
           {/* Ma Progression & Défis Tab (Fusionné) */}
           <TabsContent value="progression">
             <div className="space-y-6">

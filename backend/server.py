@@ -2019,8 +2019,9 @@ async def create_course_summary(summary_data: dict, current_user: dict = Depends
     for student_id in summary_data.get('student_ids', []):
         await create_notification(
             user_id=student_id,
-            notification_type="new_summary",
-            data={"message": f"Nouveau résumé de cours: {summary_data['title']}"}
+            title="Nouveau résumé de cours",
+            message=f"Nouveau résumé de cours: {summary_data['title']}",
+            notification_type="new_summary"
         )
     
     logger.info(f"Course summary created by teacher {current_user['id']}: {summary_data['title']}")

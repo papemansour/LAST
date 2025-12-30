@@ -2214,8 +2214,9 @@ async def answer_summary_question(question_id: str, answer_data: dict, current_u
     if question:
         await create_notification(
             user_id=question['student_id'],
-            notification_type="summary_answer",
-            data={"message": f"Réponse du professeur à votre question"}
+            title="Réponse du professeur",
+            message="Réponse du professeur à votre question",
+            notification_type="summary_answer"
         )
     
     return {"message": "Réponse envoyée avec succès"}

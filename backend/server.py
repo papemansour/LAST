@@ -1993,6 +1993,280 @@ async def delete_kkid_video(video_id: str, current_user: dict = Depends(get_curr
     logger.info(f"K-Kid video {video_id} deleted by {current_user['role']} {current_user['id']}")
     return {"message": "Vidéo supprimée avec succès"}
 
+# ========== COURSE SUMMARIES / REVISION SYSTEM ==========
+
+@api_router.post("/teacher/create-course-summary")
+async def create_course_summary(summary_data: dict, current_user: dict = Depends(get_current_user)):
+    """Teacher creates a course summary with rich text formatting"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    summary = {
+        "id": str(uuid4()),
+        "teacher_id": current_user['id'],
+        "teacher_name": f"{current_user['first_name']} {current_user['last_name']}",
+        "title": summary_data['title'],
+        "content": summary_data['content'],  # HTML content with formatting
+        "comments": summary_data.get('comments', ''),
+        "student_ids": summary_data.get('student_ids', []),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.course_summaries.insert_one(summary)
+    
+    # Notify students
+    for student_id in summary_data.get('student_ids', []):
+        await create_notification(
+            user_id=student_id,
+            notification_type="new_summary",
+            data={"message": f"Nouveau résumé de cours: {summary_data['title']}"}
+        )
+    
+    logger.info(f"Course summary created by teacher {current_user['id']}: {summary_data['title']}")
+    return {"message": "Résumé de cours créé avec succès", "summary": summary}
+
+@api_router.get("/teacher/my-course-summaries")
+async def get_teacher_course_summaries(current_user: dict = Depends(get_current_user)):
+    """Get all course summaries created by the teacher"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    summaries = await db.course_summaries.find(
+        {"teacher_id": current_user['id']},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(1000)
+    
+    # Enrich with student names
+    for summary in summaries:
+        student_names = []
+        for sid in summary.get('student_ids', []):
+            student = await db.users.find_one({"id": sid}, {"_id": 0, "first_name": 1, "last_name": 1})
+            if student:
+                student_names.append(f"{student['first_name']} {student['last_name']}")
+        summary['student_names'] = student_names
+        
+        # Get question count
+        questions = await db.summary_questions.count_documents({"summary_id": summary['id']})
+        summary['question_count'] = questions
+    
+    return summaries
+
+@api_router.put("/teacher/update-course-summary/{summary_id}")
+async def update_course_summary(summary_id: str, summary_data: dict, current_user: dict = Depends(get_current_user)):
+    """Update a course summary"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    result = await db.course_summaries.update_one(
+        {"id": summary_id, "teacher_id": current_user['id']},
+        {"$set": {
+            "title": summary_data.get('title'),
+            "content": summary_data.get('content'),
+            "comments": summary_data.get('comments', ''),
+            "student_ids": summary_data.get('student_ids', []),
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Summary not found")
+    
+    return {"message": "Résumé mis à jour avec succès"}
+
+@api_router.delete("/teacher/delete-course-summary/{summary_id}")
+async def delete_course_summary(summary_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a course summary"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    result = await db.course_summaries.delete_one({"id": summary_id, "teacher_id": current_user['id']})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Summary not found")
+    
+    # Also delete related questions
+    await db.summary_questions.delete_many({"summary_id": summary_id})
+    
+    return {"message": "Résumé supprimé avec succès"}
+
+@api_router.get("/student/my-course-summaries")
+async def get_student_course_summaries(current_user: dict = Depends(get_current_user)):
+    """Get all course summaries sent to the student"""
+    if current_user['role'] != 'student':
+        raise HTTPException(status_code=403, detail="Student access required")
+    
+    summaries = await db.course_summaries.find(
+        {"student_ids": current_user['id']},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(1000)
+    
+    # Mark as read and get question status
+    for summary in summaries:
+        # Check if student has unread questions
+        unread_answers = await db.summary_questions.count_documents({
+            "summary_id": summary['id'],
+            "student_id": current_user['id'],
+            "answer": {"$exists": True},
+            "answer_read": {"$ne": True}
+        })
+        summary['unread_answers'] = unread_answers
+    
+    return summaries
+
+@api_router.post("/student/ask-summary-question")
+async def ask_summary_question(question_data: dict, current_user: dict = Depends(get_current_user)):
+    """Student asks a question about a course summary"""
+    if current_user['role'] != 'student':
+        raise HTTPException(status_code=403, detail="Student access required")
+    
+    # Verify student has access to this summary
+    summary = await db.course_summaries.find_one(
+        {"id": question_data['summary_id'], "student_ids": current_user['id']},
+        {"_id": 0}
+    )
+    if not summary:
+        raise HTTPException(status_code=404, detail="Summary not found or access denied")
+    
+    question = {
+        "id": str(uuid4()),
+        "summary_id": question_data['summary_id'],
+        "student_id": current_user['id'],
+        "student_name": f"{current_user['first_name']} {current_user['last_name']}",
+        "teacher_id": summary['teacher_id'],
+        "question": question_data['question'],
+        "answer": None,
+        "answer_audio_url": None,
+        "answer_read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.summary_questions.insert_one(question)
+    
+    # Notify teacher
+    await create_notification(
+        user_id=summary['teacher_id'],
+        notification_type="summary_question",
+        data={"message": f"Question de {current_user['first_name']}: {question_data['question'][:50]}..."}
+    )
+    
+    logger.info(f"Summary question from student {current_user['id']} on summary {question_data['summary_id']}")
+    return {"message": "Question envoyée avec succès", "question": question}
+
+@api_router.get("/teacher/summary-questions/{summary_id}")
+async def get_summary_questions(summary_id: str, current_user: dict = Depends(get_current_user)):
+    """Get all questions for a specific summary"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    questions = await db.summary_questions.find(
+        {"summary_id": summary_id, "teacher_id": current_user['id']},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(1000)
+    
+    return questions
+
+@api_router.get("/teacher/all-summary-questions")
+async def get_all_summary_questions(current_user: dict = Depends(get_current_user)):
+    """Get all unanswered questions for the teacher"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    questions = await db.summary_questions.find(
+        {"teacher_id": current_user['id'], "answer": None},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(1000)
+    
+    # Enrich with summary titles
+    for q in questions:
+        summary = await db.course_summaries.find_one({"id": q['summary_id']}, {"_id": 0, "title": 1})
+        q['summary_title'] = summary['title'] if summary else "Résumé supprimé"
+    
+    return questions
+
+@api_router.post("/teacher/answer-summary-question/{question_id}")
+async def answer_summary_question(question_id: str, answer_data: dict, current_user: dict = Depends(get_current_user)):
+    """Teacher answers a student's question (text or audio)"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    update_data = {
+        "answered_at": datetime.now(timezone.utc).isoformat(),
+        "answer_read": False
+    }
+    
+    if answer_data.get('answer'):
+        update_data['answer'] = answer_data['answer']
+    if answer_data.get('answer_audio_url'):
+        update_data['answer_audio_url'] = answer_data['answer_audio_url']
+    
+    result = await db.summary_questions.update_one(
+        {"id": question_id, "teacher_id": current_user['id']},
+        {"$set": update_data}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Question not found")
+    
+    # Get question to notify student
+    question = await db.summary_questions.find_one({"id": question_id}, {"_id": 0})
+    if question:
+        await create_notification(
+            user_id=question['student_id'],
+            notification_type="summary_answer",
+            data={"message": f"Réponse du professeur à votre question"}
+        )
+    
+    return {"message": "Réponse envoyée avec succès"}
+
+@api_router.get("/student/my-summary-questions/{summary_id}")
+async def get_student_summary_questions(summary_id: str, current_user: dict = Depends(get_current_user)):
+    """Get student's questions and answers for a summary"""
+    if current_user['role'] != 'student':
+        raise HTTPException(status_code=403, detail="Student access required")
+    
+    questions = await db.summary_questions.find(
+        {"summary_id": summary_id, "student_id": current_user['id']},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(1000)
+    
+    # Mark answers as read
+    await db.summary_questions.update_many(
+        {"summary_id": summary_id, "student_id": current_user['id'], "answer": {"$exists": True}},
+        {"$set": {"answer_read": True}}
+    )
+    
+    return questions
+
+@api_router.post("/teacher/upload-audio-answer")
+async def upload_audio_answer(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
+    """Upload audio file for voice answer"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    # Validate file type
+    allowed_types = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/webm', 'audio/ogg']
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Invalid audio file type")
+    
+    # Save file
+    file_extension = file.filename.split('.')[-1] if '.' in file.filename else 'mp3'
+    unique_filename = f"audio_{uuid4()}.{file_extension}"
+    file_path = f"/app/frontend/public/uploads/audio/{unique_filename}"
+    
+    # Ensure directory exists
+    os.makedirs("/app/frontend/public/uploads/audio", exist_ok=True)
+    
+    with open(file_path, "wb") as f:
+        content = await file.read()
+        f.write(content)
+    
+    file_url = f"/uploads/audio/{unique_filename}"
+    logger.info(f"Audio answer uploaded by teacher {current_user['id']}: {file_url}")
+    
+    return {"file_url": file_url, "message": "Audio uploadé avec succès"}
+
+
+
 @api_router.get("/admin/documents-from-teachers")
 async def get_admin_documents_from_teachers(current_user: dict = Depends(get_current_user)):
     if current_user['role'] != 'admin':

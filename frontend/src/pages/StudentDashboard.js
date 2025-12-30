@@ -34,6 +34,7 @@ import TreasureChest from '../components/TreasureChest';
 import KidsWelcomeLetter from '../components/KidsWelcomeLetter';
 import KidsFlashcards from '../components/KidsFlashcards';
 import KidsVideoPlaylist from '../components/KidsVideoPlaylist';
+import StudentCourseSummaries from '../components/StudentCourseSummaries';
 const StudentDashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);

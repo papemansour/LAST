@@ -966,6 +966,11 @@ const TeacherDashboard = () => {
             <DocumentsManager userRole="teacher" />
           </TabsContent>
 
+          {/* Course Summaries Tab - Résumés de cours */}
+          <TabsContent value="summaries">
+            <TeacherCourseSummaries />
+          </TabsContent>
+
           {/* Meet Links Tab - Cours en ligne */}
           <TabsContent value="meet-links">
             <TeacherMeetLinks />

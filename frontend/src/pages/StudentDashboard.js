@@ -388,6 +388,14 @@ const StudentDashboard = () => {
             </TabsTrigger>
             
             <TabsTrigger 
+              value="summaries" 
+              className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+            >
+              <BookOpen className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
+              <span className="text-xs font-semibold">Résumés</span>
+            </TabsTrigger>
+            
+            <TabsTrigger 
               value="progression" 
               className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
             >

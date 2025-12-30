@@ -39,7 +39,13 @@ class MyKalamaEnglishBackendTester:
         self.test_student_id = None
         self.test_flashcard_set_id = None
         self.test_results = {
-            # NEW REVIEW REQUEST TESTS - CURRENT FOCUS
+            # CURRENT REVIEW REQUEST TESTS - Course Summaries & K-Kids
+            "course_summaries_teacher": {"passed": False, "details": []},
+            "course_summaries_student": {"passed": False, "details": []},
+            "teacher_answer_questions": {"passed": False, "details": []},
+            "kkids_video_system": {"passed": False, "details": []},
+            
+            # PREVIOUS REVIEW REQUEST TESTS
             "group_courses_get_all": {"passed": False, "details": []},
             "group_courses_create": {"passed": False, "details": []},
             "student_points_get": {"passed": False, "details": []},

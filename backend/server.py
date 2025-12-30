@@ -2146,8 +2146,9 @@ async def ask_summary_question(question_data: dict, current_user: dict = Depends
     # Notify teacher
     await create_notification(
         user_id=summary['teacher_id'],
-        notification_type="summary_question",
-        data={"message": f"Question de {current_user['first_name']}: {question_data['question'][:50]}..."}
+        title="Nouvelle question sur résumé",
+        message=f"Question de {current_user['first_name']}: {question_data['question'][:50]}...",
+        notification_type="summary_question"
     )
     
     logger.info(f"Summary question from student {current_user['id']} on summary {question_data['summary_id']}")

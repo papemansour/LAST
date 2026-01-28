@@ -4164,19 +4164,27 @@ startxref
         try:
             logger.info("🎯 Testing Current Review Request Features...")
             
-            # Test 1: Group Courses - Get All
+            # NEW TESTS FOR CURRENT REVIEW REQUEST
+            # Test 1: Teacher Session/Pointage System
+            await self.test_teacher_session_system()
+            
+            # Test 2: Course Links (Meet Links) System
+            await self.test_meet_links_system()
+            
+            # PREVIOUS REVIEW REQUEST TESTS (for reference)
+            # Test 3: Group Courses - Get All
             await self.test_group_courses_get_all()
             
-            # Test 2: Group Courses - Create (as admin)
+            # Test 4: Group Courses - Create (as admin)
             await self.test_group_courses_create()
             
-            # Test 3: Student Points - Get My Points
+            # Test 5: Student Points - Get My Points
             await self.test_student_points_get()
             
-            # Test 4: Delete All Teacher Sessions (as admin)
+            # Test 6: Delete All Teacher Sessions (as admin)
             await self.test_delete_teacher_sessions()
             
-            # Test 5: Reset Billing Stats (as secretary)
+            # Test 7: Reset Billing Stats (as secretary)
             await self.test_reset_billing_stats_secretary()
             
             return True

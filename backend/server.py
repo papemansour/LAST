@@ -6765,3 +6765,27 @@ async def root():
     """Root endpoint"""
     return {"message": "MyKalamaEnglish API", "version": "1.0", "status": "running"}
 
+# ==================== WEBSOCKET FOR REAL-TIME NOTIFICATIONS ====================
+
+@app.websocket("/ws/notifications/{user_id}")
+async def websocket_notifications(websocket: WebSocket, user_id: str):
+    """WebSocket endpoint for real-time notifications"""
+    await ws_manager.connect(websocket, user_id)
+    try:
+        while True:
+            # Keep connection alive and listen for client messages
+            data = await websocket.receive_text()
+            # Client can send 'ping' to keep connection alive
+            if data == "ping":
+                await websocket.send_text("pong")
+    except WebSocketDisconnect:
+        ws_manager.disconnect(websocket, user_id)
+    except Exception as e:
+        logger.error(f"WebSocket error for user {user_id}: {e}")
+        ws_manager.disconnect(websocket, user_id)
+
+@app.get("/api/ws/online-status")
+async def get_online_status():
+    """Get count of online users"""
+    return {"online_users": ws_manager.get_online_users_count()}
+

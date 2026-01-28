@@ -1021,6 +1021,32 @@ async def delete_secretary_meeting(meeting_id: str, current_user: dict = Depends
     
     return {"message": "Meeting deleted"}
 
+@api_router.put("/secretary/meetings/{meeting_id}")
+async def update_secretary_meeting(meeting_id: str, meeting_data: dict = Body(...), current_user: dict = Depends(get_current_user)):
+    """Update a meeting"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    update_data = {
+        "title": meeting_data.get("title"),
+        "date": meeting_data.get("date"),
+        "time": meeting_data.get("time"),
+        "attendees": meeting_data.get("attendees", ""),
+        "notes": meeting_data.get("notes", ""),
+        "meetingLink": meeting_data.get("meetingLink", ""),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    result = await db.secretary_meetings.update_one(
+        {"id": meeting_id},
+        {"$set": update_data}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Meeting not found")
+    
+    return {"message": "Meeting updated"}
+
 @api_router.get("/secretary/reports")
 async def get_secretary_reports(current_user: dict = Depends(get_current_user)):
     """Get all teacher reports"""

@@ -4382,10 +4382,10 @@ async def send_meet_link(data: MeetLinkCreate, current_user: dict = Depends(get_
         notification_type="meet_link"
     )
     
-    # 🎁 Coffre aux Trésors: Ajouter +2 points pour chaque lien de cours reçu
+    # 🎁 Coffre aux Trésors: Ajouter +1 point pour chaque lien de cours reçu
     await add_student_points(
         student_id=data.student_id, 
-        points=2, 
+        points=1, 
         reason=f"Lien de cours reçu: {data.title}"
     )
     

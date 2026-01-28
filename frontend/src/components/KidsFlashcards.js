@@ -184,7 +184,6 @@ const KidsFlashcards = () => {
         console.log('Error loading flashcard progress:', e);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Save progress

@@ -4,7 +4,7 @@ import { Button } from './ui/button';
 import { Clock, Gift, Calendar, Star, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const TrialCountdown = ({ registrationDate }) => {
+const TrialCountdown = ({ registrationDate, onUpgradeClick }) => {
   const navigate = useNavigate();
   const [daysRemaining, setDaysRemaining] = useState(7);
   const [hoursRemaining, setHoursRemaining] = useState(0);

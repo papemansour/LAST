@@ -34,6 +34,7 @@ import DocumentsManager from '../components/DocumentsManager';
 import BadgesManager from '../components/BadgesManager';
 import AdminStudentsAvailability from '../components/AdminStudentsAvailability';
 import AdminMonthlyHours from '../components/AdminMonthlyHours';
+import AdminAnalytics from '../components/AdminAnalytics';
 // ActivityFeed removed
 
 const AdminDashboard = () => {

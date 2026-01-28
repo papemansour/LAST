@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, status, UploadFile, File, Body
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, status, UploadFile, File, Body, WebSocket, WebSocketDisconnect
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
@@ -23,6 +23,7 @@ from jose import jwt, JWTError
 import stripe
 from passlib.context import CryptContext
 from email_service import email_service
+from websocket_manager import ws_manager
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')

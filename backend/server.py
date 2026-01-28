@@ -751,6 +751,57 @@ async def serve_uploaded_file_api(file_path: str):
         }
     )
 
+@api_router.post("/admin/cleanup-invalid-documents")
+async def cleanup_invalid_documents(current_user: dict = Depends(get_current_user)):
+    """Remove documents whose files no longer exist on disk"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Check all documents
+    docs = await db.documents.find({}, {"_id": 0, "id": 1, "file_url": 1, "title": 1}).to_list(1000)
+    
+    removed = []
+    for doc in docs:
+        file_url = doc.get('file_url', '')
+        if file_url:
+            file_path = Path("/app/uploads") / file_url.replace('/uploads/', '')
+            if not file_path.exists():
+                await db.documents.delete_one({"id": doc['id']})
+                removed.append({"id": doc['id'], "title": doc.get('title', 'Unknown')})
+                logger.info(f"Removed invalid document: {doc.get('title')} - {file_url}")
+    
+    return {
+        "message": f"Nettoyage terminé: {len(removed)} document(s) supprimé(s)",
+        "removed_documents": removed
+    }
+
+@api_router.get("/admin/check-documents-integrity")
+async def check_documents_integrity(current_user: dict = Depends(get_current_user)):
+    """Check which documents have missing files"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    docs = await db.documents.find({}, {"_id": 0, "id": 1, "file_url": 1, "title": 1}).to_list(1000)
+    
+    valid = []
+    invalid = []
+    
+    for doc in docs:
+        file_url = doc.get('file_url', '')
+        if file_url:
+            file_path = Path("/app/uploads") / file_url.replace('/uploads/', '')
+            if file_path.exists():
+                valid.append({"id": doc['id'], "title": doc.get('title', 'Unknown')})
+            else:
+                invalid.append({"id": doc['id'], "title": doc.get('title', 'Unknown'), "file_url": file_url})
+    
+    return {
+        "total_documents": len(docs),
+        "valid_documents": len(valid),
+        "invalid_documents": len(invalid),
+        "invalid_list": invalid
+    }
+
 @api_router.get("/")
 async def root():
     return {"message": "KALAMAENGLISH API"}

@@ -36,6 +36,8 @@ import KidsFlashcards from '../components/KidsFlashcards';
 import KidsVideoPlaylist from '../components/KidsVideoPlaylist';
 import StudentCourseSummaries from '../components/StudentCourseSummaries';
 import StudentCourseLinks from '../components/StudentCourseLinks';
+import TrialCountdown from '../components/TrialCountdown';
+import RamadanPromoBanner from '../components/RamadanPromoBanner';
 const StudentDashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);

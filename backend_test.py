@@ -921,6 +921,219 @@ startxref
             self.test_results["book_deletion"]["details"].append(f"Test error: {str(e)}")
             return False
 
+    async def test_teacher_session_system(self) -> bool:
+        """Test Teacher Session/Pointage System"""
+        try:
+            logger.info("🔍 Testing Teacher Session/Pointage System...")
+            
+            # Login as teacher first
+            teacher_login_success = await self.login_teacher("prof.test@example.com", "TestProf2025")
+            if not teacher_login_success:
+                self.test_results["teacher_session_system"]["details"].append("Failed to login as teacher")
+                return False
+            
+            headers = {"Authorization": f"Bearer {self.teacher_token}"}
+            
+            # 1. Start a new session
+            async with self.session.post(f"{BACKEND_URL}/teacher/session/start", headers=headers) as response:
+                if response.status == 200:
+                    start_result = await response.json()
+                    session_id = start_result.get("session_id")
+                    logger.info("✅ Teacher session started successfully")
+                    self.test_results["teacher_session_system"]["details"].append("Session start works")
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ Session start failed: {response.status} - {error_text}")
+                    self.test_results["teacher_session_system"]["details"].append(f"Session start failed: {error_text}")
+                    return False
+            
+            # 2. Pause the session
+            async with self.session.post(f"{BACKEND_URL}/teacher/session/pause", headers=headers) as response:
+                if response.status == 200:
+                    logger.info("✅ Teacher session paused successfully")
+                    self.test_results["teacher_session_system"]["details"].append("Session pause works")
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ Session pause failed: {response.status} - {error_text}")
+                    self.test_results["teacher_session_system"]["details"].append(f"Session pause failed: {error_text}")
+                    return False
+            
+            # 3. Resume the session
+            async with self.session.post(f"{BACKEND_URL}/teacher/session/resume", headers=headers) as response:
+                if response.status == 200:
+                    logger.info("✅ Teacher session resumed successfully")
+                    self.test_results["teacher_session_system"]["details"].append("Session resume works")
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ Session resume failed: {response.status} - {error_text}")
+                    self.test_results["teacher_session_system"]["details"].append(f"Session resume failed: {error_text}")
+                    return False
+            
+            # 4. End the session with timing data
+            end_data = {
+                "total_time": 300,  # 5 minutes
+                "paused_duration": 30  # 30 seconds
+            }
+            
+            async with self.session.post(f"{BACKEND_URL}/teacher/session/end", json=end_data, headers=headers) as response:
+                if response.status == 200:
+                    end_result = await response.json()
+                    logger.info("✅ Teacher session ended successfully")
+                    self.test_results["teacher_session_system"]["details"].append("Session end works")
+                    
+                    # Verify response contains expected fields
+                    if "message" in end_result:
+                        logger.info("✅ Session end response contains message")
+                        self.test_results["teacher_session_system"]["details"].append("Session end response valid")
+                        self.test_results["teacher_session_system"]["passed"] = True
+                        return True
+                    else:
+                        logger.error("❌ Session end response missing expected fields")
+                        self.test_results["teacher_session_system"]["details"].append("Session end response incomplete")
+                        return False
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ Session end failed: {response.status} - {error_text}")
+                    self.test_results["teacher_session_system"]["details"].append(f"Session end failed: {error_text}")
+                    return False
+                    
+        except Exception as e:
+            logger.error(f"❌ Teacher session system test error: {str(e)}")
+            self.test_results["teacher_session_system"]["details"].append(f"Test error: {str(e)}")
+            return False
+
+    async def test_meet_links_system(self) -> bool:
+        """Test Course Links (Meet Links) System"""
+        try:
+            logger.info("🔍 Testing Course Links (Meet Links) System...")
+            
+            # Login as teacher first
+            teacher_login_success = await self.login_teacher("prof.test@example.com", "TestProf2025")
+            if not teacher_login_success:
+                self.test_results["meet_links_system"]["details"].append("Failed to login as teacher")
+                return False
+            
+            headers = {"Authorization": f"Bearer {self.teacher_token}"}
+            
+            # 1. Get teacher's students list
+            async with self.session.get(f"{BACKEND_URL}/auth/me", headers=headers) as response:
+                if response.status == 200:
+                    teacher_data = await response.json()
+                    logger.info("✅ Retrieved teacher profile")
+                    self.test_results["meet_links_system"]["details"].append("Teacher profile retrieval works")
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ Failed to get teacher profile: {response.status} - {error_text}")
+                    self.test_results["meet_links_system"]["details"].append(f"Teacher profile failed: {error_text}")
+                    return False
+            
+            # Get a real student ID from the database
+            student_id = None
+            async with self.session.get(f"{BACKEND_URL}/admin/all-users", headers={"Authorization": f"Bearer {self.admin_token}"}) as response:
+                if response.status == 200:
+                    users = await response.json()
+                    for user in users:
+                        if user.get('role') == 'student' and user.get('is_active'):
+                            student_id = user.get('id')
+                            student_email = user.get('email')
+                            break
+            
+            if not student_id:
+                logger.error("❌ No active student found for testing")
+                self.test_results["meet_links_system"]["details"].append("No active student available")
+                return False
+            
+            # 2. Send meet link to student
+            meet_link_data = {
+                "student_id": student_id,
+                "meet_link": "https://meet.google.com/test-link-123",
+                "title": "Test Course Link",
+                "scheduled_date": "2025-01-05T14:00:00Z"
+            }
+            
+            async with self.session.post(f"{BACKEND_URL}/teacher/send-meet-link", json=meet_link_data, headers=headers) as response:
+                if response.status == 200:
+                    link_result = await response.json()
+                    meet_id = link_result.get("meet_id")
+                    logger.info("✅ Meet link sent to student successfully")
+                    self.test_results["meet_links_system"]["details"].append("Meet link sending works")
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ Meet link sending failed: {response.status} - {error_text}")
+                    self.test_results["meet_links_system"]["details"].append(f"Meet link sending failed: {error_text}")
+                    return False
+            
+            # 3. Login as student to test receiving the link
+            # First get student credentials
+            student_password = None
+            for user in users:
+                if user.get('id') == student_id:
+                    student_password = user.get('temporary_password') or "Test2025"
+                    break
+            
+            if student_password:
+                student_login_success = await self.login_student(student_email, student_password)
+                if student_login_success:
+                    student_headers = {"Authorization": f"Bearer {self.student_token}"}
+                    
+                    # 4. Get student's meet links
+                    async with self.session.get(f"{BACKEND_URL}/student/my-meet-links", headers=student_headers) as response:
+                        if response.status == 200:
+                            meet_links = await response.json()
+                            if isinstance(meet_links, list) and len(meet_links) > 0:
+                                logger.info(f"✅ Student received {len(meet_links)} meet links")
+                                self.test_results["meet_links_system"]["details"].append("Student meet link retrieval works")
+                                
+                                # Verify teacher_name field is present
+                                first_link = meet_links[0]
+                                if "teacher_name" in first_link:
+                                    logger.info("✅ Meet link contains teacher_name field")
+                                    self.test_results["meet_links_system"]["details"].append("Teacher name field present")
+                                else:
+                                    logger.warning("⚠️ Meet link missing teacher_name field")
+                                    self.test_results["meet_links_system"]["details"].append("Teacher name field missing")
+                                
+                                # 5. Mark meet as attended
+                                if meet_id:
+                                    async with self.session.put(f"{BACKEND_URL}/student/mark-meet-attended/{meet_id}", headers=student_headers) as response:
+                                        if response.status == 200:
+                                            logger.info("✅ Meet marked as attended successfully")
+                                            self.test_results["meet_links_system"]["details"].append("Meet attendance marking works")
+                                            self.test_results["meet_links_system"]["passed"] = True
+                                            return True
+                                        else:
+                                            error_text = await response.text()
+                                            logger.error(f"❌ Meet attendance marking failed: {response.status} - {error_text}")
+                                            self.test_results["meet_links_system"]["details"].append(f"Attendance marking failed: {error_text}")
+                                            return False
+                                else:
+                                    logger.warning("⚠️ No meet_id available for attendance test")
+                                    self.test_results["meet_links_system"]["details"].append("No meet_id for attendance test")
+                                    self.test_results["meet_links_system"]["passed"] = True
+                                    return True
+                            else:
+                                logger.error("❌ Student has no meet links")
+                                self.test_results["meet_links_system"]["details"].append("No meet links found for student")
+                                return False
+                        else:
+                            error_text = await response.text()
+                            logger.error(f"❌ Student meet links retrieval failed: {response.status} - {error_text}")
+                            self.test_results["meet_links_system"]["details"].append(f"Student meet links failed: {error_text}")
+                            return False
+                else:
+                    logger.error("❌ Failed to login as student")
+                    self.test_results["meet_links_system"]["details"].append("Student login failed")
+                    return False
+            else:
+                logger.error("❌ No student password available")
+                self.test_results["meet_links_system"]["details"].append("No student password")
+                return False
+                    
+        except Exception as e:
+            logger.error(f"❌ Meet links system test error: {str(e)}")
+            self.test_results["meet_links_system"]["details"].append(f"Test error: {str(e)}")
+            return False
+
     async def test_flashcard_system(self) -> bool:
         """Test complete flashcard system workflow"""
         try:

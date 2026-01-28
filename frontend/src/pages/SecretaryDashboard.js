@@ -1201,7 +1201,7 @@ const SecretaryDashboard = () => {
               <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50">
                 <CardTitle className="flex items-center gap-2 text-purple-700">
                   <MessageCircle className="w-5 h-5" />
-                  💬 Messagerie avec l'Administration
+                  💬 Messagerie avec l&apos;Administration
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-6">

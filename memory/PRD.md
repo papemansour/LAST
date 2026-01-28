@@ -13,10 +13,13 @@ Plateforme e-learning complète pour l'apprentissage de l'anglais, développée 
 ```
 /app/
 ├── backend/
-│   ├── server.py          # API principale FastAPI
+│   ├── server.py          # API principale FastAPI (en cours de refactorisation)
 │   ├── config.py          # Configuration
 │   ├── email_service.py   # Service d'emails
-│   └── routes/            # Routes modulaires (en cours de refactorisation)
+│   └── routes/            # Routes modulaires (documentation prête)
+│       ├── auth.py        # Documentation routes authentification
+│       ├── billing.py     # Documentation routes facturation
+│       └── course_summaries.py
 ├── frontend/
 │   └── src/
 │       ├── pages/         # Dashboards (Admin, Student, Teacher, Secretary)
@@ -40,65 +43,59 @@ Plateforme e-learning complète pour l'apprentissage de l'anglais, développée 
 - ✅ Système de disponibilités étudiants
 - ✅ Facturation avec bonus/déductions (sans TVA)
 
-### Phase 3 - En cours
-- 🔄 Refactorisation server.py (monolithe >6000 lignes)
-- 🔄 Refactorisation SecretaryDashboard.js
-- ⏳ Récapitulatif mensuel des heures pour admin
+### Phase 3 - Janvier 2026 (Complété)
+- ✅ Récapitulatif mensuel des heures pour admin
+- ✅ Édition des réunions planifiées
+- ✅ Messages vocaux dans Q/R des résumés
+- ✅ Double check bleu (accusés de lecture)
+- ✅ Onglets "Dispo Étudiants" pour admin et professeur
+- 🔄 Refactorisation server.py (documentation prête)
 
-## Dernières Modifications (Janvier 2026)
-
-### Corrections de Bugs
-1. **create_notification unifiée** - Fonction dupliquée avec signatures différentes → unifiée
-2. **Invalid Date corrigé** - Ajout de vérifications null sur les dates d'assiduité
-3. **Endpoint disponibilités** - Correction `teacher_id` → `assigned_teacher`
+## Dernières Modifications (28 Janvier 2026)
 
 ### Nouvelles Fonctionnalités
-1. **Onglet "Dispo Étudiants"** dans TeacherDashboard et AdminDashboard
-2. **Champs Bonus/Déductions** dans facturation (1 déduction = 5 EUR ou 2000 FCFA)
-3. **Téléchargement PDF** des factures amélioré
+1. **AdminMonthlyHours** - Récapitulatif mensuel avec export CSV, classement professeurs
+2. **Édition réunions** - Modal d'édition dans SecretaryDashboard
+3. **PUT /api/secretary/meetings/{id}** - Endpoint mise à jour réunions
+4. **PUT /api/student/mark-answer-read/{id}** - Marquage réponses lues
+
+### Corrections de Bugs
+1. **create_notification unifiée** - Fonction avec signature flexible
+2. **Invalid Date corrigé** - Vérifications null sur dates d'assiduité
+3. **Endpoint disponibilités** - Correction assigned_teacher
 
 ## Backlog Priorisé
 
 ### P0 - Critique
-- [ ] Terminer refactorisation server.py
-- [ ] Terminer refactorisation SecretaryDashboard.js
+- [ ] Exécuter la refactorisation de server.py (documentation prête)
 - [ ] Résoudre définitivement le bug de téléchargement de documents
 
 ### P1 - Important
-- [ ] Messages vocaux dans Q/R des résumés
-- [ ] Double check bleu (accusés de lecture)
-- [ ] Récapitulatif mensuel des heures pour admin
-- [ ] Édition des réunions planifiées
-
-### P2 - Normal
 - [ ] Synchronisation factures avec Monday.com
 - [ ] Stratégie pour cours groupés
+
+### P2 - Normal
 - [ ] Envoi de jeux par le professeur
 
 ## Endpoints Clés
 
 ### Disponibilités
-- `POST /api/student/set-availability` - Étudiant définit ses créneaux
-- `GET /api/student/my-availability` - Récupère ses propres disponibilités
-- `GET /api/teacher/students-availability` - Professeur voit les dispos de ses étudiants
-- `GET /api/admin/all-students-availability` - Admin voit toutes les disponibilités
+- `POST /api/student/set-availability`
+- `GET /api/teacher/students-availability`
+- `GET /api/admin/all-students-availability`
+
+### Récap Mensuel
+- `GET /api/admin/monthly-teacher-hours?month=X&year=Y`
 
 ### Facturation
-- `POST /api/secretary/teacher-payments` - Créer paiement avec bonus/déductions
-- `GET /api/secretary/billing-stats` - Statistiques de facturation
+- `POST /api/secretary/teacher-payments` (avec bonus/déductions)
+- `PUT /api/secretary/meetings/{id}`
 
-## Variables d'Environnement Requises
-```
-# Backend (.env)
-MONGO_URL=mongodb://localhost:27017
-DB_NAME=kalamaenglish_db
-JWT_SECRET=your-secret-key
-FRONTEND_URL=https://...
-
-# Frontend (.env)
-REACT_APP_BACKEND_URL=https://...
-```
+### Q/R Résumés
+- `PUT /api/student/mark-answer-read/{id}`
+- `PUT /api/teacher/mark-question-read/{id}`
 
 ## Tests
-Les tests sont situés dans `/app/backend/tests/` et utilisent pytest.
-Rapport de test le plus récent: `/app/test_reports/iteration_1.json`
+- Tests automatisés: `/app/backend/tests/`
+- Rapports: `/app/test_reports/iteration_2.json`
+- Dernier taux de réussite: 100% (15/15 tests backend)

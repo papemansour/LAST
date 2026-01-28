@@ -240,7 +240,7 @@ const StudentDashboard = () => {
             <span className="text-xs sm:text-sm text-gray-600 font-semibold uppercase tracking-wide">English</span>
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
-            <LiveNotifications />
+            <NotificationBell userId={user?.id} />
             <span className="text-xs sm:text-base text-gray-700 hidden sm:inline">{user?.first_name} {user?.last_name}</span>
             <span className="text-xs text-gray-700 sm:hidden">{user?.first_name}</span>
             <Button variant="outline" size="sm" onClick={handleLogout} className="border-teal-600 text-teal-600 hover:bg-teal-50 text-xs sm:text-sm px-2 sm:px-4">

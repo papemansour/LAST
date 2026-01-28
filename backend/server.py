@@ -5205,20 +5205,6 @@ async def complete_challenge(challenge_id: str, current_user: dict = Depends(get
 
 # ==================== NOTIFICATIONS ENDPOINTS ====================
 
-async def create_notification(user_id: str, title: str, message: str, notification_type: str):
-    """Helper function to create a notification"""
-    notification = {
-        "id": str(uuid4()),
-        "user_id": user_id,
-        "title": title,
-        "message": message,
-        "type": notification_type,  # 'message', 'news', 'club', 'book'
-        "is_read": False,
-        "created_at": datetime.now(timezone.utc).isoformat()
-    }
-    await db.notifications.insert_one(notification)
-    return notification
-
 @api_router.get("/notifications/my-notifications")
 async def get_my_notifications(current_user: User = Depends(get_current_user)):
     """Get all notifications for the current user"""

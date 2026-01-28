@@ -4580,7 +4580,7 @@ async def get_students_availability_for_teacher(current_user: dict = Depends(get
     
     # Get teacher's assigned students
     students = await db.users.find(
-        {"role": "student", "teacher_id": current_user['id']},
+        {"role": "student", "assigned_teacher": current_user['id']},
         {"_id": 0, "id": 1, "first_name": 1, "last_name": 1, "email": 1}
     ).to_list(1000)
     

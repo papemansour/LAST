@@ -94,11 +94,90 @@ const SecretaryBilling = ({ teachers, students, onRefresh }) => {
     setCodeInput('');
   };
 
-  const calculateTVA = (amount, currency) => {
-    const tvaRate = currency === 'EUR' ? 0.20 : 0.18;
-    const netAmount = amount / (1 + tvaRate);
-    const tvaAmount = amount - netAmount;
-    return { netAmount: netAmount.toFixed(2), tvaAmount: tvaAmount.toFixed(2), tvaRate: (tvaRate * 100) };
+  // Calcul du montant final avec bonus et déductions (sans TVA)
+  const calculateFinalAmount = (amount, bonus = 0, deductions = 0, currency) => {
+    const baseAmount = parseFloat(amount) || 0;
+    const bonusAmount = parseFloat(bonus) || 0;
+    // Déduction: 1 = 5 EUR ou 2000 FCFA
+    const deductionValue = currency === 'EUR' ? 5 : 2000;
+    const deductionsAmount = (parseFloat(deductions) || 0) * deductionValue;
+    const finalAmount = baseAmount + bonusAmount - deductionsAmount;
+    return {
+      baseAmount: baseAmount.toFixed(2),
+      bonusAmount: bonusAmount.toFixed(2),
+      deductionsCount: deductions,
+      deductionsAmount: deductionsAmount.toFixed(2),
+      finalAmount: Math.max(0, finalAmount).toFixed(2)
+    };
+  };
+
+  // Télécharger en PDF
+  const handleDownloadPDF = (item, type) => {
+    const calcInfo = calculateFinalAmount(item.amount, item.bonus || 0, item.deductions || 0, item.currency);
+    
+    let content = '';
+    if (type === 'teacher') {
+      content = `
+        <html>
+        <head>
+          <title>Facture Professeur - ${item.teacher_name}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
+            .header { text-align: center; border-bottom: 2px solid #0d9488; padding-bottom: 20px; margin-bottom: 30px; }
+            .logo { font-size: 24px; font-weight: bold; color: #0d9488; }
+            .invoice-info { display: flex; justify-content: space-between; margin-bottom: 30px; }
+            .amount { font-size: 32px; font-weight: bold; color: #0d9488; text-align: center; margin: 30px 0; padding: 20px; background: #f0fdfa; border-radius: 8px; }
+            .details { background: #f9fafb; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+            .footer { text-align: center; margin-top: 40px; color: #666; font-size: 12px; border-top: 1px solid #ddd; padding-top: 20px; }
+            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+            th { background: #0d9488; color: white; }
+            .bonus { color: green; }
+            .deduction { color: red; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="logo">🎓 MyKalamaEnglish</div>
+            <p>Facture de Paiement Professeur</p>
+          </div>
+          <div class="invoice-info">
+            <div>
+              <strong>Destinataire:</strong><br/>
+              ${item.teacher_name}<br/>
+              ${item.email || ''}
+            </div>
+            <div style="text-align: right;">
+              <strong>Date:</strong> ${new Date(item.created_at).toLocaleDateString('fr-FR')}<br/>
+              <strong>Ref:</strong> FAC-${item.id.substring(0, 8).toUpperCase()}
+            </div>
+          </div>
+          <table>
+            <tr><th>Description</th><th>Période</th><th>Montant</th></tr>
+            <tr>
+              <td>${item.description || 'Paiement cours'}</td>
+              <td>${item.period}</td>
+              <td>${calcInfo.baseAmount} ${item.currency}</td>
+            </tr>
+            ${item.bonus > 0 ? `<tr><td class="bonus">+ Bonus</td><td></td><td class="bonus">+${calcInfo.bonusAmount} ${item.currency}</td></tr>` : ''}
+            ${item.deductions > 0 ? `<tr><td class="deduction">- Déductions (${item.deductions} cours manqué(s))</td><td></td><td class="deduction">-${calcInfo.deductionsAmount} ${item.currency}</td></tr>` : ''}
+          </table>
+          <div class="amount">
+            Montant Net à Payer: ${calcInfo.finalAmount} ${item.currency}
+          </div>
+          <div class="footer">
+            <p>MyKalamaEnglish - Plateforme d'apprentissage de l'anglais</p>
+            <p>Cette facture a été générée automatiquement</p>
+          </div>
+        </body>
+        </html>
+      `;
+    }
+    
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(content);
+    printWindow.document.close();
+    printWindow.print();
   };
 
   const handleResetStats = async () => {

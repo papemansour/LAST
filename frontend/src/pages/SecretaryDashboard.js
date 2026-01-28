@@ -301,6 +301,35 @@ const SecretaryDashboard = () => {
     }
   };
 
+  const handleEditMeeting = (meeting) => {
+    setEditingMeeting({
+      id: meeting.id,
+      title: meeting.title,
+      date: meeting.date,
+      time: meeting.time,
+      attendees: meeting.attendees || '',
+      notes: meeting.notes || '',
+      meetingLink: meeting.meetingLink || ''
+    });
+  };
+
+  const handleUpdateMeeting = async () => {
+    if (!editingMeeting.title || !editingMeeting.date || !editingMeeting.time) {
+      toast.error('Veuillez remplir les champs obligatoires');
+      return;
+    }
+    try {
+      await apiClient.put(`/secretary/meetings/${editingMeeting.id}`, editingMeeting);
+      const res = await apiClient.get('/secretary/meetings');
+      setMeetings(res.data || []);
+      setEditingMeeting(null);
+      toast.success('Réunion mise à jour');
+    } catch (error) {
+      console.error('Error updating meeting:', error);
+      toast.error('Erreur lors de la mise à jour');
+    }
+  };
+
   // Notes handlers
   const handleAddNote = () => {
     if (!newNote.title || !newNote.content) {

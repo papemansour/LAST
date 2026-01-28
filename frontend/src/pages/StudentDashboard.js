@@ -454,6 +454,12 @@ const StudentDashboard = () => {
           {/* Welcome Letter Tab */}
           <TabsContent value="welcome">
             <div className="space-y-6">
+              {/* Ramadan Promo Banner */}
+              <RamadanPromoBanner />
+              
+              {/* Trial Countdown - shows remaining days of free trial */}
+              <TrialCountdown registrationDate={user?.created_at} />
+              
               <WelcomeLetter />
               <ProgressTracker user={user} />
             </div>

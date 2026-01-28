@@ -2251,6 +2251,18 @@ async def mark_question_read(question_id: str, current_user: dict = Depends(get_
     )
     return {"message": "Question marquée comme lue"}
 
+@api_router.put("/student/mark-answer-read/{question_id}")
+async def mark_answer_read(question_id: str, current_user: dict = Depends(get_current_user)):
+    """Student marks an answer as read"""
+    if current_user['role'] != 'student':
+        raise HTTPException(status_code=403, detail="Student access required")
+    
+    await db.summary_questions.update_one(
+        {"id": question_id, "student_id": current_user['id']},
+        {"$set": {"answer_read": True}}
+    )
+    return {"message": "Réponse marquée comme lue"}
+
 @api_router.get("/teacher/summary-questions/{summary_id}")
 async def get_summary_questions(summary_id: str, current_user: dict = Depends(get_current_user)):
     """Get all questions for a specific summary"""

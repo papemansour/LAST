@@ -899,6 +899,11 @@ const AdminDashboard = () => {
             </div>
           </TabsContent>
 
+          {/* Analytics Tab */}
+          <TabsContent value="analytics">
+            <AdminAnalytics />
+          </TabsContent>
+
           <TabsContent value="assign">
             <Card>
               <CardHeader>

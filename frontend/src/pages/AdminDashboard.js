@@ -464,6 +464,15 @@ const AdminDashboard = () => {
             </TabsTrigger>
             
             <TabsTrigger 
+              value="student-availability" 
+              data-testid="admin-tab-student-availability"
+              className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-teal-500 data-[state=active]:to-teal-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+            >
+              <CalendarDays className="w-6 h-6" />
+              <span className="text-xs font-semibold">Dispo Étudiants</span>
+            </TabsTrigger>
+            
+            <TabsTrigger 
               value="results" 
               data-testid="admin-tab-results"
               className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-yellow-500 data-[state=active]:to-yellow-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"

@@ -132,6 +132,21 @@ const LoginPage = () => {
           </div>
         )}
         
+        {isRamadan && (
+          <div className="mb-6 p-4 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white rounded-lg shadow-lg text-center">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <span className="text-3xl">🌙</span>
+              <p className="text-2xl font-bold">Ramadan Mubarak !</p>
+              <span className="text-3xl">⭐</span>
+            </div>
+            <p className="text-sm">رمضان مبارك - Que ce mois sacré soit rempli de bénédictions</p>
+            <div className="mt-2 p-2 bg-white/20 rounded-lg">
+              <p className="text-lg font-semibold">🎁 PROMO RAMADAN : -10% sur tous les packs !</p>
+              <p className="text-xs mt-1">Code : RAMADAN2026 - Valable jusqu&apos;au 20 mars 2026</p>
+            </div>
+          </div>
+        )}
+        
         <Card className="shadow-2xl">
           <CardHeader className="text-center">
             <CardTitle className="text-3xl">Connexion</CardTitle>

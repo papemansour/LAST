@@ -2463,18 +2463,34 @@ async def mark_notification_read(notification_id: str, current_user: dict = Depe
     )
     return {"message": "Notification marked as read"}
 
-async def create_notification(user_id: str, notification_type: str, data: dict):
-    """Helper function to create notifications"""
+async def create_notification(user_id: str, notification_type: str = None, data: dict = None, title: str = None, message: str = None):
+    """Helper function to create notifications
+    Supports two calling formats:
+    1. create_notification(user_id, notification_type, data) - legacy format
+    2. create_notification(user_id, title=..., message=..., notification_type=...) - named params
+    """
     notification = {
         "id": str(uuid.uuid4()),
         "user_id": user_id,
-        "type": notification_type,
-        **data,
+        "type": notification_type or "general",
+        "is_read": False,
         "read": False,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
+    
+    # Handle legacy format with data dict
+    if data:
+        notification.update(data)
+    
+    # Handle named parameters
+    if title:
+        notification["title"] = title
+    if message:
+        notification["message"] = message
+    
     await db.notifications.insert_one(notification)
-    logger.info(f"Notification created for user {user_id}: {notification_type}")
+    logger.info(f"Notification created for user {user_id}: {notification.get('type')}")
+    return notification
 
 # Admin delete user (teacher or student)
 @api_router.delete("/admin/delete-user/{user_id}")

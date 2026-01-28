@@ -16,7 +16,7 @@ Plateforme e-learning complète pour l'apprentissage de l'anglais, développée 
 │   ├── server.py              # API principale FastAPI
 │   ├── config.py              # Configuration DB et utilitaires
 │   ├── email_service.py       # Service d'emails
-│   ├── websocket_manager.py   # NEW: Gestionnaire WebSocket temps réel
+│   ├── websocket_manager.py   # Gestionnaire WebSocket temps réel
 │   └── routes/                # Routes modulaires (extraction en cours)
 │       ├── auth_routes.py     # Routes authentification extraites
 │       ├── billing_routes.py  # Documentation routes facturation
@@ -25,71 +25,62 @@ Plateforme e-learning complète pour l'apprentissage de l'anglais, développée 
 │   └── src/
 │       ├── pages/             # Dashboards (Admin, Student, Teacher, Secretary)
 │       ├── components/        # Composants réutilisables
-│       ├── hooks/             # NEW: useNotifications.js
+│       │   └── AdminAnalytics.js  # NEW: Graphiques avec recharts
+│       ├── hooks/             # useNotifications.js
 │       └── utils/             # Utilitaires (api.js, fileUrl.js)
 ```
 
-## Fonctionnalités Implémentées
+## Fonctionnalités Implémentées (100% Complétées)
 
-### Phase 1 - Core (Complété)
+### Phase 1 - Core ✅
 - ✅ Authentification JWT
 - ✅ Dashboards multi-rôles
 - ✅ Système de cours et de liens Google Meet
 - ✅ Messagerie interne
 - ✅ Gestion des documents
 
-### Phase 2 - Fonctionnalités Avancées (Complété)
+### Phase 2 - Fonctionnalités Avancées ✅
 - ✅ Promo Ramadan (-10% avec code promo)
 - ✅ Système de gamification (points, badges)
-- ✅ Résumés de cours avec Q/R
+- ✅ Résumés de cours avec Q/R + messages vocaux
 - ✅ Système de disponibilités étudiants
 - ✅ Facturation avec bonus/déductions (sans TVA)
 
-### Phase 3 - Janvier 2026 (Complété)
+### Phase 3 - Janvier 2026 ✅
 - ✅ Récapitulatif mensuel des heures pour admin
 - ✅ Édition des réunions planifiées
-- ✅ Messages vocaux dans Q/R des résumés
 - ✅ Double check bleu (accusés de lecture)
-- ✅ Onglets "Dispo Étudiants" pour admin et professeur
-- ✅ **Notifications WebSocket temps réel**
-- ✅ **Refactorisation server.py** (routes auth extraites)
+- ✅ Notifications WebSocket temps réel
+- ✅ **Tableau de bord analytique** avec graphiques (recharts)
+- ✅ **Bug documents résolu** - Nettoyage des fichiers invalides
+- ✅ **Bug dashboards résolu** - Import Calendar corrigé
 
-## Notifications Temps Réel (WebSocket)
+## Tableau de Bord Analytique 📊
 
-### Architecture
-- **Backend**: `websocket_manager.py` gère les connexions WebSocket
-- **Endpoint**: `/ws/notifications/{user_id}` pour les notifications push
-- **Frontend**: `NotificationBell.js` avec indicateur de connexion (vert/rouge)
-
-### Fonctionnement
-1. L'utilisateur se connecte → WebSocket établi automatiquement
-2. Étudiant pose une question → Notification push au professeur
-3. Professeur répond → Notification push à l'étudiant
-4. Ping/pong toutes les 30s pour maintenir la connexion
-5. Reconnexion automatique après 5s si déconnecté
+### Composants
+- **Cartes de résumé** : Étudiants, Professeurs, Heures, Revenus
+- **Évolution des inscriptions** : Graphique en aire (6 derniers mois)
+- **Heures par semaine** : Graphique en barres
+- **Revenus mensuels** : Graphique de ligne (EUR)
+- **Répartition par niveau** : Graphique circulaire
+- **Classement des professeurs** : Top 5 par heures enseignées
 
 ### Endpoints
-- `WS /ws/notifications/{user_id}` - Connexion WebSocket
-- `GET /api/ws/online-status` - Nombre d'utilisateurs en ligne
+- `GET /api/admin/analytics?period=week|month|year`
+- `GET /api/admin/check-documents-integrity`
+- `POST /api/admin/cleanup-invalid-documents`
 
-## Dernières Modifications (28 Janvier 2026)
+## Tests
+- **Backend** : 100% (15/15 tests passés)
+- **Frontend** : 100% (3/3 dashboards vérifiés)
+- Rapport: `/app/test_reports/iteration_4.json`
 
-### Nouvelles Fonctionnalités
-1. **WebSocket Manager** - Gestionnaire de connexions temps réel
-2. **Notifications Push** - Toast automatique pour nouvelles questions/réponses
-3. **Indicateur de connexion** - Point vert/rouge dans NotificationBell
-4. **Routes extraites** - auth_routes.py pour meilleure maintenabilité
-
-### Corrections de Bugs
-1. **Notification endpoints** - Corrigé `current_user.id` → `current_user['id']`
-2. **create_notification unifiée** - Fonction avec signature flexible
+## Credentials de Test
+- Admin: admin@mykalamaenglish.com / adminco
+- Teacher: proftest.flashcards@mykalamaenglish.com / Teacherba45cb1a
+- Student: mouhamadbachirdiagne@gmail.com / Kalama12d751
 
 ## Backlog Priorisé
-
-### P0 - Critique
-- [x] ~~Notifications temps réel~~ ✅ FAIT
-- [x] ~~Refactorisation server.py~~ ✅ EN COURS (auth extraites)
-- [ ] Résoudre le bug de téléchargement de documents (données manquantes)
 
 ### P1 - Important
 - [ ] Synchronisation factures avec Monday.com
@@ -97,9 +88,4 @@ Plateforme e-learning complète pour l'apprentissage de l'anglais, développée 
 
 ### P2 - Normal
 - [ ] Envoi de jeux par le professeur
-- [ ] Continuer extraction des routes (billing, admin)
-
-## Tests
-- Tests automatisés: `/app/backend/tests/`
-- Rapports: `/app/test_reports/iteration_3.json`
-- Dernier taux de réussite: 100% (13/13 tests backend + frontend vérifié)
+- [ ] Continuer extraction des routes server.py

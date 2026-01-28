@@ -63,6 +63,7 @@ const LoginPage = () => {
     <div className={`min-h-screen flex items-center justify-center px-4 relative overflow-hidden ${
       isChristmas ? 'bg-gradient-to-br from-red-50 via-green-50 to-red-100' : 
       isNewYear ? 'bg-gradient-to-br from-yellow-50 via-orange-50 to-pink-100' :
+      isRamadan ? 'bg-gradient-to-br from-emerald-50 via-teal-50 to-amber-50' :
       'bg-gradient-to-br from-blue-50 via-white to-purple-50'
     }`}>
       {/* Christmas decorations */}

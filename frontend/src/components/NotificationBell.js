@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Bell, MessageCircle, Newspaper, Trophy, BookOpen, X, Sparkles } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Bell, MessageCircle, Newspaper, Trophy, BookOpen, X, Sparkles, Wifi, WifiOff } from 'lucide-react';
 import { Button } from './ui/button';
 import {
   Popover,
@@ -10,19 +10,96 @@ import { Badge } from './ui/badge';
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
 
-const NotificationBell = () => {
+const NotificationBell = ({ userId }) => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [wsConnected, setWsConnected] = useState(false);
 
+  // WebSocket connection for real-time notifications
   useEffect(() => {
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(interval);
-  }, []);
+    if (!userId) return;
+    
+    let ws = null;
+    let reconnectTimeout = null;
+    let pingInterval = null;
+    
+    const connect = () => {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const host = window.location.host;
+      const wsUrl = `${protocol}//${host}/ws/notifications/${userId}`;
+      
+      try {
+        ws = new WebSocket(wsUrl);
+        
+        ws.onopen = () => {
+          console.log('🔔 Notifications WebSocket connected');
+          setWsConnected(true);
+          
+          // Ping to keep alive
+          pingInterval = setInterval(() => {
+            if (ws.readyState === WebSocket.OPEN) {
+              ws.send('ping');
+            }
+          }, 30000);
+        };
+        
+        ws.onmessage = (event) => {
+          if (event.data === 'pong') return;
+          
+          try {
+            const notification = JSON.parse(event.data);
+            
+            // Show toast for real-time notification
+            if (notification.type === 'new_question') {
+              toast.info(notification.message, {
+                description: notification.title,
+                duration: 6000,
+              });
+            } else if (notification.type === 'new_answer') {
+              toast.success(notification.message, {
+                description: notification.title,
+                duration: 6000,
+              });
+            }
+            
+            // Refresh notifications list
+            fetchNotifications();
+          } catch (e) {
+            console.error('Error parsing WebSocket message:', e);
+          }
+        };
+        
+        ws.onclose = () => {
+          console.log('🔔 Notifications WebSocket disconnected');
+          setWsConnected(false);
+          clearInterval(pingInterval);
+          
+          // Reconnect after 5 seconds
+          reconnectTimeout = setTimeout(connect, 5000);
+        };
+        
+        ws.onerror = (error) => {
+          console.error('WebSocket error:', error);
+          ws.close();
+        };
+      } catch (error) {
+        console.error('Failed to create WebSocket:', error);
+        reconnectTimeout = setTimeout(connect, 5000);
+      }
+    };
+    
+    connect();
+    
+    return () => {
+      if (ws) ws.close();
+      clearTimeout(reconnectTimeout);
+      clearInterval(pingInterval);
+    };
+  }, [userId]);
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     try {
       const res = await apiClient.get('/notifications/my-notifications');
       setNotifications(res.data || []);

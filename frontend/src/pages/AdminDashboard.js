@@ -474,6 +474,15 @@ const AdminDashboard = () => {
             </TabsTrigger>
             
             <TabsTrigger 
+              value="monthly-hours" 
+              data-testid="admin-tab-monthly-hours"
+              className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-cyan-500 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+            >
+              <BarChart3 className="w-6 h-6" />
+              <span className="text-xs font-semibold">Récap Heures</span>
+            </TabsTrigger>
+            
+            <TabsTrigger 
               value="results" 
               data-testid="admin-tab-results"
               className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-yellow-500 data-[state=active]:to-yellow-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"

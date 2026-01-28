@@ -990,6 +990,73 @@ const SecretaryDashboard = () => {
                 ))
               )}
             </div>
+            
+            {/* Modal d'édition de réunion */}
+            {editingMeeting && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                <Card className="w-full max-w-lg mx-4">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Edit className="w-5 h-5" />
+                      Modifier la réunion
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Titre *</label>
+                      <Input
+                        value={editingMeeting.title}
+                        onChange={(e) => setEditingMeeting({...editingMeeting, title: e.target.value})}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Date *</label>
+                        <Input
+                          type="date"
+                          value={editingMeeting.date}
+                          onChange={(e) => setEditingMeeting({...editingMeeting, date: e.target.value})}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Heure *</label>
+                        <Input
+                          type="time"
+                          value={editingMeeting.time}
+                          onChange={(e) => setEditingMeeting({...editingMeeting, time: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Participants</label>
+                      <Input
+                        value={editingMeeting.attendees}
+                        onChange={(e) => setEditingMeeting({...editingMeeting, attendees: e.target.value})}
+                        placeholder="ex: Prof Martin, Prof Dupont"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Notes</label>
+                      <Textarea
+                        value={editingMeeting.notes}
+                        onChange={(e) => setEditingMeeting({...editingMeeting, notes: e.target.value})}
+                        rows={3}
+                      />
+                    </div>
+                    <div className="flex gap-2 pt-2">
+                      <Button onClick={handleUpdateMeeting} className="flex-1">
+                        <Save className="w-4 h-4 mr-1" />
+                        Enregistrer
+                      </Button>
+                      <Button variant="outline" onClick={() => setEditingMeeting(null)}>
+                        <X className="w-4 h-4 mr-1" />
+                        Annuler
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
           </TabsContent>
 
           {/* Notes Tab */}

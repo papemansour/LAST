@@ -13,18 +13,20 @@ Plateforme e-learning complète pour l'apprentissage de l'anglais, développée 
 ```
 /app/
 ├── backend/
-│   ├── server.py          # API principale FastAPI (en cours de refactorisation)
-│   ├── config.py          # Configuration
-│   ├── email_service.py   # Service d'emails
-│   └── routes/            # Routes modulaires (documentation prête)
-│       ├── auth.py        # Documentation routes authentification
-│       ├── billing.py     # Documentation routes facturation
+│   ├── server.py              # API principale FastAPI
+│   ├── config.py              # Configuration DB et utilitaires
+│   ├── email_service.py       # Service d'emails
+│   ├── websocket_manager.py   # NEW: Gestionnaire WebSocket temps réel
+│   └── routes/                # Routes modulaires (extraction en cours)
+│       ├── auth_routes.py     # Routes authentification extraites
+│       ├── billing_routes.py  # Documentation routes facturation
 │       └── course_summaries.py
 ├── frontend/
 │   └── src/
-│       ├── pages/         # Dashboards (Admin, Student, Teacher, Secretary)
-│       ├── components/    # Composants réutilisables
-│       └── utils/         # Utilitaires (api.js, fileUrl.js)
+│       ├── pages/             # Dashboards (Admin, Student, Teacher, Secretary)
+│       ├── components/        # Composants réutilisables
+│       ├── hooks/             # NEW: useNotifications.js
+│       └── utils/             # Utilitaires (api.js, fileUrl.js)
 ```
 
 ## Fonctionnalités Implémentées
@@ -49,26 +51,45 @@ Plateforme e-learning complète pour l'apprentissage de l'anglais, développée 
 - ✅ Messages vocaux dans Q/R des résumés
 - ✅ Double check bleu (accusés de lecture)
 - ✅ Onglets "Dispo Étudiants" pour admin et professeur
-- 🔄 Refactorisation server.py (documentation prête)
+- ✅ **Notifications WebSocket temps réel**
+- ✅ **Refactorisation server.py** (routes auth extraites)
+
+## Notifications Temps Réel (WebSocket)
+
+### Architecture
+- **Backend**: `websocket_manager.py` gère les connexions WebSocket
+- **Endpoint**: `/ws/notifications/{user_id}` pour les notifications push
+- **Frontend**: `NotificationBell.js` avec indicateur de connexion (vert/rouge)
+
+### Fonctionnement
+1. L'utilisateur se connecte → WebSocket établi automatiquement
+2. Étudiant pose une question → Notification push au professeur
+3. Professeur répond → Notification push à l'étudiant
+4. Ping/pong toutes les 30s pour maintenir la connexion
+5. Reconnexion automatique après 5s si déconnecté
+
+### Endpoints
+- `WS /ws/notifications/{user_id}` - Connexion WebSocket
+- `GET /api/ws/online-status` - Nombre d'utilisateurs en ligne
 
 ## Dernières Modifications (28 Janvier 2026)
 
 ### Nouvelles Fonctionnalités
-1. **AdminMonthlyHours** - Récapitulatif mensuel avec export CSV, classement professeurs
-2. **Édition réunions** - Modal d'édition dans SecretaryDashboard
-3. **PUT /api/secretary/meetings/{id}** - Endpoint mise à jour réunions
-4. **PUT /api/student/mark-answer-read/{id}** - Marquage réponses lues
+1. **WebSocket Manager** - Gestionnaire de connexions temps réel
+2. **Notifications Push** - Toast automatique pour nouvelles questions/réponses
+3. **Indicateur de connexion** - Point vert/rouge dans NotificationBell
+4. **Routes extraites** - auth_routes.py pour meilleure maintenabilité
 
 ### Corrections de Bugs
-1. **create_notification unifiée** - Fonction avec signature flexible
-2. **Invalid Date corrigé** - Vérifications null sur dates d'assiduité
-3. **Endpoint disponibilités** - Correction assigned_teacher
+1. **Notification endpoints** - Corrigé `current_user.id` → `current_user['id']`
+2. **create_notification unifiée** - Fonction avec signature flexible
 
 ## Backlog Priorisé
 
 ### P0 - Critique
-- [ ] Exécuter la refactorisation de server.py (documentation prête)
-- [ ] Résoudre définitivement le bug de téléchargement de documents
+- [x] ~~Notifications temps réel~~ ✅ FAIT
+- [x] ~~Refactorisation server.py~~ ✅ EN COURS (auth extraites)
+- [ ] Résoudre le bug de téléchargement de documents (données manquantes)
 
 ### P1 - Important
 - [ ] Synchronisation factures avec Monday.com
@@ -76,26 +97,9 @@ Plateforme e-learning complète pour l'apprentissage de l'anglais, développée 
 
 ### P2 - Normal
 - [ ] Envoi de jeux par le professeur
-
-## Endpoints Clés
-
-### Disponibilités
-- `POST /api/student/set-availability`
-- `GET /api/teacher/students-availability`
-- `GET /api/admin/all-students-availability`
-
-### Récap Mensuel
-- `GET /api/admin/monthly-teacher-hours?month=X&year=Y`
-
-### Facturation
-- `POST /api/secretary/teacher-payments` (avec bonus/déductions)
-- `PUT /api/secretary/meetings/{id}`
-
-### Q/R Résumés
-- `PUT /api/student/mark-answer-read/{id}`
-- `PUT /api/teacher/mark-question-read/{id}`
+- [ ] Continuer extraction des routes (billing, admin)
 
 ## Tests
 - Tests automatisés: `/app/backend/tests/`
-- Rapports: `/app/test_reports/iteration_2.json`
-- Dernier taux de réussite: 100% (15/15 tests backend)
+- Rapports: `/app/test_reports/iteration_3.json`
+- Dernier taux de réussite: 100% (13/13 tests backend + frontend vérifié)

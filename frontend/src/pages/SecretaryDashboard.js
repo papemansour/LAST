@@ -69,6 +69,7 @@ const SecretaryDashboard = () => {
     hoursWorked: '',
     hourlyRate: '',
     bonus: '0',
+    deductions: 0,
     description: 'Cours de langue anglaise',
     notes: ''
   });

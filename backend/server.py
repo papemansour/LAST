@@ -2134,9 +2134,11 @@ async def ask_summary_question(question_data: dict, current_user: dict = Depends
         "student_id": current_user['id'],
         "student_name": f"{current_user['first_name']} {current_user['last_name']}",
         "teacher_id": summary['teacher_id'],
-        "question": question_data['question'],
+        "question": question_data.get('question', ''),
+        "question_audio_url": question_data.get('question_audio_url'),
         "answer": None,
         "answer_audio_url": None,
+        "question_read": False,
         "answer_read": False,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
@@ -2144,15 +2146,84 @@ async def ask_summary_question(question_data: dict, current_user: dict = Depends
     await db.summary_questions.insert_one(question)
     
     # Notify teacher
-    await create_notification(
-        user_id=summary['teacher_id'],
-        title="Nouvelle question sur résumé",
-        message=f"Question de {current_user['first_name']}: {question_data['question'][:50]}...",
-        notification_type="summary_question"
-    )
+    try:
+        await create_notification(
+            user_id=summary['teacher_id'],
+            notification_type="summary_question",
+            data={"message": f"Question de {current_user['first_name']}: {question_data.get('question', 'Message vocal')[:50]}..."}
+        )
+    except Exception as e:
+        logger.warning(f"Failed to create notification: {e}")
     
     logger.info(f"Summary question from student {current_user['id']} on summary {question_data['summary_id']}")
     return {"message": "Question envoyée avec succès", "question": question}
+
+@api_router.post("/student/upload-question-audio")
+async def upload_question_audio(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
+    """Upload audio file for student voice question"""
+    if current_user['role'] != 'student':
+        raise HTTPException(status_code=403, detail="Student access required")
+    
+    allowed_types = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/webm', 'audio/ogg']
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Invalid audio file type")
+    
+    file_extension = file.filename.split('.')[-1] if '.' in file.filename else 'webm'
+    unique_filename = f"student_audio_{uuid4()}.{file_extension}"
+    file_path = f"/app/uploads/audio/{unique_filename}"
+    
+    os.makedirs("/app/uploads/audio", exist_ok=True)
+    
+    with open(file_path, "wb") as f:
+        content = await file.read()
+        f.write(content)
+    
+    file_url = f"/uploads/audio/{unique_filename}"
+    return {"file_url": file_url, "message": "Audio uploadé avec succès"}
+
+@api_router.delete("/student/delete-question/{question_id}")
+async def delete_student_question(question_id: str, current_user: dict = Depends(get_current_user)):
+    """Student deletes their own question"""
+    if current_user['role'] != 'student':
+        raise HTTPException(status_code=403, detail="Student access required")
+    
+    result = await db.summary_questions.delete_one({
+        "id": question_id,
+        "student_id": current_user['id']
+    })
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Question not found")
+    
+    return {"message": "Question supprimée"}
+
+@api_router.delete("/teacher/delete-question/{question_id}")
+async def delete_teacher_question(question_id: str, current_user: dict = Depends(get_current_user)):
+    """Teacher deletes a question"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    result = await db.summary_questions.delete_one({
+        "id": question_id,
+        "teacher_id": current_user['id']
+    })
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Question not found")
+    
+    return {"message": "Question supprimée"}
+
+@api_router.put("/teacher/mark-question-read/{question_id}")
+async def mark_question_read(question_id: str, current_user: dict = Depends(get_current_user)):
+    """Teacher marks question as read"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    await db.summary_questions.update_one(
+        {"id": question_id, "teacher_id": current_user['id']},
+        {"$set": {"question_read": True}}
+    )
+    return {"message": "Question marquée comme lue"}
 
 @api_router.get("/teacher/summary-questions/{summary_id}")
 async def get_summary_questions(summary_id: str, current_user: dict = Depends(get_current_user)):

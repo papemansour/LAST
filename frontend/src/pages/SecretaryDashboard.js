@@ -1138,36 +1138,56 @@ const SecretaryDashboard = () => {
                 profReports.map(report => (
                   <Card key={report.id} className="hover:shadow-md transition-shadow">
                     <CardContent className="pt-6">
-                      <div className="flex justify-between items-start">
+                      <div 
+                        className="flex justify-between items-start cursor-pointer"
+                        onClick={() => setExpandedReport(expandedReport === report.id ? null : report.id)}
+                      >
                         <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
+                          <div className="flex items-center gap-3">
                             <h4 className="font-semibold text-lg">👨‍🏫 {report.prof_name || report.profName}</h4>
                             <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
                               📅 {new Date(report.date).toLocaleDateString('fr-FR')}
                             </span>
+                            <span className="bg-purple-100 text-purple-700 text-xs px-2 py-0.5 rounded-full flex items-center gap-1">
+                              <Eye className="w-3 h-3" />
+                              Voir détails
+                            </span>
                           </div>
-                          <div className="bg-purple-50 border border-purple-100 rounded-lg p-3 mb-3">
+                          <p className="text-sm text-gray-600 mt-2 line-clamp-2">{report.content?.substring(0, 150)}...</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button variant="ghost" size="sm" className="text-purple-600">
+                            {expandedReport === report.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => { e.stopPropagation(); handleDeleteReport(report.id); }}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      {/* Expanded Content */}
+                      {expandedReport === report.id && (
+                        <div className="mt-4 space-y-3">
+                          <div className="bg-purple-50 border border-purple-100 rounded-lg p-4">
+                            <h5 className="text-sm font-medium text-purple-800 mb-2">📄 Contenu du compte rendu</h5>
                             <p className="text-sm text-gray-700 whitespace-pre-wrap">{report.content}</p>
                           </div>
                           {report.notes && (
-                            <div className="bg-gray-50 rounded-lg p-3">
-                              <p className="text-xs text-gray-500 font-medium mb-1">📝 Notes :</p>
-                              <p className="text-sm text-gray-600">{report.notes}</p>
+                            <div className="bg-amber-50 border border-amber-100 rounded-lg p-4">
+                              <h5 className="text-sm font-medium text-amber-800 mb-2">📝 Notes supplémentaires</h5>
+                              <p className="text-sm text-gray-600 whitespace-pre-wrap">{report.notes}</p>
                             </div>
                           )}
-                          <p className="text-xs text-gray-400 mt-3">
+                          <p className="text-xs text-gray-400">
                             Créé le {new Date(report.created_at || report.createdAt).toLocaleDateString('fr-FR')}
                           </p>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteReport(report.id)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
+                      )}
                     </CardContent>
                   </Card>
                 ))

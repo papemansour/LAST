@@ -460,10 +460,13 @@ const StudentDashboard = () => {
           <TabsContent value="welcome">
             <div className="space-y-6">
               {/* Ramadan Promo Banner */}
-              <RamadanPromoBanner />
+              <RamadanPromoBanner showButton={false} />
               
               {/* Trial Countdown - shows remaining days of free trial */}
-              <TrialCountdown registrationDate={user?.created_at} />
+              <TrialCountdown 
+                registrationDate={user?.created_at} 
+                onUpgradeClick={() => setActiveTab('mypack')}
+              />
               
               <WelcomeLetter />
               <ProgressTracker user={user} />

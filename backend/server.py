@@ -3943,6 +3943,93 @@ async def delete_all_teacher_sessions(current_user: dict = Depends(get_current_u
     logger.info(f"All {result.deleted_count} sessions deleted by admin {current_user['id']}")
     return {"message": f"{result.deleted_count} sessions supprimées"}
 
+@api_router.get("/admin/monthly-teacher-hours")
+async def get_monthly_teacher_hours(month: int = None, year: int = None, current_user: dict = Depends(get_current_user)):
+    """Get monthly summary of hours worked by each teacher based on attendance"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Use current month if not specified
+    now = datetime.now(timezone.utc)
+    target_month = month or now.month
+    target_year = year or now.year
+    
+    # Get start and end of month
+    start_date = datetime(target_year, target_month, 1, tzinfo=timezone.utc)
+    if target_month == 12:
+        end_date = datetime(target_year + 1, 1, 1, tzinfo=timezone.utc)
+    else:
+        end_date = datetime(target_year, target_month + 1, 1, tzinfo=timezone.utc)
+    
+    # Get all completed sessions for this month
+    sessions = await db.teacher_sessions.find({
+        "status": "completed",
+        "end_time": {
+            "$gte": start_date.isoformat(),
+            "$lt": end_date.isoformat()
+        }
+    }, {"_id": 0}).to_list(10000)
+    
+    # Group by teacher
+    teacher_hours = {}
+    for session in sessions:
+        teacher_id = session['teacher_id']
+        if teacher_id not in teacher_hours:
+            teacher_hours[teacher_id] = {
+                "teacher_id": teacher_id,
+                "teacher_name": session.get('teacher_name', 'Inconnu'),
+                "teacher_email": session.get('teacher_email', ''),
+                "total_minutes": 0,
+                "total_sessions": 0,
+                "sessions": []
+            }
+        
+        # Calculate duration from total_time (in seconds) or from times
+        duration_minutes = session.get('total_time', 0) / 60
+        if duration_minutes == 0 and session.get('start_time') and session.get('end_time'):
+            try:
+                start = datetime.fromisoformat(session['start_time'].replace('Z', '+00:00'))
+                end = datetime.fromisoformat(session['end_time'].replace('Z', '+00:00'))
+                duration_minutes = (end - start).total_seconds() / 60
+            except:
+                pass
+        
+        teacher_hours[teacher_id]['total_minutes'] += duration_minutes
+        teacher_hours[teacher_id]['total_sessions'] += 1
+        teacher_hours[teacher_id]['sessions'].append({
+            "date": session.get('end_time', session.get('created_at')),
+            "duration_minutes": round(duration_minutes, 2)
+        })
+    
+    # Convert to list and format
+    result = []
+    for data in teacher_hours.values():
+        total_hours = data['total_minutes'] / 60
+        result.append({
+            "teacher_id": data['teacher_id'],
+            "teacher_name": data['teacher_name'],
+            "teacher_email": data['teacher_email'],
+            "total_hours": round(total_hours, 2),
+            "total_minutes": round(data['total_minutes'], 2),
+            "total_sessions": data['total_sessions'],
+            "sessions": data['sessions'][-10:]  # Last 10 sessions
+        })
+    
+    # Sort by total hours descending
+    result.sort(key=lambda x: x['total_hours'], reverse=True)
+    
+    return {
+        "month": target_month,
+        "year": target_year,
+        "month_name": ["", "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
+                       "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"][target_month],
+        "teachers": result,
+        "total_teachers": len(result),
+        "total_hours_all": round(sum(t['total_hours'] for t in result), 2)
+    }
+
+
+
 
 @api_router.post("/admin/manual-session")
 async def create_manual_session(session_data: dict, current_user: dict = Depends(get_current_user)):

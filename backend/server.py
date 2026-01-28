@@ -4644,17 +4644,6 @@ async def get_all_students_availability(current_user: dict = Depends(get_current
     
     return result
 
-
-    result = await db.meet_links.update_one(
-        {"id": meet_id, "student_id": current_user['id']},
-        {"$set": {"attended": True, "completed": True}}
-    )
-    
-    if result.modified_count == 0:
-        raise HTTPException(status_code=404, detail="Meet link not found")
-    
-    return {"message": "Cours marqué comme suivi"}
-
 @api_router.get("/student/my-progression")
 async def get_my_progression(current_user: dict = Depends(get_current_user)):
     """Get student progression statistics"""

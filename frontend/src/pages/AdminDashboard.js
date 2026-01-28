@@ -448,6 +448,15 @@ const AdminDashboard = () => {
             </TabsTrigger>
             
             <TabsTrigger 
+              value="analytics" 
+              data-testid="admin-tab-analytics"
+              className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-indigo-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+            >
+              <TrendingUp className="w-6 h-6" />
+              <span className="text-xs font-semibold">📊 Analytics</span>
+            </TabsTrigger>
+            
+            <TabsTrigger 
               value="assign" 
               data-testid="admin-tab-assign"
               className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"

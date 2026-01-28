@@ -378,9 +378,9 @@ const TeacherDashboard = () => {
               <Users className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Étudiants</span>
             </TabsTrigger>
-            <TabsTrigger value="group-codes" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
-              <Key className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
-              <span className="text-xs font-semibold">Codes Groupe</span>
+            <TabsTrigger value="student-availability" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
+              <Calendar className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
+              <span className="text-xs font-semibold">Dispo Étudiants</span>
             </TabsTrigger>
             <TabsTrigger value="courses" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <BookOpen className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
@@ -409,10 +409,6 @@ const TeacherDashboard = () => {
             <TabsTrigger value="summaries" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <BookOpen className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Résumés</span>
-            </TabsTrigger>
-            <TabsTrigger value="meet-links" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
-              <Calendar className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
-              <span className="text-xs font-semibold">Cours en ligne</span>
             </TabsTrigger>
             <TabsTrigger value="schedule" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <Calendar className="w-8 h-8 text-green-600 data-[state=active]:text-white" />

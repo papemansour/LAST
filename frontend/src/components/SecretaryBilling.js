@@ -226,25 +226,27 @@ const SecretaryBilling = ({ teachers, students, onRefresh }) => {
 
   const handlePrintInvoice = (item, type) => {
     const printWindow = window.open('', '_blank');
-    const tvaInfo = calculateTVA(parseFloat(item.amount), item.currency);
     
     let content = '';
     if (type === 'teacher') {
+      const calc = calculateFinalAmount(item.amount, item.bonus || 0, item.deductions || 0, item.currency);
       content = `
         <html>
         <head>
           <title>Facture Professeur - ${item.teacher_name}</title>
           <style>
             body { font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
-            .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
+            .header { text-align: center; border-bottom: 2px solid #0d9488; padding-bottom: 20px; margin-bottom: 30px; }
             .logo { font-size: 24px; font-weight: bold; color: #0d9488; }
             .invoice-info { display: flex; justify-content: space-between; margin-bottom: 30px; }
-            .amount { font-size: 28px; font-weight: bold; color: #0d9488; text-align: center; margin: 30px 0; }
+            .amount { font-size: 28px; font-weight: bold; color: #0d9488; text-align: center; margin: 30px 0; padding: 20px; background: #f0fdfa; border-radius: 8px; }
             .details { background: #f9fafb; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
             .footer { text-align: center; margin-top: 40px; color: #666; font-size: 12px; }
             table { width: 100%; border-collapse: collapse; margin: 20px 0; }
             th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-            th { background: #f3f4f6; }
+            th { background: #0d9488; color: white; }
+            .bonus { color: green; }
+            .deduction { color: red; }
           </style>
         </head>
         <body>
@@ -260,24 +262,21 @@ const SecretaryBilling = ({ teachers, students, onRefresh }) => {
             </div>
             <div style="text-align: right;">
               <strong>Date:</strong> ${new Date(item.created_at).toLocaleDateString('fr-FR')}<br/>
-              <strong>Ref:</strong> ${item.id.substring(0, 8).toUpperCase()}
+              <strong>Ref:</strong> FAC-${item.id.substring(0, 8).toUpperCase()}
             </div>
           </div>
           <table>
-            <tr><th>Description</th><th>Période</th><th>Montant TTC</th></tr>
+            <tr><th>Description</th><th>Période</th><th>Montant</th></tr>
             <tr>
               <td>${item.description || 'Paiement cours'}</td>
               <td>${item.period}</td>
-              <td>${item.amount} ${item.currency}</td>
+              <td>${calc.baseAmount} ${item.currency}</td>
             </tr>
+            ${item.bonus > 0 ? `<tr><td class="bonus">+ Bonus</td><td></td><td class="bonus">+${calc.bonusAmount} ${item.currency}</td></tr>` : ''}
+            ${item.deductions > 0 ? `<tr><td class="deduction">- Déductions (${item.deductions} cours manqué(s))</td><td></td><td class="deduction">-${calc.deductionsAmount} ${item.currency}</td></tr>` : ''}
           </table>
-          <div class="details">
-            <p><strong>Montant TTC:</strong> ${item.amount} ${item.currency}</p>
-            <p><strong>TVA (${tvaInfo.tvaRate}%):</strong> ${tvaInfo.tvaAmount} ${item.currency}</p>
-            <p><strong>Montant Net:</strong> ${tvaInfo.netAmount} ${item.currency}</p>
-          </div>
           <div class="amount">
-            Montant Net: ${tvaInfo.netAmount} ${item.currency}
+            Montant Net à Payer: ${calc.finalAmount} ${item.currency}
           </div>
           <div class="footer">
             <p>MyKalamaEnglish - Formation en anglais</p>
@@ -292,9 +291,9 @@ const SecretaryBilling = ({ teachers, students, onRefresh }) => {
           <title>Reçu Élève - ${item.student_name}</title>
           <style>
             body { font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
-            .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
+            .header { text-align: center; border-bottom: 2px solid #0d9488; padding-bottom: 20px; margin-bottom: 30px; }
             .logo { font-size: 24px; font-weight: bold; color: #0d9488; }
-            .amount { font-size: 28px; font-weight: bold; color: #0d9488; text-align: center; margin: 30px 0; }
+            .amount { font-size: 28px; font-weight: bold; color: #0d9488; text-align: center; margin: 30px 0; padding: 20px; background: #f0fdfa; border-radius: 8px; }
             .details { background: #f9fafb; padding: 20px; border-radius: 8px; }
             .footer { text-align: center; margin-top: 40px; color: #666; font-size: 12px; }
           </style>
@@ -315,6 +314,39 @@ const SecretaryBilling = ({ teachers, students, onRefresh }) => {
           </div>
           <div class="footer">
             <p>Merci pour votre confiance !</p>
+            <p>MyKalamaEnglish - Formation en anglais</p>
+          </div>
+        </body>
+        </html>
+      `;
+    } else if (type === 'prestataire') {
+      content = `
+        <html>
+        <head>
+          <title>Facture Prestataire - ${item.name}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
+            .header { text-align: center; border-bottom: 2px solid #0d9488; padding-bottom: 20px; margin-bottom: 30px; }
+            .logo { font-size: 24px; font-weight: bold; color: #0d9488; }
+            .amount { font-size: 28px; font-weight: bold; color: #0d9488; text-align: center; margin: 30px 0; padding: 20px; background: #f0fdfa; border-radius: 8px; }
+            .details { background: #f9fafb; padding: 20px; border-radius: 8px; }
+            .footer { text-align: center; margin-top: 40px; color: #666; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="logo">🎓 MyKalamaEnglish</div>
+            <p>Facture Prestataire</p>
+          </div>
+          <div class="details">
+            <p><strong>Prestataire:</strong> ${item.name}</p>
+            <p><strong>Service:</strong> ${item.service}</p>
+            <p><strong>Date:</strong> ${new Date(item.created_at).toLocaleDateString('fr-FR')}</p>
+          </div>
+          <div class="amount">
+            Montant: ${item.amount} ${item.currency}
+          </div>
+          <div class="footer">
             <p>MyKalamaEnglish - Formation en anglais</p>
           </div>
         </body>

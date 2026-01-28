@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Test the new Course Summaries/Revision system and K-Kids features: Backend Tests (Course Summaries Teacher/Student Side, Teacher Answer Questions, K-Kids Video System) and Frontend Tests (K-Kids Dashboard, Teacher/Student Dashboard Résumés tabs)"
+user_problem_statement: "Test the following features that were just implemented/fixed: 1) Teacher Session/Pointage System (login as teacher, start/pause/resume/end session with timing data), 2) Course Links (Meet Links) System (teacher sends meet links to students, students receive and mark attendance), 3) Frontend Testing (student login, Mes Cours tab, course links display with clickable links)"
 
 backend:
   - task: "Teacher Session/Pointage System"

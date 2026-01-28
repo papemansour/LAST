@@ -38,6 +38,7 @@ import StudentCourseSummaries from '../components/StudentCourseSummaries';
 import StudentCourseLinks from '../components/StudentCourseLinks';
 import TrialCountdown from '../components/TrialCountdown';
 import RamadanPromoBanner from '../components/RamadanPromoBanner';
+import StudentAvailability from '../components/StudentAvailability';
 const StudentDashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);

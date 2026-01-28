@@ -21,7 +21,8 @@ const LoginPage = () => {
   const currentDate = new Date();
   const isChristmas = currentDate <= new Date('2025-12-26');
   const isNewYear = currentDate >= new Date('2025-12-27') && currentDate <= new Date('2026-01-10');
-  const isRamadan = currentDate >= new Date('2026-02-17') && currentDate <= new Date('2026-03-20');
+  // Ramadan promo active now for demonstration (normally Feb 17 - Mar 20, 2026)
+  const isRamadan = true; // currentDate >= new Date('2026-02-17') && currentDate <= new Date('2026-03-20');
 
   const handleLogin = async (e) => {
     e.preventDefault();

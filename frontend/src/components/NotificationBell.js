@@ -226,6 +226,13 @@ const NotificationBell = ({ userId }) => {
               0
             </span>
           )}
+          {/* WebSocket status indicator */}
+          <span
+            className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border border-white ${
+              wsConnected ? 'bg-green-500' : 'bg-red-500 animate-pulse'
+            }`}
+            title={wsConnected ? 'Notifications en temps réel actives' : 'Reconnexion...'}
+          />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[420px] p-0 shadow-2xl border-2 border-teal-100" align="end">

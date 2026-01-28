@@ -38,6 +38,7 @@ import TeacherMeetLinks from '../components/TeacherMeetLinks';
 import GiftWelcomeLetter from '../components/GiftWelcomeLetter';
 import TeacherCourseSummaries from '../components/TeacherCourseSummaries';
 import TeacherStudentsAvailability from '../components/TeacherStudentsAvailability';
+import NotificationBell from '../components/NotificationBell';
 // ActivityFeed removed
 
 const TeacherDashboard = () => {

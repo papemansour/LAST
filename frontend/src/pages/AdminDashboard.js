@@ -22,7 +22,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
-import { LogOut, Users, UserCheck, UserPlus, Award, BookOpen, Clock, Send, FileText, DollarSign, Lock, Trash2, Phone, CalendarDays } from 'lucide-react';
+import { LogOut, Users, UserCheck, UserPlus, Award, BookOpen, Clock, Send, FileText, DollarSign, Lock, Trash2, Phone, CalendarDays, BarChart3 } from 'lucide-react';
 import KalamathequeAdmin from '../components/KalamathequeAdmin';
 import NewsManager from '../components/NewsManager';
 import ConversationChat from '../components/ConversationChat';
@@ -33,6 +33,7 @@ import AdminTrash from '../components/AdminTrash';
 import DocumentsManager from '../components/DocumentsManager';
 import BadgesManager from '../components/BadgesManager';
 import AdminStudentsAvailability from '../components/AdminStudentsAvailability';
+import AdminMonthlyHours from '../components/AdminMonthlyHours';
 // ActivityFeed removed
 
 const AdminDashboard = () => {

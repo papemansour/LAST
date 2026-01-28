@@ -7,12 +7,14 @@ import { Textarea } from '../components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
-import { LogOut, Calendar, FileText, MessageCircle, Plus, Trash2, Edit, Save, X } from 'lucide-react';
+import { LogOut, Calendar, FileText, MessageCircle, Plus, Trash2, Edit, Save, X, ChevronDown, ChevronUp, Eye } from 'lucide-react';
 
 const SecretaryDashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [expandedMeeting, setExpandedMeeting] = useState(null);
+  const [expandedReport, setExpandedReport] = useState(null);
   
   // Meetings state
   const [meetings, setMeetings] = useState([]);

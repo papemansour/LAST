@@ -4299,6 +4299,8 @@ async def send_meet_link(data: MeetLinkCreate, current_user: dict = Depends(get_
     doc = meet_link.model_dump()
     doc['scheduled_date'] = doc['scheduled_date'].isoformat()
     doc['created_at'] = doc['created_at'].isoformat()
+    # Add teacher name for display in student dashboard
+    doc['teacher_name'] = f"{current_user.get('first_name', '')} {current_user.get('last_name', '')}".strip()
     await db.meet_links.insert_one(doc)
     
     # Create notification for student

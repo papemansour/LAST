@@ -2172,7 +2172,7 @@ async def ask_summary_question(question_data: dict, current_user: dict = Depends
     
     await db.summary_questions.insert_one(question)
     
-    # Notify teacher
+    # Notify teacher via database notification
     try:
         await create_notification(
             user_id=summary['teacher_id'],
@@ -2181,6 +2181,23 @@ async def ask_summary_question(question_data: dict, current_user: dict = Depends
         )
     except Exception as e:
         logger.warning(f"Failed to create notification: {e}")
+    
+    # Send real-time WebSocket notification to teacher
+    try:
+        await ws_manager.send_personal_notification(
+            user_id=summary['teacher_id'],
+            notification={
+                "type": "new_question",
+                "title": "📩 Nouvelle Question",
+                "message": f"{current_user['first_name']} a posé une question sur '{summary.get('title', 'Résumé')}'",
+                "summary_id": question_data['summary_id'],
+                "question_id": question['id'],
+                "student_name": f"{current_user['first_name']} {current_user['last_name']}",
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+        )
+    except Exception as e:
+        logger.warning(f"Failed to send WebSocket notification: {e}")
     
     logger.info(f"Summary question from student {current_user['id']} on summary {question_data['summary_id']}")
     return {"message": "Question envoyée avec succès", "question": question}

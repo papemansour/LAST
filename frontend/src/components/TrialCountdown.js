@@ -64,7 +64,7 @@ const TrialCountdown = ({ registrationDate, onUpgradeClick }) => {
               </p>
             </div>
             <Button 
-              onClick={() => navigate('/')}
+              onClick={() => onUpgradeClick ? onUpgradeClick() : navigate('/')}
               className="bg-red-600 hover:bg-red-700"
             >
               Voir les offres

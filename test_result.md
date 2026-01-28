@@ -785,6 +785,7 @@ test_plan:
     - "NewsManager for Teachers"
     - "Monday.com CRM Integration"
     - "Secretary Billing Dashboard Delete Endpoints"
+    - "Student Course Links Frontend Interface"
   completed_tests:
     - "Système de Pièces Jointes dans la Messagerie"
     - "Système Code Magique - Interface Professeur"
@@ -800,6 +801,7 @@ test_plan:
     - "Système de Pièces Jointes dans la Messagerie - RE-TEST RÉUSSI (30/11/2025)"
     - "Système de Documents Complet - TESTÉ AVEC SUCCÈS (02/12/2025)"
     - "4 Nouvelles Fonctionnalités - TESTÉ AVEC SUCCÈS (18/12/2025)"
+    - "Student Course Links & Teacher Pointage - TESTÉ AVEC SUCCÈS (28/01/2025)"
 
   - task: "Système Code Magique - Backend API"
     implemented: true

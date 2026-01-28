@@ -750,14 +750,14 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Course Summaries - Teacher Side"
-    - "Course Summaries - Student Side"
-    - "Teacher Answer Questions"
-    - "K-Kids Video System"
+    - "Teacher Session/Pointage System"
+    - "Course Links (Meet Links) System"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
   review_request_completed:
+    - "Teacher Session/Pointage System"
+    - "Course Links (Meet Links) System"
     - "Course Summaries - Teacher Side"
     - "Course Summaries - Student Side"
     - "Teacher Answer Questions"

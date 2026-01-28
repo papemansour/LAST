@@ -47,6 +47,7 @@ const StudentDashboard = () => {
   const [homeworks, setHomeworks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showWelcomeGift, setShowWelcomeGift] = useState(false);
+  const [activeTab, setActiveTab] = useState(null); // For controlled tab switching
   const [homeworkData, setHomeworkData] = useState({
     title: '',
     description: '',

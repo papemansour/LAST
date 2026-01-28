@@ -15,6 +15,7 @@ const SecretaryDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [expandedMeeting, setExpandedMeeting] = useState(null);
   const [expandedReport, setExpandedReport] = useState(null);
+  const [editingMeeting, setEditingMeeting] = useState(null);
   
   // Meetings state
   const [meetings, setMeetings] = useState([]);

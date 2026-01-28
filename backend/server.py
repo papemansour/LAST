@@ -4408,6 +4408,117 @@ async def get_my_meet_links(current_user: dict = Depends(get_current_user)):
 @api_router.put("/student/mark-meet-attended/{meet_id}")
 async def mark_meet_attended(meet_id: str, current_user: dict = Depends(get_current_user)):
     """Mark a meet link as attended by student"""
+
+# ========== STUDENT AVAILABILITY SYSTEM ==========
+
+@api_router.post("/student/set-availability")
+async def set_student_availability(data: dict, current_user: dict = Depends(get_current_user)):
+    """Student sets their weekly availability"""
+    if current_user['role'] != 'student':
+        raise HTTPException(status_code=403, detail="Student access required")
+    
+    availability = {
+        "student_id": current_user['id'],
+        "student_name": f"{current_user['first_name']} {current_user['last_name']}",
+        "slots": data.get('slots', []),  # List of {day: "monday", time: "09:00", available: true}
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    # Upsert - update if exists, insert if not
+    await db.student_availability.update_one(
+        {"student_id": current_user['id']},
+        {"$set": availability},
+        upsert=True
+    )
+    
+    return {"message": "Disponibilités enregistrées", "availability": availability}
+
+@api_router.get("/student/my-availability")
+async def get_student_availability(current_user: dict = Depends(get_current_user)):
+    """Get student's own availability"""
+    if current_user['role'] != 'student':
+        raise HTTPException(status_code=403, detail="Student access required")
+    
+    availability = await db.student_availability.find_one(
+        {"student_id": current_user['id']},
+        {"_id": 0}
+    )
+    
+    return availability or {"slots": []}
+
+@api_router.get("/teacher/students-availability")
+async def get_students_availability_for_teacher(current_user: dict = Depends(get_current_user)):
+    """Teacher gets availability of their assigned students"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    # Get teacher's assigned students
+    students = await db.users.find(
+        {"role": "student", "teacher_id": current_user['id']},
+        {"_id": 0, "id": 1, "first_name": 1, "last_name": 1, "email": 1}
+    ).to_list(1000)
+    
+    student_ids = [s['id'] for s in students]
+    
+    # Get availability for these students
+    availabilities = await db.student_availability.find(
+        {"student_id": {"$in": student_ids}},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    # Merge student info with availability
+    result = []
+    for student in students:
+        avail = next((a for a in availabilities if a['student_id'] == student['id']), {"slots": []})
+        result.append({
+            "student_id": student['id'],
+            "student_name": f"{student['first_name']} {student['last_name']}",
+            "email": student.get('email'),
+            "slots": avail.get('slots', []),
+            "updated_at": avail.get('updated_at')
+        })
+    
+    return result
+
+@api_router.get("/admin/all-students-availability")
+async def get_all_students_availability(current_user: dict = Depends(get_current_user)):
+    """Admin gets availability of all students"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Get all students
+    students = await db.users.find(
+        {"role": "student"},
+        {"_id": 0, "id": 1, "first_name": 1, "last_name": 1, "email": 1, "teacher_id": 1}
+    ).to_list(1000)
+    
+    # Get all availabilities
+    availabilities = await db.student_availability.find({}, {"_id": 0}).to_list(1000)
+    
+    # Merge
+    result = []
+    for student in students:
+        avail = next((a for a in availabilities if a['student_id'] == student['id']), {"slots": []})
+        
+        # Get teacher name if assigned
+        teacher_name = None
+        if student.get('teacher_id'):
+            teacher = await db.users.find_one({"id": student['teacher_id']}, {"_id": 0, "first_name": 1, "last_name": 1})
+            if teacher:
+                teacher_name = f"{teacher['first_name']} {teacher['last_name']}"
+        
+        result.append({
+            "student_id": student['id'],
+            "student_name": f"{student['first_name']} {student['last_name']}",
+            "email": student.get('email'),
+            "teacher_name": teacher_name,
+            "slots": avail.get('slots', []),
+            "updated_at": avail.get('updated_at')
+        })
+    
+    return result
+
+
     result = await db.meet_links.update_one(
         {"id": meet_id, "student_id": current_user['id']},
         {"$set": {"attended": True, "completed": True}}

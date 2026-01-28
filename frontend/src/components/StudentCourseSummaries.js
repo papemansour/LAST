@@ -56,6 +56,21 @@ const StudentCourseSummaries = () => {
       const res = await apiClient.get(`/student/my-summary-questions/${summary.id}`);
       setQuestions(res.data);
       setShowQuestionsDialog(true);
+      
+      // Mark unread answers as read
+      const unreadAnswers = res.data.filter(q => q.answer && !q.answer_read);
+      for (const q of unreadAnswers) {
+        try {
+          await apiClient.put(`/student/mark-answer-read/${q.id}`);
+        } catch (e) {
+          console.error('Error marking answer as read:', e);
+        }
+      }
+      
+      // Refresh summaries to update unread count
+      if (unreadAnswers.length > 0) {
+        fetchSummaries();
+      }
     } catch (error) {
       toast.error('Erreur de chargement des questions');
     }

@@ -93,6 +93,24 @@ const LoginPage = () => {
         </>
       )}
       
+      {/* Ramadan Mubarak decorations */}
+      {isRamadan && (
+        <>
+          <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-emerald-600 to-transparent opacity-20"></div>
+          <div className="absolute top-5 left-10 text-6xl animate-pulse">🌙</div>
+          <div className="absolute top-5 right-10 text-6xl animate-pulse" style={{ animationDelay: '0.5s' }}>⭐</div>
+          <div className="absolute top-10 left-1/2 transform -translate-x-1/2 text-5xl animate-bounce">🕌</div>
+          <div className="absolute bottom-10 left-20 text-4xl animate-pulse">🏮</div>
+          <div className="absolute bottom-10 right-20 text-4xl animate-pulse" style={{ animationDelay: '1s' }}>🏮</div>
+          <div className="absolute top-1/4 left-1/4 text-3xl animate-pulse" style={{ animationDuration: '2s' }}>✨</div>
+          <div className="absolute top-1/3 right-1/4 text-3xl animate-pulse" style={{ animationDuration: '3s', animationDelay: '1s' }}>✨</div>
+          <div className="absolute top-1/2 left-10 text-2xl opacity-60">🌟</div>
+          <div className="absolute top-2/3 right-10 text-2xl opacity-60">🌟</div>
+          <div className="absolute bottom-1/4 left-1/3 text-4xl animate-bounce" style={{ animationDelay: '0.8s' }}>📿</div>
+          <div className="absolute bottom-1/3 right-1/3 text-4xl animate-bounce" style={{ animationDelay: '1.2s' }}>🤲</div>
+        </>
+      )}
+      
       <div className="w-full max-w-md relative z-10">
         <Link to="/" className="inline-flex items-center text-blue-600 hover:text-blue-700 mb-6">
           <ArrowLeft className="w-4 h-4 mr-2" />

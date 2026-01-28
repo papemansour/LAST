@@ -60,6 +60,13 @@ const HomePage = () => {
   const [numberOfStudents, setNumberOfStudents] = useState(2);
   const [sharedLoginCode, setSharedLoginCode] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  
+  // Check if Ramadan promo is active (Feb 17 - Mar 20, 2026)
+  const currentDate = new Date();
+  const isRamadanPromo = currentDate >= new Date('2026-02-17') && currentDate <= new Date('2026-03-20');
+  const ramadanDiscount = isRamadanPromo ? 0.10 : 0; // 10% discount
+  const RAMADAN_PROMO_CODE = 'promo_1SuToTI4faCc3GWYTk1MUuar';
+  
   const [pricingData, setPricingData] = useState({
     kkid_eur: 30,
     kkid_discount: 0,

@@ -4615,7 +4615,7 @@ async def get_all_students_availability(current_user: dict = Depends(get_current
     # Get all students
     students = await db.users.find(
         {"role": "student"},
-        {"_id": 0, "id": 1, "first_name": 1, "last_name": 1, "email": 1, "teacher_id": 1}
+        {"_id": 0, "id": 1, "first_name": 1, "last_name": 1, "email": 1, "assigned_teacher": 1}
     ).to_list(1000)
     
     # Get all availabilities
@@ -4628,8 +4628,8 @@ async def get_all_students_availability(current_user: dict = Depends(get_current
         
         # Get teacher name if assigned
         teacher_name = None
-        if student.get('teacher_id'):
-            teacher = await db.users.find_one({"id": student['teacher_id']}, {"_id": 0, "first_name": 1, "last_name": 1})
+        if student.get('assigned_teacher'):
+            teacher = await db.users.find_one({"id": student['assigned_teacher']}, {"_id": 0, "first_name": 1, "last_name": 1})
             if teacher:
                 teacher_name = f"{teacher['first_name']} {teacher['last_name']}"
         

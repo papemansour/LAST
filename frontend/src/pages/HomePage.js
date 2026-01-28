@@ -386,7 +386,7 @@ const HomePage = () => {
         plan_level: plan.level,
         amount: plan.price,
         currency: currency,
-        promo_code: 'promo_1SYGM3I4faCc3GWYbdYRPXX8'
+        promo_code: isRamadanPromo ? RAMADAN_PROMO_CODE : 'promo_1SYGM3I4faCc3GWYbdYRPXX8'
       });
       
       // Redirect to Stripe Checkout

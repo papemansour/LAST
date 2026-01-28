@@ -539,22 +539,24 @@ const SecretaryBilling = ({ teachers, students, onRefresh }) => {
           {/* Payments List */}
           <div className="space-y-3">
             {teacherPayments.map(payment => {
-              const tva = calculateTVA(parseFloat(payment.amount), payment.currency);
+              const calc = calculateFinalAmount(payment.amount, payment.bonus || 0, payment.deductions || 0, payment.currency);
               return (
                 <Card key={payment.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between flex-wrap gap-4">
                       <div>
                         <h4 className="font-semibold">{payment.teacher_name}</h4>
                         <p className="text-sm text-gray-600">{payment.period} - {payment.description}</p>
                         <p className="text-sm text-gray-500">{payment.email}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-lg font-bold text-teal-600">{tva.netAmount} {payment.currency}</p>
-                        <p className="text-xs text-gray-500">TTC: {payment.amount} {payment.currency}</p>
+                        <p className="text-lg font-bold text-teal-600">{calc.finalAmount} {payment.currency}</p>
+                        <p className="text-xs text-gray-500">Base: {calc.baseAmount} {payment.currency}</p>
+                        {payment.bonus > 0 && <p className="text-xs text-green-600">+Bonus: {calc.bonusAmount}</p>}
+                        {payment.deductions > 0 && <p className="text-xs text-red-600">-Déductions: {calc.deductionsAmount} ({payment.deductions} cours)</p>}
                       </div>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="outline" onClick={() => handlePrintInvoice(payment, 'teacher')}>
+                        <Button size="sm" variant="outline" onClick={() => handleDownloadPDF(payment, 'teacher')} title="Télécharger PDF">
                           <Printer className="w-4 h-4" />
                         </Button>
                         <Button size="sm" variant="outline" onClick={() => handleSendEmail(payment, 'teacher')}>

@@ -4141,7 +4141,158 @@ async def get_monthly_teacher_hours(month: int = None, year: int = None, current
         "total_hours_all": round(sum(t['total_hours'] for t in result), 2)
     }
 
-
+@api_router.get("/admin/analytics")
+async def get_admin_analytics(period: str = "month", current_user: dict = Depends(get_current_user)):
+    """Get comprehensive analytics for admin dashboard"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    now = datetime.now(timezone.utc)
+    
+    # Calculate date ranges based on period
+    if period == "week":
+        start_date = now - timedelta(days=7)
+    elif period == "year":
+        start_date = now - timedelta(days=365)
+    else:  # month
+        start_date = now - timedelta(days=30)
+    
+    # Get student counts
+    total_students = await db.users.count_documents({"role": "student"})
+    active_students = await db.users.count_documents({"role": "student", "is_active": True})
+    total_teachers = await db.users.count_documents({"role": "teacher"})
+    
+    # Get students by level
+    levels = await db.users.aggregate([
+        {"$match": {"role": "student"}},
+        {"$group": {"_id": "$level", "count": {"$sum": 1}}}
+    ]).to_list(100)
+    
+    students_by_level = [
+        {"name": l['_id'] or "Non défini", "value": l['count']} 
+        for l in levels if l['_id']
+    ]
+    
+    # Get monthly student growth (last 6 months)
+    students_by_month = []
+    month_names = ["", "Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sept", "Oct", "Nov", "Déc"]
+    for i in range(5, -1, -1):
+        target_date = now - timedelta(days=i*30)
+        month_start = datetime(target_date.year, target_date.month, 1, tzinfo=timezone.utc)
+        if target_date.month == 12:
+            month_end = datetime(target_date.year + 1, 1, 1, tzinfo=timezone.utc)
+        else:
+            month_end = datetime(target_date.year, target_date.month + 1, 1, tzinfo=timezone.utc)
+        
+        count = await db.users.count_documents({
+            "role": "student",
+            "created_at": {"$lt": month_end.isoformat()}
+        })
+        students_by_month.append({
+            "month": month_names[target_date.month],
+            "count": count
+        })
+    
+    # Get hours by week (last 4 weeks)
+    hours_by_week = []
+    for i in range(3, -1, -1):
+        week_start = now - timedelta(days=(i+1)*7)
+        week_end = now - timedelta(days=i*7)
+        
+        sessions = await db.teacher_sessions.find({
+            "status": "completed",
+            "end_time": {"$gte": week_start.isoformat(), "$lt": week_end.isoformat()}
+        }, {"_id": 0, "total_time_seconds": 1}).to_list(1000)
+        
+        total_hours = sum(s.get('total_time_seconds', 0) for s in sessions) / 3600
+        hours_by_week.append({
+            "week": f"Sem {4-i}",
+            "hours": round(total_hours, 1)
+        })
+    
+    # Get revenue by month (from payments)
+    revenue_by_month = []
+    for i in range(5, -1, -1):
+        target_date = now - timedelta(days=i*30)
+        month_start = datetime(target_date.year, target_date.month, 1, tzinfo=timezone.utc)
+        if target_date.month == 12:
+            month_end = datetime(target_date.year + 1, 1, 1, tzinfo=timezone.utc)
+        else:
+            month_end = datetime(target_date.year, target_date.month + 1, 1, tzinfo=timezone.utc)
+        
+        payments_eur = await db.payments.find({
+            "currency": "EUR",
+            "created_at": {"$gte": month_start.isoformat(), "$lt": month_end.isoformat()}
+        }, {"_id": 0, "amount": 1}).to_list(1000)
+        
+        payments_fcfa = await db.payments.find({
+            "currency": "FCFA",
+            "created_at": {"$gte": month_start.isoformat(), "$lt": month_end.isoformat()}
+        }, {"_id": 0, "amount": 1}).to_list(1000)
+        
+        revenue_by_month.append({
+            "month": month_names[target_date.month],
+            "eur": sum(p.get('amount', 0) for p in payments_eur),
+            "fcfa": sum(p.get('amount', 0) for p in payments_fcfa)
+        })
+    
+    # Get top teachers by hours this month
+    month_start = datetime(now.year, now.month, 1, tzinfo=timezone.utc)
+    teacher_sessions = await db.teacher_sessions.find({
+        "status": "completed",
+        "end_time": {"$gte": month_start.isoformat()}
+    }, {"_id": 0, "teacher_id": 1, "teacher_name": 1, "total_time_seconds": 1}).to_list(1000)
+    
+    teacher_hours = {}
+    for s in teacher_sessions:
+        tid = s.get('teacher_id')
+        if tid:
+            if tid not in teacher_hours:
+                teacher_hours[tid] = {"name": s.get('teacher_name', 'Unknown'), "hours": 0, "students": 0}
+            teacher_hours[tid]['hours'] += s.get('total_time_seconds', 0) / 3600
+    
+    # Count students per teacher
+    for tid in teacher_hours:
+        count = await db.users.count_documents({"assigned_teacher": tid, "role": "student"})
+        teacher_hours[tid]['students'] = count
+    
+    top_teachers = sorted(
+        [{"name": v['name'], "hours": round(v['hours'], 1), "students": v['students']} 
+         for v in teacher_hours.values()],
+        key=lambda x: x['hours'],
+        reverse=True
+    )[:5]
+    
+    # Calculate total hours this month
+    total_hours_this_month = sum(t['hours'] for t in top_teachers)
+    
+    # Calculate growth rate
+    prev_month_students = await db.users.count_documents({
+        "role": "student",
+        "created_at": {"$lt": month_start.isoformat()}
+    })
+    growth_rate = ((total_students - prev_month_students) / max(prev_month_students, 1)) * 100 if prev_month_students > 0 else 0
+    
+    # Total revenue
+    total_eur = sum(r['eur'] for r in revenue_by_month[-1:])
+    total_fcfa = sum(r['fcfa'] for r in revenue_by_month[-1:])
+    
+    return {
+        "summary": {
+            "total_students": total_students,
+            "active_students": active_students,
+            "total_teachers": total_teachers,
+            "total_hours_this_month": round(total_hours_this_month, 1),
+            "revenue_eur": total_eur,
+            "revenue_fcfa": total_fcfa,
+            "growth_rate": round(growth_rate, 1)
+        },
+        "students_by_month": students_by_month,
+        "hours_by_week": hours_by_week,
+        "revenue_by_month": revenue_by_month,
+        "students_by_level": students_by_level,
+        "top_teachers": top_teachers
+    }
 
 
 @api_router.post("/admin/manual-session")

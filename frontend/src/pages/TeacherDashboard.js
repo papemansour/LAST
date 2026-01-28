@@ -469,6 +469,11 @@ const TeacherDashboard = () => {
             </Card>
           </TabsContent>
 
+          {/* Students Availability Tab */}
+          <TabsContent value="student-availability">
+            <TeacherStudentsAvailability />
+          </TabsContent>
+
           {/* Group Codes Tab */}
           <TabsContent value="group-codes">
             <TeacherGroupCodeManager />

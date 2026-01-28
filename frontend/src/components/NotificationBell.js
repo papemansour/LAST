@@ -108,7 +108,13 @@ const NotificationBell = ({ userId }) => {
     } catch (error) {
       console.error('Error fetching notifications:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 60000); // Reduced to 60s since we have WebSocket
+    return () => clearInterval(interval);
+  }, [fetchNotifications]);
 
   const markAsRead = async (notificationId) => {
     try {

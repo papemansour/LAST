@@ -23,7 +23,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
-import { LogOut, Users, BookOpen, Calendar, MessageCircle, Send, Video, FileText, Upload, Play, Pause, Square, Clock, Heart, Mail, Sparkles, Key, Gamepad2, Timer, Newspaper, Library, UserCircle } from 'lucide-react';
+import { LogOut, Users, BookOpen, Calendar, MessageCircle, Send, Video, FileText, Upload, Play, Pause, Square, Clock, Heart, Mail, Sparkles, Key, Gamepad2, Timer, Newspaper, Library, UserCircle, CalendarDays } from 'lucide-react';
 import AvailabilityScheduler from '../components/AvailabilityScheduler';
 import ConversationChat from '../components/ConversationChat';
 import NewsManager from '../components/NewsManager';
@@ -37,6 +37,7 @@ import DocumentsManager from '../components/DocumentsManager';
 import TeacherMeetLinks from '../components/TeacherMeetLinks';
 import GiftWelcomeLetter from '../components/GiftWelcomeLetter';
 import TeacherCourseSummaries from '../components/TeacherCourseSummaries';
+import TeacherStudentsAvailability from '../components/TeacherStudentsAvailability';
 // ActivityFeed removed
 
 const TeacherDashboard = () => {

@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { Button } from './ui/button';
-import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
 import { getFileUrl } from '../utils/fileUrl';
 import { 
   BookOpen, MessageCircle, Send, ChevronDown, ChevronUp, 
-  CheckCircle2, Clock, FileText, Volume2, User, Bell
+  CheckCircle2, Clock, FileText, Volume2, User, Bell,
+  Mic, MicOff, Square, Trash2, Check
 } from 'lucide-react';
 import {
   Dialog,
@@ -27,6 +27,13 @@ const StudentCourseSummaries = () => {
   const [questions, setQuestions] = useState([]);
   const [newQuestion, setNewQuestion] = useState('');
   const [submittingQuestion, setSubmittingQuestion] = useState(false);
+  
+  // Audio recording
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioBlob, setAudioBlob] = useState(null);
+  const [audioUrl, setAudioUrl] = useState(null);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
 
   useEffect(() => {
     fetchSummaries();
@@ -54,29 +61,91 @@ const StudentCourseSummaries = () => {
     }
   };
 
+  // Audio recording functions
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorderRef.current = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+      
+      mediaRecorderRef.current.ondataavailable = (event) => {
+        audioChunksRef.current.push(event.data);
+      };
+      
+      mediaRecorderRef.current.onstop = () => {
+        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        setAudioBlob(blob);
+        setAudioUrl(URL.createObjectURL(blob));
+        stream.getTracks().forEach(track => track.stop());
+      };
+      
+      mediaRecorderRef.current.start();
+      setIsRecording(true);
+      toast.info('Enregistrement en cours...');
+    } catch (error) {
+      toast.error('Impossible d\'accéder au microphone');
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
   const handleAskQuestion = async () => {
-    if (!newQuestion.trim()) {
-      toast.error('Veuillez saisir votre question');
+    if (!newQuestion.trim() && !audioBlob) {
+      toast.error('Veuillez saisir une question ou enregistrer un message vocal');
       return;
     }
     
     setSubmittingQuestion(true);
     try {
+      let audioFileUrl = null;
+      
+      // Upload audio if exists
+      if (audioBlob) {
+        const formData = new FormData();
+        formData.append('file', audioBlob, 'question.webm');
+        const uploadRes = await apiClient.post('/student/upload-question-audio', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        audioFileUrl = uploadRes.data.file_url;
+      }
+      
       await apiClient.post('/student/ask-summary-question', {
         summary_id: selectedSummary.id,
-        question: newQuestion
+        question: newQuestion || 'Message vocal',
+        question_audio_url: audioFileUrl
       });
       
       toast.success('Question envoyée au professeur!');
       setNewQuestion('');
+      setAudioBlob(null);
+      setAudioUrl(null);
       
       // Refresh questions
       const res = await apiClient.get(`/student/my-summary-questions/${selectedSummary.id}`);
       setQuestions(res.data);
     } catch (error) {
+      console.error('Error sending question:', error);
       toast.error('Erreur lors de l\'envoi de la question');
     } finally {
       setSubmittingQuestion(false);
+    }
+  };
+
+  const handleDeleteQuestion = async (questionId) => {
+    if (!window.confirm('Supprimer cette question ?')) return;
+    
+    try {
+      await apiClient.delete(`/student/delete-question/${questionId}`);
+      toast.success('Question supprimée');
+      const res = await apiClient.get(`/student/my-summary-questions/${selectedSummary.id}`);
+      setQuestions(res.data);
+    } catch (error) {
+      toast.error('Erreur lors de la suppression');
     }
   };
 
@@ -215,7 +284,7 @@ const StudentCourseSummaries = () => {
               Questions sur: {selectedSummary?.title}
             </DialogTitle>
             <DialogDescription>
-              Posez vos questions et consultez les réponses de votre professeur
+              Posez vos questions par écrit ou message vocal
             </DialogDescription>
           </DialogHeader>
           
@@ -227,17 +296,50 @@ const StudentCourseSummaries = () => {
                 <Textarea
                   value={newQuestion}
                   onChange={(e) => setNewQuestion(e.target.value)}
-                  placeholder="Tapez votre question ici... (ex: Je ne comprends pas la différence entre...)"
+                  placeholder="Tapez votre question ici..."
                   rows={3}
                   className="bg-white"
                 />
+                
+                {/* Voice recording */}
+                <div className="mt-3 flex items-center gap-3">
+                  <span className="text-sm text-gray-600">Ou message vocal :</span>
+                  {!isRecording ? (
+                    <Button 
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={startRecording}
+                      className="flex items-center gap-2"
+                    >
+                      <Mic className="w-4 h-4 text-red-600" />
+                      Enregistrer
+                    </Button>
+                  ) : (
+                    <Button 
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={stopRecording}
+                      className="flex items-center gap-2 bg-red-100 border-red-300 animate-pulse"
+                    >
+                      <Square className="w-4 h-4 text-red-600" />
+                      Arrêter
+                    </Button>
+                  )}
+                  
+                  {audioUrl && (
+                    <audio controls src={audioUrl} className="h-8 flex-1" />
+                  )}
+                </div>
+                
                 <Button 
                   onClick={handleAskQuestion}
-                  disabled={submittingQuestion || !newQuestion.trim()}
+                  disabled={submittingQuestion || (!newQuestion.trim() && !audioBlob)}
                   className="mt-3 bg-teal-600 hover:bg-teal-700"
                 >
                   <Send className="w-4 h-4 mr-2" />
-                  {submittingQuestion ? 'Envoi...' : 'Envoyer la question'}
+                  {submittingQuestion ? 'Envoi...' : 'Envoyer'}
                 </Button>
               </CardContent>
             </Card>
@@ -249,8 +351,7 @@ const StudentCourseSummaries = () => {
               {questions.length === 0 ? (
                 <div className="text-center py-8 bg-gray-50 rounded-lg">
                   <MessageCircle className="w-10 h-10 text-gray-400 mx-auto mb-3" />
-                  <p className="text-gray-500">Vous n&apos;avez pas encore posé de questions</p>
-                  <p className="text-sm text-gray-400">Utilisez le formulaire ci-dessus pour poser une question</p>
+                  <p className="text-gray-500">Aucune question posée</p>
                 </div>
               ) : (
                 questions.map(question => (
@@ -266,19 +367,42 @@ const StudentCourseSummaries = () => {
                         </div>
                         <div className="flex-1">
                           <p className="font-medium text-gray-800">Votre question</p>
-                          <p className="text-sm text-gray-600 mt-1">{question.question}</p>
+                          {question.question && question.question !== 'Message vocal' && (
+                            <p className="text-sm text-gray-600 mt-1">{question.question}</p>
+                          )}
+                          {question.question_audio_url && (
+                            <div className="mt-2 p-2 bg-teal-50 rounded-lg">
+                              <p className="text-xs text-teal-700 mb-1 flex items-center gap-1">
+                                <Volume2 className="w-3 h-3" />
+                                Message vocal
+                              </p>
+                              <audio controls className="w-full h-8">
+                                <source src={getFileUrl(question.question_audio_url)} />
+                              </audio>
+                            </div>
+                          )}
                           <p className="text-xs text-gray-400 mt-2">
                             {new Date(question.created_at).toLocaleString('fr-FR')}
                           </p>
                         </div>
-                        {question.answer ? (
-                          <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
-                        ) : (
-                          <div className="flex items-center gap-1 text-amber-600 text-xs">
-                            <Clock className="w-4 h-4" />
-                            En attente
-                          </div>
-                        )}
+                        <div className="flex items-center gap-2">
+                          {question.answer ? (
+                            <div className="flex items-center text-blue-600">
+                              <Check className="w-4 h-4" />
+                              <Check className="w-4 h-4 -ml-2" />
+                            </div>
+                          ) : (
+                            <Clock className="w-4 h-4 text-amber-600" />
+                          )}
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleDeleteQuestion(question.id)}
+                            className="text-red-600 hover:bg-red-50"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                       
                       {/* Answer */}
@@ -289,8 +413,16 @@ const StudentCourseSummaries = () => {
                               <span className="text-sm">👨‍🏫</span>
                             </div>
                             <div className="flex-1">
-                              <p className="font-medium text-green-800">Réponse du professeur</p>
-                              <p className="text-sm text-gray-700 mt-1">{question.answer}</p>
+                              <div className="flex items-center gap-2">
+                                <p className="font-medium text-green-800">Réponse du professeur</p>
+                                <div className="flex items-center text-blue-600">
+                                  <Check className="w-3 h-3" />
+                                  <Check className="w-3 h-3 -ml-1" />
+                                </div>
+                              </div>
+                              {question.answer && (
+                                <p className="text-sm text-gray-700 mt-1">{question.answer}</p>
+                              )}
                               
                               {question.answer_audio_url && (
                                 <div className="mt-3 p-3 bg-green-50 rounded-lg">
@@ -300,7 +432,6 @@ const StudentCourseSummaries = () => {
                                   </p>
                                   <audio controls className="w-full h-10">
                                     <source src={getFileUrl(question.answer_audio_url)} />
-                                    Votre navigateur ne supporte pas l&apos;audio.
                                   </audio>
                                 </div>
                               )}
@@ -319,7 +450,7 @@ const StudentCourseSummaries = () => {
                         <div className="mt-3 ml-11 p-3 bg-amber-50 rounded-lg border border-amber-200">
                           <p className="text-sm text-amber-700 flex items-center gap-2">
                             <Clock className="w-4 h-4" />
-                            Votre professeur répondra bientôt à cette question
+                            En attente de réponse du professeur
                           </p>
                         </div>
                       )}

@@ -619,9 +619,9 @@ const StudentDashboard = () => {
             )}
           </TabsContent>
 
-          {/* Mes Cours Tab - Liens de cours cliquables */}
-          <TabsContent value="courses">
-            <StudentCourseLinks />
+          {/* Mes Dispos Tab - Disponibilités de l'étudiant */}
+          <TabsContent value="availability">
+            <StudentAvailability />
           </TabsContent>
 
           {/* Liens Tab */}

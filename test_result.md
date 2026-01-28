@@ -1043,3 +1043,31 @@ The Kalama Club functionality works correctly. The issue was incorrect test meth
 4. Student receiving summaries and asking questions
 5. Teacher answering with text/audio
 
+
+
+### Additional Updates - 2026-01-28 07:48
+
+**Course Links Feature:**
+- Created `StudentCourseLinks.js` component with:
+  - Upcoming courses section with alert banner
+  - Clickable links that open in new tabs
+  - 'Rejoindre le cours' button for easy access
+  - Past courses history with 'Mark as attended' functionality
+- Added 'Mes Cours' tab in StudentDashboard
+- Updated backend to include teacher_name in meet_links
+
+**Pointage (Session Timer) Status:**
+- Backend endpoints tested and working:
+  - POST /api/teacher/session/start ✅
+  - POST /api/teacher/session/pause ✅
+  - POST /api/teacher/session/resume ✅
+  - POST /api/teacher/session/end ✅
+- Frontend timer component functional
+
+**Files Created:**
+- /app/frontend/src/components/StudentCourseLinks.js
+
+**Files Modified:**
+- /app/frontend/src/pages/StudentDashboard.js (added 'Mes Cours' tab)
+- /app/backend/server.py (added teacher_name to meet_links)
+

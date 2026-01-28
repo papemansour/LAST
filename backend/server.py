@@ -2463,30 +2463,53 @@ async def mark_notification_read(notification_id: str, current_user: dict = Depe
     )
     return {"message": "Notification marked as read"}
 
-async def create_notification(user_id: str, notification_type: str = None, data: dict = None, title: str = None, message: str = None):
+async def create_notification(user_id: str, arg2=None, arg3=None, arg4=None, *, 
+                             notification_type: str = None, data: dict = None, 
+                             title: str = None, message: str = None):
     """Helper function to create notifications
-    Supports two calling formats:
-    1. create_notification(user_id, notification_type, data) - legacy format
-    2. create_notification(user_id, title=..., message=..., notification_type=...) - named params
+    Supports multiple calling formats:
+    1. create_notification(user_id, notification_type, data) - legacy 3-param format
+    2. create_notification(user_id, title, message, notification_type) - 4-param positional
+    3. create_notification(user_id, title=..., message=..., notification_type=...) - named params
     """
+    # Determine which format was used
+    actual_title = title
+    actual_message = message
+    actual_type = notification_type
+    actual_data = data
+    
+    if isinstance(arg2, str) and isinstance(arg3, dict):
+        # Format 1: create_notification(user_id, notification_type, data)
+        actual_type = arg2
+        actual_data = arg3
+    elif isinstance(arg2, str) and isinstance(arg3, str) and isinstance(arg4, str):
+        # Format 2: create_notification(user_id, title, message, notification_type)
+        actual_title = arg2
+        actual_message = arg3
+        actual_type = arg4
+    elif isinstance(arg2, str) and isinstance(arg3, str) and arg4 is None:
+        # Format 2 with 3 positional: create_notification(user_id, title, message)
+        actual_title = arg2
+        actual_message = arg3
+    
     notification = {
         "id": str(uuid.uuid4()),
         "user_id": user_id,
-        "type": notification_type or "general",
+        "type": actual_type or "general",
         "is_read": False,
         "read": False,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     
     # Handle legacy format with data dict
-    if data:
-        notification.update(data)
+    if actual_data:
+        notification.update(actual_data)
     
     # Handle named parameters
-    if title:
-        notification["title"] = title
-    if message:
-        notification["message"] = message
+    if actual_title:
+        notification["title"] = actual_title
+    if actual_message:
+        notification["message"] = actual_message
     
     await db.notifications.insert_one(notification)
     logger.info(f"Notification created for user {user_id}: {notification.get('type')}")

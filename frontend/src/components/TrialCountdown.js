@@ -127,7 +127,7 @@ const TrialCountdown = ({ registrationDate, onUpgradeClick }) => {
           {/* CTA Button */}
           <div className="flex flex-col gap-2">
             <Button 
-              onClick={() => navigate('/')}
+              onClick={() => onUpgradeClick ? onUpgradeClick() : navigate('/')}
               className={`bg-gradient-to-r ${getUrgencyColor()} hover:opacity-90 text-white px-6`}
             >
               <Star className="w-4 h-4 mr-2" />

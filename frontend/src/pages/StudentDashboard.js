@@ -302,7 +302,11 @@ const StudentDashboard = () => {
           </div>
         </div>
 
-        <Tabs defaultValue={user.level === 'kkid' ? 'quiz' : 'welcome'} className="space-y-6">
+        <Tabs 
+          value={activeTab || (user.level === 'kkid' ? 'quiz' : 'welcome')} 
+          onValueChange={setActiveTab}
+          className="space-y-6"
+        >
           {/* Grid Navigation Cards */}
           <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-3 h-auto bg-transparent p-0">
             {/* K-Kid Dashboard : Quiz, Vidéo, Récompense */}

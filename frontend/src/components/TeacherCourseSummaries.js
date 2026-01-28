@@ -65,14 +65,28 @@ const TeacherCourseSummaries = () => {
 
   const fetchData = async () => {
     try {
-      const [summariesRes, usersRes, questionsRes] = await Promise.all([
+      const [summariesRes, questionsRes] = await Promise.all([
         apiClient.get('/teacher/my-course-summaries'),
-        apiClient.get('/admin/all-users'),
         apiClient.get('/teacher/all-summary-questions')
       ]);
       
+      // Fetch teacher's assigned students
+      let studentsList = [];
+      try {
+        const studentsRes = await apiClient.get('/teacher/my-students');
+        studentsList = studentsRes.data || [];
+      } catch (err) {
+        // Fallback: try to get all users if teacher has permission
+        try {
+          const usersRes = await apiClient.get('/admin/all-users');
+          studentsList = usersRes.data.filter(u => u.role === 'student');
+        } catch (e) {
+          console.log('Could not fetch students list');
+        }
+      }
+      
       setSummaries(summariesRes.data);
-      setStudents(usersRes.data.filter(u => u.role === 'student'));
+      setStudents(studentsList);
       setAllUnansweredQuestions(questionsRes.data);
     } catch (error) {
       console.error('Error fetching data:', error);

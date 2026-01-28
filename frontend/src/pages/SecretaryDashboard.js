@@ -898,24 +898,54 @@ const SecretaryDashboard = () => {
                 meetings.map(meeting => (
                   <Card key={meeting.id} className="hover:shadow-md transition-shadow">
                     <CardContent className="pt-6">
-                      <div className="flex justify-between items-start">
+                      <div 
+                        className="flex justify-between items-start cursor-pointer"
+                        onClick={() => setExpandedMeeting(expandedMeeting === meeting.id ? null : meeting.id)}
+                      >
                         <div className="flex-1">
-                          <h4 className="font-semibold text-lg mb-2">{meeting.title}</h4>
-                          <div className="space-y-1 text-sm text-gray-600">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-semibold text-lg">{meeting.title}</h4>
+                            {meeting.notes && (
+                              <span className="bg-purple-100 text-purple-700 text-xs px-2 py-0.5 rounded-full flex items-center gap-1">
+                                <Eye className="w-3 h-3" />
+                                Notes
+                              </span>
+                            )}
+                          </div>
+                          <div className="space-y-1 text-sm text-gray-600 mt-2">
                             <p>📅 {new Date(meeting.date).toLocaleDateString('fr-FR')} à {meeting.time}</p>
                             {meeting.attendees && <p>👥 {meeting.attendees}</p>}
-                            {meeting.notes && <p className="mt-2 text-gray-700">📝 {meeting.notes}</p>}
                           </div>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteMeeting(meeting.id)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-purple-600"
+                          >
+                            {expandedMeeting === meeting.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => { e.stopPropagation(); handleDeleteMeeting(meeting.id); }}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
+                      
+                      {/* Expanded Notes Section */}
+                      {expandedMeeting === meeting.id && meeting.notes && (
+                        <div className="mt-4 p-4 bg-purple-50 rounded-lg border border-purple-200">
+                          <h5 className="font-medium text-purple-800 mb-2 flex items-center gap-2">
+                            <FileText className="w-4 h-4" />
+                            Notes de la réunion
+                          </h5>
+                          <p className="text-gray-700 whitespace-pre-wrap">{meeting.notes}</p>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 ))

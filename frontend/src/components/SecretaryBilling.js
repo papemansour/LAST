@@ -40,7 +40,9 @@ const SecretaryBilling = ({ teachers, students, onRefresh }) => {
     period: '',
     description: '',
     status: 'paid',
-    email: ''
+    email: '',
+    bonus: 0,
+    deductions: 0
   });
   
   const [newReceipt, setNewReceipt] = useState({

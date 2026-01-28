@@ -1413,7 +1413,7 @@ const SecretaryDashboard = () => {
                       />
                     </div>
                   </div>
-                  <div className="grid grid-cols-4 gap-3">
+                  <div className="grid grid-cols-5 gap-3">
                     <div>
                       <label className="block text-sm font-medium mb-1">Montant *</label>
                       <Input
@@ -1444,15 +1444,28 @@ const SecretaryDashboard = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1">Bonus</label>
+                      <label className="block text-sm font-medium mb-1 text-green-600">Bonus</label>
                       <Input
                         type="number"
                         value={newPayment.bonus}
                         onChange={(e) => setNewPayment({...newPayment, bonus: e.target.value})}
                         placeholder="0"
+                        className="border-green-200 bg-green-50"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1 text-red-600">Déductions</label>
+                      <Input
+                        type="number"
+                        value={newPayment.deductions || 0}
+                        onChange={(e) => setNewPayment({...newPayment, deductions: parseInt(e.target.value) || 0})}
+                        placeholder="0"
+                        className="border-red-200 bg-red-50"
+                        title="Nombre de cours manqués (1 = 5€ ou 2000 FCFA)"
                       />
                     </div>
                   </div>
+                  <p className="text-xs text-gray-500">💡 1 déduction = {newPayment.currency === 'FCFA' ? '2000 FCFA' : '5 EUR'} (pénalité pour cours manqué)</p>
                   <div>
                     <label className="block text-sm font-medium mb-1">Notes</label>
                     <Input

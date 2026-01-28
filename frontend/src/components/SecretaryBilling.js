@@ -60,10 +60,6 @@ const SecretaryBilling = ({ teachers, students, onRefresh }) => {
     email: ''
   });
 
-  useEffect(() => {
-    fetchBillingData();
-  }, []);
-
   const fetchBillingData = async () => {
     try {
       const [paymentsRes, receiptsRes, invoicesRes, statsRes] = await Promise.all([
@@ -80,6 +76,11 @@ const SecretaryBilling = ({ teachers, students, onRefresh }) => {
       console.error('Error fetching billing:', error);
     }
   };
+
+  useEffect(() => {
+    fetchBillingData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleCodeSubmit = () => {
     if (codeInput === SECRET_CODE) {

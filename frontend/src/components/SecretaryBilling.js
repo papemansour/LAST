@@ -485,7 +485,7 @@ const SecretaryBilling = ({ teachers, students, onRefresh }) => {
                 </Select>
                 <Input
                   type="number"
-                  placeholder="Montant TTC"
+                  placeholder="Montant de base"
                   value={newPayment.amount}
                   onChange={(e) => setNewPayment({ ...newPayment, amount: e.target.value })}
                   required
@@ -508,6 +508,23 @@ const SecretaryBilling = ({ teachers, students, onRefresh }) => {
                   onChange={(e) => setNewPayment({ ...newPayment, period: e.target.value })}
                   required
                 />
+                <Input
+                  type="number"
+                  placeholder="Bonus (montant)"
+                  value={newPayment.bonus}
+                  onChange={(e) => setNewPayment({ ...newPayment, bonus: parseFloat(e.target.value) || 0 })}
+                  className="bg-green-50 border-green-200"
+                />
+                <Input
+                  type="number"
+                  placeholder="Déductions (nb cours manqués)"
+                  value={newPayment.deductions}
+                  onChange={(e) => setNewPayment({ ...newPayment, deductions: parseInt(e.target.value) || 0 })}
+                  className="bg-red-50 border-red-200"
+                />
+                <p className="text-xs text-gray-500 col-span-2">
+                  💡 1 déduction = {newPayment.currency === 'EUR' ? '5 EUR' : '2000 FCFA'} (pénalité pour cours manqué)
+                </p>
                 <Textarea
                   placeholder="Description"
                   value={newPayment.description}

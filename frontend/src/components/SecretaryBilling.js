@@ -349,7 +349,7 @@ const SecretaryBilling = ({ teachers, students, onRefresh }) => {
     try {
       await apiClient.post('/secretary/teacher-payments', newPayment);
       toast.success('Facture créée');
-      setNewPayment({ teacher_id: '', teacher_name: '', amount: '', currency: 'EUR', period: '', description: '', status: 'paid', email: '' });
+      setNewPayment({ teacher_id: '', teacher_name: '', amount: '', currency: 'EUR', period: '', description: '', status: 'paid', email: '', bonus: 0, deductions: 0 });
       fetchBillingData();
     } catch (error) {
       toast.error('Erreur lors de la création');

@@ -122,24 +122,24 @@ class TestQRNotificationFlow:
             return response.json()
         pytest.skip("Teacher login failed")
     
-    def test_teacher_can_view_qr_questions(self, teacher_auth):
-        """Test teacher can view Q/R questions from students"""
+    def test_teacher_can_view_summary_questions(self, teacher_auth):
+        """Test teacher can view Q/R summary questions from students"""
         headers = {"Authorization": f"Bearer {teacher_auth['access_token']}"}
-        response = requests.get(f"{BASE_URL}/api/teacher/qr-questions", headers=headers)
+        response = requests.get(f"{BASE_URL}/api/teacher/all-summary-questions", headers=headers)
         # Should return 200 with list of questions
         assert response.status_code == 200
         data = response.json()
         assert isinstance(data, list)
-        print(f"✅ Teacher can view Q/R questions - {len(data)} questions found")
+        print(f"✅ Teacher can view Q/R questions - {len(data)} unanswered questions found")
     
-    def test_teacher_students_list(self, teacher_auth):
-        """Test teacher can get their students list"""
+    def test_teacher_course_summaries(self, teacher_auth):
+        """Test teacher can get their course summaries"""
         headers = {"Authorization": f"Bearer {teacher_auth['access_token']}"}
-        response = requests.get(f"{BASE_URL}/api/teacher/students", headers=headers)
+        response = requests.get(f"{BASE_URL}/api/teacher/my-course-summaries", headers=headers)
         assert response.status_code == 200
         data = response.json()
         assert isinstance(data, list)
-        print(f"✅ Teacher has {len(data)} students assigned")
+        print(f"✅ Teacher has {len(data)} course summaries")
 
 
 class TestWebSocketManager:

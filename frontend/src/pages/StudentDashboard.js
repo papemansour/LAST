@@ -35,6 +35,7 @@ import KidsWelcomeLetter from '../components/KidsWelcomeLetter';
 import KidsFlashcards from '../components/KidsFlashcards';
 import KidsVideoPlaylist from '../components/KidsVideoPlaylist';
 import StudentCourseSummaries from '../components/StudentCourseSummaries';
+import NotificationBell from '../components/NotificationBell';
 import StudentCourseLinks from '../components/StudentCourseLinks';
 import TrialCountdown from '../components/TrialCountdown';
 import RamadanPromoBanner from '../components/RamadanPromoBanner';

@@ -1139,11 +1139,11 @@ const AdminDashboard = () => {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3">
                           <div>
                             <p className="text-xs text-gray-500">Début</p>
-                            <p className="font-medium">{new Date(session.start_time).toLocaleString('fr-FR')}</p>
+                            <p className="font-medium">{session.start_time ? new Date(session.start_time).toLocaleString('fr-FR') : 'Non disponible'}</p>
                           </div>
                           <div>
                             <p className="text-xs text-gray-500">Fin</p>
-                            <p className="font-medium">{new Date(session.end_time).toLocaleString('fr-FR')}</p>
+                            <p className="font-medium">{session.end_time ? new Date(session.end_time).toLocaleString('fr-FR') : 'En cours'}</p>
                           </div>
                           <div>
                             <p className="text-xs text-gray-500">Durée totale</p>

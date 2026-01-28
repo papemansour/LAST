@@ -2339,12 +2339,30 @@ async def answer_summary_question(question_id: str, answer_data: dict, current_u
     # Get question to notify student
     question = await db.summary_questions.find_one({"id": question_id}, {"_id": 0})
     if question:
+        # Database notification
         await create_notification(
             user_id=question['student_id'],
             title="Réponse du professeur",
             message="Réponse du professeur à votre question",
             notification_type="summary_answer"
         )
+        
+        # Real-time WebSocket notification to student
+        try:
+            await ws_manager.send_personal_notification(
+                user_id=question['student_id'],
+                notification={
+                    "type": "new_answer",
+                    "title": "✅ Réponse reçue",
+                    "message": f"Le professeur {current_user['first_name']} a répondu à votre question",
+                    "summary_id": question.get('summary_id'),
+                    "question_id": question_id,
+                    "teacher_name": f"{current_user['first_name']} {current_user['last_name']}",
+                    "timestamp": datetime.now(timezone.utc).isoformat()
+                }
+            )
+        except Exception as e:
+            logger.warning(f"Failed to send WebSocket notification: {e}")
     
     return {"message": "Réponse envoyée avec succès"}
 

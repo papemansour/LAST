@@ -1197,6 +1197,11 @@ const AdminDashboard = () => {
             <AdminStudentsAvailability />
           </TabsContent>
 
+          {/* Monthly Hours Tab */}
+          <TabsContent value="monthly-hours">
+            <AdminMonthlyHours />
+          </TabsContent>
+
           {/* Prix Tab */}
           <TabsContent value="pricing">
             <Card>

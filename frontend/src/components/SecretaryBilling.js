@@ -617,10 +617,10 @@ const SecretaryBilling = ({ teachers, students, onRefresh }) => {
                         <p className="text-sm text-gray-500">{payment.email}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-lg font-bold text-teal-600">{calc.finalAmount} {payment.currency}</p>
-                        <p className="text-xs text-gray-500">Base: {calc.baseAmount} {payment.currency}</p>
+                        <p className="text-xs text-gray-500">Somme initiale: {calc.baseAmount} {payment.currency}</p>
                         {payment.bonus > 0 && <p className="text-xs text-green-600">+Bonus: {calc.bonusAmount}</p>}
-                        {payment.deductions > 0 && <p className="text-xs text-red-600">-Déductions: {calc.deductionsAmount} ({payment.deductions} cours)</p>}
+                        {payment.deductions > 0 && <p className="text-xs text-red-600">-Déductions: {calc.deductionsAmount} ({payment.deductions} × {calc.deductionUnitValue})</p>}
+                        <p className="text-lg font-bold text-teal-600">Net: {calc.finalAmount} {payment.currency}</p>
                       </div>
                       <div className="flex gap-2">
                         <Button size="sm" variant="outline" onClick={() => handleDownloadPDF(payment, 'teacher')} title="Télécharger PDF">

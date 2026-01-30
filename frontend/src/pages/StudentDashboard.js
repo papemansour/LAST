@@ -628,38 +628,81 @@ const StudentDashboard = () => {
           <TabsContent value="links">
             <Card className="border-teal-100">
               <CardHeader>
-                <CardTitle className="text-teal-800">Liens reçus de votre professeur</CardTitle>
-                <CardDescription>Google Meet, ressources en ligne, etc.</CardDescription>
+                <CardTitle className="text-teal-800">📅 Liens de cours reçus</CardTitle>
+                <CardDescription>Liens Google Meet envoyés par votre professeur</CardDescription>
               </CardHeader>
               <CardContent>
                 {links.length === 0 ? (
-                  <p className="text-gray-500">Aucun lien reçu</p>
+                  <div className="text-center py-8">
+                    <LinkIcon className="w-12 h-12 mx-auto text-gray-300 mb-4" />
+                    <p className="text-gray-500">Aucun lien de cours reçu pour le moment</p>
+                    <p className="text-sm text-gray-400 mt-2">Votre professeur vous enverra des liens Google Meet ici</p>
+                  </div>
                 ) : (
                   <div className="space-y-4">
                     {links.map((link) => (
-                      <div key={link.id} className="p-4 border border-teal-100 rounded-lg hover:bg-teal-50 transition">
+                      <div key={link.id} className="p-4 border border-teal-100 rounded-lg hover:bg-teal-50 transition bg-white shadow-sm">
                         <div className="flex items-start gap-3">
-                          <LinkIcon className="w-5 h-5 text-teal-600 mt-1 flex-shrink-0" />
+                          <div className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <Video className="w-5 h-5 text-teal-600" />
+                          </div>
                           <div className="flex-1">
                             <h3 className="font-semibold text-teal-800">{link.title}</h3>
-                            {link.description && (
-                              <p className="text-sm text-gray-600 mt-1">{link.description}</p>
+                            {link.scheduled_date && (
+                              <p className="text-sm text-gray-600 mt-1">
+                                📅 Programmé le: {new Date(link.scheduled_date).toLocaleDateString('fr-FR', {
+                                  weekday: 'long',
+                                  day: 'numeric',
+                                  month: 'long',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </p>
                             )}
-                            <a 
-                              href={link.url} 
-                              target="_blank" 
-                              rel="noopener noreferrer" 
-                              className="inline-flex items-center gap-1 text-sm text-teal-600 hover:underline mt-2"
-                            >
-                              <LinkIcon className="w-4 h-4" />
-                              Ouvrir le lien
-                            </a>
-                            <div className="flex gap-2 mt-2">
+                            
+                            {/* Lien cliquable */}
+                            <div className="mt-3 p-3 bg-gray-50 rounded-lg border">
+                              <p className="text-xs text-gray-500 mb-2">Lien Google Meet:</p>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <a 
+                                  href={link.meet_link} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer" 
+                                  className="flex-1 text-sm text-blue-600 hover:underline break-all"
+                                >
+                                  {link.meet_link}
+                                </a>
+                                <div className="flex gap-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(link.meet_link);
+                                      toast.success('Lien copié !');
+                                    }}
+                                    className="flex items-center gap-1"
+                                  >
+                                    <FileText className="w-4 h-4" />
+                                    Copier
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    className="bg-teal-600 hover:bg-teal-700"
+                                    onClick={() => window.open(link.meet_link, '_blank')}
+                                  >
+                                    <Video className="w-4 h-4 mr-1" />
+                                    Rejoindre
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="flex gap-2 mt-3 flex-wrap">
                               <span className="text-xs bg-teal-100 text-teal-700 px-2 py-1 rounded">
-                                De: {link.from_teacher_name}
+                                👨‍🏫 {link.teacher_name || 'Professeur'}
                               </span>
-                              <span className="text-xs text-gray-500">
-                                {new Date(link.created_at).toLocaleDateString('fr-FR')}
+                              <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                                Reçu le {new Date(link.created_at).toLocaleDateString('fr-FR')}
                               </span>
                             </div>
                           </div>

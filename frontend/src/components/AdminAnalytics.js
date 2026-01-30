@@ -250,35 +250,61 @@ const AdminAnalytics = () => {
         {/* Revenue */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <DollarSign className="w-5 h-5 text-green-600" />
-              Revenus Mensuels (EUR)
-            </CardTitle>
-            <CardDescription>Entrées (reçus élèves) vs Sorties (paiements profs)</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <DollarSign className="w-5 h-5 text-green-600" />
+                  Revenus Mensuels ({currency})
+                </CardTitle>
+                <CardDescription>Entrées (reçus élèves) vs Sorties (paiements profs)</CardDescription>
+              </div>
+              <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={() => setCurrency('EUR')}
+                  className={`px-3 py-1 text-sm font-medium rounded-md transition-all ${
+                    currency === 'EUR' 
+                      ? 'bg-white text-green-600 shadow-sm' 
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  EUR €
+                </button>
+                <button
+                  onClick={() => setCurrency('FCFA')}
+                  className={`px-3 py-1 text-sm font-medium rounded-md transition-all ${
+                    currency === 'FCFA' 
+                      ? 'bg-white text-green-600 shadow-sm' 
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  FCFA
+                </button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={250}>
               <LineChart data={data.revenue_by_month}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip formatter={(value) => `${value}€`} />
+                <YAxis tickFormatter={(value) => currency === 'FCFA' ? `${(value/1000).toFixed(0)}k` : value} />
+                <Tooltip formatter={(value) => currency === 'EUR' ? `${value}€` : `${value.toLocaleString()} FCFA`} />
                 <Legend />
                 <Line 
                   type="monotone" 
-                  dataKey="incoming_eur" 
+                  dataKey={currency === 'EUR' ? 'incoming_eur' : 'incoming_fcfa'}
                   stroke="#16a34a" 
                   strokeWidth={3}
                   dot={{ fill: '#16a34a', strokeWidth: 2 }}
-                  name="Entrées (€)"
+                  name={currency === 'EUR' ? 'Entrées (€)' : 'Entrées (FCFA)'}
                 />
                 <Line 
                   type="monotone" 
-                  dataKey="outgoing_eur" 
+                  dataKey={currency === 'EUR' ? 'outgoing_eur' : 'outgoing_fcfa'}
                   stroke="#dc2626" 
                   strokeWidth={3}
                   dot={{ fill: '#dc2626', strokeWidth: 2 }}
-                  name="Sorties (€)"
+                  name={currency === 'EUR' ? 'Sorties (€)' : 'Sorties (FCFA)'}
                 />
               </LineChart>
             </ResponsiveContainer>

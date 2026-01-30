@@ -77,6 +77,18 @@ Plateforme e-learning complète pour l'apprentissage de l'anglais, développée 
   - Sessions programmées avec suivi de présence
   - Nouvel onglet "👥 Groupes" dans le dashboard Admin
 
+### Phase 6 - Janvier 2026 (Fork 4) ✅
+- ✅ **Création d'étudiant par l'admin** - Formulaire complet dans l'espace admin
+  - Champs: Prénom, Nom, Email, Téléphone (avec indicatif pays), Niveau, Prix, Devise, Mot de passe provisoire
+  - Génération automatique de code Digika
+  - Affichage des credentials après création avec option de copie
+  - Endpoint: `POST /api/admin/create-student`
+- ✅ **Tarification automatique** - Prix auto-rempli selon niveau et devise (30/01/2026)
+  - Le champ "Prix" se met à jour dynamiquement quand le niveau ou la devise change
+  - Récupération des prix depuis l'endpoint `/api/pricing`
+  - Prix affichés dans le menu déroulant des niveaux (ex: "Débutant (76€)" ou "Débutant (13,500 FCFA)")
+  - Composant: `CreateStudentForm.js`
+
 ## Tableau de Bord Analytique 📊
 
 ### Composants

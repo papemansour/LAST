@@ -548,6 +548,15 @@ const AdminDashboard = () => {
             </TabsTrigger>
             
             <TabsTrigger 
+              value="group-courses" 
+              data-testid="admin-tab-group-courses"
+              className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-cyan-500 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+            >
+              <Users className="w-6 h-6" />
+              <span className="text-xs font-semibold">👥 Groupes</span>
+            </TabsTrigger>
+            
+            <TabsTrigger 
               value="conversations" 
               data-testid="admin-tab-conversations"
               className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-rose-500 data-[state=active]:to-rose-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"

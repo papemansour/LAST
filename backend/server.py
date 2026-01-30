@@ -955,12 +955,17 @@ async def register_group(group_data: GroupRegistration):
 
 @api_router.post("/auth/login")
 async def login(credentials: UserLogin):
+    logger.info(f"Login attempt for: {credentials.email}")
     user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
     
     if not user:
+        logger.warning(f"User not found: {credentials.email}")
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
+    logger.info(f"User found: {user.get('email')}, is_active: {user.get('is_active')}, has_password_hash: {'password_hash' in user}")
+    
     if not user.get('is_active'):
+        logger.warning(f"User not active: {credentials.email}")
         raise HTTPException(status_code=403, detail="Account not activated yet. Please wait for admin approval.")
     
     # Check if student access is restricted
@@ -968,7 +973,15 @@ async def login(credentials: UserLogin):
         raise HTTPException(status_code=403, detail="Your access has been restricted. Please contact the administrator.")
     
     # Verify password
-    if not verify_password(credentials.password, user['password_hash']):
+    try:
+        password_valid = verify_password(credentials.password, user['password_hash'])
+        logger.info(f"Password verification result: {password_valid}")
+    except Exception as e:
+        logger.error(f"Password verification error: {e}")
+        password_valid = False
+    
+    if not password_valid:
+        logger.warning(f"Invalid password for: {credentials.email}")
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
     # Create token

@@ -58,6 +58,7 @@ Plateforme e-learning complète pour l'apprentissage de l'anglais, développée 
 ### Phase 4 - Janvier 2026 (Fork 2) ✅
 - ✅ **Séparation des revenus Admin Analytics** - Graphique avec entrées (reçus élèves) vs sorties (paiements profs)
 - ✅ **Suppression onglet "Cours" professeur** - Onglet retiré du TeacherDashboard.js
+- ✅ **Filtre EUR/FCFA sur graphique revenus** - Basculement dynamique entre les deux devises
 
 ## Tableau de Bord Analytique 📊
 

@@ -1242,22 +1242,44 @@ async def get_teacher_payments(current_user: dict = Depends(get_current_user)):
 
 @api_router.post("/secretary/teacher-payments")
 async def create_teacher_payment(payment_data: dict = Body(...), current_user: dict = Depends(get_current_user)):
-    """Create a teacher payment record"""
+    """Create a teacher payment record with deductions system"""
     if current_user['role'] not in ['secretary', 'admin']:
         raise HTTPException(status_code=403, detail="Secretary or admin access required")
     
+    # Support both camelCase and snake_case field names
+    teacher_id = payment_data.get("teacherId") or payment_data.get("teacher_id", "")
+    teacher_name = payment_data.get("teacherName") or payment_data.get("teacher_name", "")
+    teacher_email = payment_data.get("teacherEmail") or payment_data.get("teacher_email", "")
+    
+    # Get deductions and bonus
+    deductions = int(payment_data.get("deductions", 0))
+    bonus = float(payment_data.get("bonus", 0))
+    amount = float(payment_data.get("amount", 0))
+    currency = payment_data.get("currency", "EUR")
+    
+    # Calculate net amount
+    deduction_unit = 5 if currency == "EUR" else 1500
+    deductions_amount = deductions * deduction_unit
+    montant_initial = amount + bonus
+    montant_net = max(0, montant_initial - deductions_amount)
+    
     payment = {
         "id": str(uuid4()),
-        "teacher_id": payment_data.get("teacherId"),
-        "teacher_name": payment_data.get("teacherName"),
-        "teacher_email": payment_data.get("teacherEmail", ""),
-        "teacher_address": payment_data.get("teacherAddress", ""),
+        "teacher_id": teacher_id,
+        "teacher_name": teacher_name,
+        "teacher_email": teacher_email,
+        "teacher_address": payment_data.get("teacherAddress") or payment_data.get("teacher_address", ""),
         "month": payment_data.get("month"),
-        "amount": payment_data.get("amount"),
-        "currency": payment_data.get("currency", "EUR"),
-        "hours_worked": payment_data.get("hoursWorked", ""),
-        "hourly_rate": payment_data.get("hourlyRate", ""),
-        "bonus": payment_data.get("bonus", "0"),
+        "period": payment_data.get("month"),
+        "amount": amount,
+        "currency": currency,
+        "hours_worked": payment_data.get("hoursWorked") or payment_data.get("hours_worked") or payment_data.get("hours", ""),
+        "hourly_rate": payment_data.get("hourlyRate") or payment_data.get("hourly_rate", ""),
+        "bonus": bonus,
+        "deductions": deductions,
+        "deductions_amount": deductions_amount,
+        "montant_initial": montant_initial,
+        "montant_net": montant_net,
         "description": payment_data.get("description", "Cours de langue anglaise"),
         "notes": payment_data.get("notes", ""),
         "created_by": current_user['id'],
@@ -1273,8 +1295,8 @@ async def create_teacher_payment(payment_data: dict = Body(...), current_user: d
     except Exception as e:
         logger.warning(f"Could not sync teacher payment to Monday: {e}")
     
-    logger.info(f"Teacher payment created for: {payment['teacher_name']} - {payment['amount']} {payment['currency']}")
-    return {"message": "Payment created", "id": payment['id']}
+    logger.info(f"Teacher payment created for: {payment['teacher_name']} - Net: {montant_net} {currency} (Deductions: {deductions})")
+    return {"message": "Payment created", "id": payment['id'], "montant_net": montant_net}
 
 @api_router.delete("/secretary/teacher-payments/{payment_id}")
 async def delete_teacher_payment(payment_id: str, current_user: dict = Depends(get_current_user)):

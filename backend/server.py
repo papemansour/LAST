@@ -1394,7 +1394,7 @@ async def delete_prestataire_invoice(invoice_id: str, current_user: dict = Depen
 
 @api_router.post("/secretary/send-invoice-email")
 async def send_invoice_by_email(data: dict = Body(...), current_user: dict = Depends(get_current_user)):
-    """Send invoice by email"""
+    """Send invoice by email - Sans TVA, avec système de déductions pour professeurs"""
     if current_user['role'] not in ['secretary', 'admin']:
         raise HTTPException(status_code=403, detail="Secretary or admin access required")
     
@@ -1403,71 +1403,131 @@ async def send_invoice_by_email(data: dict = Body(...), current_user: dict = Dep
     recipient_name = data.get("recipient_name", "")
     amount = float(data.get("amount", 0))
     currency = data.get("currency", "EUR")
+    bonus = float(data.get("bonus", 0))
+    deductions = int(data.get("deductions", 0))
+    period = data.get("period", "")
     
-    # TVA INCLUSE dans le montant - calcul du montant net
-    tva_rate = 0.20 if currency == "EUR" else 0.18  # 20% EUR, 18% FCFA
-    montant_net = amount / (1 + tva_rate)
-    tva_amount = amount - montant_net
+    # Calcul avec système de déductions (sans TVA)
+    deduction_unit = 5 if currency == "EUR" else 1500  # 5€ ou 1500 FCFA par cours manqué
+    deductions_amount = deductions * deduction_unit
+    montant_initial = amount + bonus
+    montant_net = max(0, montant_initial - deductions_amount)
     
     # Générer le contenu de l'email
-    subject = f"Facture MyKalama English - {recipient_name}"
+    subject = f"Bulletin de Salaire MyKalama English - {recipient_name}" if invoice_type == 'teacher' else f"Reçu de Paiement MyKalama English - {recipient_name}"
     
-    html_content = f"""
-    <html>
-    <body style="font-family: Arial, sans-serif; padding: 20px;">
-        <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
-            <div style="background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%); padding: 30px; text-align: center;">
-                <h1 style="color: white; margin: 0;">🎓 MyKalama English</h1>
-                <p style="color: rgba(255,255,255,0.9); margin-top: 10px;">Facture {'Professeur' if invoice_type == 'teacher' else 'Étudiant'}</p>
+    if invoice_type == 'teacher':
+        # Email pour professeur avec système de déductions
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
+                <div style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); padding: 30px; text-align: center;">
+                    <h1 style="color: white; margin: 0;">🎓 MyKalama English</h1>
+                    <p style="color: rgba(255,255,255,0.9); margin-top: 10px;">Bulletin de Salaire</p>
+                </div>
+                <div style="padding: 30px;">
+                    <p>Bonjour <strong>{recipient_name}</strong>,</p>
+                    <p>Veuillez trouver ci-dessous votre bulletin de salaire{' pour ' + period if period else ''} :</p>
+                    
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                        <tr style="background: #f3f4f6;">
+                            <td style="padding: 12px; border: 1px solid #e5e7eb;"><strong>Montant de base</strong></td>
+                            <td style="padding: 12px; border: 1px solid #e5e7eb; text-align: right;">{amount:.2f} {currency}</td>
+                        </tr>
+                        {"<tr style='background: #d1fae5;'><td style='padding: 12px; border: 1px solid #e5e7eb;'><strong>+ Bonus</strong></td><td style='padding: 12px; border: 1px solid #e5e7eb; text-align: right; color: #059669;'>+{:.2f} {}</td></tr>".format(bonus, currency) if bonus > 0 else ""}
+                        <tr style="background: #f9fafb;">
+                            <td style="padding: 12px; border: 1px solid #e5e7eb;"><strong>Somme Initiale</strong></td>
+                            <td style="padding: 12px; border: 1px solid #e5e7eb; text-align: right; font-weight: bold;">{montant_initial:.2f} {currency}</td>
+                        </tr>
+                        {"<tr style='background: #fef2f2;'><td style='padding: 12px; border: 1px solid #e5e7eb;'><strong>⚠️ Déductions ({} cours manqués × {} {})</strong></td><td style='padding: 12px; border: 1px solid #e5e7eb; text-align: right; color: #dc2626;'>-{:.2f} {}</td></tr>".format(deductions, deduction_unit, currency, deductions_amount, currency) if deductions > 0 else ""}
+                        <tr style="background: #d1fae5;">
+                            <td style="padding: 12px; border: 1px solid #e5e7eb;"><strong>💰 SOMME NETTE À RECEVOIR</strong></td>
+                            <td style="padding: 12px; border: 1px solid #e5e7eb; text-align: right; font-weight: bold; font-size: 18px; color: #059669;">{montant_net:.2f} {currency}</td>
+                        </tr>
+                    </table>
+                    
+                    {"<p style='background: #fef2f2; padding: 10px; border-radius: 6px; color: #991b1b; font-size: 14px;'><strong>Note:</strong> {} déduction(s) appliquée(s) pour cours manqué(s) à {} {}/cours</p>".format(deductions, deduction_unit, currency) if deductions > 0 else ""}
+                    
+                    <p style="margin-top: 30px;">Cordialement,<br><strong>L'équipe MyKalama English</strong></p>
+                </div>
+                <div style="background: #1f2937; color: white; padding: 20px; text-align: center; font-size: 12px;">
+                    <p>MyKalama English - Paris, France / Dakar, Sénégal</p>
+                    <p>📞 +221 78 260 75 49 / 78 528 68 89</p>
+                    <p>📧 mykalamaenglish@gmail.com</p>
+                </div>
             </div>
-            <div style="padding: 30px;">
-                <p>Bonjour <strong>{recipient_name}</strong>,</p>
-                <p>Veuillez trouver ci-dessous le détail de votre facture :</p>
-                
-                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-                    <tr style="background: #f3f4f6;">
-                        <td style="padding: 12px; border: 1px solid #e5e7eb;"><strong>Montant brut (TTC)</strong></td>
-                        <td style="padding: 12px; border: 1px solid #e5e7eb; text-align: right;">{amount:.2f} {currency}</td>
-                    </tr>
-                    <tr style="background: #f3f4f6;">
-                        <td style="padding: 12px; border: 1px solid #e5e7eb;"><strong>TVA déduite ({int(tva_rate*100)}%)</strong></td>
-                        <td style="padding: 12px; border: 1px solid #e5e7eb; text-align: right;">- {tva_amount:.2f} {currency}</td>
-                    </tr>
-                    <tr style="background: #d1fae5;">
-                        <td style="padding: 12px; border: 1px solid #e5e7eb;"><strong>💰 Montant net à recevoir</strong></td>
-                        <td style="padding: 12px; border: 1px solid #e5e7eb; text-align: right; font-weight: bold; font-size: 18px;">{montant_net:.2f} {currency}</td>
-                    </tr>
-                </table>
-                
-                <p style="margin-top: 30px;">Cordialement,<br><strong>L'équipe MyKalama English</strong></p>
+        </body>
+        </html>
+        """
+        
+        text_content = f"""
+        Bulletin de Salaire MyKalama English - {recipient_name}
+        
+        Bonjour {recipient_name},
+        
+        Veuillez trouver ci-dessous votre bulletin de salaire{' pour ' + period if period else ''} :
+        
+        Montant de base: {amount:.2f} {currency}
+        {"Bonus: +{:.2f} {}".format(bonus, currency) if bonus > 0 else ""}
+        Somme Initiale: {montant_initial:.2f} {currency}
+        {"Déductions ({} cours × {} {}): -{:.2f} {}".format(deductions, deduction_unit, currency, deductions_amount, currency) if deductions > 0 else ""}
+        SOMME NETTE À RECEVOIR: {montant_net:.2f} {currency}
+        
+        Cordialement,
+        L'équipe MyKalama English
+        
+        📞 +221 78 260 75 49 / 78 528 68 89
+        📧 mykalamaenglish@gmail.com
+        """
+    else:
+        # Email pour étudiant (reçu simple sans TVA)
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
+                <div style="background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%); padding: 30px; text-align: center;">
+                    <h1 style="color: white; margin: 0;">🎓 MyKalama English</h1>
+                    <p style="color: rgba(255,255,255,0.9); margin-top: 10px;">Reçu de Paiement</p>
+                </div>
+                <div style="padding: 30px;">
+                    <p>Bonjour <strong>{recipient_name}</strong>,</p>
+                    <p>Nous vous confirmons la réception de votre paiement :</p>
+                    
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                        <tr style="background: #dbeafe;">
+                            <td style="padding: 12px; border: 1px solid #e5e7eb;"><strong>💰 MONTANT PAYÉ</strong></td>
+                            <td style="padding: 12px; border: 1px solid #e5e7eb; text-align: right; font-weight: bold; font-size: 18px; color: #3b82f6;">{amount:.2f} {currency}</td>
+                        </tr>
+                    </table>
+                    
+                    <p style="margin-top: 30px;">Merci pour votre confiance !<br><strong>L'équipe MyKalama English</strong></p>
+                </div>
+                <div style="background: #1f2937; color: white; padding: 20px; text-align: center; font-size: 12px;">
+                    <p>MyKalama English - Paris, France / Dakar, Sénégal</p>
+                    <p>📞 +221 78 260 75 49 / 78 528 68 89</p>
+                    <p>📧 mykalamaenglish@gmail.com</p>
+                </div>
             </div>
-            <div style="background: #1f2937; color: white; padding: 20px; text-align: center; font-size: 12px;">
-                <p>MyKalama English - Paris, France / Dakar, Sénégal</p>
-                <p>📞 +221 78 260 75 49 / 78 528 68 89</p>
-                <p>📧 mykalamaenglish@gmail.com</p>
-            </div>
-        </div>
-    </body>
-    </html>
-    """
-    
-    text_content = f"""
-    Facture MyKalama English - {recipient_name}
-    
-    Bonjour {recipient_name},
-    
-    Veuillez trouver ci-dessous le détail de votre facture :
-    
-    Montant brut (TTC): {amount:.2f} {currency}
-    TVA déduite ({int(tva_rate*100)}%): -{tva_amount:.2f} {currency}
-    Montant net à recevoir: {montant_net:.2f} {currency}
-    
-    Cordialement,
-    L'équipe MyKalama English
-    
-    📞 +221 78 260 75 49 / 78 528 68 89
-    📧 mykalamaenglish@gmail.com
-    """
+        </body>
+        </html>
+        """
+        
+        text_content = f"""
+        Reçu de Paiement MyKalama English - {recipient_name}
+        
+        Bonjour {recipient_name},
+        
+        Nous vous confirmons la réception de votre paiement :
+        
+        MONTANT PAYÉ: {amount:.2f} {currency}
+        
+        Merci pour votre confiance !
+        L'équipe MyKalama English
+        
+        📞 +221 78 260 75 49 / 78 528 68 89
+        📧 mykalamaenglish@gmail.com
+        """
     
     # Envoyer via le service email
     email_sent = await email_service.send_invoice_email(
@@ -1485,8 +1545,10 @@ async def send_invoice_by_email(data: dict = Body(...), current_user: dict = Dep
         "subject": subject,
         "html_content": html_content,
         "invoice_type": invoice_type,
-        "amount_brut": amount,
-        "tva_amount": tva_amount,
+        "amount": amount,
+        "bonus": bonus,
+        "deductions": deductions,
+        "deductions_amount": deductions_amount,
         "montant_net": montant_net,
         "currency": currency,
         "status": "sent" if email_sent else "pending",

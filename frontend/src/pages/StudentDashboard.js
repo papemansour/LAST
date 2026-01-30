@@ -67,7 +67,7 @@ const StudentDashboard = () => {
     try {
       const [userRes, linksRes, homeworksRes, pricingRes] = await Promise.all([
         apiClient.get('/auth/me'),
-        apiClient.get('/student/my-links'),
+        apiClient.get('/student/my-meet-links'),
         apiClient.get('/student/my-homeworks'),
         apiClient.get('/pricing')
       ]);

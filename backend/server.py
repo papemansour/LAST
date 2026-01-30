@@ -3999,6 +3999,39 @@ async def get_my_courses(current_user: dict = Depends(get_current_user)):
     ).to_list(1000)
     return courses
 
+@api_router.get("/teacher/my-payments")
+async def get_teacher_my_payments(current_user: dict = Depends(get_current_user)):
+    """Get all payment slips for the connected teacher"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    # Search by teacher_id OR by email match
+    teacher_email = current_user.get('email', '')
+    teacher_name = f"{current_user.get('first_name', '')} {current_user.get('last_name', '')}".strip()
+    
+    payments = await db.teacher_payments.find({
+        "$or": [
+            {"teacher_id": current_user['id']},
+            {"teacher_email": teacher_email},
+            {"email": teacher_email},
+            {"teacher_name": teacher_name}
+        ]
+    }, {"_id": 0}).sort("created_at", -1).to_list(100)
+    
+    # Calculate net amount for each payment
+    for payment in payments:
+        amount = float(payment.get('amount', 0))
+        bonus = float(payment.get('bonus', 0))
+        deductions = int(payment.get('deductions', 0))
+        currency = payment.get('currency', 'EUR')
+        deduction_unit = 5 if currency == 'EUR' else 1500
+        deductions_amount = deductions * deduction_unit
+        payment['montant_initial'] = amount + bonus
+        payment['deductions_amount'] = deductions_amount
+        payment['montant_net'] = max(0, amount + bonus - deductions_amount)
+    
+    return payments
+
 @api_router.post("/teacher/create-course")
 async def create_course(course_data: CourseCreate, current_user: dict = Depends(get_current_user)):
     if current_user['role'] != 'teacher':

@@ -64,6 +64,19 @@ Plateforme e-learning complète pour l'apprentissage de l'anglais, développée 
   - Déductions: 1 cours manqué = 5€ (EUR) ou 1500 FCFA
   - Bulletin de salaire affiche: Somme Initiale → Déductions → Somme Nette
 
+### Phase 5 - Janvier 2026 (Fork 3) ✅
+- ✅ **Stockage MongoDB pour les documents** - Les fichiers sont maintenant stockés en Base64 dans MongoDB
+  - Résout le problème de perte des fichiers après déploiement
+  - Endpoint: `/api/files/{file_id}` pour récupérer les fichiers
+  - Limite: 15MB par fichier
+- ✅ **Système de Cours Groupés** - Gestion des cours avec plusieurs étudiants
+  - Prix: 80€/personne (configurable)
+  - Création de groupes par admin/secrétaire
+  - Ajout/retrait d'étudiants
+  - Lien Meet partagé pour le groupe
+  - Sessions programmées avec suivi de présence
+  - Nouvel onglet "👥 Groupes" dans le dashboard Admin
+
 ## Tableau de Bord Analytique 📊
 
 ### Composants

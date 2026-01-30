@@ -711,10 +711,37 @@ async def add_student_points(student_id: str, points: int, reason: str = ""):
 
 @api_router.get("/uploads/{file_path:path}")
 async def serve_uploaded_file_api(file_path: str):
-    """Serve uploaded files from persistent storage via /api/uploads/ route"""
+    """Serve uploaded files - tries MongoDB first, then local storage as fallback"""
     from fastapi.responses import Response
     import mimetypes
+    import base64
     
+    # Extract potential file_id from path (for new MongoDB files)
+    # New format: /api/files/{file_id}
+    # Old format: /uploads/documents/{uuid}.ext
+    
+    potential_file_id = file_path.split('/')[-1].split('.')[0] if '.' in file_path.split('/')[-1] else file_path.split('/')[-1]
+    
+    # Try MongoDB first
+    file_data = await db.file_storage.find_one({"id": potential_file_id}, {"_id": 0})
+    
+    if file_data:
+        try:
+            content = base64.b64decode(file_data['data'])
+            return Response(
+                content=content,
+                media_type=file_data.get('mime_type', 'application/octet-stream'),
+                headers={
+                    "Content-Disposition": f'inline; filename="{file_data["filename"]}"',
+                    "X-Content-Type-Options": "nosniff",
+                    "Cache-Control": "public, max-age=86400",
+                    "Access-Control-Allow-Origin": "*"
+                }
+            )
+        except Exception as e:
+            logger.error(f"Error decoding MongoDB file: {e}")
+    
+    # Fallback to local file system (for old files)
     file_full_path = Path("/app/uploads") / file_path
     
     # Security check: ensure file is within uploads directory
@@ -725,15 +752,15 @@ async def serve_uploaded_file_api(file_path: str):
     
     # Check if file exists
     if not file_full_path.exists() or not file_full_path.is_file():
-        logger.warning(f"File not found: {file_full_path}")
-        raise HTTPException(status_code=404, detail="File not found")
+        logger.warning(f"File not found (neither in MongoDB nor local): {file_full_path}")
+        raise HTTPException(status_code=404, detail="Fichier non trouvé. Il a peut-être été supprimé lors d'un déploiement.")
     
     # Determine MIME type
     mime_type, _ = mimetypes.guess_type(str(file_full_path))
     if mime_type is None:
         mime_type = "application/octet-stream"
     
-    logger.info(f"Serving file via API: {file_path} ({mime_type})")
+    logger.info(f"Serving local file via API: {file_path} ({mime_type})")
     
     # Read file content
     with open(file_full_path, "rb") as f:
@@ -744,7 +771,7 @@ async def serve_uploaded_file_api(file_path: str):
         content=content,
         media_type=mime_type,
         headers={
-            "Content-Disposition": f'attachment; filename="{file_full_path.name}"',
+            "Content-Disposition": f'inline; filename="{file_full_path.name}"',
             "X-Content-Type-Options": "nosniff",
             "Cache-Control": "public, max-age=3600",
             "Access-Control-Allow-Origin": "*"

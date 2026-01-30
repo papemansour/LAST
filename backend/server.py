@@ -7311,12 +7311,21 @@ async def get_student_games(current_user: dict = Depends(get_current_user)):
     
     games = await db.game_assignments.find({"student_id": current_user['id']}, {"_id": 0}).to_list(100)
     
-    # Enrich flashcard games with actual flashcard data
+    # Enrich games with actual game data
     for game in games:
         if game['game_type'] == 'flashcard' and game.get('game_id'):
             flashcard_set = await db.flashcard_sets.find_one({"id": game['game_id']}, {"_id": 0})
             if flashcard_set:
                 game['flashcards'] = flashcard_set['flashcards']
+        elif game['game_type'] == 'quiz' and game.get('game_id'):
+            quiz = await db.quizzes.find_one({"id": game['game_id']}, {"_id": 0})
+            if quiz:
+                game['questions'] = quiz['questions']
+                game['time_limit'] = quiz.get('time_limit', 0)
+        elif game['game_type'] == 'memory' and game.get('game_id'):
+            memory_game = await db.memory_games.find_one({"id": game['game_id']}, {"_id": 0})
+            if memory_game:
+                game['pairs'] = memory_game['pairs']
     
     return games
 

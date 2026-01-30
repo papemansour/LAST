@@ -1580,11 +1580,11 @@ const SecretaryDashboard = () => {
                         onChange={(e) => setNewPayment({...newPayment, deductions: parseInt(e.target.value) || 0})}
                         placeholder="0"
                         className="border-red-200 bg-red-50"
-                        title="Nombre de cours manqués (1 = 5€ ou 2000 FCFA)"
+                        title="Nombre de cours manqués (1 = 5€ ou 1500 FCFA)"
                       />
                     </div>
                   </div>
-                  <p className="text-xs text-gray-500">💡 1 déduction = {newPayment.currency === 'FCFA' ? '2000 FCFA' : '5 EUR'} (pénalité pour cours manqué)</p>
+                  <p className="text-xs text-gray-500">💡 1 déduction = {newPayment.currency === 'FCFA' ? '1500 FCFA' : '5€'} (pénalité pour cours manqué)</p>
                   <div>
                     <label className="block text-sm font-medium mb-1">Notes</label>
                     <Input

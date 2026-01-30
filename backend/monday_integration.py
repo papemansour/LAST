@@ -2,6 +2,7 @@
 Monday.com CRM Integration - MyKalama English
 Gestion des étudiants, professeurs, prestataires et factures
 """
+import os
 import requests
 import logging
 import json
@@ -10,11 +11,12 @@ from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
-MONDAY_API_KEY = "eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjU5OTA0ODM3NSwiYWFpIjoxMSwidWlkIjo5NzM5OTY1MywiaWFkIjoiMjAyNS0xMi0xOFQwMTowNzoxOC42ODZaIiwicGVyIjoibWU6d3JpdGUiLCJhY3RpZCI6MzI5Mjg2NjYsInJnbiI6ImV1YzEifQ.FgB7cs9lMjYIfg5ENGwMHesoGMQ4VT0e0H9koQOOtzc"
+# Configuration depuis les variables d'environnement
+MONDAY_API_KEY = os.environ.get("MONDAY_API_KEY", "")
 MONDAY_API_URL = "https://api.monday.com/v2"
 
-# Board IDs
-MONDAY_BOARD_STUDENTS = "5089020316"  # Board principal étudiants
+# Board IDs depuis les variables d'environnement
+MONDAY_BOARD_STUDENTS = os.environ.get("MONDAY_BOARD_STUDENTS", "5089020316")
 
 # Column IDs pour le board étudiants
 STUDENT_COLUMNS = {

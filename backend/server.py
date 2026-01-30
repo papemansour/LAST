@@ -4261,7 +4261,7 @@ async def get_admin_analytics(period: str = "month", current_user: dict = Depend
             "hours": round(total_hours, 1)
         })
     
-    # Get revenue by month (from payments)
+    # Get revenue by month (incoming from student_receipts, outgoing from teacher_payments)
     revenue_by_month = []
     for i in range(5, -1, -1):
         target_date = now - timedelta(days=i*30)
@@ -4271,20 +4271,36 @@ async def get_admin_analytics(period: str = "month", current_user: dict = Depend
         else:
             month_end = datetime(target_date.year, target_date.month + 1, 1, tzinfo=timezone.utc)
         
-        payments_eur = await db.payments.find({
+        # Incoming revenue: student receipts (EUR)
+        incoming_eur = await db.student_receipts.find({
             "currency": "EUR",
             "created_at": {"$gte": month_start.isoformat(), "$lt": month_end.isoformat()}
         }, {"_id": 0, "amount": 1}).to_list(1000)
         
-        payments_fcfa = await db.payments.find({
+        # Incoming revenue: student receipts (FCFA)
+        incoming_fcfa = await db.student_receipts.find({
+            "currency": "FCFA",
+            "created_at": {"$gte": month_start.isoformat(), "$lt": month_end.isoformat()}
+        }, {"_id": 0, "amount": 1}).to_list(1000)
+        
+        # Outgoing expenses: teacher payments (EUR)
+        outgoing_eur = await db.teacher_payments.find({
+            "currency": "EUR",
+            "created_at": {"$gte": month_start.isoformat(), "$lt": month_end.isoformat()}
+        }, {"_id": 0, "amount": 1}).to_list(1000)
+        
+        # Outgoing expenses: teacher payments (FCFA)
+        outgoing_fcfa = await db.teacher_payments.find({
             "currency": "FCFA",
             "created_at": {"$gte": month_start.isoformat(), "$lt": month_end.isoformat()}
         }, {"_id": 0, "amount": 1}).to_list(1000)
         
         revenue_by_month.append({
             "month": month_names[target_date.month],
-            "eur": sum(p.get('amount', 0) for p in payments_eur),
-            "fcfa": sum(p.get('amount', 0) for p in payments_fcfa)
+            "incoming_eur": sum(p.get('amount', 0) for p in incoming_eur),
+            "incoming_fcfa": sum(p.get('amount', 0) for p in incoming_fcfa),
+            "outgoing_eur": sum(p.get('amount', 0) for p in outgoing_eur),
+            "outgoing_fcfa": sum(p.get('amount', 0) for p in outgoing_fcfa)
         })
     
     # Get top teachers by hours this month
@@ -4324,9 +4340,11 @@ async def get_admin_analytics(period: str = "month", current_user: dict = Depend
     })
     growth_rate = ((total_students - prev_month_students) / max(prev_month_students, 1)) * 100 if prev_month_students > 0 else 0
     
-    # Total revenue
-    total_eur = sum(r['eur'] for r in revenue_by_month[-1:])
-    total_fcfa = sum(r['fcfa'] for r in revenue_by_month[-1:])
+    # Total revenue (net = incoming - outgoing)
+    total_incoming_eur = sum(r['incoming_eur'] for r in revenue_by_month[-1:])
+    total_incoming_fcfa = sum(r['incoming_fcfa'] for r in revenue_by_month[-1:])
+    total_outgoing_eur = sum(r['outgoing_eur'] for r in revenue_by_month[-1:])
+    total_outgoing_fcfa = sum(r['outgoing_fcfa'] for r in revenue_by_month[-1:])
     
     return {
         "summary": {
@@ -4334,8 +4352,12 @@ async def get_admin_analytics(period: str = "month", current_user: dict = Depend
             "active_students": active_students,
             "total_teachers": total_teachers,
             "total_hours_this_month": round(total_hours_this_month, 1),
-            "revenue_eur": total_eur,
-            "revenue_fcfa": total_fcfa,
+            "incoming_eur": total_incoming_eur,
+            "incoming_fcfa": total_incoming_fcfa,
+            "outgoing_eur": total_outgoing_eur,
+            "outgoing_fcfa": total_outgoing_fcfa,
+            "net_eur": total_incoming_eur - total_outgoing_eur,
+            "net_fcfa": total_incoming_fcfa - total_outgoing_fcfa,
             "growth_rate": round(growth_rate, 1)
         },
         "students_by_month": students_by_month,

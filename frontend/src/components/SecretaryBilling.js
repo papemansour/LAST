@@ -590,7 +590,7 @@ const SecretaryBilling = ({ teachers, students, onRefresh }) => {
                   className="bg-red-50 border-red-200"
                 />
                 <p className="text-xs text-gray-500 col-span-2">
-                  💡 1 déduction = {newPayment.currency === 'EUR' ? '5 EUR' : '2000 FCFA'} (pénalité pour cours manqué)
+                  💡 1 déduction = {newPayment.currency === 'EUR' ? '5€' : '1500 FCFA'} (pénalité pour cours manqué)
                 </p>
                 <Textarea
                   placeholder="Description"

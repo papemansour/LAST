@@ -116,11 +116,7 @@ const SecretaryDashboard = () => {
     setCodeInput('');
   };
 
-  // Calculer TVA selon la devise
-  const calculateTVA = (amount, currency) => {
-    const rate = currency === 'EUR' ? 0.20 : 0.18; // 20% EUR, 18% FCFA
-    return parseFloat(amount || 0) * rate;
-  };
+  // Fonction calculateTVA supprimée - TVA retirée du système de facturation
 
   useEffect(() => {
     fetchUserData();

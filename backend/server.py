@@ -347,6 +347,57 @@ class MeetLinkCreate(BaseModel):
     title: str
     scheduled_date: str  # ISO format
 
+# ==================== COURS GROUPÉS MODELS ====================
+
+class GroupCourse(BaseModel):
+    """Modèle pour les cours groupés - plusieurs étudiants, un professeur"""
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str  # Nom du groupe (ex: "Groupe Débutants Janvier")
+    description: str = ""
+    teacher_id: str
+    teacher_name: str = ""
+    student_ids: List[str] = []  # Liste des étudiants dans le groupe
+    max_students: int = 10
+    price_per_person: float = 80.0  # 80€ par personne
+    currency: str = "EUR"
+    level: str = "beginner"  # beginner, intermediate, advanced
+    schedule: str = ""  # Ex: "Lundi et Mercredi 18h-19h30"
+    meet_link: str = ""  # Lien Google Meet partagé
+    start_date: str = ""
+    end_date: str = ""
+    total_hours: int = 0
+    status: str = "active"  # active, completed, cancelled
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class GroupCourseCreate(BaseModel):
+    name: str
+    description: str = ""
+    teacher_id: str
+    max_students: int = 10
+    price_per_person: float = 80.0
+    currency: str = "EUR"
+    level: str = "beginner"
+    schedule: str = ""
+    meet_link: str = ""
+    start_date: str = ""
+    end_date: str = ""
+    total_hours: int = 0
+
+class GroupSession(BaseModel):
+    """Session individuelle d'un cours groupé"""
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    group_id: str
+    title: str
+    scheduled_date: str  # ISO format
+    duration_minutes: int = 90
+    meet_link: str = ""
+    status: str = "scheduled"  # scheduled, completed, cancelled
+    attendees: List[str] = []  # IDs des étudiants présents
+    notes: str = ""
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
 class Badge(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))

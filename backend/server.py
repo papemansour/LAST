@@ -1968,6 +1968,161 @@ async def create_student_by_admin(student_data: StudentCreateByAdmin, current_us
         "digika_code": digika_code
     }
 
+@api_router.post("/admin/import-students-csv")
+async def import_students_csv(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
+    """Importer des étudiants en masse depuis un fichier CSV"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    if not file.filename.endswith('.csv'):
+        raise HTTPException(status_code=400, detail="Le fichier doit être au format CSV")
+    
+    import csv
+    import io
+    
+    content = await file.read()
+    try:
+        # Essayer d'abord UTF-8, sinon latin-1
+        try:
+            decoded = content.decode('utf-8')
+        except UnicodeDecodeError:
+            decoded = content.decode('latin-1')
+        
+        csv_reader = csv.DictReader(io.StringIO(decoded), delimiter=';')
+        
+        results = {
+            "imported": [],
+            "errors": [],
+            "skipped": []
+        }
+        
+        # Mapper les niveaux
+        level_map = {
+            'beginner': 'beginner', 'debutant': 'beginner', 'débutant': 'beginner',
+            'intermediate': 'intermediate', 'intermédiaire': 'intermediate', 'intermediaire': 'intermediate',
+            'advanced': 'advanced', 'professionnel': 'advanced', 'avancé': 'advanced', 'avance': 'advanced',
+            'kkid': 'kkid', 'k-kid': 'kkid', 'kid': 'kkid', 'enfant': 'kkid',
+            'k-débutant': 'beginner', 'k-intermédiaire': 'intermediate', 'k-professionnel': 'advanced', 'k-kids': 'kkid'
+        }
+        
+        for row_num, row in enumerate(csv_reader, start=2):
+            try:
+                # Nettoyer les clés (trim whitespace)
+                row = {k.strip().lower(): v.strip() if v else '' for k, v in row.items() if k}
+                
+                # Extraire les champs (avec plusieurs noms possibles)
+                email = row.get('email', row.get('e-mail', row.get('mail', ''))).strip()
+                first_name = row.get('prenom', row.get('prénom', row.get('first_name', row.get('firstname', '')))).strip()
+                last_name = row.get('nom', row.get('last_name', row.get('lastname', row.get('name', '')))).strip()
+                phone = row.get('telephone', row.get('téléphone', row.get('phone', row.get('tel', '')))).strip()
+                level_raw = row.get('niveau', row.get('level', 'beginner')).strip().lower()
+                price_str = row.get('prix', row.get('price', row.get('tarif', '0'))).strip()
+                currency = row.get('devise', row.get('currency', 'EUR')).strip().upper()
+                
+                # Validation basique
+                if not email:
+                    results["errors"].append({"row": row_num, "reason": "Email manquant"})
+                    continue
+                    
+                if not first_name:
+                    results["errors"].append({"row": row_num, "email": email, "reason": "Prénom manquant"})
+                    continue
+                
+                # Vérifier si l'email existe déjà
+                existing = await db.users.find_one({"email": email}, {"_id": 0})
+                if existing:
+                    results["skipped"].append({"row": row_num, "email": email, "reason": "Email déjà existant"})
+                    continue
+                
+                # Mapper le niveau
+                level = level_map.get(level_raw, 'beginner')
+                
+                # Parser le prix
+                try:
+                    price = float(price_str.replace(',', '.').replace(' ', '')) if price_str else 0
+                except:
+                    price = 0
+                
+                # Normaliser la devise
+                if currency in ['FCFA', 'XOF', 'CFA']:
+                    currency = 'FCFA'
+                else:
+                    currency = 'EUR'
+                
+                # Générer mot de passe et code
+                temp_password = f"Kalama{uuid.uuid4().hex[:6]}"
+                password_hash = hash_password(temp_password)
+                digika_code = f"DIGIKA{uuid.uuid4().hex[:4].upper()}"
+                
+                # Créer l'étudiant
+                student = User(
+                    email=email,
+                    first_name=first_name,
+                    last_name=last_name or first_name,
+                    phone=phone or "",
+                    role="student",
+                    level=level,
+                    is_active=True,
+                    password_hash=password_hash,
+                    temporary_password=temp_password
+                )
+                
+                doc = student.model_dump()
+                doc['created_at'] = doc['created_at'].isoformat()
+                doc['digika_password'] = digika_code
+                doc['price'] = price
+                doc['currency'] = currency
+                doc['created_by_admin'] = True
+                doc['imported_from_csv'] = True
+                
+                await db.users.insert_one(doc)
+                
+                results["imported"].append({
+                    "row": row_num,
+                    "email": email,
+                    "name": f"{first_name} {last_name}",
+                    "level": level,
+                    "password": temp_password,
+                    "digika_code": digika_code
+                })
+                
+            except Exception as e:
+                results["errors"].append({"row": row_num, "reason": str(e)})
+        
+        logger.info(f"CSV Import by admin {current_user['id']}: {len(results['imported'])} imported, {len(results['skipped'])} skipped, {len(results['errors'])} errors")
+        
+        return {
+            "message": f"{len(results['imported'])} étudiant(s) importé(s) avec succès",
+            "summary": {
+                "total_imported": len(results["imported"]),
+                "total_skipped": len(results["skipped"]),
+                "total_errors": len(results["errors"])
+            },
+            "details": results
+        }
+        
+    except Exception as e:
+        logger.error(f"CSV import error: {e}")
+        raise HTTPException(status_code=400, detail=f"Erreur lors du parsing du CSV: {str(e)}")
+
+@api_router.get("/admin/csv-template")
+async def get_csv_template(current_user: dict = Depends(get_current_user)):
+    """Télécharger un modèle CSV pour l'import d'étudiants"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    csv_content = """prenom;nom;email;telephone;niveau;prix;devise
+Jean;Dupont;jean.dupont@gmail.com;+33612345678;beginner;76;EUR
+Marie;Martin;marie.martin@gmail.com;+221771234567;intermediate;60000;FCFA
+"""
+    
+    from fastapi.responses import Response
+    return Response(
+        content=csv_content,
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=modele_import_etudiants.csv"}
+    )
+
 @api_router.get("/admin/all-users")
 async def get_all_users(current_user: dict = Depends(get_current_user)):
     if current_user['role'] != 'admin':

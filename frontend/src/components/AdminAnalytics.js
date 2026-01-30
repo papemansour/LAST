@@ -251,9 +251,9 @@ const AdminAnalytics = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <DollarSign className="w-5 h-5 text-green-600" />
-              Revenus Mensuels
+              Revenus Mensuels (EUR)
             </CardTitle>
-            <CardDescription>Évolution des revenus en EUR</CardDescription>
+            <CardDescription>Entrées (reçus élèves) vs Sorties (paiements profs)</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={250}>
@@ -265,11 +265,19 @@ const AdminAnalytics = () => {
                 <Legend />
                 <Line 
                   type="monotone" 
-                  dataKey="eur" 
+                  dataKey="incoming_eur" 
                   stroke="#16a34a" 
                   strokeWidth={3}
                   dot={{ fill: '#16a34a', strokeWidth: 2 }}
-                  name="EUR"
+                  name="Entrées (€)"
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="outgoing_eur" 
+                  stroke="#dc2626" 
+                  strokeWidth={3}
+                  dot={{ fill: '#dc2626', strokeWidth: 2 }}
+                  name="Sorties (€)"
                 />
               </LineChart>
             </ResponsiveContainer>

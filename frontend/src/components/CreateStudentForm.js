@@ -365,16 +365,16 @@ const CreateStudentForm = ({ onStudentCreated }) => {
                 <Label>Niveau</Label>
                 <Select
                   value={formData.level}
-                  onValueChange={(value) => setFormData({...formData, level: value})}
+                  onValueChange={handleLevelChange}
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="beginner">🟢 Débutant</SelectItem>
-                    <SelectItem value="intermediate">🟡 Intermédiaire</SelectItem>
-                    <SelectItem value="advanced">🔴 Professionnel</SelectItem>
-                    <SelectItem value="kkid">🧒 K-Kid</SelectItem>
+                    <SelectItem value="beginner">🟢 Débutant {pricingData && `(${formData.currency === 'EUR' ? (pricingData.beginner_eur - (pricingData.beginner_discount || 0)) + '€' : ((pricingData.beginner_fcfa || 50000) - (pricingData.beginner_discount_fcfa || 0)).toLocaleString() + ' FCFA'})`}</SelectItem>
+                    <SelectItem value="intermediate">🟡 Intermédiaire {pricingData && `(${formData.currency === 'EUR' ? (pricingData.intermediate_eur - (pricingData.intermediate_discount || 0)) + '€' : ((pricingData.intermediate_fcfa || 60000) - (pricingData.intermediate_discount_fcfa || 0)).toLocaleString() + ' FCFA'})`}</SelectItem>
+                    <SelectItem value="advanced">🔴 Professionnel {pricingData && `(${formData.currency === 'EUR' ? (pricingData.advanced_eur - (pricingData.advanced_discount || 0)) + '€' : ((pricingData.advanced_fcfa || 70000) - (pricingData.advanced_discount_fcfa || 0)).toLocaleString() + ' FCFA'})`}</SelectItem>
+                    <SelectItem value="kkid">🧒 K-Kid {pricingData && `(${formData.currency === 'EUR' ? (pricingData.kkid_eur - (pricingData.kkid_discount || 0)) + '€' : ((pricingData.kkid_fcfa || 20000) - (pricingData.kkid_discount_fcfa || 0)).toLocaleString() + ' FCFA'})`}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -401,7 +401,7 @@ const CreateStudentForm = ({ onStudentCreated }) => {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Prix</Label>
+                <Label>Prix (auto-rempli selon le niveau)</Label>
                 <Input
                   type="number"
                   value={formData.price}
@@ -413,7 +413,7 @@ const CreateStudentForm = ({ onStudentCreated }) => {
                 <Label>Devise</Label>
                 <Select
                   value={formData.currency}
-                  onValueChange={(value) => setFormData({...formData, currency: value})}
+                  onValueChange={handleCurrencyChange}
                 >
                   <SelectTrigger>
                     <SelectValue />

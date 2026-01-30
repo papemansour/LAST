@@ -649,6 +649,9 @@ const AdminDashboard = () => {
                     {/* Bouton créer étudiant */}
                     <CreateStudentForm onStudentCreated={() => fetchStudents()} />
                     
+                    {/* Bouton import CSV */}
+                    <ImportStudentsCSV onImportComplete={() => fetchStudents()} />
+                    
                     {/* Filtre par niveau */}
                     <select
                       value={levelFilter}

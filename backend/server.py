@@ -4620,61 +4620,117 @@ async def get_my_conversations(current_user: dict = Depends(get_current_user)):
 
 # ==================== DOCUMENTS ENDPOINTS ====================
 
+# Collection pour stocker les fichiers en Base64 dans MongoDB (persistant)
+# Cela résout le problème des fichiers perdus après déploiement
+
 @api_router.post("/documents/upload")
 async def upload_document(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
-    """Upload a document file"""
-    from pathlib import Path
+    """Upload a document file - stored in MongoDB for persistence"""
+    import base64
     
-    # File size limit: 50MB
-    MAX_FILE_SIZE = 50 * 1024 * 1024
+    # File size limit: 15MB (MongoDB document limit)
+    MAX_FILE_SIZE = 15 * 1024 * 1024
     contents = await file.read()
     
     if len(contents) > MAX_FILE_SIZE:
-        raise HTTPException(status_code=400, detail="File too large (max 50MB)")
+        raise HTTPException(status_code=400, detail="Fichier trop volumineux (max 15MB)")
     
-    # Create upload directory (persistent storage)
-    upload_dir = Path("/app/uploads/documents")
-    upload_dir.mkdir(parents=True, exist_ok=True)
+    # Generate unique file ID
+    file_id = str(uuid4())
+    file_ext = file.filename.split('.')[-1].lower() if '.' in file.filename else 'file'
     
-    # Generate unique filename
-    file_ext = file.filename.split('.')[-1] if '.' in file.filename else 'file'
-    unique_filename = f"{str(uuid4())}.{file_ext}"
-    file_path = upload_dir / unique_filename
+    # Determine file type and MIME type
+    mime_types = {
+        'jpg': 'image/jpeg', 'jpeg': 'image/jpeg', 'png': 'image/png', 
+        'gif': 'image/gif', 'webp': 'image/webp', 'svg': 'image/svg+xml',
+        'pdf': 'application/pdf',
+        'doc': 'application/msword', 'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'xls': 'application/vnd.ms-excel', 'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'ppt': 'application/vnd.ms-powerpoint', 'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'mp4': 'video/mp4', 'avi': 'video/x-msvideo', 'mov': 'video/quicktime', 'webm': 'video/webm',
+        'mp3': 'audio/mpeg', 'wav': 'audio/wav', 'ogg': 'audio/ogg',
+        'txt': 'text/plain', 'csv': 'text/csv', 'json': 'application/json'
+    }
     
-    # Save file
+    mime_type = mime_types.get(file_ext, 'application/octet-stream')
+    
+    file_type = "other"
+    if file_ext in ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']:
+        file_type = "image"
+    elif file_ext == 'pdf':
+        file_type = "pdf"
+    elif file_ext in ['doc', 'docx']:
+        file_type = "document"
+    elif file_ext in ['xls', 'xlsx']:
+        file_type = "spreadsheet"
+    elif file_ext in ['ppt', 'pptx']:
+        file_type = "presentation"
+    elif file_ext in ['mp4', 'avi', 'mov', 'webm']:
+        file_type = "video"
+    elif file_ext in ['mp3', 'wav', 'ogg']:
+        file_type = "audio"
+    
+    # Store file in MongoDB as Base64
     try:
-        with open(file_path, "wb") as f:
-            f.write(contents)
+        file_data = {
+            "id": file_id,
+            "filename": file.filename,
+            "extension": file_ext,
+            "mime_type": mime_type,
+            "file_type": file_type,
+            "size": len(contents),
+            "data": base64.b64encode(contents).decode('utf-8'),
+            "uploaded_by": current_user['id'],
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
         
-        file_url = f"/uploads/documents/{unique_filename}"
+        await db.file_storage.insert_one(file_data)
         
-        # Determine file type
-        file_type = "other"
-        if file_ext.lower() in ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']:
-            file_type = "image"
-        elif file_ext.lower() in ['pdf']:
-            file_type = "pdf"
-        elif file_ext.lower() in ['doc', 'docx']:
-            file_type = "document"
-        elif file_ext.lower() in ['xls', 'xlsx']:
-            file_type = "spreadsheet"
-        elif file_ext.lower() in ['ppt', 'pptx']:
-            file_type = "presentation"
-        elif file_ext.lower() in ['mp4', 'avi', 'mov', 'webm']:
-            file_type = "video"
-        elif file_ext.lower() in ['mp3', 'wav', 'ogg']:
-            file_type = "audio"
+        # URL points to our MongoDB file endpoint
+        file_url = f"/api/files/{file_id}"
         
-        logger.info(f"Document uploaded by {current_user['id']}: {file.filename}")
+        logger.info(f"Document uploaded to MongoDB by {current_user['id']}: {file.filename} ({len(contents)} bytes)")
         
         return {
             "file_url": file_url,
             "file_name": file.filename,
-            "file_type": file_type
+            "file_type": file_type,
+            "file_id": file_id
         }
     except Exception as e:
         logger.error(f"Upload error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Error uploading file")
+        raise HTTPException(status_code=500, detail="Erreur lors de l'upload du fichier")
+
+
+@api_router.get("/files/{file_id}")
+async def get_file_from_mongodb(file_id: str):
+    """Retrieve a file from MongoDB storage"""
+    import base64
+    from fastapi.responses import Response
+    
+    # Find file in MongoDB
+    file_data = await db.file_storage.find_one({"id": file_id}, {"_id": 0})
+    
+    if not file_data:
+        raise HTTPException(status_code=404, detail="Fichier non trouvé")
+    
+    try:
+        # Decode Base64 content
+        content = base64.b64decode(file_data['data'])
+        
+        return Response(
+            content=content,
+            media_type=file_data.get('mime_type', 'application/octet-stream'),
+            headers={
+                "Content-Disposition": f'inline; filename="{file_data["filename"]}"',
+                "X-Content-Type-Options": "nosniff",
+                "Cache-Control": "public, max-age=86400",
+                "Access-Control-Allow-Origin": "*"
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error retrieving file {file_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail="Erreur lors de la récupération du fichier")
 
 @api_router.post("/documents/send")
 async def send_document(document_data: DocumentCreate, current_user: dict = Depends(get_current_user)):

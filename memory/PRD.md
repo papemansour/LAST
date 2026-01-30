@@ -25,7 +25,7 @@ Plateforme e-learning complète pour l'apprentissage de l'anglais, développée 
 │   └── src/
 │       ├── pages/             # Dashboards (Admin, Student, Teacher, Secretary)
 │       ├── components/        # Composants réutilisables
-│       │   └── AdminAnalytics.js  # NEW: Graphiques avec recharts
+│       │   └── AdminAnalytics.js  # Graphiques avec recharts
 │       ├── hooks/             # useNotifications.js
 │       └── utils/             # Utilitaires (api.js, fileUrl.js)
 ```
@@ -55,32 +55,40 @@ Plateforme e-learning complète pour l'apprentissage de l'anglais, développée 
 - ✅ **Bug documents résolu** - Nettoyage des fichiers invalides
 - ✅ **Bug dashboards résolu** - Import Calendar corrigé
 
+### Phase 4 - Janvier 2026 (Fork 2) ✅
+- ✅ **Séparation des revenus Admin Analytics** - Graphique avec entrées (reçus élèves) vs sorties (paiements profs)
+- ✅ **Suppression onglet "Cours" professeur** - Onglet retiré du TeacherDashboard.js
+
 ## Tableau de Bord Analytique 📊
 
 ### Composants
-- **Cartes de résumé** : Étudiants, Professeurs, Heures, Revenus
+- **Cartes de résumé** : Étudiants, Professeurs, Heures, **Revenus nets (entrées/sorties)**
 - **Évolution des inscriptions** : Graphique en aire (6 derniers mois)
 - **Heures par semaine** : Graphique en barres
-- **Revenus mensuels** : Graphique de ligne (EUR)
+- **Revenus mensuels** : **Graphique à 2 lignes (Entrées en vert, Sorties en rouge)**
 - **Répartition par niveau** : Graphique circulaire
 - **Classement des professeurs** : Top 5 par heures enseignées
 
 ### Endpoints
 - `GET /api/admin/analytics?period=week|month|year`
+  - Retourne: incoming_eur, outgoing_eur, net_eur (et équivalents FCFA)
+  - revenue_by_month: chaque mois contient incoming_eur, outgoing_eur
 - `GET /api/admin/check-documents-integrity`
 - `POST /api/admin/cleanup-invalid-documents`
 
 ## Tests
-- **Backend** : 100% (15/15 tests passés)
-- **Frontend** : 100% (3/3 dashboards vérifiés)
-- Rapport: `/app/test_reports/iteration_4.json`
+- **Backend** : 100% (10/10 tests passés - iteration 6)
+- **Frontend** : 100% (UI vérifiée)
+- Rapport: `/app/test_reports/iteration_6.json`
 
 ## Credentials de Test
-- Admin: admin@mykalamaenglish.com / adminco
-- Teacher: proftest.flashcards@mykalamaenglish.com / Teacherba45cb1a
-- Student: mouhamadbachirdiagne@gmail.com / Kalama12d751
+- Admin: admin@mykalamaenglish.com / admin123
+- Teacher: proftest.flashcards@mykalamaenglish.com / teacher123
 
 ## Backlog Priorisé
+
+### P0 - Critique
+- [ ] Continuer refactorisation de server.py (>6000 lignes)
 
 ### P1 - Important
 - [ ] Synchronisation factures avec Monday.com
@@ -88,4 +96,4 @@ Plateforme e-learning complète pour l'apprentissage de l'anglais, développée 
 
 ### P2 - Normal
 - [ ] Envoi de jeux par le professeur
-- [ ] Continuer extraction des routes server.py
+- [ ] Export PDF/CSV des statistiques admin

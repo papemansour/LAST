@@ -4290,6 +4290,273 @@ async def get_monthly_teacher_hours(month: int = None, year: int = None, current
         "total_hours_all": round(sum(t['total_hours'] for t in result), 2)
     }
 
+# ==================== COURS GROUPÉS ENDPOINTS ====================
+
+@api_router.get("/group-courses")
+async def get_all_group_courses(current_user: dict = Depends(get_current_user)):
+    """Get all group courses - accessible by admin, secretary, teachers"""
+    if current_user['role'] not in ['admin', 'secretary', 'teacher']:
+        raise HTTPException(status_code=403, detail="Accès non autorisé")
+    
+    courses = await db.group_courses.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    
+    # Enrichir avec les noms des étudiants
+    for course in courses:
+        student_names = []
+        for sid in course.get('student_ids', []):
+            student = await db.users.find_one({"id": sid}, {"_id": 0, "first_name": 1, "last_name": 1})
+            if student:
+                student_names.append(f"{student['first_name']} {student['last_name']}")
+        course['student_names'] = student_names
+        course['enrolled_count'] = len(course.get('student_ids', []))
+    
+    return courses
+
+@api_router.post("/group-courses")
+async def create_group_course(course_data: GroupCourseCreate, current_user: dict = Depends(get_current_user)):
+    """Create a new group course - admin/secretary only"""
+    if current_user['role'] not in ['admin', 'secretary']:
+        raise HTTPException(status_code=403, detail="Accès réservé à l'admin/secrétaire")
+    
+    # Get teacher info
+    teacher = await db.users.find_one({"id": course_data.teacher_id}, {"_id": 0, "first_name": 1, "last_name": 1})
+    teacher_name = f"{teacher['first_name']} {teacher['last_name']}" if teacher else "Non assigné"
+    
+    group_course = {
+        "id": str(uuid4()),
+        "name": course_data.name,
+        "description": course_data.description,
+        "teacher_id": course_data.teacher_id,
+        "teacher_name": teacher_name,
+        "student_ids": [],
+        "max_students": course_data.max_students,
+        "price_per_person": course_data.price_per_person,
+        "currency": course_data.currency,
+        "level": course_data.level,
+        "schedule": course_data.schedule,
+        "meet_link": course_data.meet_link,
+        "start_date": course_data.start_date,
+        "end_date": course_data.end_date,
+        "total_hours": course_data.total_hours,
+        "status": "active",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.group_courses.insert_one(group_course)
+    logger.info(f"Group course created: {course_data.name} by {current_user['id']}")
+    
+    return {"message": "Cours groupé créé avec succès", "group": group_course}
+
+@api_router.put("/group-courses/{group_id}")
+async def update_group_course(group_id: str, updates: dict, current_user: dict = Depends(get_current_user)):
+    """Update a group course"""
+    if current_user['role'] not in ['admin', 'secretary']:
+        raise HTTPException(status_code=403, detail="Accès réservé à l'admin/secrétaire")
+    
+    # Remove protected fields
+    updates.pop('id', None)
+    updates.pop('_id', None)
+    updates.pop('created_at', None)
+    
+    result = await db.group_courses.update_one({"id": group_id}, {"$set": updates})
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Cours groupé non trouvé")
+    
+    return {"message": "Cours groupé mis à jour"}
+
+@api_router.delete("/group-courses/{group_id}")
+async def delete_group_course(group_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a group course"""
+    if current_user['role'] not in ['admin', 'secretary']:
+        raise HTTPException(status_code=403, detail="Accès réservé à l'admin/secrétaire")
+    
+    result = await db.group_courses.delete_one({"id": group_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Cours groupé non trouvé")
+    
+    # Also delete associated sessions
+    await db.group_sessions.delete_many({"group_id": group_id})
+    
+    return {"message": "Cours groupé supprimé"}
+
+@api_router.post("/group-courses/{group_id}/add-student")
+async def add_student_to_group(group_id: str, data: dict, current_user: dict = Depends(get_current_user)):
+    """Add a student to a group course"""
+    if current_user['role'] not in ['admin', 'secretary']:
+        raise HTTPException(status_code=403, detail="Accès réservé à l'admin/secrétaire")
+    
+    student_id = data.get('student_id')
+    if not student_id:
+        raise HTTPException(status_code=400, detail="student_id requis")
+    
+    # Check if group exists and has space
+    group = await db.group_courses.find_one({"id": group_id}, {"_id": 0})
+    if not group:
+        raise HTTPException(status_code=404, detail="Cours groupé non trouvé")
+    
+    if len(group.get('student_ids', [])) >= group.get('max_students', 10):
+        raise HTTPException(status_code=400, detail="Le groupe est complet")
+    
+    if student_id in group.get('student_ids', []):
+        raise HTTPException(status_code=400, detail="L'étudiant est déjà dans ce groupe")
+    
+    # Add student
+    await db.group_courses.update_one(
+        {"id": group_id},
+        {"$push": {"student_ids": student_id}}
+    )
+    
+    # Get student info for notification
+    student = await db.users.find_one({"id": student_id}, {"_id": 0, "first_name": 1, "email": 1})
+    
+    # Create notification for student
+    await create_notification(
+        user_id=student_id,
+        notification_type="group_course",
+        data={
+            "message": f"Vous avez été ajouté au cours groupé: {group['name']}",
+            "group_id": group_id,
+            "schedule": group.get('schedule', ''),
+            "meet_link": group.get('meet_link', '')
+        }
+    )
+    
+    logger.info(f"Student {student_id} added to group {group_id}")
+    return {"message": f"Étudiant ajouté au groupe avec succès", "student_name": student.get('first_name', '') if student else ''}
+
+@api_router.post("/group-courses/{group_id}/remove-student")
+async def remove_student_from_group(group_id: str, data: dict, current_user: dict = Depends(get_current_user)):
+    """Remove a student from a group course"""
+    if current_user['role'] not in ['admin', 'secretary']:
+        raise HTTPException(status_code=403, detail="Accès réservé à l'admin/secrétaire")
+    
+    student_id = data.get('student_id')
+    if not student_id:
+        raise HTTPException(status_code=400, detail="student_id requis")
+    
+    result = await db.group_courses.update_one(
+        {"id": group_id},
+        {"$pull": {"student_ids": student_id}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Cours groupé non trouvé")
+    
+    return {"message": "Étudiant retiré du groupe"}
+
+@api_router.get("/group-courses/{group_id}/sessions")
+async def get_group_sessions(group_id: str, current_user: dict = Depends(get_current_user)):
+    """Get all sessions for a group course"""
+    sessions = await db.group_sessions.find({"group_id": group_id}, {"_id": 0}).sort("scheduled_date", 1).to_list(100)
+    return sessions
+
+@api_router.post("/group-courses/{group_id}/sessions")
+async def create_group_session(group_id: str, session_data: dict, current_user: dict = Depends(get_current_user)):
+    """Create a new session for a group course"""
+    if current_user['role'] not in ['admin', 'secretary', 'teacher']:
+        raise HTTPException(status_code=403, detail="Accès non autorisé")
+    
+    # Verify group exists
+    group = await db.group_courses.find_one({"id": group_id}, {"_id": 0})
+    if not group:
+        raise HTTPException(status_code=404, detail="Cours groupé non trouvé")
+    
+    session = {
+        "id": str(uuid4()),
+        "group_id": group_id,
+        "title": session_data.get('title', f"Session {group['name']}"),
+        "scheduled_date": session_data.get('scheduled_date'),
+        "duration_minutes": session_data.get('duration_minutes', 90),
+        "meet_link": session_data.get('meet_link', group.get('meet_link', '')),
+        "status": "scheduled",
+        "attendees": [],
+        "notes": session_data.get('notes', ''),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.group_sessions.insert_one(session)
+    
+    # Notify all students in the group
+    for student_id in group.get('student_ids', []):
+        await create_notification(
+            user_id=student_id,
+            notification_type="group_session",
+            data={
+                "message": f"Nouvelle session programmée: {session['title']}",
+                "session_id": session['id'],
+                "scheduled_date": session['scheduled_date'],
+                "meet_link": session['meet_link']
+            }
+        )
+    
+    return {"message": "Session créée", "session": session}
+
+@api_router.put("/group-sessions/{session_id}/attendance")
+async def update_session_attendance(session_id: str, data: dict, current_user: dict = Depends(get_current_user)):
+    """Mark attendance for a group session"""
+    if current_user['role'] not in ['admin', 'secretary', 'teacher']:
+        raise HTTPException(status_code=403, detail="Accès non autorisé")
+    
+    attendees = data.get('attendees', [])
+    status = data.get('status', 'completed')
+    notes = data.get('notes', '')
+    
+    result = await db.group_sessions.update_one(
+        {"id": session_id},
+        {"$set": {"attendees": attendees, "status": status, "notes": notes}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Session non trouvée")
+    
+    return {"message": "Présences enregistrées"}
+
+@api_router.get("/teacher/my-group-courses")
+async def get_teacher_group_courses(current_user: dict = Depends(get_current_user)):
+    """Get group courses assigned to the current teacher"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Accès réservé aux professeurs")
+    
+    courses = await db.group_courses.find(
+        {"teacher_id": current_user['id']},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(50)
+    
+    # Enrichir avec les noms des étudiants
+    for course in courses:
+        student_names = []
+        for sid in course.get('student_ids', []):
+            student = await db.users.find_one({"id": sid}, {"_id": 0, "first_name": 1, "last_name": 1})
+            if student:
+                student_names.append({"id": sid, "name": f"{student['first_name']} {student['last_name']}"})
+        course['students'] = student_names
+        course['enrolled_count'] = len(course.get('student_ids', []))
+    
+    return courses
+
+@api_router.get("/student/my-group-courses")
+async def get_student_group_courses(current_user: dict = Depends(get_current_user)):
+    """Get group courses the current student is enrolled in"""
+    if current_user['role'] != 'student':
+        raise HTTPException(status_code=403, detail="Accès réservé aux étudiants")
+    
+    courses = await db.group_courses.find(
+        {"student_ids": current_user['id'], "status": "active"},
+        {"_id": 0}
+    ).to_list(50)
+    
+    # Get upcoming sessions for each course
+    for course in courses:
+        sessions = await db.group_sessions.find(
+            {"group_id": course['id'], "status": "scheduled"},
+            {"_id": 0}
+        ).sort("scheduled_date", 1).to_list(5)
+        course['upcoming_sessions'] = sessions
+    
+    return courses
+
 @api_router.get("/admin/analytics")
 async def get_admin_analytics(period: str = "month", current_user: dict = Depends(get_current_user)):
     """Get comprehensive analytics for admin dashboard"""

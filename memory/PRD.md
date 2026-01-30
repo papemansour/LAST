@@ -88,6 +88,14 @@ Plateforme e-learning complète pour l'apprentissage de l'anglais, développée 
   - Récupération des prix depuis l'endpoint `/api/pricing`
   - Prix affichés dans le menu déroulant des niveaux (ex: "Débutant (76€)" ou "Débutant (13,500 FCFA)")
   - Composant: `CreateStudentForm.js`
+- ✅ **Import CSV d'étudiants en masse** (30/01/2026)
+  - Upload de fichier CSV avec drag & drop ou sélection manuelle
+  - Colonnes supportées: prenom, nom, email, telephone, niveau, prix, devise (séparateur `;`)
+  - Gestion intelligente: import, skip (doublons), erreurs avec rapport détaillé
+  - Téléchargement d'un modèle CSV
+  - Copie des credentials (individuel ou en masse)
+  - Endpoints: `POST /api/admin/import-students-csv`, `GET /api/admin/csv-template`
+  - Composant: `ImportStudentsCSV.js`
 
 ## Tableau de Bord Analytique 📊
 

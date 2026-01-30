@@ -91,6 +91,18 @@ class TeacherCreate(BaseModel):
     first_name: str
     last_name: str
 
+class StudentCreateByAdmin(BaseModel):
+    """Modèle pour la création d'un étudiant par l'admin"""
+    first_name: str
+    last_name: str
+    email: EmailStr
+    phone: str
+    phone_country_code: str = "+221"  # Indicateur pays par défaut (Sénégal)
+    level: str = "beginner"  # beginner, intermediate, advanced, kkid
+    price: float = 0
+    currency: str = "EUR"  # EUR ou FCFA
+    password: Optional[str] = None  # Si vide, généré automatiquement
+
 class Course(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))

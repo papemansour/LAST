@@ -32,16 +32,9 @@ const TeacherMeetLinks = () => {
 
   const fetchStudents = async () => {
     try {
-      // Get teacher's students
-      const res = await apiClient.get('/auth/me');
-      const myStudents = res.data.students || [];
-      
-      // Fetch student details
-      const allUsersRes = await apiClient.get('/admin/all-users');
-      const studentDetails = allUsersRes.data.filter(u => 
-        u.role === 'student' && myStudents.includes(u.id)
-      );
-      setStudents(studentDetails);
+      // Get teacher's students directly from the teacher endpoint
+      const res = await apiClient.get('/teacher/my-students');
+      setStudents(res.data || []);
     } catch (error) {
       console.error('Error fetching students:', error);
     }

@@ -883,6 +883,11 @@ const TeacherDashboard = () => {
             </Card>
           </TabsContent>
 
+          {/* Mes Payes Tab */}
+          <TabsContent value="payments">
+            <TeacherPayments />
+          </TabsContent>
+
           {/* Profile Tab - Changement de mot de passe */}
           <TabsContent value="profile">
             <Card className="border-teal-100">

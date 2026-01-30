@@ -16,6 +16,7 @@ const AdminAnalytics = () => {
   const [loading, setLoading] = useState(true);
   const [analytics, setAnalytics] = useState(null);
   const [period, setPeriod] = useState('month'); // week, month, year
+  const [currency, setCurrency] = useState('EUR'); // EUR, FCFA
 
   useEffect(() => {
     fetchAnalytics();

@@ -98,8 +98,8 @@ const SecretaryBilling = ({ teachers, students, onRefresh }) => {
   const calculateFinalAmount = (amount, bonus = 0, deductions = 0, currency) => {
     const baseAmount = parseFloat(amount) || 0;
     const bonusAmount = parseFloat(bonus) || 0;
-    // Déduction: 1 = 5 EUR ou 2000 FCFA
-    const deductionValue = currency === 'EUR' ? 5 : 2000;
+    // Déduction: 1 = 5 EUR ou 1500 FCFA (cours manqué)
+    const deductionValue = currency === 'EUR' ? 5 : 1500;
     const deductionsAmount = (parseFloat(deductions) || 0) * deductionValue;
     const finalAmount = baseAmount + bonusAmount - deductionsAmount;
     return {
@@ -107,6 +107,7 @@ const SecretaryBilling = ({ teachers, students, onRefresh }) => {
       bonusAmount: bonusAmount.toFixed(2),
       deductionsCount: deductions,
       deductionsAmount: deductionsAmount.toFixed(2),
+      deductionUnitValue: deductionValue,
       finalAmount: Math.max(0, finalAmount).toFixed(2)
     };
   };

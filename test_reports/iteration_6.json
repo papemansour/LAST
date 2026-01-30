@@ -1,0 +1,71 @@
+{
+  "summary": "Tested Admin Analytics revenue separation feature and Teacher Dashboard 'Cours' tab removal. Fixed a critical bug in /admin/analytics endpoint where amount values stored as strings caused TypeError. All 10 backend tests pass. Frontend UI verified - revenue chart shows two lines (Entrées/Sorties), net revenue card shows +X€/-Y€ format, and 'Cours' tab is correctly removed from teacher dashboard.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_analytics_revenue.py",
+    "/app/test_reports/pytest/pytest_analytics_revenue.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [
+    "/app/backend/server.py - Fixed TypeError in /admin/analytics endpoint: Added safe_amount() helper to convert string amounts to float (line 4298-4311)",
+    "/app/backend/tests/test_analytics_revenue.py - Created comprehensive test suite for revenue separation feature"
+  ],
+  "success_rate": {
+    "backend": "100% (10/10 tests passed)",
+    "frontend": "100% (All UI elements verified)"
+  },
+  "test_credentials": {
+    "admin_email": "admin@mykalamaenglish.com",
+    "admin_password": "admin123",
+    "teacher_email": "proftest.flashcards@mykalamaenglish.com",
+    "teacher_password": "teacher123"
+  },
+  "seed_data_creation": "None - used existing data",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Admin Analytics revenue separation feature fully tested and working. The /admin/analytics endpoint now returns incoming_eur, outgoing_eur, net_eur (and FCFA equivalents) in summary and revenue_by_month. Frontend AdminAnalytics.js displays two-line chart (green for Entrées, red for Sorties) and net revenue card with +X€/-Y€ format. Teacher dashboard 'Cours' tab (value='courses') has been removed - all other tabs working correctly.",
+  "features_tested": {
+    "admin_analytics_revenue_separation": {
+      "api_endpoint": "/api/admin/analytics",
+      "status": "WORKING",
+      "new_fields_in_summary": ["incoming_eur", "outgoing_eur", "net_eur", "incoming_fcfa", "outgoing_fcfa", "net_fcfa"],
+      "revenue_by_month_structure": "Each month has incoming_eur, incoming_fcfa, outgoing_eur, outgoing_fcfa",
+      "frontend_chart": "Two-line chart with Entrées (green) and Sorties (red)",
+      "frontend_card": "Revenus nets card shows net value with +X€/-Y€ format"
+    },
+    "teacher_dashboard_cours_tab_removal": {
+      "status": "VERIFIED",
+      "cours_tab_present": false,
+      "other_tabs_working": ["Bienvenue", "CLUB", "Étudiants", "Dispo Étudiants", "Liens Meet", "Jeu", "Vidéos K-Kid", "Pointage", "Messages", "Documents", "Résumés", "Horaires", "News", "Bibliothèque", "Profil"],
+      "teacher_my_courses_endpoint": "Still working (returns 200)"
+    }
+  },
+  "tests_passed": [
+    "TestAdminAnalyticsRevenue::test_admin_login_success",
+    "TestAdminAnalyticsRevenue::test_teacher_login_success",
+    "TestAdminAnalyticsRevenue::test_admin_analytics_returns_revenue_separation",
+    "TestAdminAnalyticsRevenue::test_admin_analytics_revenue_by_month_structure",
+    "TestAdminAnalyticsRevenue::test_admin_analytics_requires_admin_role",
+    "TestAdminAnalyticsRevenue::test_admin_analytics_requires_auth",
+    "TestAdminAnalyticsRevenue::test_admin_analytics_different_periods",
+    "TestAdminAnalyticsRevenue::test_admin_analytics_no_old_revenue_field",
+    "TestTeacherDashboardNoCoursesTab::test_teacher_login_success",
+    "TestTeacherDashboardNoCoursesTab::test_teacher_my_courses_endpoint_still_works"
+  ],
+  "bug_fixed": {
+    "file": "/app/backend/server.py",
+    "line": "4298-4311",
+    "issue": "TypeError: unsupported operand type(s) for +: 'int' and 'str' - The amount field in student_receipts and teacher_payments collections was stored as string, causing sum() to fail",
+    "fix": "Added safe_amount() helper function to convert string amounts to float before summing",
+    "impact": "/admin/analytics endpoint now works correctly and returns revenue data"
+  }
+}

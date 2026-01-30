@@ -112,8 +112,9 @@ Plateforme e-learning complète pour l'apprentissage de l'anglais, développée 
 - Rapport: `/app/test_reports/iteration_6.json`
 
 ## Credentials de Test
-- Admin: admin@mykalamaenglish.com / admin123
-- Teacher: proftest.flashcards@mykalamaenglish.com / teacher123
+- Admin: admin@mykalamaenglish.com / adminco
+- Secrétaire: secretaire@mykalamaenglish.com / secretaireco
+- Teacher (test): proftest.flashcards@mykalamaenglish.com / teacher123
 
 ## Backlog Priorisé
 

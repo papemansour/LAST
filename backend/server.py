@@ -1866,6 +1866,108 @@ async def create_teacher(teacher_data: TeacherCreate, current_user: dict = Depen
         "temporary_password": temp_password
     }
 
+@api_router.post("/admin/create-student")
+async def create_student_by_admin(student_data: StudentCreateByAdmin, current_user: dict = Depends(get_current_user)):
+    """Créer un étudiant directement par l'admin sans inscription"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Vérifier si l'email existe déjà
+    existing = await db.users.find_one({"email": student_data.email}, {"_id": 0})
+    if existing:
+        raise HTTPException(status_code=400, detail="Cet email est déjà utilisé")
+    
+    # Générer un mot de passe si non fourni
+    temp_password = student_data.password if student_data.password else f"Kalama{uuid.uuid4().hex[:6]}"
+    password_hash = hash_password(temp_password)
+    
+    # Générer le code Digika
+    digika_code = f"DIGIKA{uuid.uuid4().hex[:4].upper()}"
+    
+    # Mapper le niveau
+    level_map = {
+        'beginner': 'beginner',
+        'intermediate': 'intermediate', 
+        'advanced': 'advanced',
+        'kkid': 'kkid',
+        'K-Débutant': 'beginner',
+        'K-Intermédiaire': 'intermediate',
+        'K-Professionnel': 'advanced',
+        'K-Kids': 'kkid'
+    }
+    level = level_map.get(student_data.level, 'beginner')
+    
+    # Créer l'étudiant
+    student = User(
+        email=student_data.email,
+        first_name=student_data.first_name,
+        last_name=student_data.last_name,
+        phone=f"{student_data.phone_country_code}{student_data.phone}",
+        role="student",
+        level=level,
+        is_active=True,
+        password_hash=password_hash,
+        temporary_password=temp_password
+    )
+    
+    doc = student.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    doc['digika_password'] = digika_code
+    doc['price'] = student_data.price
+    doc['currency'] = student_data.currency
+    doc['phone_country_code'] = student_data.phone_country_code
+    doc['created_by_admin'] = True
+    
+    await db.users.insert_one(doc)
+    
+    # Créer la lettre de bienvenue
+    level_names = {
+        'beginner': 'Débutant',
+        'intermediate': 'Intermédiaire',
+        'advanced': 'Professionnel',
+        'kkid': 'K-Kid'
+    }
+    
+    letter_content = generate_welcome_letter_content(
+        student_data.first_name,
+        level_names.get(level, 'Débutant'),
+        'student',
+        student_data.email,
+        temp_password
+    )
+    
+    welcome_letter = WelcomeLetter(
+        user_id=student.id,
+        user_email=student_data.email,
+        user_name=f"{student_data.first_name} {student_data.last_name}",
+        user_level=level,
+        user_role='student',
+        temp_password=temp_password,
+        content=letter_content
+    )
+    
+    letter_doc = welcome_letter.model_dump()
+    letter_doc['created_at'] = letter_doc['created_at'].isoformat()
+    await db.welcome_letters.insert_one(letter_doc)
+    
+    logger.info(f"Student {student.id} created by admin {current_user['id']}")
+    
+    return {
+        "message": "Étudiant créé avec succès",
+        "student": {
+            "id": student.id,
+            "email": student_data.email,
+            "first_name": student_data.first_name,
+            "last_name": student_data.last_name,
+            "phone": f"{student_data.phone_country_code}{student_data.phone}",
+            "level": level,
+            "price": student_data.price,
+            "currency": student_data.currency
+        },
+        "temporary_password": temp_password,
+        "digika_code": digika_code
+    }
+
 @api_router.get("/admin/all-users")
 async def get_all_users(current_user: dict = Depends(get_current_user)):
     if current_user['role'] != 'admin':

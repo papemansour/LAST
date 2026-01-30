@@ -592,22 +592,26 @@ const SecretaryDashboard = () => {
     const currency = payment.currency || 'EUR';
     const amountBrut = parseFloat(payment.amount || 0);
     const bonus = parseFloat(payment.bonus || 0);
-    const totalBrut = amountBrut + bonus; // Montant TTC (TVA incluse)
+    const deductions = parseInt(payment.deductions || 0);
     
-    // TVA INCLUSE dans le montant - on la déduit pour obtenir le net
-    const tvaRate = currency === 'EUR' ? 0.20 : 0.18; // 20% EUR, 18% FCFA
-    // Formule: Montant TTC / (1 + taux TVA) = Montant HT (ce que le prof reçoit)
-    const montantNet = totalBrut / (1 + tvaRate);
-    const tvaAmount = totalBrut - montantNet;
+    // Calcul des déductions: 5€ par cours manqué en EUR, 1500 FCFA en FCFA
+    const deductionUnitValue = currency === 'EUR' ? 5 : 1500;
+    const deductionsAmount = deductions * deductionUnitValue;
     
-    const invoiceNumber = `FAC-PROF-${payment.id?.slice(0, 8).toUpperCase() || 'XXXXX'}`;
+    // Montant initial (avec bonus)
+    const montantInitial = amountBrut + bonus;
+    // Montant net (après déductions)
+    const montantNet = Math.max(0, montantInitial - deductionsAmount);
+    
+    const hasDeductions = deductions > 0;
+    const invoiceNumber = `SAL-PROF-${payment.id?.slice(0, 8).toUpperCase() || 'XXXXX'}`;
     
     const printWindow = window.open('', '_blank');
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Facture Professeur - MyKalama English</title>
+        <title>Bulletin de Salaire - MyKalama English</title>
         <style>
           body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; color: #333; }
           .header { display: flex; justify-content: space-between; border-bottom: 3px solid #059669; padding-bottom: 20px; margin-bottom: 30px; }
@@ -621,10 +625,12 @@ const SecretaryDashboard = () => {
           table { width: 100%; border-collapse: collapse; margin: 30px 0; }
           th { background: #059669; color: white; padding: 12px; text-align: left; }
           td { padding: 12px; border-bottom: 1px solid #e5e7eb; }
-          .totals { width: 350px; margin-left: auto; }
+          .totals { width: 400px; margin-left: auto; }
           .totals tr td { padding: 8px 12px; }
-          .totals .total-row { background: #f3f4f6; }
+          .totals .initial-row { background: #f3f4f6; }
+          .totals .deduction-row { background: #fef2f2; color: #dc2626; }
           .totals .net-row { background: #d1fae5; font-weight: bold; font-size: 18px; }
+          .deduction-info { background: #fef2f2; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc2626; }
           .footer { margin-top: 50px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #666; }
           .stamp { text-align: center; margin: 30px 0; }
           .stamp-text { display: inline-block; padding: 15px 40px; border: 3px solid #059669; border-radius: 10px; color: #059669; font-weight: bold; font-size: 18px; transform: rotate(-3deg); }
@@ -638,9 +644,10 @@ const SecretaryDashboard = () => {
             <p style="margin-top: 10px; color: #666;">Société de Formation en Langues</p>
           </div>
           <div class="invoice-info">
-            <div class="invoice-number">FACTURE</div>
-            <p><strong>N° :</strong> ${invoiceNumber}</p>
+            <div class="invoice-number">BULLETIN DE SALAIRE</div>
+            <p><strong>Réf :</strong> ${invoiceNumber}</p>
             <p><strong>Date :</strong> ${new Date(payment.created_at || Date.now()).toLocaleDateString('fr-FR')}</p>
+            <p><strong>Période :</strong> ${payment.month || 'Non spécifiée'}</p>
           </div>
         </div>
         
@@ -654,7 +661,7 @@ const SecretaryDashboard = () => {
             <p>📧 mykalamaenglish@gmail.com</p>
           </div>
           <div class="party">
-            <div class="party-title">👤 DESTINATAIRE (Prestataire)</div>
+            <div class="party-title">👤 PROFESSEUR</div>
             <p><strong>${payment.teacher_name || payment.teacherName}</strong></p>
             <p>📧 ${payment.teacher_email || payment.teacherEmail || 'Email non spécifié'}</p>
           </div>
@@ -664,40 +671,46 @@ const SecretaryDashboard = () => {
           <thead>
             <tr>
               <th>Description</th>
-              <th>Quantité</th>
-              <th>Prix Unitaire</th>
-              <th>Total</th>
+              <th>Heures</th>
+              <th>Montant</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td>${payment.description || 'Cours de langue anglaise'}</td>
-              <td>${payment.hours_worked || payment.hoursWorked || '1'} h</td>
-              <td>${payment.hourly_rate || payment.hourlyRate || amountBrut} ${currency}</td>
-              <td>${amountBrut.toFixed(2)} ${currency}</td>
+              <td>${payment.hours_worked || payment.hoursWorked || '-'} h</td>
+              <td><strong>${amountBrut.toFixed(2)} ${currency}</strong></td>
             </tr>
             ${bonus > 0 ? `
             <tr>
-              <td>Bonus / Prime</td>
-              <td>1</td>
-              <td>${bonus.toFixed(2)} ${currency}</td>
-              <td>${bonus.toFixed(2)} ${currency}</td>
+              <td style="color: #059669;">+ Bonus / Prime</td>
+              <td>-</td>
+              <td style="color: #059669;">+${bonus.toFixed(2)} ${currency}</td>
             </tr>
             ` : ''}
           </tbody>
         </table>
         
+        ${hasDeductions ? `
+        <div class="deduction-info">
+          <strong>⚠️ Déductions appliquées</strong><br/>
+          <p>${deductions} cours manqué(s) × ${deductionUnitValue} ${currency} = <strong>-${deductionsAmount.toFixed(2)} ${currency}</strong></p>
+        </div>
+        ` : ''}
+        
         <table class="totals">
-          <tr>
-            <td>Montant brut (TTC) :</td>
-            <td style="text-align: right;">${totalBrut.toFixed(2)} ${currency}</td>
+          <tr class="initial-row">
+            <td>Somme Initiale :</td>
+            <td style="text-align: right;">${montantInitial.toFixed(2)} ${currency}</td>
           </tr>
-          <tr class="total-row">
-            <td>TVA déduite (${currency === 'EUR' ? '20' : '18'}%) :</td>
-            <td style="text-align: right;">- ${tvaAmount.toFixed(2)} ${currency}</td>
+          ${hasDeductions ? `
+          <tr class="deduction-row">
+            <td>Déductions (${deductions} cours) :</td>
+            <td style="text-align: right;">- ${deductionsAmount.toFixed(2)} ${currency}</td>
           </tr>
+          ` : ''}
           <tr class="net-row">
-            <td>💰 MONTANT NET À PAYER :</td>
+            <td>💰 SOMME NETTE ${hasDeductions ? 'APRÈS DÉDUCTIONS' : ''} :</td>
             <td style="text-align: right;">${montantNet.toFixed(2)} ${currency}</td>
           </tr>
         </table>
@@ -707,8 +720,8 @@ const SecretaryDashboard = () => {
         </div>
         
         <div class="footer">
-          <p><strong>Conditions de paiement :</strong> Paiement à réception de facture</p>
           <p><strong>Mode de paiement :</strong> Virement bancaire / Mobile Money</p>
+          ${hasDeductions ? `<p><strong>Note :</strong> ${deductions} déduction(s) appliquée(s) pour cours manqué(s) (${deductionUnitValue} ${currency}/cours)</p>` : ''}
           <p style="margin-top: 20px; text-align: center;">
             <em>Merci pour votre confiance !</em>
           </p>

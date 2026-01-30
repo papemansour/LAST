@@ -36,6 +36,7 @@ import AdminStudentsAvailability from '../components/AdminStudentsAvailability';
 import AdminMonthlyHours from '../components/AdminMonthlyHours';
 import AdminAnalytics from '../components/AdminAnalytics';
 import GroupCourses from '../components/GroupCourses';
+import CreateStudentForm from '../components/CreateStudentForm';
 // ActivityFeed removed
 
 const AdminDashboard = () => {

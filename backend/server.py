@@ -3723,37 +3723,57 @@ async def get_student_teacher(teacher_id: str, current_user: dict = Depends(get_
     return teacher
 
 @api_router.post("/upload")
-async def upload_file(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
-    """Upload a file (document, video, image, etc.)"""
-    import os
-    from pathlib import Path
+async def upload_file_general(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
+    """Upload a file (document, video, image, etc.) - stored in MongoDB for persistence"""
+    import base64
     
-    # Create upload directory if it doesn't exist (persistent storage)
-    upload_dir = Path("/app/uploads")
-    upload_dir.mkdir(parents=True, exist_ok=True)
+    # File size limit: 15MB (MongoDB document limit)
+    MAX_FILE_SIZE = 15 * 1024 * 1024
+    contents = await file.read()
     
-    # Generate unique filename
-    file_ext = file.filename.split('.')[-1]
-    unique_filename = f"{str(uuid4())}.{file_ext}"
-    file_path = upload_dir / unique_filename
+    if len(contents) > MAX_FILE_SIZE:
+        raise HTTPException(status_code=400, detail="Fichier trop volumineux (max 15MB)")
     
-    # Save file
+    # Generate unique file ID
+    file_id = str(uuid4())
+    file_ext = file.filename.split('.')[-1].lower() if '.' in file.filename else 'file'
+    
+    # Determine MIME type
+    mime_types = {
+        'jpg': 'image/jpeg', 'jpeg': 'image/jpeg', 'png': 'image/png', 
+        'gif': 'image/gif', 'webp': 'image/webp', 'pdf': 'application/pdf',
+        'doc': 'application/msword', 'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'mp4': 'video/mp4', 'mp3': 'audio/mpeg', 'wav': 'audio/wav'
+    }
+    mime_type = mime_types.get(file_ext, 'application/octet-stream')
+    
+    # Store file in MongoDB
     try:
-        contents = await file.read()
-        with open(file_path, "wb") as f:
-            f.write(contents)
+        file_data = {
+            "id": file_id,
+            "filename": file.filename,
+            "extension": file_ext,
+            "mime_type": mime_type,
+            "size": len(contents),
+            "data": base64.b64encode(contents).decode('utf-8'),
+            "uploaded_by": current_user['id'],
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
         
-        file_url = f"/uploads/{unique_filename}"
-        logger.info(f"File uploaded by {current_user['role']} {current_user['id']}: {file.filename}")
+        await db.file_storage.insert_one(file_data)
+        
+        file_url = f"/api/files/{file_id}"
+        logger.info(f"File uploaded to MongoDB by {current_user['role']} {current_user['id']}: {file.filename}")
         
         return {
             "message": "File uploaded successfully",
             "file_url": file_url,
-            "filename": file.filename
+            "filename": file.filename,
+            "file_id": file_id
         }
     except Exception as e:
         logger.error(f"Upload error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Error uploading file")
+        raise HTTPException(status_code=500, detail="Erreur lors de l'upload du fichier")
 
 @api_router.post("/student/send-document-to-admin")
 async def student_send_document_to_admin(doc_data: dict, current_user: dict = Depends(get_current_user)):

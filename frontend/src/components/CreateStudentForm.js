@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -14,6 +14,7 @@ const CreateStudentForm = ({ onStudentCreated }) => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [createdStudent, setCreatedStudent] = useState(null);
+  const [pricingData, setPricingData] = useState(null);
   
   const [formData, setFormData] = useState({
     first_name: '',
@@ -27,6 +28,91 @@ const CreateStudentForm = ({ onStudentCreated }) => {
     password: ''
   });
 
+  // Charger les prix au montage
+  useEffect(() => {
+    fetchPricing();
+  }, []);
+
+  const fetchPricing = async () => {
+    try {
+      const response = await apiClient.get('/pricing');
+      setPricingData(response.data);
+      // Appliquer le prix par défaut (beginner EUR)
+      if (response.data) {
+        const price = response.data.beginner_eur - (response.data.beginner_discount || 0);
+        setFormData(prev => ({ ...prev, price: price.toString() }));
+      }
+    } catch (error) {
+      console.error('Error fetching pricing:', error);
+    }
+  };
+
+  // Mettre à jour le prix quand le niveau ou la devise change
+  const updatePriceForLevel = (level, currency) => {
+    if (!pricingData) return;
+    
+    let price = 0;
+    let discount = 0;
+    
+    if (currency === 'EUR') {
+      switch (level) {
+        case 'kkid':
+          price = pricingData.kkid_eur || 30;
+          discount = pricingData.kkid_discount || 0;
+          break;
+        case 'beginner':
+          price = pricingData.beginner_eur || 76;
+          discount = pricingData.beginner_discount || 0;
+          break;
+        case 'intermediate':
+          price = pricingData.intermediate_eur || 90;
+          discount = pricingData.intermediate_discount || 0;
+          break;
+        case 'advanced':
+          price = pricingData.advanced_eur || 102;
+          discount = pricingData.advanced_discount || 0;
+          break;
+        default:
+          price = 76;
+      }
+    } else {
+      // FCFA
+      switch (level) {
+        case 'kkid':
+          price = pricingData.kkid_fcfa || 20000;
+          discount = pricingData.kkid_discount_fcfa || 0;
+          break;
+        case 'beginner':
+          price = pricingData.beginner_fcfa || 50000;
+          discount = pricingData.beginner_discount_fcfa || 0;
+          break;
+        case 'intermediate':
+          price = pricingData.intermediate_fcfa || 60000;
+          discount = pricingData.intermediate_discount_fcfa || 0;
+          break;
+        case 'advanced':
+          price = pricingData.advanced_fcfa || 70000;
+          discount = pricingData.advanced_discount_fcfa || 0;
+          break;
+        default:
+          price = 50000;
+      }
+    }
+    
+    const finalPrice = price - discount;
+    setFormData(prev => ({ ...prev, price: finalPrice.toString() }));
+  };
+
+  const handleLevelChange = (level) => {
+    setFormData(prev => ({ ...prev, level }));
+    updatePriceForLevel(level, formData.currency);
+  };
+
+  const handleCurrencyChange = (currency) => {
+    setFormData(prev => ({ ...prev, currency }));
+    updatePriceForLevel(formData.level, currency);
+  };
+
   const resetForm = () => {
     setFormData({
       first_name: '',
@@ -35,7 +121,7 @@ const CreateStudentForm = ({ onStudentCreated }) => {
       phone: '',
       phone_country_code: '+221',
       level: 'beginner',
-      price: '',
+      price: pricingData ? (pricingData.beginner_eur - (pricingData.beginner_discount || 0)).toString() : '',
       currency: 'EUR',
       password: ''
     });

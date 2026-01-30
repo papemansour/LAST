@@ -7092,25 +7092,197 @@ async def delete_flashcard_set(set_id: str, current_user: dict = Depends(get_cur
 
 @api_router.post("/teacher/assign-game")
 async def assign_game(data: dict, current_user: dict = Depends(get_current_user)):
-    """Assign a game (flashcard or kahoot) to a student"""
+    """Assign a game (flashcard, kahoot, quiz, memory) to one or multiple students"""
     if current_user['role'] != 'teacher':
         raise HTTPException(status_code=403, detail="Teacher access required")
     
-    assignment = {
+    # Support single student_id or multiple student_ids
+    student_ids = data.get('student_ids', [])
+    if not student_ids and data.get('student_id'):
+        student_ids = [data['student_id']]
+    
+    if not student_ids:
+        raise HTTPException(status_code=400, detail="Au moins un étudiant requis")
+    
+    assigned_count = 0
+    teacher_name = f"{current_user.get('first_name', '')} {current_user.get('last_name', '')}"
+    
+    for student_id in student_ids:
+        assignment = {
+            "id": str(uuid4()),
+            "teacher_id": current_user['id'],
+            "student_id": student_id,
+            "game_type": data['game_type'],  # 'flashcard', 'kahoot', 'quiz', 'memory'
+            "game_id": data.get('game_id'),  # flashcard/quiz/memory set id
+            "game_url": data.get('game_url'),  # kahoot link
+            "title": data['title'],
+            "assigned_at": datetime.now(timezone.utc).isoformat(),
+            "completed": False,
+            "score": None
+        }
+        
+        await db.game_assignments.insert_one(assignment)
+        assigned_count += 1
+        
+        # Create notification for the student
+        game_type_labels = {
+            'flashcard': 'Flashcards',
+            'kahoot': 'Kahoot',
+            'quiz': 'Quiz',
+            'memory': 'Memory'
+        }
+        game_label = game_type_labels.get(data['game_type'], 'Jeu')
+        
+        notification = {
+            "id": str(uuid4()),
+            "user_id": student_id,
+            "type": "game_assigned",
+            "title": f"🎮 Nouveau {game_label} assigné !",
+            "message": f"{teacher_name} vous a assigné: {data['title']}",
+            "data": {
+                "game_type": data['game_type'],
+                "game_id": data.get('game_id'),
+                "assignment_id": assignment['id']
+            },
+            "read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.notifications.insert_one(notification)
+    
+    return {
+        "message": f"Jeu assigné à {assigned_count} étudiant(s)",
+        "assigned_count": assigned_count
+    }
+
+# ============== QUIZ GAME ENDPOINTS ==============
+
+@api_router.post("/teacher/create-quiz")
+async def create_quiz(data: dict, current_user: dict = Depends(get_current_user)):
+    """Create a new quiz with multiple choice questions"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    quiz = {
         "id": str(uuid4()),
         "teacher_id": current_user['id'],
-        "student_id": data['student_id'],
-        "game_type": data['game_type'],  # 'flashcard' or 'kahoot'
-        "game_id": data.get('game_id'),  # flashcard set id
-        "game_url": data.get('game_url'),  # kahoot link
         "title": data['title'],
-        "assigned_at": datetime.now(timezone.utc).isoformat(),
-        "completed": False,
-        "score": None
+        "description": data.get('description', ''),
+        "questions": [],  # Will contain {id, question, options[], correct_answer}
+        "time_limit": data.get('time_limit', 0),  # seconds per question, 0 = no limit
+        "created_at": datetime.now(timezone.utc).isoformat()
     }
     
-    await db.game_assignments.insert_one(assignment)
-    return {"message": "Game assigned to student"}
+    await db.quizzes.insert_one(quiz)
+    return {"message": "Quiz créé", "quiz_id": quiz['id']}
+
+@api_router.post("/teacher/add-quiz-question")
+async def add_quiz_question(data: dict, current_user: dict = Depends(get_current_user)):
+    """Add a question to a quiz"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    question = {
+        "id": str(uuid4()),
+        "question": data['question'],
+        "options": data['options'],  # List of 4 options
+        "correct_answer": data['correct_answer'],  # Index of correct option (0-3)
+        "image_url": data.get('image_url', '')
+    }
+    
+    result = await db.quizzes.update_one(
+        {"id": data['quiz_id'], "teacher_id": current_user['id']},
+        {"$push": {"questions": question}}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Quiz not found")
+    
+    return {"message": "Question ajoutée", "question_id": question['id']}
+
+@api_router.get("/teacher/my-quizzes")
+async def get_teacher_quizzes(current_user: dict = Depends(get_current_user)):
+    """Get all quizzes created by teacher"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    quizzes = await db.quizzes.find({"teacher_id": current_user['id']}, {"_id": 0}).to_list(100)
+    return quizzes
+
+@api_router.delete("/teacher/delete-quiz/{quiz_id}")
+async def delete_quiz(quiz_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a quiz"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    result = await db.quizzes.delete_one({"id": quiz_id, "teacher_id": current_user['id']})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Quiz not found")
+    
+    return {"message": "Quiz supprimé"}
+
+# ============== MEMORY GAME ENDPOINTS ==============
+
+@api_router.post("/teacher/create-memory-game")
+async def create_memory_game(data: dict, current_user: dict = Depends(get_current_user)):
+    """Create a new memory matching game"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    memory_game = {
+        "id": str(uuid4()),
+        "teacher_id": current_user['id'],
+        "title": data['title'],
+        "description": data.get('description', ''),
+        "pairs": [],  # Will contain {id, word1, word2} or {id, image_url, word}
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.memory_games.insert_one(memory_game)
+    return {"message": "Jeu Memory créé", "game_id": memory_game['id']}
+
+@api_router.post("/teacher/add-memory-pair")
+async def add_memory_pair(data: dict, current_user: dict = Depends(get_current_user)):
+    """Add a pair to a memory game"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    pair = {
+        "id": str(uuid4()),
+        "card1": data['card1'],  # French word or image URL
+        "card2": data['card2'],  # English translation
+        "type": data.get('type', 'text')  # 'text' or 'image'
+    }
+    
+    result = await db.memory_games.update_one(
+        {"id": data['game_id'], "teacher_id": current_user['id']},
+        {"$push": {"pairs": pair}}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Memory game not found")
+    
+    return {"message": "Paire ajoutée", "pair_id": pair['id']}
+
+@api_router.get("/teacher/my-memory-games")
+async def get_teacher_memory_games(current_user: dict = Depends(get_current_user)):
+    """Get all memory games created by teacher"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    games = await db.memory_games.find({"teacher_id": current_user['id']}, {"_id": 0}).to_list(100)
+    return games
+
+@api_router.delete("/teacher/delete-memory-game/{game_id}")
+async def delete_memory_game(game_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a memory game"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    result = await db.memory_games.delete_one({"id": game_id, "teacher_id": current_user['id']})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Memory game not found")
+    
+    return {"message": "Jeu Memory supprimé"}
 
 @api_router.get("/teacher/game-scores")
 async def get_teacher_game_scores(current_user: dict = Depends(get_current_user)):

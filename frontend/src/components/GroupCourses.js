@@ -1,290 +1,573 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Button } from './ui/button';
-import { Badge } from './ui/badge';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
+import { Badge } from '../components/ui/badge';
 import { toast } from 'sonner';
+import { Users, Plus, Calendar, Video, Euro, Trash2, UserPlus, UserMinus, Clock, BookOpen } from 'lucide-react';
 import apiClient from '../utils/api';
-import { Users, Calendar, Clock, MapPin, Star, CheckCircle, Euro } from 'lucide-react';
 
-const GroupCourses = ({ userRole = 'student' }) => {
-  const [courses, setCourses] = useState([]);
-  const [myCourses, setMyCourses] = useState([]);
+const GroupCourses = ({ userRole = 'admin' }) => {
+  const [groups, setGroups] = useState([]);
+  const [teachers, setTeachers] = useState([]);
+  const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [enrollingId, setEnrollingId] = useState(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showAddStudentModal, setShowAddStudentModal] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState(null);
+  const [newGroup, setNewGroup] = useState({
+    name: '',
+    description: '',
+    teacher_id: '',
+    max_students: 10,
+    price_per_person: 80,
+    currency: 'EUR',
+    level: 'beginner',
+    schedule: '',
+    meet_link: '',
+    start_date: '',
+    end_date: '',
+    total_hours: 20
+  });
 
   useEffect(() => {
-    fetchCourses();
-  }, [userRole]);
+    fetchData();
+  }, []);
 
-  const fetchCourses = async () => {
+  const fetchData = async () => {
     try {
-      // Fetch available courses
-      const availableResponse = await apiClient.get('/group-courses');
-      setCourses(availableResponse.data);
-      
-      // Fetch my enrolled courses if student
-      if (userRole === 'student') {
-        const myResponse = await apiClient.get('/student/my-group-courses');
-        setMyCourses(myResponse.data);
-      } else if (userRole === 'teacher') {
-        const myResponse = await apiClient.get('/teacher/my-group-courses');
-        setMyCourses(myResponse.data);
-      }
+      setLoading(true);
+      const [groupsRes, teachersRes, studentsRes] = await Promise.all([
+        apiClient.get('/group-courses'),
+        apiClient.get('/admin/users?role=teacher'),
+        apiClient.get('/admin/users?role=student')
+      ]);
+      setGroups(groupsRes.data || []);
+      setTeachers(teachersRes.data || []);
+      setStudents(studentsRes.data || []);
     } catch (error) {
-      console.error('Error fetching courses:', error);
+      console.error('Error fetching data:', error);
+      toast.error('Erreur lors du chargement');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEnroll = async (courseId) => {
-    setEnrollingId(courseId);
+  const handleCreateGroup = async () => {
+    if (!newGroup.name || !newGroup.teacher_id) {
+      toast.error('Veuillez remplir les champs obligatoires');
+      return;
+    }
+
     try {
-      await apiClient.post(`/group-courses/${courseId}/enroll`);
-      toast.success('🎉 Inscription réussie ! +2 points ajoutés à votre Coffre aux Trésors');
-      fetchCourses();
+      await apiClient.post('/group-courses', newGroup);
+      toast.success('🎓 Cours groupé créé avec succès!');
+      setShowCreateModal(false);
+      setNewGroup({
+        name: '',
+        description: '',
+        teacher_id: '',
+        max_students: 10,
+        price_per_person: 80,
+        currency: 'EUR',
+        level: 'beginner',
+        schedule: '',
+        meet_link: '',
+        start_date: '',
+        end_date: '',
+        total_hours: 20
+      });
+      fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Erreur lors de l\'inscription');
-    } finally {
-      setEnrollingId(null);
+      toast.error('Erreur lors de la création');
     }
   };
 
-  const getLevelBadge = (level) => {
-    const colors = {
-      beginner: 'bg-green-100 text-green-700',
-      intermediate: 'bg-blue-100 text-blue-700',
-      advanced: 'bg-purple-100 text-purple-700'
-    };
-    const labels = {
-      beginner: 'Débutant',
-      intermediate: 'Intermédiaire',
-      advanced: 'Avancé'
-    };
-    return (
-      <Badge className={colors[level] || 'bg-gray-100'}>
-        {labels[level] || level}
-      </Badge>
-    );
+  const handleDeleteGroup = async (groupId) => {
+    if (!window.confirm('Supprimer ce cours groupé ?')) return;
+    
+    try {
+      await apiClient.delete(`/group-courses/${groupId}`);
+      toast.success('Cours groupé supprimé');
+      fetchData();
+    } catch (error) {
+      toast.error('Erreur lors de la suppression');
+    }
   };
 
-  const formatDays = (days) => {
-    const dayLabels = {
-      monday: 'Lun',
-      tuesday: 'Mar',
-      wednesday: 'Mer',
-      thursday: 'Jeu',
-      friday: 'Ven',
-      saturday: 'Sam',
-      sunday: 'Dim'
-    };
-    return days?.map(d => dayLabels[d] || d).join(', ') || 'À définir';
+  const handleAddStudent = async (studentId) => {
+    if (!selectedGroup) return;
+    
+    try {
+      await apiClient.post(`/group-courses/${selectedGroup.id}/add-student`, { student_id: studentId });
+      toast.success('✅ Étudiant ajouté au groupe!');
+      setShowAddStudentModal(false);
+      fetchData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erreur lors de l\'ajout');
+    }
   };
 
-  const isEnrolled = (courseId) => {
-    return myCourses.some(c => c.id === courseId);
+  const handleRemoveStudent = async (groupId, studentId) => {
+    if (!window.confirm('Retirer cet étudiant du groupe ?')) return;
+    
+    try {
+      await apiClient.post(`/group-courses/${groupId}/remove-student`, { student_id: studentId });
+      toast.success('Étudiant retiré du groupe');
+      fetchData();
+    } catch (error) {
+      toast.error('Erreur lors du retrait');
+    }
   };
+
+  const getLevelBadgeColor = (level) => {
+    switch(level) {
+      case 'beginner': return 'bg-green-100 text-green-700';
+      case 'intermediate': return 'bg-blue-100 text-blue-700';
+      case 'advanced': return 'bg-purple-100 text-purple-700';
+      default: return 'bg-gray-100 text-gray-700';
+    }
+  };
+
+  const getLevelLabel = (level) => {
+    switch(level) {
+      case 'beginner': return 'Débutant';
+      case 'intermediate': return 'Intermédiaire';
+      case 'advanced': return 'Avancé';
+      default: return level;
+    }
+  };
+
+  // Get students not in the selected group
+  const availableStudents = selectedGroup 
+    ? students.filter(s => !selectedGroup.student_ids?.includes(s.id))
+    : students;
 
   if (loading) {
     return (
-      <div className="space-y-4">
-        <div className="animate-pulse h-48 bg-gray-200 rounded-lg"></div>
-        <div className="animate-pulse h-48 bg-gray-200 rounded-lg"></div>
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Mes cours groupés */}
-      {myCourses.length > 0 && (
+      {/* Header */}
+      <div className="flex justify-between items-center">
         <div>
-          <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
-            <CheckCircle className="w-5 h-5 text-green-600" />
-            Mes cours groupés
-          </h3>
-          <div className="grid gap-4 md:grid-cols-2">
-            {myCourses.map((course) => (
-              <Card key={course.id} className="border-2 border-green-200 bg-green-50">
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg">{course.title}</CardTitle>
-                      <CardDescription>
-                        {course.teacher_name && `Prof. ${course.teacher_name}`}
-                      </CardDescription>
-                    </div>
-                    {getLevelBadge(course.level)}
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Calendar className="w-4 h-4" />
-                      <span>{formatDays(course.scheduled_days)}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Clock className="w-4 h-4" />
-                      <span>{course.scheduled_time || 'Horaire à confirmer'}</span>
-                    </div>
-                    {course.group_members?.length > 0 && (
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <Users className="w-4 h-4" />
-                        <span>Avec: {course.group_members.join(', ')}</span>
-                      </div>
-                    )}
-                    {course.meet_link && (
-                      <a 
-                        href={course.meet_link} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="inline-block mt-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 text-sm"
-                      >
-                        🎥 Rejoindre le cours
-                      </a>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+            <Users className="w-7 h-7 text-teal-600" />
+            Cours Groupés
+          </h2>
+          <p className="text-gray-500">Gérez les cours avec plusieurs étudiants • 80€/personne</p>
         </div>
-      )}
-
-      {/* Cours disponibles */}
-      <div>
-        <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
-          <Users className="w-5 h-5 text-teal-600" />
-          Cours groupés disponibles
-        </h3>
         
-        {courses.length === 0 ? (
-          <Card className="bg-gray-50">
-            <CardContent className="py-8 text-center">
-              <Users className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-              <p className="text-gray-600">Aucun cours groupé disponible pour le moment</p>
-              <p className="text-sm text-gray-500 mt-1">Revenez bientôt pour découvrir de nouveaux cours !</p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {courses.map((course) => (
-              <Card 
-                key={course.id} 
-                className={`hover:shadow-lg transition-shadow ${
-                  course.status === 'full' ? 'opacity-75' : ''
-                } ${course.discount_applied ? 'border-2 border-orange-300' : ''}`}
-              >
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg">{course.title}</CardTitle>
-                      <CardDescription>
-                        {course.teacher_name && `Prof. ${course.teacher_name}`}
-                      </CardDescription>
-                    </div>
-                    {getLevelBadge(course.level)}
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {course.description && (
-                    <p className="text-sm text-gray-600">{course.description}</p>
-                  )}
-                  
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Calendar className="w-4 h-4" />
-                      <span>{formatDays(course.scheduled_days)}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Clock className="w-4 h-4" />
-                      <span>{course.scheduled_time || 'Horaire à confirmer'}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Users className="w-4 h-4" />
-                      <span>{course.enrolled_count}/{course.max_students} inscrits</span>
-                      {course.spots_left > 0 && course.spots_left <= 2 && (
-                        <Badge className="bg-red-100 text-red-700 text-xs">
-                          Plus que {course.spots_left} place(s) !
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Prix */}
-                  <div className="p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-600">Prix/pers :</span>
-                      <div className="text-right">
-                        {course.discount_applied ? (
-                          <div>
-                            <span className="line-through text-gray-400 text-sm mr-2">
-                              {course.price_per_person_eur}€
-                            </span>
-                            <span className="font-bold text-green-600">
-                              {course.final_price_eur}€
-                            </span>
-                            <Badge className="ml-2 bg-orange-100 text-orange-700 text-xs">
-                              -{course.discount_4_plus}%
-                            </Badge>
-                          </div>
-                        ) : (
-                          <span className="font-bold text-gray-800">
-                            {course.price_per_person_eur}€ / {course.price_per_person_fcfa?.toLocaleString()} FCFA
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    {!course.discount_applied && course.enrolled_count < 4 && (
-                      <p className="text-xs text-orange-600 mt-1">
-                        ✨ -{course.discount_4_plus}% si 4+ étudiants s'inscrivent !
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Bouton d'inscription */}
-                  {userRole === 'student' && (
-                    <Button
-                      className="w-full"
-                      disabled={course.status === 'full' || isEnrolled(course.id) || enrollingId === course.id}
-                      onClick={() => handleEnroll(course.id)}
+        {(userRole === 'admin' || userRole === 'secretary') && (
+          <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+            <DialogTrigger asChild>
+              <Button className="bg-teal-600 hover:bg-teal-700">
+                <Plus className="w-4 h-4 mr-2" />
+                Nouveau Groupe
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Créer un Cours Groupé</DialogTitle>
+              </DialogHeader>
+              <div className="grid grid-cols-2 gap-4 mt-4">
+                <div className="col-span-2">
+                  <Label>Nom du groupe *</Label>
+                  <Input
+                    value={newGroup.name}
+                    onChange={(e) => setNewGroup({...newGroup, name: e.target.value})}
+                    placeholder="Ex: Groupe Débutants Février 2026"
+                  />
+                </div>
+                
+                <div className="col-span-2">
+                  <Label>Description</Label>
+                  <Input
+                    value={newGroup.description}
+                    onChange={(e) => setNewGroup({...newGroup, description: e.target.value})}
+                    placeholder="Description du cours..."
+                  />
+                </div>
+                
+                <div>
+                  <Label>Professeur *</Label>
+                  <Select
+                    value={newGroup.teacher_id}
+                    onValueChange={(value) => setNewGroup({...newGroup, teacher_id: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionner" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {teachers.map(t => (
+                        <SelectItem key={t.id} value={t.id}>
+                          {t.first_name} {t.last_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label>Niveau</Label>
+                  <Select
+                    value={newGroup.level}
+                    onValueChange={(value) => setNewGroup({...newGroup, level: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="beginner">Débutant</SelectItem>
+                      <SelectItem value="intermediate">Intermédiaire</SelectItem>
+                      <SelectItem value="advanced">Avancé</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label>Prix par personne</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="number"
+                      value={newGroup.price_per_person}
+                      onChange={(e) => setNewGroup({...newGroup, price_per_person: parseFloat(e.target.value)})}
+                    />
+                    <Select
+                      value={newGroup.currency}
+                      onValueChange={(value) => setNewGroup({...newGroup, currency: value})}
                     >
-                      {isEnrolled(course.id) ? (
-                        <>✅ Déjà inscrit</>
-                      ) : course.status === 'full' ? (
-                        <>😢 Complet</>
-                      ) : enrollingId === course.id ? (
-                        <>⏳ Inscription...</>
-                      ) : (
-                        <>🎓 S'inscrire (+2 pts)</>
-                      )}
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                      <SelectTrigger className="w-24">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="EUR">EUR</SelectItem>
+                        <SelectItem value="FCFA">FCFA</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <div>
+                  <Label>Nombre max d'étudiants</Label>
+                  <Input
+                    type="number"
+                    value={newGroup.max_students}
+                    onChange={(e) => setNewGroup({...newGroup, max_students: parseInt(e.target.value)})}
+                  />
+                </div>
+                
+                <div>
+                  <Label>Heures totales</Label>
+                  <Input
+                    type="number"
+                    value={newGroup.total_hours}
+                    onChange={(e) => setNewGroup({...newGroup, total_hours: parseInt(e.target.value)})}
+                  />
+                </div>
+                
+                <div>
+                  <Label>Horaires</Label>
+                  <Input
+                    value={newGroup.schedule}
+                    onChange={(e) => setNewGroup({...newGroup, schedule: e.target.value})}
+                    placeholder="Ex: Lundi et Mercredi 18h-19h30"
+                  />
+                </div>
+                
+                <div className="col-span-2">
+                  <Label>Lien Google Meet</Label>
+                  <Input
+                    value={newGroup.meet_link}
+                    onChange={(e) => setNewGroup({...newGroup, meet_link: e.target.value})}
+                    placeholder="https://meet.google.com/..."
+                  />
+                </div>
+                
+                <div>
+                  <Label>Date de début</Label>
+                  <Input
+                    type="date"
+                    value={newGroup.start_date}
+                    onChange={(e) => setNewGroup({...newGroup, start_date: e.target.value})}
+                  />
+                </div>
+                
+                <div>
+                  <Label>Date de fin</Label>
+                  <Input
+                    type="date"
+                    value={newGroup.end_date}
+                    onChange={(e) => setNewGroup({...newGroup, end_date: e.target.value})}
+                  />
+                </div>
+                
+                <div className="col-span-2 flex justify-end gap-2 mt-4">
+                  <Button variant="outline" onClick={() => setShowCreateModal(false)}>
+                    Annuler
+                  </Button>
+                  <Button onClick={handleCreateGroup} className="bg-teal-600 hover:bg-teal-700">
+                    Créer le Groupe
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         )}
       </div>
 
-      {/* Info box */}
-      <Card className="bg-gradient-to-r from-teal-50 to-cyan-50 border-teal-200">
-        <CardContent className="py-4">
-          <div className="flex items-start gap-3">
-            <Star className="w-6 h-6 text-teal-600 flex-shrink-0 mt-1" />
-            <div>
-              <h4 className="font-semibold text-teal-800">Pourquoi choisir un cours groupé ?</h4>
-              <ul className="text-sm text-teal-700 mt-2 space-y-1">
-                <li>💰 Tarif avantageux : 80€/pers au lieu de cours individuels</li>
-                <li>👥 Apprenez avec d'autres étudiants de votre niveau</li>
-                <li>🎮 Exercices interactifs et discussions de groupe</li>
-                <li>📈 Réduction supplémentaire de 10% à partir de 4 étudiants !</li>
-                <li>🎁 +2 points dans votre Coffre aux Trésors à l'inscription</li>
-              </ul>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="bg-gradient-to-br from-teal-500 to-teal-600 text-white">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-teal-100 text-sm">Groupes actifs</p>
+                <p className="text-3xl font-bold">{groups.filter(g => g.status === 'active').length}</p>
+              </div>
+              <Users className="w-10 h-10 text-teal-200" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-blue-100 text-sm">Étudiants inscrits</p>
+                <p className="text-3xl font-bold">
+                  {groups.reduce((acc, g) => acc + (g.student_ids?.length || 0), 0)}
+                </p>
+              </div>
+              <BookOpen className="w-10 h-10 text-blue-200" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-green-100 text-sm">Revenus potentiels</p>
+                <p className="text-3xl font-bold">
+                  {groups.reduce((acc, g) => {
+                    if (g.currency === 'EUR') {
+                      return acc + (g.student_ids?.length || 0) * (g.price_per_person || 80);
+                    }
+                    return acc;
+                  }, 0)}€
+                </p>
+              </div>
+              <Euro className="w-10 h-10 text-green-200" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-purple-100 text-sm">Heures totales</p>
+                <p className="text-3xl font-bold">
+                  {groups.reduce((acc, g) => acc + (g.total_hours || 0), 0)}h
+                </p>
+              </div>
+              <Clock className="w-10 h-10 text-purple-200" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Groups List */}
+      {groups.length === 0 ? (
+        <Card className="text-center py-12">
+          <CardContent>
+            <Users className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+            <h3 className="text-xl font-semibold text-gray-600 mb-2">Aucun cours groupé</h3>
+            <p className="text-gray-500 mb-4">Créez votre premier cours groupé pour commencer</p>
+            {(userRole === 'admin' || userRole === 'secretary') && (
+              <Button onClick={() => setShowCreateModal(true)} className="bg-teal-600 hover:bg-teal-700">
+                <Plus className="w-4 h-4 mr-2" />
+                Créer un Groupe
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-6">
+          {groups.map(group => (
+            <Card key={group.id} className="hover:shadow-lg transition-shadow">
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-xl flex items-center gap-2">
+                      {group.name}
+                      <Badge className={getLevelBadgeColor(group.level)}>
+                        {getLevelLabel(group.level)}
+                      </Badge>
+                      {group.status === 'active' ? (
+                        <Badge className="bg-green-100 text-green-700">Actif</Badge>
+                      ) : (
+                        <Badge className="bg-gray-100 text-gray-700">{group.status}</Badge>
+                      )}
+                    </CardTitle>
+                    <CardDescription className="mt-1">
+                      {group.description || 'Aucune description'}
+                    </CardDescription>
+                  </div>
+                  
+                  {(userRole === 'admin' || userRole === 'secretary') && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDeleteGroup(group.id)}
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+              </CardHeader>
+              
+              <CardContent>
+                <div className="grid md:grid-cols-3 gap-6">
+                  {/* Info */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Users className="w-4 h-4 text-teal-600" />
+                      <span className="font-medium">Professeur:</span>
+                      <span>{group.teacher_name || 'Non assigné'}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Calendar className="w-4 h-4 text-teal-600" />
+                      <span className="font-medium">Horaires:</span>
+                      <span>{group.schedule || 'Non défini'}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Euro className="w-4 h-4 text-green-600" />
+                      <span className="font-medium">Prix:</span>
+                      <span className="text-green-600 font-semibold">
+                        {group.price_per_person} {group.currency}/personne
+                      </span>
+                    </div>
+                    {group.meet_link && (
+                      <a
+                        href={group.meet_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
+                      >
+                        <Video className="w-4 h-4" />
+                        Rejoindre le cours
+                      </a>
+                    )}
+                  </div>
+                  
+                  {/* Students */}
+                  <div className="md:col-span-2">
+                    <div className="flex justify-between items-center mb-3">
+                      <h4 className="font-semibold text-gray-700">
+                        Étudiants ({group.enrolled_count || 0}/{group.max_students})
+                      </h4>
+                      {(userRole === 'admin' || userRole === 'secretary') && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedGroup(group);
+                            setShowAddStudentModal(true);
+                          }}
+                          disabled={(group.enrolled_count || 0) >= group.max_students}
+                          className="text-teal-600 border-teal-300 hover:bg-teal-50"
+                        >
+                          <UserPlus className="w-4 h-4 mr-1" />
+                          Ajouter
+                        </Button>
+                      )}
+                    </div>
+                    
+                    {/* Progress bar */}
+                    <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
+                      <div
+                        className="bg-teal-600 h-2 rounded-full transition-all"
+                        style={{ width: `${((group.enrolled_count || 0) / group.max_students) * 100}%` }}
+                      />
+                    </div>
+                    
+                    {/* Student list */}
+                    <div className="flex flex-wrap gap-2">
+                      {group.student_names?.length > 0 ? (
+                        group.student_names.map((name, idx) => (
+                          <div
+                            key={idx}
+                            className="flex items-center gap-1 bg-gray-100 rounded-full px-3 py-1 text-sm"
+                          >
+                            <span>{name}</span>
+                            {(userRole === 'admin' || userRole === 'secretary') && (
+                              <button
+                                onClick={() => handleRemoveStudent(group.id, group.student_ids[idx])}
+                                className="text-red-400 hover:text-red-600 ml-1"
+                              >
+                                <UserMinus className="w-3 h-3" />
+                              </button>
+                            )}
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-gray-400 text-sm italic">Aucun étudiant inscrit</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Add Student Modal */}
+      <Dialog open={showAddStudentModal} onOpenChange={setShowAddStudentModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ajouter un étudiant au groupe</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4 space-y-4">
+            <p className="text-sm text-gray-500">
+              Groupe: <strong>{selectedGroup?.name}</strong>
+            </p>
+            
+            <div className="max-h-64 overflow-y-auto space-y-2">
+              {availableStudents.length === 0 ? (
+                <p className="text-gray-500 text-center py-4">Aucun étudiant disponible</p>
+              ) : (
+                availableStudents.map(student => (
+                  <div
+                    key={student.id}
+                    className="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer"
+                    onClick={() => handleAddStudent(student.id)}
+                  >
+                    <div>
+                      <p className="font-medium">{student.first_name} {student.last_name}</p>
+                      <p className="text-sm text-gray-500">{student.email}</p>
+                    </div>
+                    <Button size="sm" variant="ghost" className="text-teal-600">
+                      <UserPlus className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))
+              )}
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

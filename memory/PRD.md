@@ -106,11 +106,12 @@ Plateforme e-learning complète pour l'apprentissage de l'anglais, développée 
 ## Backlog Priorisé
 
 ### P0 - Critique
+- [x] ~~Stockage persistant des documents~~ ✅ Résolu avec MongoDB
 - [ ] Continuer refactorisation de server.py (>6000 lignes)
 
 ### P1 - Important
+- [x] ~~Stratégie pour cours groupés~~ ✅ Implémenté
 - [ ] Synchronisation factures avec Monday.com
-- [ ] Stratégie pour cours groupés
 
 ### P2 - Normal
 - [ ] Envoi de jeux par le professeur

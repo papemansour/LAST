@@ -172,9 +172,11 @@ const AdminAnalytics = () => {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-green-100 text-sm">Revenus</p>
-                <p className="text-2xl font-bold">{data.summary.revenue_eur}€</p>
-                <p className="text-green-200 text-xs">{data.summary.revenue_fcfa?.toLocaleString()} FCFA</p>
+                <p className="text-green-100 text-sm">Revenus nets</p>
+                <p className="text-2xl font-bold">{data.summary.net_eur || 0}€</p>
+                <p className="text-green-200 text-xs">
+                  +{data.summary.incoming_eur || 0}€ / -{data.summary.outgoing_eur || 0}€
+                </p>
               </div>
               <DollarSign className="w-10 h-10 text-green-200" />
             </div>

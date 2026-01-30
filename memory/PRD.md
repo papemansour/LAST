@@ -59,6 +59,10 @@ Plateforme e-learning complète pour l'apprentissage de l'anglais, développée 
 - ✅ **Séparation des revenus Admin Analytics** - Graphique avec entrées (reçus élèves) vs sorties (paiements profs)
 - ✅ **Suppression onglet "Cours" professeur** - Onglet retiré du TeacherDashboard.js
 - ✅ **Filtre EUR/FCFA sur graphique revenus** - Basculement dynamique entre les deux devises
+- ✅ **Nouveau système de déductions professeurs** :
+  - Suppression de la TVA sur les bulletins de salaire
+  - Déductions: 1 cours manqué = 5€ (EUR) ou 1500 FCFA
+  - Bulletin de salaire affiche: Somme Initiale → Déductions → Somme Nette
 
 ## Tableau de Bord Analytique 📊
 

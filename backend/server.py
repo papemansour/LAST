@@ -4295,12 +4295,19 @@ async def get_admin_analytics(period: str = "month", current_user: dict = Depend
             "created_at": {"$gte": month_start.isoformat(), "$lt": month_end.isoformat()}
         }, {"_id": 0, "amount": 1}).to_list(1000)
         
+        # Helper to safely convert amount to float (handles string amounts from DB)
+        def safe_amount(val):
+            try:
+                return float(val) if val else 0
+            except (ValueError, TypeError):
+                return 0
+        
         revenue_by_month.append({
             "month": month_names[target_date.month],
-            "incoming_eur": sum(p.get('amount', 0) for p in incoming_eur),
-            "incoming_fcfa": sum(p.get('amount', 0) for p in incoming_fcfa),
-            "outgoing_eur": sum(p.get('amount', 0) for p in outgoing_eur),
-            "outgoing_fcfa": sum(p.get('amount', 0) for p in outgoing_fcfa)
+            "incoming_eur": sum(safe_amount(p.get('amount', 0)) for p in incoming_eur),
+            "incoming_fcfa": sum(safe_amount(p.get('amount', 0)) for p in incoming_fcfa),
+            "outgoing_eur": sum(safe_amount(p.get('amount', 0)) for p in outgoing_eur),
+            "outgoing_fcfa": sum(safe_amount(p.get('amount', 0)) for p in outgoing_fcfa)
         })
     
     # Get top teachers by hours this month

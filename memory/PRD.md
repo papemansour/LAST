@@ -63,10 +63,10 @@ Plateforme e-learning complète pour l'apprentissage de l'anglais, développée 
 ## Tableau de Bord Analytique 📊
 
 ### Composants
-- **Cartes de résumé** : Étudiants, Professeurs, Heures, **Revenus nets (entrées/sorties)**
+- **Cartes de résumé** : Étudiants, Professeurs, Heures, **Revenus nets (avec badge EUR/FCFA cliquable)**
 - **Évolution des inscriptions** : Graphique en aire (6 derniers mois)
 - **Heures par semaine** : Graphique en barres
-- **Revenus mensuels** : **Graphique à 2 lignes (Entrées en vert, Sorties en rouge)**
+- **Revenus mensuels** : **Graphique à 2 lignes + sélecteur EUR/FCFA**
 - **Répartition par niveau** : Graphique circulaire
 - **Classement des professeurs** : Top 5 par heures enseignées
 

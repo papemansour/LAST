@@ -1983,6 +1983,11 @@ const AdminDashboard = () => {
             </Card>
           </TabsContent>
 
+          {/* Group Courses Tab */}
+          <TabsContent value="group-courses">
+            <GroupCourses userRole="admin" />
+          </TabsContent>
+
           {/* Documents Tab */}
           <TabsContent value="documents">
             <DocumentsManager userRole="admin" />

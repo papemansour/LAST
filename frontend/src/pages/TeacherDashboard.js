@@ -23,7 +23,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
-import { LogOut, Users, BookOpen, Calendar, MessageCircle, Send, Video, FileText, Upload, Play, Pause, Square, Clock, Heart, Mail, Sparkles, Key, Gamepad2, Timer, Newspaper, Library, UserCircle, CalendarDays } from 'lucide-react';
+import { LogOut, Users, BookOpen, Calendar, MessageCircle, Send, Video, FileText, Upload, Play, Pause, Square, Clock, Heart, Mail, Sparkles, Key, Gamepad2, Timer, Newspaper, Library, UserCircle, CalendarDays, Wallet } from 'lucide-react';
 import AvailabilityScheduler from '../components/AvailabilityScheduler';
 import ConversationChat from '../components/ConversationChat';
 import NewsManager from '../components/NewsManager';
@@ -33,6 +33,7 @@ import KalamaClub from '../components/KalamaClub';
 import TeacherGames from '../components/TeacherGames';
 import TeacherVideos from '../components/TeacherVideos';
 import TeacherGroupCodeManager from '../components/TeacherGroupCodeManager';
+import TeacherPayments from '../components/TeacherPayments';
 import DocumentsManager from '../components/DocumentsManager';
 import TeacherMeetLinks from '../components/TeacherMeetLinks';
 import GiftWelcomeLetter from '../components/GiftWelcomeLetter';

@@ -169,15 +169,29 @@ const AdminAnalytics = () => {
           </CardContent>
         </Card>
         
-        <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white">
+        <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white cursor-pointer hover:from-green-600 hover:to-green-700 transition-all" onClick={() => setCurrency(currency === 'EUR' ? 'FCFA' : 'EUR')}>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-green-100 text-sm">Revenus nets</p>
-                <p className="text-2xl font-bold">{data.summary.net_eur || 0}€</p>
-                <p className="text-green-200 text-xs">
-                  +{data.summary.incoming_eur || 0}€ / -{data.summary.outgoing_eur || 0}€
+                <p className="text-green-100 text-sm flex items-center gap-1">
+                  Revenus nets
+                  <span className="text-xs bg-green-400/30 px-1.5 py-0.5 rounded">{currency}</span>
                 </p>
+                {currency === 'EUR' ? (
+                  <>
+                    <p className="text-2xl font-bold">{data.summary.net_eur || 0}€</p>
+                    <p className="text-green-200 text-xs">
+                      +{data.summary.incoming_eur || 0}€ / -{data.summary.outgoing_eur || 0}€
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-2xl font-bold">{(data.summary.net_fcfa || 0).toLocaleString()} F</p>
+                    <p className="text-green-200 text-xs">
+                      +{(data.summary.incoming_fcfa || 0).toLocaleString()} / -{(data.summary.outgoing_fcfa || 0).toLocaleString()}
+                    </p>
+                  </>
+                )}
               </div>
               <DollarSign className="w-10 h-10 text-green-200" />
             </div>

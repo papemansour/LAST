@@ -96,6 +96,17 @@ Plateforme e-learning complète pour l'apprentissage de l'anglais, développée 
   - Copie des credentials (individuel ou en masse)
   - Endpoints: `POST /api/admin/import-students-csv`, `GET /api/admin/csv-template`
   - Composant: `ImportStudentsCSV.js`
+- ✅ **Système de jeux amélioré** (30/01/2026)
+  - **Envoi à plusieurs étudiants** : Sélection individuelle ou "Tous les étudiants" en un clic
+  - **Notifications automatiques** : L'étudiant reçoit une notification "🎮 Nouveau jeu assigné!"
+  - **Nouveaux types de jeux** :
+    - **Quiz** : Questions à choix multiples avec temps limite optionnel
+    - **Memory** : Jeu de mémoire avec paires de mots (français/anglais)
+  - Interface à onglets : Flashcards | Quiz | Memory | Scores
+  - Endpoints ajoutés:
+    - Quiz: `POST /api/teacher/create-quiz`, `POST /api/teacher/add-quiz-question`, `GET /api/teacher/my-quizzes`
+    - Memory: `POST /api/teacher/create-memory-game`, `POST /api/teacher/add-memory-pair`, `GET /api/teacher/my-memory-games`
+  - Composants mis à jour: `TeacherGames.js`, `StudentGamesAdvanced.js`
 
 ## Tableau de Bord Analytique 📊
 

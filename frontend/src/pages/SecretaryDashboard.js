@@ -1604,15 +1604,30 @@ const SecretaryDashboard = () => {
                       {teacherPayments.length === 0 ? (
                         <p className="text-gray-500 text-sm text-center py-4">Aucun paiement enregistré</p>
                       ) : (
-                        teacherPayments.slice(0, 5).map(payment => (
+                        teacherPayments.slice(0, 5).map(payment => {
+                          const deductions = parseInt(payment.deductions || 0);
+                          const deductionUnitValue = payment.currency === 'FCFA' ? 1500 : 5;
+                          const deductionsAmount = deductions * deductionUnitValue;
+                          const montantInitial = parseFloat(payment.amount || 0) + parseFloat(payment.bonus || 0);
+                          const montantNet = Math.max(0, montantInitial - deductionsAmount);
+                          
+                          return (
                           <div key={payment.id} className="flex justify-between items-center p-2 bg-green-50 rounded-lg">
                             <div>
                               <p className="font-medium text-sm">{payment.teacher_name || payment.teacherName}</p>
                               <p className="text-xs text-gray-500">{payment.month}</p>
+                              {deductions > 0 && (
+                                <p className="text-xs text-red-500">-{deductions} déduction(s)</p>
+                              )}
                             </div>
                             <div className="flex items-center gap-1">
-                              <span className="font-bold text-green-600 mr-2">{payment.amount} {payment.currency || 'EUR'}</span>
-                              <button onClick={() => printTeacherInvoice(payment)} className="p-1 text-purple-500 hover:text-purple-700 hover:bg-purple-100 rounded" title="Imprimer facture">
+                              <div className="text-right mr-2">
+                                {deductions > 0 && (
+                                  <p className="text-xs text-gray-400 line-through">{montantInitial.toFixed(0)} {payment.currency || 'EUR'}</p>
+                                )}
+                                <span className="font-bold text-green-600">{montantNet.toFixed(0)} {payment.currency || 'EUR'}</span>
+                              </div>
+                              <button onClick={() => printTeacherInvoice(payment)} className="p-1 text-purple-500 hover:text-purple-700 hover:bg-purple-100 rounded" title="Imprimer bulletin">
                                 📄
                               </button>
                               <button onClick={() => sendInvoiceByEmail(payment, 'teacher')} className="p-1 text-blue-500 hover:text-blue-700 hover:bg-blue-100 rounded" title="Envoyer par email">
@@ -1626,7 +1641,7 @@ const SecretaryDashboard = () => {
                               </button>
                             </div>
                           </div>
-                        ))
+                        )})
                       )}
                     </div>
                   </div>

@@ -645,6 +645,9 @@ const AdminDashboard = () => {
                 <div className="flex justify-between items-center">
                   <CardTitle>Liste des étudiants</CardTitle>
                   <div className="flex gap-3 items-center">
+                    {/* Bouton créer étudiant */}
+                    <CreateStudentForm onStudentCreated={() => fetchStudents()} />
+                    
                     {/* Filtre par niveau */}
                     <select
                       value={levelFilter}

@@ -118,29 +118,33 @@ const SecretaryBilling = ({ teachers, students, onRefresh }) => {
     
     let content = '';
     if (type === 'teacher') {
+      const hasDeductions = item.deductions > 0;
       content = `
         <html>
         <head>
-          <title>Facture Professeur - ${item.teacher_name}</title>
+          <title>Bulletin de Salaire - ${item.teacher_name}</title>
           <style>
             body { font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
             .header { text-align: center; border-bottom: 2px solid #0d9488; padding-bottom: 20px; margin-bottom: 30px; }
             .logo { font-size: 24px; font-weight: bold; color: #0d9488; }
             .invoice-info { display: flex; justify-content: space-between; margin-bottom: 30px; }
-            .amount { font-size: 32px; font-weight: bold; color: #0d9488; text-align: center; margin: 30px 0; padding: 20px; background: #f0fdfa; border-radius: 8px; }
+            .amount-box { font-size: 24px; font-weight: bold; text-align: center; margin: 20px 0; padding: 15px; border-radius: 8px; }
+            .initial-amount { background: #f3f4f6; color: #374151; }
+            .final-amount { background: #f0fdfa; color: #0d9488; font-size: 28px; }
             .details { background: #f9fafb; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
             .footer { text-align: center; margin-top: 40px; color: #666; font-size: 12px; border-top: 1px solid #ddd; padding-top: 20px; }
             table { width: 100%; border-collapse: collapse; margin: 20px 0; }
             th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
             th { background: #0d9488; color: white; }
             .bonus { color: green; }
-            .deduction { color: red; }
+            .deduction { color: #dc2626; }
+            .deduction-info { background: #fef2f2; padding: 10px; border-radius: 6px; margin: 10px 0; font-size: 14px; color: #991b1b; }
           </style>
         </head>
         <body>
           <div class="header">
             <div class="logo">🎓 MyKalamaEnglish</div>
-            <p>Facture de Paiement Professeur</p>
+            <p>Bulletin de Salaire Professeur</p>
           </div>
           <div class="invoice-info">
             <div>
@@ -150,25 +154,38 @@ const SecretaryBilling = ({ teachers, students, onRefresh }) => {
             </div>
             <div style="text-align: right;">
               <strong>Date:</strong> ${new Date(item.created_at).toLocaleDateString('fr-FR')}<br/>
-              <strong>Ref:</strong> FAC-${item.id.substring(0, 8).toUpperCase()}
+              <strong>Ref:</strong> SAL-${item.id.substring(0, 8).toUpperCase()}
             </div>
           </div>
+          
           <table>
             <tr><th>Description</th><th>Période</th><th>Montant</th></tr>
             <tr>
-              <td>${item.description || 'Paiement cours'}</td>
+              <td>${item.description || 'Cours de langue anglaise'}</td>
               <td>${item.period}</td>
-              <td>${calcInfo.baseAmount} ${item.currency}</td>
+              <td><strong>${calcInfo.baseAmount} ${item.currency}</strong></td>
             </tr>
             ${item.bonus > 0 ? `<tr><td class="bonus">+ Bonus</td><td></td><td class="bonus">+${calcInfo.bonusAmount} ${item.currency}</td></tr>` : ''}
-            ${item.deductions > 0 ? `<tr><td class="deduction">- Déductions (${item.deductions} cours manqué(s))</td><td></td><td class="deduction">-${calcInfo.deductionsAmount} ${item.currency}</td></tr>` : ''}
           </table>
-          <div class="amount">
-            Montant Net à Payer: ${calcInfo.finalAmount} ${item.currency}
+          
+          <div class="amount-box initial-amount">
+            Somme Initiale: ${calcInfo.baseAmount} ${item.currency}
           </div>
+          
+          ${hasDeductions ? `
+            <div class="deduction-info">
+              <strong>⚠️ Déductions appliquées:</strong><br/>
+              ${item.deductions} cours manqué(s) × ${calcInfo.deductionUnitValue} ${item.currency} = <strong>-${calcInfo.deductionsAmount} ${item.currency}</strong>
+            </div>
+          ` : ''}
+          
+          <div class="amount-box final-amount">
+            Somme Nette ${hasDeductions ? 'après Déductions' : ''}: ${calcInfo.finalAmount} ${item.currency}
+          </div>
+          
           <div class="footer">
             <p>MyKalamaEnglish - Plateforme d'apprentissage de l'anglais</p>
-            <p>Cette facture a été générée automatiquement</p>
+            <p>Ce bulletin de salaire a été généré automatiquement</p>
           </div>
         </body>
         </html>

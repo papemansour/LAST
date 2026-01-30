@@ -42,8 +42,12 @@ const AdminAnalytics = () => {
       active_students: 35,
       total_teachers: 4,
       total_hours_this_month: 120,
-      revenue_eur: 2500,
-      revenue_fcfa: 850000,
+      incoming_eur: 2500,
+      incoming_fcfa: 850000,
+      outgoing_eur: 1200,
+      outgoing_fcfa: 400000,
+      net_eur: 1300,
+      net_fcfa: 450000,
       growth_rate: 12.5
     },
     students_by_month: [
@@ -61,12 +65,12 @@ const AdminAnalytics = () => {
       { week: 'Sem 4', hours: 35 }
     ],
     revenue_by_month: [
-      { month: 'Août', eur: 1800, fcfa: 600000 },
-      { month: 'Sept', eur: 2000, fcfa: 680000 },
-      { month: 'Oct', eur: 2200, fcfa: 720000 },
-      { month: 'Nov', eur: 2350, fcfa: 780000 },
-      { month: 'Déc', eur: 2400, fcfa: 820000 },
-      { month: 'Jan', eur: 2500, fcfa: 850000 }
+      { month: 'Août', incoming_eur: 1800, incoming_fcfa: 600000, outgoing_eur: 900, outgoing_fcfa: 300000 },
+      { month: 'Sept', incoming_eur: 2000, incoming_fcfa: 680000, outgoing_eur: 950, outgoing_fcfa: 320000 },
+      { month: 'Oct', incoming_eur: 2200, incoming_fcfa: 720000, outgoing_eur: 1000, outgoing_fcfa: 350000 },
+      { month: 'Nov', incoming_eur: 2350, incoming_fcfa: 780000, outgoing_eur: 1100, outgoing_fcfa: 380000 },
+      { month: 'Déc', incoming_eur: 2400, incoming_fcfa: 820000, outgoing_eur: 1150, outgoing_fcfa: 390000 },
+      { month: 'Jan', incoming_eur: 2500, incoming_fcfa: 850000, outgoing_eur: 1200, outgoing_fcfa: 400000 }
     ],
     students_by_level: [
       { name: 'Débutant', value: 15 },

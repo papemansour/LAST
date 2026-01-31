@@ -408,13 +408,19 @@ const SecretaryDashboard = () => {
       setNewPayment({
         teacherId: '',
         teacherName: '',
+        teacherEmail: '',
+        teacherAddress: '',
         month: new Date().toISOString().slice(0, 7),
         amount: '',
+        currency: 'EUR',
         hoursWorked: '',
+        hourlyRate: '',
         bonus: '0',
+        deductions: 0,
+        description: 'Cours de langue anglaise',
         notes: ''
       });
-      toast.success('💰 Paiement enregistré !');
+      toast.success('🪙 Paiement enregistré !');
     } catch (error) {
       console.error('Error adding payment:', error);
       toast.error('Erreur lors de l\'enregistrement du paiement');

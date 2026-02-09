@@ -1494,49 +1494,64 @@ const SecretaryDashboard = () => {
             )}
 
             <div className="grid lg:grid-cols-2 gap-6">
-              {/* Teacher Payments Section */}
+              {/* Teacher Payments Section - Simplified */}
               <Card className="border-green-200">
                 <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50">
                   <CardTitle className="flex items-center gap-2 text-green-700">
-                    💰 Paiement des Professeurs
+                    🪙 Bulletin de Salaire Professeur
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-6 space-y-4">
+                  {/* Professeur */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Professeur *</label>
+                    <select
+                      value={newPayment.teacherName}
+                      onChange={(e) => {
+                        const selectedTeacher = teachers.find(t => `${t.first_name} ${t.last_name}` === e.target.value);
+                        setNewPayment({
+                          ...newPayment,
+                          teacherName: e.target.value,
+                          teacherId: selectedTeacher?.id || '',
+                          teacherEmail: selectedTeacher?.email || ''
+                        });
+                      }}
+                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                    >
+                      <option value="">Sélectionner un professeur...</option>
+                      {teachers.map(t => (
+                        <option key={t.id} value={`${t.first_name} ${t.last_name}`}>
+                          {t.first_name} {t.last_name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Email */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Email du professeur</label>
+                    <Input
+                      type="email"
+                      value={newPayment.teacherEmail}
+                      onChange={(e) => setNewPayment({...newPayment, teacherEmail: e.target.value})}
+                      placeholder="email@exemple.com"
+                    />
+                  </div>
+
+                  {/* Période */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Période / Mois *</label>
+                    <Input
+                      type="month"
+                      value={newPayment.month}
+                      onChange={(e) => setNewPayment({...newPayment, month: e.target.value})}
+                    />
+                  </div>
+
+                  {/* Montant et Devise */}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-sm font-medium mb-1">Professeur *</label>
-                      <select
-                        value={newPayment.teacherName}
-                        onChange={(e) => {
-                          const selectedTeacher = teachers.find(t => `${t.first_name} ${t.last_name}` === e.target.value);
-                          setNewPayment({
-                            ...newPayment,
-                            teacherName: e.target.value,
-                            teacherId: selectedTeacher?.id || ''
-                          });
-                        }}
-                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                      >
-                        <option value="">Sélectionner...</option>
-                        {teachers.map(t => (
-                          <option key={t.id} value={`${t.first_name} ${t.last_name}`}>
-                            {t.first_name} {t.last_name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Mois *</label>
-                      <Input
-                        type="month"
-                        value={newPayment.month}
-                        onChange={(e) => setNewPayment({...newPayment, month: e.target.value})}
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-5 gap-3">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Montant *</label>
+                      <label className="block text-sm font-medium mb-1">Montant de base *</label>
                       <Input
                         type="number"
                         value={newPayment.amount}
@@ -1551,60 +1566,93 @@ const SecretaryDashboard = () => {
                         onChange={(e) => setNewPayment({...newPayment, currency: e.target.value})}
                         className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm h-10"
                       >
-                        <option value="EUR">🇪🇺 EUR</option>
-                        <option value="FCFA">🇸🇳 FCFA</option>
+                        <option value="EUR">🇪🇺 Euro (EUR)</option>
+                        <option value="FCFA">🇸🇳 Franc CFA (FCFA)</option>
                       </select>
                     </div>
+                  </div>
+
+                  {/* Bonus et Déductions */}
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-sm font-medium mb-1">Heures</label>
-                      <Input
-                        type="number"
-                        value={newPayment.hoursWorked}
-                        onChange={(e) => setNewPayment({...newPayment, hoursWorked: e.target.value})}
-                        placeholder="20"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1 text-green-600">Bonus</label>
+                      <label className="block text-sm font-medium mb-1 text-green-600">+ Bonus</label>
                       <Input
                         type="number"
                         value={newPayment.bonus}
                         onChange={(e) => setNewPayment({...newPayment, bonus: e.target.value})}
                         placeholder="0"
-                        className="border-green-200 bg-green-50"
+                        className="border-green-300 bg-green-50 focus:ring-green-500"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1 text-red-600">Déductions</label>
+                      <label className="block text-sm font-medium mb-1 text-red-600">- Déductions (nb cours manqués)</label>
                       <Input
                         type="number"
                         value={newPayment.deductions || 0}
                         onChange={(e) => setNewPayment({...newPayment, deductions: parseInt(e.target.value) || 0})}
                         placeholder="0"
-                        className="border-red-200 bg-red-50"
-                        title="Nombre de cours manqués (1 = 5€ ou 1500 FCFA)"
+                        className="border-red-300 bg-red-50 focus:ring-red-500"
                       />
                     </div>
                   </div>
-                  <p className="text-xs text-gray-500">💡 1 déduction = {newPayment.currency === 'FCFA' ? '1500 FCFA' : '5€'} (pénalité pour cours manqué)</p>
+                  
+                  <p className="text-xs text-gray-500 bg-yellow-50 p-2 rounded">
+                    💡 1 déduction = {newPayment.currency === 'FCFA' ? '1 500 FCFA' : '5 €'} (pénalité par cours manqué)
+                  </p>
+
+                  {/* Affichage du Montant Net calculé */}
+                  {newPayment.amount && (
+                    <div className="bg-gradient-to-r from-green-100 to-emerald-100 p-4 rounded-lg border border-green-300">
+                      <div className="flex justify-between items-center text-sm">
+                        <span>Montant de base:</span>
+                        <span>{parseFloat(newPayment.amount || 0).toFixed(2)} {newPayment.currency}</span>
+                      </div>
+                      {parseFloat(newPayment.bonus || 0) > 0 && (
+                        <div className="flex justify-between items-center text-sm text-green-600">
+                          <span>+ Bonus:</span>
+                          <span>+{parseFloat(newPayment.bonus || 0).toFixed(2)} {newPayment.currency}</span>
+                        </div>
+                      )}
+                      {parseInt(newPayment.deductions || 0) > 0 && (
+                        <div className="flex justify-between items-center text-sm text-red-600">
+                          <span>- Déductions ({newPayment.deductions} × {newPayment.currency === 'FCFA' ? '1500' : '5'}):</span>
+                          <span>-{(parseInt(newPayment.deductions || 0) * (newPayment.currency === 'FCFA' ? 1500 : 5)).toFixed(2)} {newPayment.currency}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between items-center mt-2 pt-2 border-t border-green-300 font-bold text-lg text-green-700">
+                        <span>💰 MONTANT NET:</span>
+                        <span>
+                          {Math.max(0, 
+                            parseFloat(newPayment.amount || 0) + 
+                            parseFloat(newPayment.bonus || 0) - 
+                            (parseInt(newPayment.deductions || 0) * (newPayment.currency === 'FCFA' ? 1500 : 5))
+                          ).toFixed(2)} {newPayment.currency}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Commentaire */}
                   <div>
-                    <label className="block text-sm font-medium mb-1">Notes</label>
-                    <Input
+                    <label className="block text-sm font-medium mb-1">Commentaire / Notes</label>
+                    <textarea
                       value={newPayment.notes}
                       onChange={(e) => setNewPayment({...newPayment, notes: e.target.value})}
-                      placeholder="Commentaires..."
+                      placeholder="Ajouter un commentaire..."
+                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm min-h-[60px]"
                     />
                   </div>
-                  <Button onClick={handleAddTeacherPayment} className="w-full bg-green-600 hover:bg-green-700">
-                    💸 Enregistrer le Paiement
+
+                  <Button onClick={handleAddTeacherPayment} className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3">
+                    ✅ Enregistrer le Bulletin de Salaire
                   </Button>
 
                   {/* Recent Payments */}
                   <div className="mt-4 pt-4 border-t">
-                    <h4 className="font-semibold text-sm mb-3">Paiements Récents</h4>
+                    <h4 className="font-semibold text-sm mb-3 text-gray-700">📋 Bulletins Récents</h4>
                     <div className="space-y-2 max-h-48 overflow-y-auto">
                       {teacherPayments.length === 0 ? (
-                        <p className="text-gray-500 text-sm text-center py-4">Aucun paiement enregistré</p>
+                        <p className="text-gray-500 text-sm text-center py-4">Aucun bulletin enregistré</p>
                       ) : (
                         teacherPayments.slice(0, 5).map(payment => {
                           const deductions = parseInt(payment.deductions || 0);
@@ -1614,7 +1662,7 @@ const SecretaryDashboard = () => {
                           const montantNet = Math.max(0, montantInitial - deductionsAmount);
                           
                           return (
-                          <div key={payment.id} className="flex justify-between items-center p-2 bg-green-50 rounded-lg">
+                          <div key={payment.id} className="flex justify-between items-center p-3 bg-green-50 rounded-lg border border-green-100">
                             <div>
                               <p className="font-medium text-sm">{payment.teacher_name || payment.teacherName}</p>
                               <p className="text-xs text-gray-500">{payment.month}</p>
@@ -1622,24 +1670,18 @@ const SecretaryDashboard = () => {
                                 <p className="text-xs text-red-500">-{deductions} déduction(s)</p>
                               )}
                             </div>
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-2">
                               <div className="text-right mr-2">
                                 {deductions > 0 && (
                                   <p className="text-xs text-gray-400 line-through">{montantInitial.toFixed(0)} {payment.currency || 'EUR'}</p>
                                 )}
                                 <span className="font-bold text-green-600">{montantNet.toFixed(0)} {payment.currency || 'EUR'}</span>
                               </div>
-                              <button onClick={() => printTeacherInvoice(payment)} className="p-1 text-purple-500 hover:text-purple-700 hover:bg-purple-100 rounded" title="Imprimer bulletin">
-                                📄
+                              <button onClick={() => printTeacherInvoice(payment)} className="p-1.5 text-purple-600 hover:bg-purple-100 rounded" title="Imprimer">
+                                🖨️
                               </button>
-                              <button onClick={() => sendInvoiceByEmail(payment, 'teacher')} className="p-1 text-blue-500 hover:text-blue-700 hover:bg-blue-100 rounded" title="Envoyer par email">
-                                📧
-                              </button>
-                              <button onClick={() => saveInvoice(payment, 'teacher')} className="p-1 text-green-500 hover:text-green-700 hover:bg-green-100 rounded" title="Enregistrer PDF">
-                                💾
-                              </button>
-                              <button onClick={() => handleDeletePayment(payment.id)} className="p-1 text-red-500 hover:text-red-700 hover:bg-red-100 rounded" title="Supprimer">
-                                <Trash2 className="w-4 h-4" />
+                              <button onClick={() => handleDeletePayment(payment.id)} className="p-1.5 text-red-500 hover:bg-red-100 rounded" title="Supprimer">
+                                🗑️
                               </button>
                             </div>
                           </div>

@@ -3,11 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/
 import { Button } from './ui/button';
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
-import { RotateCcw, Trash2, AlertCircle } from 'lucide-react';
+import { RotateCcw, Trash2, AlertCircle, AlertTriangle } from 'lucide-react';
 
 const AdminTrash = () => {
   const [deletedUsers, setDeletedUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [emptyingTrash, setEmptyingTrash] = useState(false);
 
   useEffect(() => {
     fetchDeletedUsers();
@@ -46,6 +47,24 @@ const AdminTrash = () => {
     }
   };
 
+  const handleEmptyTrash = async () => {
+    if (!window.confirm(`⚠️ ATTENTION !\n\nVous êtes sur le point de supprimer DÉFINITIVEMENT ${deletedUsers.length} utilisateur(s).\n\nCette action est IRRÉVERSIBLE !\n\nÊtes-vous sûr de vouloir continuer ?`)) return;
+    
+    // Double confirmation
+    if (!window.confirm(`🔴 DERNIÈRE CHANCE !\n\nConfirmez la suppression définitive de TOUS les utilisateurs de la poubelle.`)) return;
+    
+    setEmptyingTrash(true);
+    try {
+      const response = await apiClient.delete('/admin/empty-trash');
+      toast.success(`🗑️ ${response.data.message}`);
+      fetchDeletedUsers();
+    } catch (error) {
+      toast.error('Erreur lors du vidage de la poubelle');
+    } finally {
+      setEmptyingTrash(false);
+    }
+  };
+
   if (loading) {
     return <div className="text-center py-8">Chargement...</div>;
   }
@@ -53,13 +72,29 @@ const AdminTrash = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Trash2 className="w-6 h-6 text-red-500" />
-          🗑️ Poubelle
-        </CardTitle>
-        <CardDescription>
-          Utilisateurs supprimés - Vous pouvez les restaurer ou les supprimer définitivement
-        </CardDescription>
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Trash2 className="w-6 h-6 text-red-500" />
+              🗑️ Poubelle
+            </CardTitle>
+            <CardDescription>
+              Utilisateurs supprimés - Vous pouvez les restaurer ou les supprimer définitivement
+            </CardDescription>
+          </div>
+          {deletedUsers.length > 0 && (
+            <Button
+              onClick={handleEmptyTrash}
+              variant="destructive"
+              disabled={emptyingTrash}
+              className="flex items-center gap-2"
+              data-testid="empty-trash-button"
+            >
+              <AlertTriangle className="w-4 h-4" />
+              {emptyingTrash ? 'Suppression...' : `Vider la poubelle (${deletedUsers.length})`}
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         {deletedUsers.length === 0 ? (

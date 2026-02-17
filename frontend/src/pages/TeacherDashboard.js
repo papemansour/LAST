@@ -44,6 +44,7 @@ import NotificationBell from '../components/NotificationBell';
 
 const TeacherDashboard = () => {
   const navigate = useNavigate();
+  const tabContentRef = useRef(null);
   const [user, setUser] = useState(null);
   const [students, setStudents] = useState([]);
   const [courses, setCourses] = useState([]);

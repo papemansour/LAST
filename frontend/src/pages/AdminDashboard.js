@@ -583,15 +583,6 @@ const AdminDashboard = () => {
               <Award className="w-6 h-6" />
               <span className="text-xs font-semibold">🏆 Badges</span>
             </TabsTrigger>
-            
-            <TabsTrigger 
-              value="trash" 
-              data-testid="admin-tab-trash"
-              className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-red-500 data-[state=active]:to-orange-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
-            >
-              <Trash2 className="w-6 h-6" />
-              <span className="text-xs font-semibold">🗑️ Poubelle</span>
-            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="pending">

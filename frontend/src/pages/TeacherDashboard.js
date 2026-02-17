@@ -451,6 +451,9 @@ const TeacherDashboard = () => {
             </TabsTrigger>
           </TabsList>
 
+          {/* Content Area with ref for auto-scroll */}
+          <div ref={tabContentRef}>
+
           {/* Welcome Letter Tab */}
           <TabsContent value="welcome">
             <WelcomeLetter />

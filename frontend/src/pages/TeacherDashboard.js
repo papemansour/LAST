@@ -1003,6 +1003,7 @@ const TeacherDashboard = () => {
               </CardContent>
             </Card>
           </TabsContent>
+          </div>
         </Tabs>
       </div>
       

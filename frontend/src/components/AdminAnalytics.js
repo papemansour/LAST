@@ -288,22 +288,22 @@ const AdminAnalytics = () => {
           </CardContent>
         </Card>
 
-        {/* Hours per Week */}
+        {/* Hours per Semester */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-purple-600" />
-              Heures de Cours par Semaine
+              Heures de Cours par Trimestre
             </CardTitle>
-            <CardDescription>Volume d'heures enseignées</CardDescription>
+            <CardDescription>Volume d'heures enseignées par trimestre</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={data.hours_by_week}>
+              <BarChart data={data.hours_by_semester || data.hours_by_week}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="week" />
+                <XAxis dataKey="label" />
                 <YAxis />
-                <Tooltip />
+                <Tooltip formatter={(value) => [`${value}h`, 'Heures']} />
                 <Bar dataKey="hours" fill="#7c3aed" radius={[4, 4, 0, 0]} name="Heures" />
               </BarChart>
             </ResponsiveContainer>

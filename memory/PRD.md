@@ -103,13 +103,32 @@ Plateforme e-learning complète pour l'apprentissage de l'anglais, développée 
     - Memory: `POST /api/teacher/create-memory-game`, `POST /api/teacher/add-memory-pair`, `GET /api/teacher/my-memory-games`
   - Composants mis à jour: `TeacherGames.js`, `StudentGamesAdvanced.js`
 
+### Phase 7 - Février 2026 (Fork 5) ✅
+- ✅ **Nettoyage UI Admin** (17/02/2026)
+  - Suppression des onglets "Groupes" (pending-groups et group-courses) de AdminDashboard.js
+  - Suppression des imports PendingGroupRegistrations et GroupCourses
+  - Suppression du doublon de l'onglet "Poubelle"
+- ✅ **Vider la poubelle** (17/02/2026)
+  - Bouton "Vider la poubelle (X)" dans AdminTrash.js avec double confirmation
+  - Endpoint: `DELETE /api/admin/empty-trash`
+  - data-testid: `empty-trash-button`
+- ✅ **Analytics - Heures par Trimestre** (17/02/2026)
+  - Remplacement du graphique "Heures par Semaine" par "Heures par Trimestre"
+  - Labels: T1 2025, T2 2025, T3 2025, T4 2025, T1 2026
+  - API: `hours_by_semester` dans `/api/admin/analytics`
+- ✅ **Analytics - Édition des revenus** (17/02/2026)
+  - Tableau des revenus mensuels avec bouton d'édition (crayon) pour chaque mois
+  - Modal d'édition avec champs: Entrées EUR/FCFA, Sorties EUR/FCFA
+  - Endpoint: `POST /api/admin/update-revenue`
+  - data-testid: `edit-revenue-{month}`
+
 ## Tableau de Bord Analytique 📊
 
 ### Composants
 - **Cartes de résumé** : Étudiants, Professeurs, Heures, **Revenus nets (avec badge EUR/FCFA cliquable)**
 - **Évolution des inscriptions** : Graphique en aire (6 derniers mois)
-- **Heures par semaine** : Graphique en barres
-- **Revenus mensuels** : **Graphique à 2 lignes + sélecteur EUR/FCFA**
+- **Heures par Trimestre** : Graphique en barres (T1-T4 par année)
+- **Revenus mensuels** : **Graphique à 2 lignes + sélecteur EUR/FCFA + tableau éditable**
 - **Répartition par niveau** : Graphique circulaire
 - **Classement des professeurs** : Top 5 par heures enseignées
 
@@ -117,17 +136,20 @@ Plateforme e-learning complète pour l'apprentissage de l'anglais, développée 
 - `GET /api/admin/analytics?period=week|month|year`
   - Retourne: incoming_eur, outgoing_eur, net_eur (et équivalents FCFA)
   - revenue_by_month: chaque mois contient incoming_eur, outgoing_eur
+  - hours_by_semester: heures groupées par trimestre
+- `POST /api/admin/update-revenue` - Correction des données de revenus
+- `DELETE /api/admin/empty-trash` - Vider la poubelle
 - `GET /api/admin/check-documents-integrity`
 - `POST /api/admin/cleanup-invalid-documents`
 
 ## Tests
-- **Backend** : 100% (10/10 tests passés - iteration 6)
+- **Backend** : 100% (11/11 tests passés - iteration 7)
 - **Frontend** : 100% (UI vérifiée)
-- Rapport: `/app/test_reports/iteration_6.json`
+- Rapport: `/app/test_reports/iteration_7.json`
 
 ## Credentials de Test
 - Admin: admin@mykalamaenglish.com / adminco
-- Secrétaire: secretaire@mykalamaenglish.com / secretaireco
+- Secrétaire: secretaire@mykalamaenglish.com / kalamasecret
 - Teacher (test): proftest.flashcards@mykalamaenglish.com / teacher123
 
 ## Backlog Priorisé
@@ -137,9 +159,9 @@ Plateforme e-learning complète pour l'apprentissage de l'anglais, développée 
 - [ ] Continuer refactorisation de server.py (>6000 lignes)
 
 ### P1 - Important
-- [x] ~~Stratégie pour cours groupés~~ ✅ Implémenté
+- [x] ~~Stratégie pour cours groupés~~ ✅ Implémenté puis supprimé
 - [ ] Synchronisation factures avec Monday.com
 
 ### P2 - Normal
-- [ ] Envoi de jeux par le professeur
+- [x] ~~Envoi de jeux par le professeur~~ ✅ Implémenté
 - [ ] Export PDF/CSV des statistiques admin

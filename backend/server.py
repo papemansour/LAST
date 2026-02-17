@@ -3148,6 +3148,24 @@ async def permanent_delete_user(user_id: str, current_user: dict = Depends(get_c
     logger.info(f"User permanently deleted by admin: {user_id}")
     return {"message": "User permanently deleted"}
 
+@api_router.delete("/admin/empty-trash")
+async def empty_trash(current_user: dict = Depends(get_current_user)):
+    """Empty the entire trash - permanently delete all users in trash"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Count how many users will be deleted
+    count = await db.deleted_users.count_documents({})
+    
+    if count == 0:
+        return {"message": "La poubelle est déjà vide", "deleted_count": 0}
+    
+    # Delete all users in trash
+    result = await db.deleted_users.delete_many({})
+    
+    logger.info(f"Trash emptied by admin: {result.deleted_count} users permanently deleted")
+    return {"message": f"{result.deleted_count} utilisateur(s) supprimé(s) définitivement", "deleted_count": result.deleted_count}
+
 @api_router.get("/admin/users")
 async def get_users_by_role(role: Optional[str] = None, current_user: dict = Depends(get_current_user)):
     """Get all users, optionally filtered by role"""

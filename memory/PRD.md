@@ -25,7 +25,8 @@ Plateforme e-learning complète pour l'apprentissage de l'anglais, développée 
 │   └── src/
 │       ├── pages/             # Dashboards (Admin, Student, Teacher, Secretary)
 │       ├── components/        # Composants réutilisables
-│       │   └── AdminAnalytics.js  # Graphiques avec recharts
+│       │   ├── AdminAnalytics.js  # Graphiques avec recharts + tableau revenus éditable
+│       │   └── AdminTrash.js      # Poubelle avec "Vider la poubelle"
 │       ├── hooks/             # useNotifications.js
 │       └── utils/             # Utilitaires (api.js, fileUrl.js)
 ```
@@ -69,13 +70,7 @@ Plateforme e-learning complète pour l'apprentissage de l'anglais, développée 
   - Résout le problème de perte des fichiers après déploiement
   - Endpoint: `/api/files/{file_id}` pour récupérer les fichiers
   - Limite: 15MB par fichier
-- ✅ **Système de Cours Groupés** - Gestion des cours avec plusieurs étudiants
-  - Prix: 80€/personne (configurable)
-  - Création de groupes par admin/secrétaire
-  - Ajout/retrait d'étudiants
-  - Lien Meet partagé pour le groupe
-  - Sessions programmées avec suivi de présence
-  - Nouvel onglet "👥 Groupes" dans le dashboard Admin
+- ✅ **Système de Cours Groupés** - Gestion des cours avec plusieurs étudiants (SUPPRIMÉ depuis Phase 7)
 
 ### Phase 6 - Janvier 2026 (Fork 4) ✅
 - ✅ **Création d'étudiant par l'admin** - Formulaire complet dans l'espace admin

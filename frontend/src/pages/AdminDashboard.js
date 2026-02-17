@@ -28,17 +28,14 @@ import NewsManager from '../components/NewsManager';
 import ConversationChat from '../components/ConversationChat';
 import KalamaClub from '../components/KalamaClub';
 import TestQuestionsManager from '../components/TestQuestionsManager';
-import PendingGroupRegistrations from '../components/PendingGroupRegistrations';
 import AdminTrash from '../components/AdminTrash';
 import DocumentsManager from '../components/DocumentsManager';
 import BadgesManager from '../components/BadgesManager';
 import AdminStudentsAvailability from '../components/AdminStudentsAvailability';
 import AdminMonthlyHours from '../components/AdminMonthlyHours';
 import AdminAnalytics from '../components/AdminAnalytics';
-import GroupCourses from '../components/GroupCourses';
 import CreateStudentForm from '../components/CreateStudentForm';
 import ImportStudentsCSV from '../components/ImportStudentsCSV';
-// ActivityFeed removed
 
 const AdminDashboard = () => {
   const navigate = useNavigate();

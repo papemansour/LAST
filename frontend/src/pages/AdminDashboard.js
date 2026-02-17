@@ -423,16 +423,6 @@ const AdminDashboard = () => {
 
 
             <TabsTrigger 
-              value="pending-groups" 
-              data-testid="admin-tab-pending-groups"
-              className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-indigo-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
-            >
-              <Users className="w-6 h-6" />
-              <span className="text-xs font-semibold">Groupes</span>
-            </TabsTrigger>
-
-            
-            <TabsTrigger 
               value="students" 
               data-testid="admin-tab-students"
               className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-teal-500 data-[state=active]:to-teal-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"

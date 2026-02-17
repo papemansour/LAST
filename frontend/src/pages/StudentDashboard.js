@@ -465,7 +465,7 @@ const StudentDashboard = () => {
           </TabsList>
           
           {/* Content Area */}
-          <div className="flex-1">
+          <div className="flex-1" ref={tabContentRef}>
 
           {/* Welcome Letter Tab */}
           <TabsContent value="welcome">

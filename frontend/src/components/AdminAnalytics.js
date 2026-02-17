@@ -79,11 +79,12 @@ const AdminAnalytics = () => {
       { month: 'Déc', count: 38 },
       { month: 'Jan', count: 40 }
     ],
-    hours_by_week: [
-      { week: 'Sem 1', hours: 28 },
-      { week: 'Sem 2', hours: 32 },
-      { week: 'Sem 3', hours: 30 },
-      { week: 'Sem 4', hours: 35 }
+    hours_by_semester: [
+      { semester: 'Jan-Mar 2025', hours: 320, label: 'T1 2025' },
+      { semester: 'Avr-Juin 2025', hours: 380, label: 'T2 2025' },
+      { semester: 'Juil-Sept 2025', hours: 290, label: 'T3 2025' },
+      { semester: 'Oct-Déc 2025', hours: 410, label: 'T4 2025' },
+      { semester: 'Jan-Mar 2026', hours: 180, label: 'T1 2026' }
     ],
     revenue_by_month: [
       { month: 'Août', incoming_eur: 1800, incoming_fcfa: 600000, outgoing_eur: 900, outgoing_fcfa: 300000 },
@@ -106,6 +107,37 @@ const AdminAnalytics = () => {
       { name: 'Prof. Laurent', hours: 12, students: 5 }
     ]
   });
+
+  // Fonction pour ouvrir le dialog d'édition
+  const handleEditRevenue = (monthData) => {
+    setEditingMonth(monthData.month);
+    setEditForm({
+      incoming_eur: monthData.incoming_eur || 0,
+      incoming_fcfa: monthData.incoming_fcfa || 0,
+      outgoing_eur: monthData.outgoing_eur || 0,
+      outgoing_fcfa: monthData.outgoing_fcfa || 0
+    });
+    setEditDialogOpen(true);
+  };
+
+  // Fonction pour sauvegarder les modifications
+  const handleSaveRevenue = async () => {
+    setSaving(true);
+    try {
+      await apiClient.post('/admin/update-revenue', {
+        month: editingMonth,
+        ...editForm
+      });
+      toast.success(`Revenus de ${editingMonth} mis à jour !`);
+      setEditDialogOpen(false);
+      fetchAnalytics(); // Recharger les données
+    } catch (error) {
+      console.error('Error updating revenue:', error);
+      toast.error('Erreur lors de la mise à jour des revenus');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   if (loading) {
     return (

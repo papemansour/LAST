@@ -369,7 +369,17 @@ const TeacherDashboard = () => {
           </Card>
         </div>
 
-        <Tabs defaultValue="welcome" className="space-y-6">
+        <Tabs 
+          defaultValue="welcome" 
+          className="space-y-6"
+          onValueChange={() => {
+            setTimeout(() => {
+              if (tabContentRef.current) {
+                tabContentRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }, 100);
+          }}
+        >
           <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-3 h-auto bg-transparent p-0">
             <TabsTrigger value="welcome" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <Mail className="w-8 h-8 text-green-600 data-[state=active]:text-white" />

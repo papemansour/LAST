@@ -324,27 +324,29 @@ const AdminAnalytics = () => {
                 </CardTitle>
                 <CardDescription>Entrées (reçus élèves) vs Sorties (paiements profs)</CardDescription>
               </div>
-              <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
-                <button
-                  onClick={() => setCurrency('EUR')}
-                  className={`px-3 py-1 text-sm font-medium rounded-md transition-all ${
-                    currency === 'EUR' 
-                      ? 'bg-white text-green-600 shadow-sm' 
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  EUR €
-                </button>
-                <button
-                  onClick={() => setCurrency('FCFA')}
-                  className={`px-3 py-1 text-sm font-medium rounded-md transition-all ${
-                    currency === 'FCFA' 
-                      ? 'bg-white text-green-600 shadow-sm' 
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  FCFA
-                </button>
+              <div className="flex items-center gap-2">
+                <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+                  <button
+                    onClick={() => setCurrency('EUR')}
+                    className={`px-3 py-1 text-sm font-medium rounded-md transition-all ${
+                      currency === 'EUR' 
+                        ? 'bg-white text-green-600 shadow-sm' 
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    EUR €
+                  </button>
+                  <button
+                    onClick={() => setCurrency('FCFA')}
+                    className={`px-3 py-1 text-sm font-medium rounded-md transition-all ${
+                      currency === 'FCFA' 
+                        ? 'bg-white text-green-600 shadow-sm' 
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    FCFA
+                  </button>
+                </div>
               </div>
             </div>
           </CardHeader>
@@ -374,6 +376,53 @@ const AdminAnalytics = () => {
                 />
               </LineChart>
             </ResponsiveContainer>
+            
+            {/* Tableau des revenus avec bouton éditer */}
+            <div className="mt-4 border rounded-lg overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-3 py-2 text-left font-medium text-gray-700">Mois</th>
+                    <th className="px-3 py-2 text-right font-medium text-green-700">Entrées</th>
+                    <th className="px-3 py-2 text-right font-medium text-red-700">Sorties</th>
+                    <th className="px-3 py-2 text-right font-medium text-blue-700">Net</th>
+                    <th className="px-3 py-2 text-center font-medium text-gray-700">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.revenue_by_month.map((row, idx) => {
+                    const incoming = currency === 'EUR' ? row.incoming_eur : row.incoming_fcfa;
+                    const outgoing = currency === 'EUR' ? row.outgoing_eur : row.outgoing_fcfa;
+                    const net = incoming - outgoing;
+                    return (
+                      <tr key={row.month} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                        <td className="px-3 py-2 font-medium">{row.month}</td>
+                        <td className="px-3 py-2 text-right text-green-600">
+                          {currency === 'EUR' ? `${incoming}€` : `${incoming.toLocaleString()} F`}
+                        </td>
+                        <td className="px-3 py-2 text-right text-red-600">
+                          {currency === 'EUR' ? `${outgoing}€` : `${outgoing.toLocaleString()} F`}
+                        </td>
+                        <td className="px-3 py-2 text-right font-semibold text-blue-600">
+                          {currency === 'EUR' ? `${net}€` : `${net.toLocaleString()} F`}
+                        </td>
+                        <td className="px-3 py-2 text-center">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleEditRevenue(row)}
+                            className="h-7 px-2 text-gray-500 hover:text-blue-600"
+                            data-testid={`edit-revenue-${row.month}`}
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </CardContent>
         </Card>
 

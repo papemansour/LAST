@@ -779,12 +779,6 @@ const AdminDashboard = () => {
           </TabsContent>
 
 
-
-          {/* Pending Group Registrations Tab */}
-          <TabsContent value="pending-groups">
-            <PendingGroupRegistrations />
-          </TabsContent>
-
           <TabsContent value="teachers">
             <div className="grid md:grid-cols-2 gap-6">
               <Card>
@@ -1967,11 +1961,6 @@ const AdminDashboard = () => {
                 <KalamaClub userRole="admin" />
               </CardContent>
             </Card>
-          </TabsContent>
-
-          {/* Group Courses Tab */}
-          <TabsContent value="group-courses">
-            <GroupCourses userRole="admin" />
           </TabsContent>
 
           {/* Documents Tab */}

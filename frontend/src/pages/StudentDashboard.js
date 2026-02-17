@@ -306,7 +306,15 @@ const StudentDashboard = () => {
 
         <Tabs 
           value={activeTab || (user.level === 'kkid' ? 'quiz' : 'welcome')} 
-          onValueChange={setActiveTab}
+          onValueChange={(value) => {
+            setActiveTab(value);
+            // Scroll to content after tab change
+            setTimeout(() => {
+              if (tabContentRef.current) {
+                tabContentRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }, 100);
+          }}
           className="space-y-6"
         >
           {/* Grid Navigation Cards */}

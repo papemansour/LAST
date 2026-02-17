@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from './ui/dialog';
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
 import { 
@@ -8,7 +17,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   AreaChart, Area
 } from 'recharts';
-import { TrendingUp, Users, Clock, DollarSign, RefreshCw, Calendar, Award } from 'lucide-react';
+import { TrendingUp, Users, Clock, DollarSign, RefreshCw, Calendar, Award, Pencil, Save, X } from 'lucide-react';
 
 const COLORS = ['#0d9488', '#0891b2', '#7c3aed', '#db2777', '#ea580c', '#16a34a'];
 

@@ -26,6 +26,17 @@ const AdminAnalytics = () => {
   const [analytics, setAnalytics] = useState(null);
   const [period, setPeriod] = useState('month'); // week, month, year
   const [currency, setCurrency] = useState('EUR'); // EUR, FCFA
+  
+  // États pour l'édition des revenus
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingMonth, setEditingMonth] = useState(null);
+  const [editForm, setEditForm] = useState({
+    incoming_eur: 0,
+    incoming_fcfa: 0,
+    outgoing_eur: 0,
+    outgoing_fcfa: 0
+  });
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     fetchAnalytics();

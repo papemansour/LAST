@@ -5138,10 +5138,98 @@ async def get_admin_analytics(period: str = "month", current_user: dict = Depend
         },
         "students_by_month": students_by_month,
         "hours_by_week": hours_by_week,
+        "hours_by_semester": await get_hours_by_semester(),
         "revenue_by_month": revenue_by_month,
         "students_by_level": students_by_level,
         "top_teachers": top_teachers
     }
+
+async def get_hours_by_semester():
+    """Calculate teaching hours grouped by quarter/semester"""
+    now = datetime.now(timezone.utc)
+    semesters = []
+    
+    # Define quarters for the last 5 quarters
+    quarters = [
+        {"start_month": 1, "end_month": 3, "label": "T1"},
+        {"start_month": 4, "end_month": 6, "label": "T2"},
+        {"start_month": 7, "end_month": 9, "label": "T3"},
+        {"start_month": 10, "end_month": 12, "label": "T4"},
+    ]
+    
+    # Calculate for current year and previous year
+    for year in [now.year - 1, now.year]:
+        for q in quarters:
+            start = datetime(year, q["start_month"], 1, tzinfo=timezone.utc)
+            if q["end_month"] == 12:
+                end = datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+            else:
+                end = datetime(year, q["end_month"] + 1, 1, tzinfo=timezone.utc)
+            
+            # Skip future quarters
+            if start > now:
+                continue
+            
+            # Get all course links sent in this period (each link = 1 session)
+            course_links = await db.course_links.count_documents({
+                "created_at": {"$gte": start.isoformat(), "$lt": end.isoformat()}
+            })
+            
+            # Get completed sessions in this period
+            sessions = await db.teacher_sessions.find({
+                "status": "completed",
+                "end_time": {"$gte": start.isoformat(), "$lt": end.isoformat()}
+            }, {"_id": 0, "total_time_seconds": 1}).to_list(1000)
+            
+            total_hours = sum(s.get('total_time_seconds', 0) for s in sessions) / 3600
+            
+            # If no session data, estimate from course links (assume 1h per link)
+            if total_hours == 0 and course_links > 0:
+                total_hours = course_links  # 1 hour per course link sent
+            
+            month_names = {1: "Jan", 4: "Avr", 7: "Juil", 10: "Oct"}
+            end_month_names = {3: "Mar", 6: "Juin", 9: "Sept", 12: "Déc"}
+            
+            semesters.append({
+                "semester": f"{month_names[q['start_month']]}-{end_month_names[q['end_month']]} {year}",
+                "hours": round(total_hours, 1),
+                "label": f"{q['label']} {year}"
+            })
+    
+    # Return last 5 quarters
+    return semesters[-5:] if len(semesters) > 5 else semesters
+
+@api_router.post("/admin/update-revenue")
+async def update_revenue(data: dict, current_user: dict = Depends(get_current_user)):
+    """Update revenue data for a specific month (for corrections)"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    month = data.get('month')
+    if not month:
+        raise HTTPException(status_code=400, detail="Month is required")
+    
+    # Store the correction in a dedicated collection
+    correction = {
+        "id": str(uuid.uuid4()),
+        "month": month,
+        "incoming_eur": data.get('incoming_eur', 0),
+        "incoming_fcfa": data.get('incoming_fcfa', 0),
+        "outgoing_eur": data.get('outgoing_eur', 0),
+        "outgoing_fcfa": data.get('outgoing_fcfa', 0),
+        "corrected_by": current_user['id'],
+        "corrected_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    # Upsert - update if exists, insert if not
+    await db.revenue_corrections.update_one(
+        {"month": month},
+        {"$set": correction},
+        upsert=True
+    )
+    
+    logger.info(f"Revenue correction for {month} by admin {current_user['email']}")
+    return {"message": f"Revenus de {month} mis à jour", "correction": correction}
 
 
 @api_router.post("/admin/manual-session")

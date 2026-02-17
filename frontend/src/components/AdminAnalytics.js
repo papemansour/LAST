@@ -497,6 +497,91 @@ const AdminAnalytics = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Modal d'édition des revenus */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Pencil className="w-5 h-5 text-blue-600" />
+              Modifier les revenus - {editingMonth}
+            </DialogTitle>
+            <DialogDescription>
+              Corrigez les entrées et sorties pour ce mois
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="incoming_eur" className="text-green-700">Entrées (EUR) €</Label>
+                <Input
+                  id="incoming_eur"
+                  type="number"
+                  value={editForm.incoming_eur}
+                  onChange={(e) => setEditForm({...editForm, incoming_eur: parseInt(e.target.value) || 0})}
+                  className="border-green-300 focus:border-green-500"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="incoming_fcfa" className="text-green-700">Entrées (FCFA)</Label>
+                <Input
+                  id="incoming_fcfa"
+                  type="number"
+                  value={editForm.incoming_fcfa}
+                  onChange={(e) => setEditForm({...editForm, incoming_fcfa: parseInt(e.target.value) || 0})}
+                  className="border-green-300 focus:border-green-500"
+                />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="outgoing_eur" className="text-red-700">Sorties (EUR) €</Label>
+                <Input
+                  id="outgoing_eur"
+                  type="number"
+                  value={editForm.outgoing_eur}
+                  onChange={(e) => setEditForm({...editForm, outgoing_eur: parseInt(e.target.value) || 0})}
+                  className="border-red-300 focus:border-red-500"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="outgoing_fcfa" className="text-red-700">Sorties (FCFA)</Label>
+                <Input
+                  id="outgoing_fcfa"
+                  type="number"
+                  value={editForm.outgoing_fcfa}
+                  onChange={(e) => setEditForm({...editForm, outgoing_fcfa: parseInt(e.target.value) || 0})}
+                  className="border-red-300 focus:border-red-500"
+                />
+              </div>
+            </div>
+
+            {/* Résumé */}
+            <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <p className="text-sm text-blue-800">
+                <strong>Résumé :</strong>
+              </p>
+              <div className="grid grid-cols-2 gap-2 mt-2 text-sm">
+                <p className="text-blue-700">Net EUR: <strong>{editForm.incoming_eur - editForm.outgoing_eur}€</strong></p>
+                <p className="text-blue-700">Net FCFA: <strong>{(editForm.incoming_fcfa - editForm.outgoing_fcfa).toLocaleString()} F</strong></p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)} disabled={saving}>
+              <X className="w-4 h-4 mr-1" />
+              Annuler
+            </Button>
+            <Button onClick={handleSaveRevenue} disabled={saving} className="bg-blue-600 hover:bg-blue-700">
+              <Save className="w-4 h-4 mr-1" />
+              {saving ? 'Enregistrement...' : 'Enregistrer'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

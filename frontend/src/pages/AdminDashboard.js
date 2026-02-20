@@ -580,6 +580,15 @@ const AdminDashboard = () => {
               <Award className="w-6 h-6" />
               <span className="text-xs font-semibold">🏆 Badges</span>
             </TabsTrigger>
+            
+            <TabsTrigger 
+              value="leave-requests" 
+              data-testid="admin-tab-leave-requests"
+              className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+            >
+              <Plane className="w-6 h-6" />
+              <span className="text-xs font-semibold">🏖️ Congés</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="pending">

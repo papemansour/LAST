@@ -606,7 +606,8 @@ const SecretaryDashboard = () => {
     const montantNet = Math.max(0, montantInitial - deductionsAmount);
     
     const hasDeductions = deductions > 0;
-    const invoiceNumber = `SAL-PROF-${payment.id?.slice(0, 8).toUpperCase() || 'XXXXX'}`;
+    // Use invoice_ref from backend if available, fallback to generated
+    const invoiceNumber = payment.invoice_ref || `FAC-${new Date().getFullYear()}-${payment.id?.slice(0, 3).toUpperCase() || 'XXX'}`;
     
     const printWindow = window.open('', '_blank');
     printWindow.document.write(`

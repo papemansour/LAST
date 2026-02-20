@@ -109,8 +109,9 @@ const TeacherDashboard = () => {
       setCourses(coursesRes.data);
       setConversations(conversationsRes.data);
       
-      // Check if first login to show welcome gift
-      if (userRes.data.first_login) {
+      // Check if first login to show welcome gift (NOT for secretary profile)
+      const isSecretary = userRes.data.email?.toLowerCase() === 'ndeyemane.dieng@mykalamaenglish.com';
+      if (userRes.data.first_login && !isSecretary) {
         setShowWelcomeGift(true);
       }
       

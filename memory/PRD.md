@@ -153,6 +153,9 @@ Plateforme e-learning complète pour l'apprentissage de l'anglais, développée 
   - Email: `ndeyemane.dieng@mykalamaenglish.com`
   - Mot de passe: `Teacherc209e87f`
   - Rôle: `teacher` avec interface limitée
+  - **Titre**: "Espace Privé" (au lieu de "Espace Professeur")
+  - **Pas de welcome gift** ni de lettre de bienvenue
+  - **Pas de cartes statistiques** (étudiants, cours, messages)
   - **Onglets affichés (7)**: Club, Messages Admin, Horaires, News, Bibliothèque, Mes Payes, Profil
   - **Onglets masqués (9)**: Bienvenue, Étudiants, Dispo Étudiants, Liens Meet, Jeu, Vidéos K-Kid, Pointage, Documents, Résumés
   - Détection par email dans TeacherDashboard.js

@@ -122,6 +122,41 @@ Plateforme e-learning complète pour l'apprentissage de l'anglais, développée 
   - Endpoint: `POST /api/admin/update-revenue`
   - data-testid: `edit-revenue-{month}`
 
+### Phase 8 - Février 2026 (Fork 6) ✅
+- ✅ **Promo Ramadan** (20/02/2026)
+  - Bannière: "🌙 PROMO RAMADAN : -10% sur tous les packs ! Code : RAMADAN2026 - Valable jusqu'au 20 mars 2026"
+  - Code promo Stripe: `promo_1T2s9HI4faCc3GWYXTWySNJ1`
+  - **K-Kid exclu de la promo** (pas de réduction sur le pack enfants)
+  - RamadanPromoBanner.js mis à jour avec mention "(Hors Pack K-Kid)"
+  - HomePage.js: Logique conditionnelle pour appliquer la promo uniquement aux packs non-K-Kid
+
+- ✅ **Référence de facture FAC-YYYY-XXX** (20/02/2026)
+  - Format: FAC-2026-001, FAC-2026-002, etc.
+  - Générée automatiquement lors de la création d'un bulletin de salaire professeur
+  - Visible dans l'espace secrétaire sur la liste des bulletins
+  - Stockée dans le champ `invoice_ref` de la collection `teacher_payments`
+
+- ✅ **Solde à venir (Professeur)** (20/02/2026)
+  - Nouvelle section dans l'onglet "Mes Payes" du dashboard professeur
+  - Disponible **uniquement à partir du 25 du mois**
+  - Affiche le montant prévu avant la réception officielle du bulletin
+  - Endpoint: `GET /api/teacher/upcoming-balance`
+  - Message dynamique: "Disponible dans X jour(s)" ou montant si disponible
+
+- ✅ **Logique de visibilité des bulletins** (20/02/2026)
+  - Bulletin créé entre le **25 et 28** du mois → Visible dans "Mes Payes" **à partir du 29**
+  - Bulletin créé **le 29+** → Visible immédiatement
+  - Champs ajoutés: `visible_from` (date ISO), `status` ("pending" ou "visible")
+  - Endpoint `GET /api/teacher/my-payments` filtre par date de visibilité
+
+- ✅ **Profil spécial Ndeyemane (Secrétaire)** (20/02/2026)
+  - Email: `ndeyemane.dieng@mykalamaenglish.com`
+  - Mot de passe: `Teacherc209e87f`
+  - Rôle: `teacher` avec interface limitée
+  - **Onglets affichés (7)**: Club, Messages Admin, Horaires, News, Bibliothèque, Mes Payes, Profil
+  - **Onglets masqués (9)**: Bienvenue, Étudiants, Dispo Étudiants, Liens Meet, Jeu, Vidéos K-Kid, Pointage, Documents, Résumés
+  - Détection par email dans TeacherDashboard.js
+
 ## Tableau de Bord Analytique 📊
 
 ### Composants

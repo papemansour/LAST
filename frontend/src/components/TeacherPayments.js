@@ -192,6 +192,53 @@ const TeacherPayments = () => {
 
   return (
     <div className="space-y-6">
+      {/* Upcoming Balance Card - Solde à venir */}
+      {upcomingBalance && (
+        <Card className={`border-2 ${upcomingBalance.available ? 'bg-gradient-to-br from-amber-50 to-yellow-100 border-amber-300' : 'bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200'}`}>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className={`p-4 rounded-xl ${upcomingBalance.available ? 'bg-amber-500' : 'bg-gray-400'}`}>
+                  <Clock className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    💰 Solde à Venir
+                    {!upcomingBalance.available && (
+                      <span className="text-xs bg-gray-200 px-2 py-1 rounded-full text-gray-600">
+                        Disponible dans {upcomingBalance.available_from} jour(s)
+                      </span>
+                    )}
+                  </h3>
+                  {upcomingBalance.available ? (
+                    <>
+                      <p className="text-3xl font-bold text-amber-700">
+                        {upcomingBalance.total_upcoming?.toFixed(2)} {upcomingBalance.currency}
+                      </p>
+                      <p className="text-sm text-amber-600 mt-1">
+                        📅 Bulletin disponible : {upcomingBalance.bulletin_visible_from}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-sm text-gray-500 mt-1">
+                      {upcomingBalance.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+              {upcomingBalance.available && upcomingBalance.details?.length > 0 && (
+                <div className="text-right">
+                  <div className="flex items-center gap-2 text-amber-600 bg-amber-100 px-3 py-2 rounded-lg">
+                    <AlertCircle className="w-4 h-4" />
+                    <span className="text-sm font-medium">En attente de validation</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="bg-gradient-to-br from-green-50 to-emerald-100 border-green-200">

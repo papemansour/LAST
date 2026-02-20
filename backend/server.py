@@ -4065,7 +4065,7 @@ async def get_my_courses(current_user: dict = Depends(get_current_user)):
 
 @api_router.get("/teacher/my-payments")
 async def get_teacher_my_payments(current_user: dict = Depends(get_current_user)):
-    """Get all payment slips for the connected teacher"""
+    """Get all payment slips for the connected teacher (filtered by visibility date)"""
     if current_user['role'] != 'teacher':
         raise HTTPException(status_code=403, detail="Teacher access required")
     
@@ -4073,7 +4073,7 @@ async def get_teacher_my_payments(current_user: dict = Depends(get_current_user)
     teacher_email = current_user.get('email', '')
     teacher_name = f"{current_user.get('first_name', '')} {current_user.get('last_name', '')}".strip()
     
-    payments = await db.teacher_payments.find({
+    all_payments = await db.teacher_payments.find({
         "$or": [
             {"teacher_id": current_user['id']},
             {"teacher_email": teacher_email},
@@ -4082,8 +4082,11 @@ async def get_teacher_my_payments(current_user: dict = Depends(get_current_user)
         ]
     }, {"_id": 0}).sort("created_at", -1).to_list(100)
     
-    # Calculate net amount for each payment
-    for payment in payments:
+    now = datetime.now(timezone.utc)
+    visible_payments = []
+    
+    # Calculate net amount for each payment and filter by visibility
+    for payment in all_payments:
         amount = float(payment.get('amount', 0))
         bonus = float(payment.get('bonus', 0))
         deductions = int(payment.get('deductions', 0))
@@ -4093,8 +4096,86 @@ async def get_teacher_my_payments(current_user: dict = Depends(get_current_user)
         payment['montant_initial'] = amount + bonus
         payment['deductions_amount'] = deductions_amount
         payment['montant_net'] = max(0, amount + bonus - deductions_amount)
+        
+        # Check visibility date
+        visible_from = payment.get('visible_from')
+        if visible_from:
+            try:
+                visible_date = datetime.fromisoformat(visible_from.replace('Z', '+00:00'))
+                if now >= visible_date:
+                    visible_payments.append(payment)
+            except:
+                visible_payments.append(payment)
+        else:
+            # Old payments without visibility date - show them
+            visible_payments.append(payment)
     
-    return payments
+    return visible_payments
+
+@api_router.get("/teacher/upcoming-balance")
+async def get_teacher_upcoming_balance(current_user: dict = Depends(get_current_user)):
+    """Get the upcoming balance for the teacher (visible from 25th of month)"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    now = datetime.now(timezone.utc)
+    day_of_month = now.day
+    
+    # Only available from the 25th of the month
+    if day_of_month < 25:
+        return {
+            "available": False,
+            "message": "Le solde à venir sera disponible à partir du 25 du mois",
+            "available_from": 25 - day_of_month
+        }
+    
+    # Search by teacher_id OR by email match
+    teacher_email = current_user.get('email', '')
+    teacher_name = f"{current_user.get('first_name', '')} {current_user.get('last_name', '')}".strip()
+    
+    # Get current month's pending payments (created between 25-28)
+    current_month_start = datetime(now.year, now.month, 1, tzinfo=timezone.utc).isoformat()
+    current_month_end = datetime(now.year, now.month + 1, 1, tzinfo=timezone.utc).isoformat() if now.month < 12 else datetime(now.year + 1, 1, 1, tzinfo=timezone.utc).isoformat()
+    
+    pending_payments = await db.teacher_payments.find({
+        "$or": [
+            {"teacher_id": current_user['id']},
+            {"teacher_email": teacher_email},
+            {"email": teacher_email},
+            {"teacher_name": teacher_name}
+        ],
+        "created_at": {"$gte": current_month_start, "$lt": current_month_end},
+        "status": "pending"
+    }, {"_id": 0}).to_list(100)
+    
+    total_upcoming = 0
+    upcoming_details = []
+    
+    for payment in pending_payments:
+        amount = float(payment.get('amount', 0))
+        bonus = float(payment.get('bonus', 0))
+        deductions = int(payment.get('deductions', 0))
+        currency = payment.get('currency', 'EUR')
+        deduction_unit = 5 if currency == 'EUR' else 1500
+        deductions_amount = deductions * deduction_unit
+        montant_net = max(0, amount + bonus - deductions_amount)
+        
+        total_upcoming += montant_net
+        upcoming_details.append({
+            "month": payment.get('month'),
+            "montant_net": montant_net,
+            "currency": currency,
+            "visible_from": payment.get('visible_from')
+        })
+    
+    return {
+        "available": True,
+        "total_upcoming": total_upcoming,
+        "currency": upcoming_details[0]['currency'] if upcoming_details else 'EUR',
+        "details": upcoming_details,
+        "message": f"Solde à venir pour ce mois: {total_upcoming} {upcoming_details[0]['currency'] if upcoming_details else 'EUR'}",
+        "bulletin_visible_from": "29 du mois" if day_of_month < 29 else "Disponible maintenant"
+    }
 
 @api_router.post("/teacher/create-course")
 async def create_course(course_data: CourseCreate, current_user: dict = Depends(get_current_user)):

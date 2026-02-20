@@ -65,7 +65,7 @@ const HomePage = () => {
   const currentDate = new Date();
   const isRamadanPromo = currentDate >= new Date('2026-02-17') && currentDate <= new Date('2026-03-20');
   const ramadanDiscount = isRamadanPromo ? 0.10 : 0; // 10% discount
-  const RAMADAN_PROMO_CODE = 'promo_1SuToTI4faCc3GWYTk1MUuar';
+  const RAMADAN_PROMO_CODE = 'promo_1T2s9HI4faCc3GWYXTWySNJ1';
   
   const [pricingData, setPricingData] = useState({
     kkid_eur: 30,
@@ -552,8 +552,8 @@ const HomePage = () => {
             <CurrencyToggle />
           </div>
           
-          <p className="text-center text-base sm:text-lg md:text-xl text-red-600 font-semibold mb-3 md:mb-4 px-4">
-            🎄 Promo Noël & Nouvel An - Valable jusqu'au 14 janvier 2025
+          <p className="text-center text-base sm:text-lg md:text-xl text-emerald-600 font-semibold mb-3 md:mb-4 px-4">
+            🌙 PROMO RAMADAN : -10% sur tous les packs ! Code : RAMADAN2026 - Valable jusqu'au 20 mars 2026
           </p>
           <div className="text-center mb-8 md:mb-12 px-4">
             <p className="text-base sm:text-lg md:text-xl font-semibold mb-2">

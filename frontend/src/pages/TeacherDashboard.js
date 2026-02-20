@@ -379,6 +379,7 @@ const TeacherDashboard = () => {
             </CardContent>
           </Card>
         </div>
+        )}
 
         <Tabs 
           defaultValue={isSecretaryProfile ? "payments" : "welcome"} 

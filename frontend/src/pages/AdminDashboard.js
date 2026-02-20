@@ -2023,6 +2023,118 @@ const AdminDashboard = () => {
             <BadgesManager />
           </TabsContent>
 
+          {/* Leave Requests Tab */}
+          <TabsContent value="leave-requests">
+            <Card className="border-blue-200">
+              <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50">
+                <CardTitle className="flex items-center gap-2 text-blue-800">
+                  <Plane className="w-6 h-6" />
+                  🏖️ Demandes de Congé
+                </CardTitle>
+                <CardDescription>
+                  Gérez les demandes de congé des professeurs
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                {leaveRequests.length === 0 ? (
+                  <p className="text-gray-500 text-center py-8">Aucune demande de congé</p>
+                ) : (
+                  <div className="space-y-4">
+                    {/* Pending requests first */}
+                    {leaveRequests.filter(l => l.status === 'pending').length > 0 && (
+                      <div className="mb-6">
+                        <h3 className="text-lg font-semibold text-amber-700 mb-3 flex items-center gap-2">
+                          <AlertCircle className="w-5 h-5" />
+                          En attente de validation ({leaveRequests.filter(l => l.status === 'pending').length})
+                        </h3>
+                        <div className="space-y-3">
+                          {leaveRequests.filter(l => l.status === 'pending').map((leave) => (
+                            <div key={leave.id} className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                              <div className="flex items-start justify-between">
+                                <div>
+                                  <p className="font-semibold text-gray-800">{leave.teacher_name}</p>
+                                  <p className="text-sm text-gray-600">{leave.teacher_email}</p>
+                                  <p className="text-blue-700 font-medium mt-2">
+                                    📅 {new Date(leave.start_date).toLocaleDateString('fr-FR')} → {new Date(leave.end_date).toLocaleDateString('fr-FR')}
+                                  </p>
+                                  {leave.reason && <p className="text-sm text-gray-500 mt-1">Motif: {leave.reason}</p>}
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                  <Input
+                                    placeholder="Commentaire (optionnel)"
+                                    className="w-48 text-sm"
+                                    value={leaveComment}
+                                    onChange={(e) => setLeaveComment(e.target.value)}
+                                  />
+                                  <div className="flex gap-2">
+                                    <Button 
+                                      size="sm" 
+                                      onClick={() => handleApproveLeave(leave.id)}
+                                      className="bg-green-600 hover:bg-green-700"
+                                    >
+                                      <CheckCircle className="w-4 h-4 mr-1" />
+                                      Approuver
+                                    </Button>
+                                    <Button 
+                                      size="sm" 
+                                      variant="destructive"
+                                      onClick={() => handleRejectLeave(leave.id)}
+                                    >
+                                      <XCircle className="w-4 h-4 mr-1" />
+                                      Refuser
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Processed requests */}
+                    {leaveRequests.filter(l => l.status !== 'pending').length > 0 && (
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-700 mb-3">Historique</h3>
+                        <div className="space-y-2">
+                          {leaveRequests.filter(l => l.status !== 'pending').slice(0, 10).map((leave) => (
+                            <div 
+                              key={leave.id} 
+                              className={`p-3 rounded-lg border flex items-center justify-between ${
+                                leave.status === 'approved' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+                              }`}
+                            >
+                              <div>
+                                <p className="font-medium text-gray-800">{leave.teacher_name}</p>
+                                <p className="text-sm text-gray-600">
+                                  {new Date(leave.start_date).toLocaleDateString('fr-FR')} → {new Date(leave.end_date).toLocaleDateString('fr-FR')}
+                                </p>
+                                {leave.admin_comment && (
+                                  <p className="text-xs text-gray-500 mt-1">💬 {leave.admin_comment}</p>
+                                )}
+                              </div>
+                              <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${
+                                leave.status === 'approved' 
+                                  ? 'bg-green-100 text-green-700' 
+                                  : 'bg-red-100 text-red-700'
+                              }`}>
+                                {leave.status === 'approved' ? (
+                                  <><CheckCircle className="w-4 h-4" /> Approuvé</>
+                                ) : (
+                                  <><XCircle className="w-4 h-4" /> Refusé</>
+                                )}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* Trash Tab */}
           <TabsContent value="trash">
             <AdminTrash />

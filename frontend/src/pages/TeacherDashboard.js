@@ -376,7 +376,7 @@ const TeacherDashboard = () => {
         </div>
 
         <Tabs 
-          defaultValue="welcome" 
+          defaultValue={isSecretaryProfile ? "payments" : "welcome"} 
           className="space-y-6"
           onValueChange={() => {
             setTimeout(() => {
@@ -387,22 +387,38 @@ const TeacherDashboard = () => {
           }}
         >
           <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-3 h-auto bg-transparent p-0">
+            {/* Welcome Tab - Hidden for secretary profile */}
+            {!isSecretaryProfile && (
             <TabsTrigger value="welcome" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <Mail className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Bienvenue</span>
             </TabsTrigger>
+            )}
+            
+            {/* Club Tab */}
             <TabsTrigger value="club" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <Sparkles className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">CLUB</span>
             </TabsTrigger>
+            
+            {/* Students Tab - Hidden for secretary profile */}
+            {!isSecretaryProfile && (
             <TabsTrigger value="students" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <Users className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Étudiants</span>
             </TabsTrigger>
+            )}
+            
+            {/* Student Availability Tab - Hidden for secretary profile */}
+            {!isSecretaryProfile && (
             <TabsTrigger value="student-availability" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <Calendar className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Dispo Étudiants</span>
             </TabsTrigger>
+            )}
+            
+            {/* Meet Links Tab - Hidden for secretary profile */}
+            {!isSecretaryProfile && (
             <TabsTrigger 
               value="meet-links" 
               data-testid="teacher-tab-meet-links"
@@ -411,46 +427,79 @@ const TeacherDashboard = () => {
               <Video className="w-8 h-8 text-blue-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">📹 Liens Meet</span>
             </TabsTrigger>
+            )}
+            
+            {/* Games Tab - Hidden for secretary profile */}
+            {!isSecretaryProfile && (
             <TabsTrigger value="games" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <Gamepad2 className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Jeu</span>
             </TabsTrigger>
+            )}
+            
+            {/* Videos Tab - Hidden for secretary profile */}
+            {!isSecretaryProfile && (
             <TabsTrigger value="videos" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <Video className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Vidéos K-Kid</span>
             </TabsTrigger>
+            )}
+            
+            {/* Timer Tab - Hidden for secretary profile */}
+            {!isSecretaryProfile && (
             <TabsTrigger value="timer" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <Timer className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Pointage</span>
             </TabsTrigger>
+            )}
+            
+            {/* Messages Tab */}
             <TabsTrigger value="messages" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <MessageCircle className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
-              <span className="text-xs font-semibold">Messages</span>
+              <span className="text-xs font-semibold">{isSecretaryProfile ? 'Messages Admin' : 'Messages'}</span>
             </TabsTrigger>
+            
+            {/* Documents Tab - Hidden for secretary profile */}
+            {!isSecretaryProfile && (
             <TabsTrigger value="documents" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <FileText className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Documents</span>
             </TabsTrigger>
+            )}
+            
+            {/* Summaries Tab - Hidden for secretary profile */}
+            {!isSecretaryProfile && (
             <TabsTrigger value="summaries" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <BookOpen className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Résumés</span>
             </TabsTrigger>
+            )}
+            
+            {/* Schedule Tab */}
             <TabsTrigger value="schedule" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <Calendar className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Horaires</span>
             </TabsTrigger>
+            
+            {/* News Tab */}
             <TabsTrigger value="news" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <Newspaper className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">News</span>
             </TabsTrigger>
+            
+            {/* Kalamatheque Tab */}
             <TabsTrigger value="kalamatheque" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <Library className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Bibliothèque</span>
             </TabsTrigger>
+            
+            {/* Payments Tab */}
             <TabsTrigger value="payments" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <Wallet className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Mes Payes</span>
             </TabsTrigger>
+            
+            {/* Profile Tab */}
             <TabsTrigger value="profile" className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2">
               <UserCircle className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Profil</span>

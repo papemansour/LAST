@@ -3,14 +3,16 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
-import { Printer, Download, Wallet, TrendingUp, TrendingDown, Calendar } from 'lucide-react';
+import { Printer, Download, Wallet, TrendingUp, TrendingDown, Calendar, Clock, AlertCircle } from 'lucide-react';
 
 const TeacherPayments = () => {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [upcomingBalance, setUpcomingBalance] = useState(null);
 
   useEffect(() => {
     fetchPayments();
+    fetchUpcomingBalance();
   }, []);
 
   const fetchPayments = async () => {
@@ -22,6 +24,15 @@ const TeacherPayments = () => {
       toast.error('Erreur lors du chargement des bulletins');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUpcomingBalance = async () => {
+    try {
+      const response = await apiClient.get('/teacher/upcoming-balance');
+      setUpcomingBalance(response.data);
+    } catch (error) {
+      console.error('Error fetching upcoming balance:', error);
     }
   };
 

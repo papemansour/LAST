@@ -1,21 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { toast } from 'sonner';
-import axios from 'axios';
 import { ArrowLeft } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { login, user } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      redirectBasedOnRole(user.role, user.level);
+    }
+  }, [user]);
+  
+  const redirectBasedOnRole = (role, level) => {
+    if (role === 'admin') {
+      navigate('/admin', { replace: true });
+    } else if (role === 'secretary') {
+      navigate('/secretary', { replace: true });
+    } else if (role === 'teacher') {
+      navigate('/teacher', { replace: true });
+    } else if (role === 'student') {
+      if (level === 'kkid') {
+        navigate('/kid-dashboard', { replace: true });
+      } else {
+        navigate('/student', { replace: true });
+      }
+    }
+  };
   
   // Check date for seasonal messages
   const currentDate = new Date();
@@ -29,30 +53,15 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${API}/auth/login`, { email, password });
-      localStorage.setItem('token', response.data.access_token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      const response = await login(email, password);
       
       toast.success('Connexion réussie!');
       
       // Redirect based on role and level
-      const role = response.data.user.role;
-      const level = response.data.user.level;
+      const role = response.user.role;
+      const level = response.user.level;
       
-      if (role === 'admin') {
-        navigate('/admin');
-      } else if (role === 'secretary') {
-        navigate('/secretary');
-      } else if (role === 'teacher') {
-        navigate('/teacher');
-      } else if (role === 'student') {
-        // K-Kid students get special kid dashboard
-        if (level === 'kkid') {
-          navigate('/kid-dashboard');
-        } else {
-          navigate('/student');
-        }
-      }
+      redirectBasedOnRole(role, level);
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Erreur de connexion');
     } finally {

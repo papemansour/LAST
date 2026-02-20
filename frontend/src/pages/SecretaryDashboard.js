@@ -59,6 +59,12 @@ const SecretaryDashboard = () => {
   const [teachers, setTeachers] = useState([]);
   const [students, setStudents] = useState([]);
   const [billingTab, setBillingTab] = useState('teachers'); // teachers, students, prestataires
+  
+  // Security code for viewing teacher payments
+  const [paymentsUnlocked, setPaymentsUnlocked] = useState(false);
+  const [securityCode, setSecurityCode] = useState('');
+  const PAYMENTS_CODE = '2811';
+  
   const [newPayment, setNewPayment] = useState({
     teacherId: '',
     teacherName: '',

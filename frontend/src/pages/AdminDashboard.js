@@ -89,10 +89,46 @@ const AdminDashboard = () => {
   });
   const [activeConversation, setActiveConversation] = useState(null);
   const [conversationMode, setConversationMode] = useState('individual'); // 'individual' ou 'group'
+  
+  // Leave requests state
+  const [leaveRequests, setLeaveRequests] = useState([]);
+  const [leaveComment, setLeaveComment] = useState('');
 
   useEffect(() => {
     fetchData();
+    fetchLeaveRequests();
   }, []);
+
+  const fetchLeaveRequests = async () => {
+    try {
+      const response = await apiClient.get('/admin/leave-requests');
+      setLeaveRequests(response.data || []);
+    } catch (error) {
+      console.error('Error fetching leave requests:', error);
+    }
+  };
+
+  const handleApproveLeave = async (leaveId) => {
+    try {
+      await apiClient.post(`/admin/leave-request/${leaveId}/approve`, { comment: leaveComment });
+      toast.success('✅ Congé approuvé');
+      setLeaveComment('');
+      fetchLeaveRequests();
+    } catch (error) {
+      toast.error('Erreur lors de l\'approbation');
+    }
+  };
+
+  const handleRejectLeave = async (leaveId) => {
+    try {
+      await apiClient.post(`/admin/leave-request/${leaveId}/reject`, { comment: leaveComment });
+      toast.success('❌ Congé refusé');
+      setLeaveComment('');
+      fetchLeaveRequests();
+    } catch (error) {
+      toast.error('Erreur lors du refus');
+    }
+  };
 
   const fetchData = async () => {
     try {

@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from './components/ui/sonner';
 import { CurrencyProvider } from './components/CurrencySelector';
+import { AuthProvider } from './hooks/useAuth';
 import '@/App.css';
 
 import HomePage from './pages/HomePage';
@@ -23,6 +24,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
+    <AuthProvider>
     <CurrencyProvider>
       <div className="App">
         <BrowserRouter>
@@ -74,6 +76,7 @@ function App() {
         <Toaster position="top-center" richColors />
       </div>
     </CurrencyProvider>
+    </AuthProvider>
   );
 }
 

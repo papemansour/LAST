@@ -54,6 +54,11 @@ Les mots de passe des étudiants sont générés automatiquement au format `Stud
 | Test Student | test.student@example.com | Débutant | `Student` + 8 caractères |
 | Étudiant Test | etudiant.test@example.com | K-Kid | `Student` + 8 caractères |
 
+## 🔐 Codes de Sécurité
+
+| Fonctionnalité | Code | Utilisateur |
+|----------------|------|-------------|
+| Bulletins Professeurs (Espace Secrétaire) | `2811` | Secrétaire |
 ---
 
 ## 🔑 Format des mots de passe générés

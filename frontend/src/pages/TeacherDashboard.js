@@ -340,10 +340,14 @@ const TeacherDashboard = () => {
 
       <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-12 max-w-7xl">
         <div className="mb-4 sm:mb-8">
-          <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-2">Espace Professeur</h2>
+          <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-2">
+            {isSecretaryProfile ? 'Espace Privé' : 'Espace Professeur'}
+          </h2>
           <p className="text-gray-600">Bienvenue {user?.first_name}!</p>
         </div>
 
+        {/* Stats Cards - Hidden for secretary profile */}
+        {!isSecretaryProfile && (
         <div className="grid md:grid-cols-4 gap-6 mb-8">
           <Card className="border-teal-100">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

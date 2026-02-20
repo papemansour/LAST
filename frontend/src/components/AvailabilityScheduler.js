@@ -312,6 +312,7 @@ const AvailabilityScheduler = ({ apiClient }) => {
         </div>
       </CardContent>
     </Card>
+    </div>
   );
 };
 

@@ -179,9 +179,24 @@ const TeacherPayments = () => {
     printWindow.print();
   };
 
-  // Calculate totals
-  const totalNet = payments.reduce((sum, p) => sum + (p.montant_net || 0), 0);
-  const totalDeductions = payments.reduce((sum, p) => sum + (p.deductions_amount || 0), 0);
+  // Calculate totals separately for EUR and FCFA
+  const totalNetEUR = payments
+    .filter(p => (p.currency || 'EUR') === 'EUR')
+    .reduce((sum, p) => sum + (p.montant_net || 0), 0);
+  const totalNetFCFA = payments
+    .filter(p => p.currency === 'FCFA')
+    .reduce((sum, p) => sum + (p.montant_net || 0), 0);
+  
+  const totalDeductionsEUR = payments
+    .filter(p => (p.currency || 'EUR') === 'EUR')
+    .reduce((sum, p) => sum + (p.deductions_amount || 0), 0);
+  const totalDeductionsFCFA = payments
+    .filter(p => p.currency === 'FCFA')
+    .reduce((sum, p) => sum + (p.deductions_amount || 0), 0);
+
+  // Determine primary currency based on payments
+  const hasEUR = payments.some(p => (p.currency || 'EUR') === 'EUR');
+  const hasFCFA = payments.some(p => p.currency === 'FCFA');
 
   if (loading) {
     return (

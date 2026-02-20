@@ -1263,8 +1263,30 @@ async def create_teacher_payment(payment_data: dict = Body(...), current_user: d
     montant_initial = amount + bonus
     montant_net = max(0, montant_initial - deductions_amount)
     
+    # Generate invoice reference: FAC-YYYY-XXX
+    year = datetime.now(timezone.utc).year
+    count = await db.teacher_payments.count_documents({"created_at": {"$gte": f"{year}-01-01"}})
+    invoice_ref = f"FAC-{year}-{str(count + 1).zfill(3)}"
+    
+    # Determine visibility based on day of month
+    # - Created 25-28: visible_from = 29th of month
+    # - Created 29+: visible immediately
+    now = datetime.now(timezone.utc)
+    day_of_month = now.day
+    
+    if 25 <= day_of_month <= 28:
+        # Bulletin visible from 29th
+        if now.month == 12:
+            visible_from = datetime(now.year + 1, 1, 29, tzinfo=timezone.utc).isoformat()
+        else:
+            visible_from = datetime(now.year, now.month, 29, tzinfo=timezone.utc).isoformat()
+    else:
+        # Visible immediately
+        visible_from = now.isoformat()
+    
     payment = {
         "id": str(uuid4()),
+        "invoice_ref": invoice_ref,
         "teacher_id": teacher_id,
         "teacher_name": teacher_name,
         "teacher_email": teacher_email,
@@ -1283,7 +1305,9 @@ async def create_teacher_payment(payment_data: dict = Body(...), current_user: d
         "description": payment_data.get("description", "Cours de langue anglaise"),
         "notes": payment_data.get("notes", ""),
         "created_by": current_user['id'],
-        "created_at": datetime.now(timezone.utc).isoformat()
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "visible_from": visible_from,
+        "status": "pending" if 25 <= day_of_month <= 28 else "visible"
     }
     
     await db.teacher_payments.insert_one(payment)
@@ -1295,8 +1319,8 @@ async def create_teacher_payment(payment_data: dict = Body(...), current_user: d
     except Exception as e:
         logger.warning(f"Could not sync teacher payment to Monday: {e}")
     
-    logger.info(f"Teacher payment created for: {payment['teacher_name']} - Net: {montant_net} {currency} (Deductions: {deductions})")
-    return {"message": "Payment created", "id": payment['id'], "montant_net": montant_net}
+    logger.info(f"Teacher payment created for: {payment['teacher_name']} - Net: {montant_net} {currency} - Ref: {invoice_ref} - Status: {payment['status']}")
+    return {"message": "Payment created", "id": payment['id'], "montant_net": montant_net, "invoice_ref": invoice_ref}
 
 @api_router.delete("/secretary/teacher-payments/{payment_id}")
 async def delete_teacher_payment(payment_id: str, current_user: dict = Depends(get_current_user)):

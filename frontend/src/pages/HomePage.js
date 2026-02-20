@@ -437,12 +437,16 @@ const HomePage = () => {
       }
       
       // Call backend to create Stripe session with promo code
+      // K-Kid is excluded from Ramadan promo
+      const isKkid = level === 'kkid';
+      const applyRamadanPromo = isRamadanPromo && !isKkid;
+      
       const response = await axios.post(`${API}/payments/create-checkout`, {
         plan_name: packInfo.name,
         plan_level: level,
         amount: packInfo.amount,
         currency: currency,
-        promo_code: isRamadanPromo ? RAMADAN_PROMO_CODE : 'promo_1SYGM3I4faCc3GWYbdYRPXX8'
+        promo_code: applyRamadanPromo ? RAMADAN_PROMO_CODE : null
       });
       
       // Redirect to Stripe Checkout

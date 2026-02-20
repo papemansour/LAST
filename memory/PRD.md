@@ -186,6 +186,7 @@ Plateforme e-learning complète pour l'apprentissage de l'anglais, développée 
 - Admin: admin@mykalamaenglish.com / adminco
 - Secrétaire: secretaire@mykalamaenglish.com / kalamasecret
 - Teacher (test): proftest.flashcards@mykalamaenglish.com / teacher123
+- Ndeyemane (secrétaire): ndeyemane.dieng@mykalamaenglish.com / Teacherc209e87f
 
 ## Backlog Priorisé
 

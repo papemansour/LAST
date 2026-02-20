@@ -7,7 +7,11 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  // Initialize user from localStorage immediately to prevent flash
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem('user');
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -17,6 +21,7 @@ export const AuthProvider = ({ children }) => {
   const checkAuth = async () => {
     const token = localStorage.getItem('token');
     if (!token) {
+      setUser(null);
       setLoading(false);
       return;
     }
@@ -26,9 +31,13 @@ export const AuthProvider = ({ children }) => {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUser(response.data);
+      // Update localStorage with fresh data
+      localStorage.setItem('user', JSON.stringify(response.data));
     } catch (error) {
+      console.error('Auth check failed:', error);
       localStorage.removeItem('token');
       localStorage.removeItem('user');
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -58,16 +67,7 @@ export const AuthProvider = ({ children }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    // Return default values when outside provider
-    const token = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-    return {
-      user: storedUser ? JSON.parse(storedUser) : null,
-      loading: false,
-      login: () => {},
-      logout: () => {},
-      checkAuth: () => {}
-    };
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };

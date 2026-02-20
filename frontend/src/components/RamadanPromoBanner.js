@@ -69,6 +69,7 @@ const RamadanPromoBanner = ({ showButton = true, compact = false }) => {
                   <p className="text-sm text-emerald-600">
                     Code promo : <span className="font-mono bg-emerald-100 px-2 py-0.5 rounded">RAMADAN2026</span>
                   </p>
+                  <p className="text-xs text-gray-500 mt-1">(Hors Pack K-Kid)</p>
                 </div>
               </div>
             </div>

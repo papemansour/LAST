@@ -3551,6 +3551,163 @@ async def get_my_availability(current_user: dict = Depends(get_current_user)):
     
     return availability or {"availability": {}}
 
+# ============ LEAVE REQUEST ENDPOINTS ============
+
+@api_router.get("/teacher/my-leave-requests")
+async def get_my_leave_requests(current_user: dict = Depends(get_current_user)):
+    """Get all leave requests for the connected teacher"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    leaves = await db.leave_requests.find(
+        {"teacher_id": current_user['id']},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    
+    return leaves
+
+@api_router.post("/teacher/leave-request")
+async def create_leave_request(leave_data: dict = Body(...), current_user: dict = Depends(get_current_user)):
+    """Teacher submits a leave request"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    start_date = leave_data.get('start_date')
+    end_date = leave_data.get('end_date')
+    reason = leave_data.get('reason', '')
+    
+    if not start_date or not end_date:
+        raise HTTPException(status_code=400, detail="Start and end dates are required")
+    
+    leave_request = {
+        "id": str(uuid4()),
+        "teacher_id": current_user['id'],
+        "teacher_name": f"{current_user.get('first_name', '')} {current_user.get('last_name', '')}".strip(),
+        "teacher_email": current_user.get('email', ''),
+        "start_date": start_date,
+        "end_date": end_date,
+        "reason": reason,
+        "status": "pending",  # pending, approved, rejected
+        "admin_comment": "",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.leave_requests.insert_one(leave_request)
+    
+    # Notify admin (create notification)
+    admin_users = await db.users.find({"role": "admin"}, {"_id": 0, "id": 1}).to_list(10)
+    for admin in admin_users:
+        notification = {
+            "id": str(uuid4()),
+            "user_id": admin['id'],
+            "message": f"🏖️ Nouvelle demande de congé de {leave_request['teacher_name']} ({start_date} → {end_date})",
+            "read": False,
+            "link": "/admin?tab=leave-requests",
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.notifications.insert_one(notification)
+    
+    logger.info(f"Leave request created by {leave_request['teacher_name']}: {start_date} to {end_date}")
+    return {"message": "Leave request submitted", "id": leave_request['id']}
+
+@api_router.delete("/teacher/leave-request/{leave_id}")
+async def cancel_leave_request(leave_id: str, current_user: dict = Depends(get_current_user)):
+    """Teacher cancels their own pending leave request"""
+    if current_user['role'] != 'teacher':
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    
+    # Only allow canceling own pending requests
+    leave = await db.leave_requests.find_one({"id": leave_id, "teacher_id": current_user['id']})
+    if not leave:
+        raise HTTPException(status_code=404, detail="Leave request not found")
+    
+    if leave.get('status') != 'pending':
+        raise HTTPException(status_code=400, detail="Can only cancel pending requests")
+    
+    await db.leave_requests.delete_one({"id": leave_id})
+    return {"message": "Leave request cancelled"}
+
+# Admin endpoints for leave management
+@api_router.get("/admin/leave-requests")
+async def get_all_leave_requests(current_user: dict = Depends(get_current_user)):
+    """Admin gets all leave requests"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    leaves = await db.leave_requests.find({}, {"_id": 0}).sort("created_at", -1).to_list(200)
+    return leaves
+
+@api_router.post("/admin/leave-request/{leave_id}/approve")
+async def approve_leave_request(leave_id: str, data: dict = Body(...), current_user: dict = Depends(get_current_user)):
+    """Admin approves a leave request"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    leave = await db.leave_requests.find_one({"id": leave_id})
+    if not leave:
+        raise HTTPException(status_code=404, detail="Leave request not found")
+    
+    comment = data.get('comment', '')
+    
+    await db.leave_requests.update_one(
+        {"id": leave_id},
+        {"$set": {
+            "status": "approved",
+            "admin_comment": comment,
+            "approved_by": current_user['id'],
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Notify teacher
+    notification = {
+        "id": str(uuid4()),
+        "user_id": leave['teacher_id'],
+        "message": f"✅ Votre demande de congé ({leave['start_date']} → {leave['end_date']}) a été approuvée !",
+        "read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.notifications.insert_one(notification)
+    
+    logger.info(f"Leave request {leave_id} approved by admin")
+    return {"message": "Leave request approved"}
+
+@api_router.post("/admin/leave-request/{leave_id}/reject")
+async def reject_leave_request(leave_id: str, data: dict = Body(...), current_user: dict = Depends(get_current_user)):
+    """Admin rejects a leave request"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    leave = await db.leave_requests.find_one({"id": leave_id})
+    if not leave:
+        raise HTTPException(status_code=404, detail="Leave request not found")
+    
+    comment = data.get('comment', '')
+    
+    await db.leave_requests.update_one(
+        {"id": leave_id},
+        {"$set": {
+            "status": "rejected",
+            "admin_comment": comment,
+            "rejected_by": current_user['id'],
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Notify teacher
+    notification = {
+        "id": str(uuid4()),
+        "user_id": leave['teacher_id'],
+        "message": f"❌ Votre demande de congé ({leave['start_date']} → {leave['end_date']}) a été refusée.{' Motif: ' + comment if comment else ''}",
+        "read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.notifications.insert_one(notification)
+    
+    logger.info(f"Leave request {leave_id} rejected by admin")
+    return {"message": "Leave request rejected"}
+
 # ============ GROUP CODE ENDPOINTS ============
 
 import random

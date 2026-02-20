@@ -62,6 +62,12 @@ const TeacherDashboard = () => {
   const [pauseStart, setPauseStart] = useState(null);
   const [pausedDuration, setPausedDuration] = useState(0);
   
+  // Check if user is the secretary (ndeyemane) - limited tabs
+  const isSecretaryProfile = user?.email?.toLowerCase() === 'ndeyemane.dieng@mykalamaenglish.com';
+  
+  // Allowed tabs for secretary profile
+  const secretaryAllowedTabs = ['payments', 'schedule', 'messages', 'kalamatheque', 'news', 'club', 'profile'];
+  
   const [courseData, setCourseData] = useState({
     title: '',
     description: '',

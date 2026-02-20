@@ -1666,8 +1666,14 @@ const SecretaryDashboard = () => {
                             <div>
                               <p className="font-medium text-sm">{payment.teacher_name || payment.teacherName}</p>
                               <p className="text-xs text-gray-500">{payment.month}</p>
+                              {payment.invoice_ref && (
+                                <p className="text-xs text-green-700 font-mono font-semibold">📋 {payment.invoice_ref}</p>
+                              )}
                               {deductions > 0 && (
                                 <p className="text-xs text-red-500">-{deductions} déduction(s)</p>
+                              )}
+                              {payment.status === 'pending' && (
+                                <p className="text-xs text-amber-600 font-medium">⏳ En attente (visible le 29)</p>
                               )}
                             </div>
                             <div className="flex items-center gap-2">

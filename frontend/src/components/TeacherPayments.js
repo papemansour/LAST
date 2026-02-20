@@ -257,6 +257,8 @@ const TeacherPayments = () => {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Total Net EUR */}
+        {hasEUR && (
         <Card className="bg-gradient-to-br from-green-50 to-emerald-100 border-green-200">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
@@ -264,12 +266,30 @@ const TeacherPayments = () => {
                 <Wallet className="w-6 h-6 text-white" />
               </div>
               <div>
-                <p className="text-sm text-green-700">Total Net Reçu</p>
-                <p className="text-2xl font-bold text-green-800">{totalNet.toFixed(2)} €</p>
+                <p className="text-sm text-green-700">Total Net Reçu (EUR)</p>
+                <p className="text-2xl font-bold text-green-800">{totalNetEUR.toFixed(2)} €</p>
               </div>
             </div>
           </CardContent>
         </Card>
+        )}
+        
+        {/* Total Net FCFA */}
+        {hasFCFA && (
+        <Card className="bg-gradient-to-br from-green-50 to-emerald-100 border-green-200">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-green-500 rounded-xl">
+                <Wallet className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <p className="text-sm text-green-700">Total Net Reçu (FCFA)</p>
+                <p className="text-2xl font-bold text-green-800">{totalNetFCFA.toLocaleString()} FCFA</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        )}
         
         <Card className="bg-gradient-to-br from-blue-50 to-indigo-100 border-blue-200">
           <CardContent className="p-6">
@@ -285,7 +305,8 @@ const TeacherPayments = () => {
           </CardContent>
         </Card>
         
-        {totalDeductions > 0 && (
+        {/* Deductions EUR */}
+        {totalDeductionsEUR > 0 && (
           <Card className="bg-gradient-to-br from-red-50 to-orange-100 border-red-200">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -293,8 +314,25 @@ const TeacherPayments = () => {
                   <TrendingDown className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-red-700">Total Déductions</p>
-                  <p className="text-2xl font-bold text-red-800">-{totalDeductions.toFixed(2)} €</p>
+                  <p className="text-sm text-red-700">Total Déductions (EUR)</p>
+                  <p className="text-2xl font-bold text-red-800">-{totalDeductionsEUR.toFixed(2)} €</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
+        {/* Deductions FCFA */}
+        {totalDeductionsFCFA > 0 && (
+          <Card className="bg-gradient-to-br from-red-50 to-orange-100 border-red-200">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-red-500 rounded-xl">
+                  <TrendingDown className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm text-red-700">Total Déductions (FCFA)</p>
+                  <p className="text-2xl font-bold text-red-800">-{totalDeductionsFCFA.toLocaleString()} FCFA</p>
                 </div>
               </div>
             </CardContent>

@@ -1654,53 +1654,107 @@ const SecretaryDashboard = () => {
                     ✅ Enregistrer le Bulletin de Salaire
                   </Button>
 
-                  {/* Recent Payments */}
+                  {/* Recent Payments - Protected by code */}
                   <div className="mt-4 pt-4 border-t">
                     <h4 className="font-semibold text-sm mb-3 text-gray-700">📋 Bulletins Récents</h4>
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {teacherPayments.length === 0 ? (
-                        <p className="text-gray-500 text-sm text-center py-4">Aucun bulletin enregistré</p>
-                      ) : (
-                        teacherPayments.slice(0, 5).map(payment => {
-                          const deductions = parseInt(payment.deductions || 0);
-                          const deductionUnitValue = payment.currency === 'FCFA' ? 1500 : 5;
-                          const deductionsAmount = deductions * deductionUnitValue;
-                          const montantInitial = parseFloat(payment.amount || 0) + parseFloat(payment.bonus || 0);
-                          const montantNet = Math.max(0, montantInitial - deductionsAmount);
-                          
-                          return (
-                          <div key={payment.id} className="flex justify-between items-center p-3 bg-green-50 rounded-lg border border-green-100">
-                            <div>
-                              <p className="font-medium text-sm">{payment.teacher_name || payment.teacherName}</p>
-                              <p className="text-xs text-gray-500">{payment.month}</p>
-                              {payment.invoice_ref && (
-                                <p className="text-xs text-green-700 font-mono font-semibold">📋 {payment.invoice_ref}</p>
-                              )}
-                              {deductions > 0 && (
-                                <p className="text-xs text-red-500">-{deductions} déduction(s)</p>
-                              )}
-                              {payment.status === 'pending' && (
-                                <p className="text-xs text-amber-600 font-medium">⏳ En attente (visible le 29)</p>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="text-right mr-2">
-                                {deductions > 0 && (
-                                  <p className="text-xs text-gray-400 line-through">{montantInitial.toFixed(0)} {payment.currency || 'EUR'}</p>
-                                )}
-                                <span className="font-bold text-green-600">{montantNet.toFixed(0)} {payment.currency || 'EUR'}</span>
+                    
+                    {!paymentsUnlocked ? (
+                      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="text-2xl">🔒</span>
+                          <p className="text-sm text-gray-600">Entrez le code pour accéder aux bulletins</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <input
+                            type="password"
+                            value={securityCode}
+                            onChange={(e) => setSecurityCode(e.target.value)}
+                            placeholder="Code à 4 chiffres"
+                            maxLength={4}
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-center text-lg tracking-widest"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && securityCode === PAYMENTS_CODE) {
+                                setPaymentsUnlocked(true);
+                                toast.success('🔓 Accès déverrouillé');
+                              }
+                            }}
+                          />
+                          <Button 
+                            onClick={() => {
+                              if (securityCode === PAYMENTS_CODE) {
+                                setPaymentsUnlocked(true);
+                                toast.success('🔓 Accès déverrouillé');
+                              } else {
+                                toast.error('❌ Code incorrect');
+                                setSecurityCode('');
+                              }
+                            }}
+                            className="bg-blue-600 hover:bg-blue-700"
+                          >
+                            Déverrouiller
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-xs text-green-600 flex items-center gap-1">🔓 Accès déverrouillé</span>
+                          <button 
+                            onClick={() => {
+                              setPaymentsUnlocked(false);
+                              setSecurityCode('');
+                            }}
+                            className="text-xs text-gray-500 hover:text-red-500"
+                          >
+                            🔒 Verrouiller
+                          </button>
+                        </div>
+                        <div className="space-y-2 max-h-48 overflow-y-auto">
+                          {teacherPayments.length === 0 ? (
+                            <p className="text-gray-500 text-sm text-center py-4">Aucun bulletin enregistré</p>
+                          ) : (
+                            teacherPayments.slice(0, 5).map(payment => {
+                              const deductions = parseInt(payment.deductions || 0);
+                              const deductionUnitValue = payment.currency === 'FCFA' ? 1500 : 5;
+                              const deductionsAmount = deductions * deductionUnitValue;
+                              const montantInitial = parseFloat(payment.amount || 0) + parseFloat(payment.bonus || 0);
+                              const montantNet = Math.max(0, montantInitial - deductionsAmount);
+                              
+                              return (
+                              <div key={payment.id} className="flex justify-between items-center p-3 bg-green-50 rounded-lg border border-green-100">
+                                <div>
+                                  <p className="font-medium text-sm">{payment.teacher_name || payment.teacherName}</p>
+                                  <p className="text-xs text-gray-500">{payment.month}</p>
+                                  {payment.invoice_ref && (
+                                    <p className="text-xs text-green-700 font-mono font-semibold">📋 {payment.invoice_ref}</p>
+                                  )}
+                                  {deductions > 0 && (
+                                    <p className="text-xs text-red-500">-{deductions} déduction(s)</p>
+                                  )}
+                                  {payment.status === 'pending' && (
+                                    <p className="text-xs text-amber-600 font-medium">⏳ En attente (visible le 29)</p>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <div className="text-right mr-2">
+                                    {deductions > 0 && (
+                                      <p className="text-xs text-gray-400 line-through">{montantInitial.toFixed(0)} {payment.currency || 'EUR'}</p>
+                                    )}
+                                    <span className="font-bold text-green-600">{montantNet.toFixed(0)} {payment.currency || 'EUR'}</span>
+                                  </div>
+                                  <button onClick={() => printTeacherInvoice(payment)} className="p-1.5 text-purple-600 hover:bg-purple-100 rounded" title="Imprimer">
+                                    🖨️
+                                  </button>
+                                  <button onClick={() => handleDeletePayment(payment.id)} className="p-1.5 text-red-500 hover:bg-red-100 rounded" title="Supprimer">
+                                    🗑️
+                                  </button>
+                                </div>
                               </div>
-                              <button onClick={() => printTeacherInvoice(payment)} className="p-1.5 text-purple-600 hover:bg-purple-100 rounded" title="Imprimer">
-                                🖨️
-                              </button>
-                              <button onClick={() => handleDeletePayment(payment.id)} className="p-1.5 text-red-500 hover:bg-red-100 rounded" title="Supprimer">
-                                🗑️
-                              </button>
-                            </div>
-                          </div>
-                        )})
-                      )}
-                    </div>
+                            )})
+                          )}
+                        </div>
+                      </>
+                    )}
                   </div>
                 </CardContent>
               </Card>

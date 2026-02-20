@@ -160,6 +160,27 @@ Plateforme e-learning complète pour l'apprentissage de l'anglais, développée 
   - **Onglets masqués (9)**: Bienvenue, Étudiants, Dispo Étudiants, Liens Meet, Jeu, Vidéos K-Kid, Pointage, Documents, Résumés
   - Détection par email dans TeacherDashboard.js
 
+- ✅ **Système de Congés Professeurs** (20/02/2026)
+  - **Côté Professeur (Onglet Horaires)**:
+    - Section bleue "🏖️ Demande de Congé"
+    - Formulaire: Date début, Date fin, Motif (optionnel)
+    - Bouton bleu "Envoyer la demande"
+    - Liste des demandes avec statuts (En attente, Approuvé, Refusé)
+    - Possibilité d'annuler une demande en attente
+  - **Côté Admin (Nouvel onglet "Congés")**:
+    - Liste des demandes en attente avec boutons Approuver/Refuser
+    - Possibilité d'ajouter un commentaire
+    - Historique des demandes traitées
+    - Notifications automatiques à l'admin et au professeur
+  - **Endpoints**:
+    - `GET /api/teacher/my-leave-requests`
+    - `POST /api/teacher/leave-request`
+    - `DELETE /api/teacher/leave-request/{id}`
+    - `GET /api/admin/leave-requests`
+    - `POST /api/admin/leave-request/{id}/approve`
+    - `POST /api/admin/leave-request/{id}/reject`
+  - **Collection MongoDB**: `leave_requests`
+
 ## Tableau de Bord Analytique 📊
 
 ### Composants

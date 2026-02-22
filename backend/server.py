@@ -3348,6 +3348,25 @@ async def admin_reset_password(user_id: str, current_user: dict = Depends(get_cu
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
+    # Generate temporary password
+    import secrets
+    temporary_password = f"Temp{secrets.token_hex(4)}"
+    hashed_password = pwd_context.hash(temporary_password)
+    
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"password_hash": hashed_password, "hashed_password": hashed_password}}
+    )
+    
+    # Try to send email
+    email_sent = False
+    try:
+        from email_service import email_service
+        await email_service.send_password_reset_email(user['email'], temporary_password)
+        email_sent = True
+    except Exception as e:
+        logger.warning(f"Could not send password reset email: {e}")
+    
     logger.info(f"Password reset by admin {current_user['email']} for user {user['email']}")
     
     return {

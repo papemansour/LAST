@@ -35,11 +35,11 @@
 
 Les mots de passe des étudiants sont générés automatiquement au format `Student` + 8 caractères aléatoires lors de la création du compte.
 
-### Étudiants principaux
+### Étudiants principaux (compte de test)
 
 | Nom | Email | Niveau | Mot de passe |
 |-----|-------|--------|--------------|
-| Mouhamad Bachir DIAGNE | mouhamadbachirdiagne@gmail.com | Débutant | `Student` + 8 caractères |
+| Mouhamad Bachir DIAGNE | mouhamadbachirdiagne@gmail.com | Débutant | `Student123test` |
 | Khadidiatou DIONNE | diatoudione444@gmail.com | Débutant | `Student` + 8 caractères |
 | Salimata NDIAYE | ndiayesalimata434@gmail.com | Intermédiaire | `Student` + 8 caractères |
 | Mouhamath LO | mouhamathlo94@gmail.com | Débutant | `Student` + 8 caractères |

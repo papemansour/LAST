@@ -3008,8 +3008,6 @@ async def delete_document(document_id: str, current_user: dict = Depends(get_cur
     result = await db.documents.delete_one({"id": document_id})
     logger.info(f"Document {document_id} deleted by user {current_user['id']}")
     return {"message": "Document supprimé avec succès"}
-    
-    return documents
 
 @api_router.delete("/documents/{document_id}")
 async def delete_document(document_id: str, current_user: dict = Depends(get_current_user)):

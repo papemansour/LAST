@@ -4107,12 +4107,8 @@ async def get_all_teacher_availability(current_user: dict = Depends(get_current_
     
     return result
 
-    
-    await db.admin_documents.insert_one(document)
-    logger.info(f"Document sent by admin to {doc_data['recipient_type']} {doc_data['recipient_id']}")
-    return {"message": "Document sent successfully"}
 
-    return notifications
+# Teacher features
 
 
 # TEST ROUTES

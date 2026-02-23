@@ -4727,9 +4727,12 @@ async def start_session(current_user: dict = Depends(get_current_user)):
     session = {
         "id": str(uuid.uuid4()),
         "teacher_id": current_user['id'],
+        "teacher_name": f"{current_user.get('first_name', '')} {current_user.get('last_name', '')}".strip(),
+        "teacher_email": current_user.get('email', ''),
         "start_time": datetime.now(timezone.utc).isoformat(),
         "status": "in_progress",
-        "pauses": []
+        "pauses": [],
+        "created_at": datetime.now(timezone.utc).isoformat()
     }
     
     await db.teacher_sessions.insert_one(session)

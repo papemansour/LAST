@@ -14,6 +14,7 @@ import {
 } from '../components/ui/dialog';
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
+import { useAuth } from '../hooks/useAuth';
 import { LogOut, BookOpen, FileText, Link as LinkIcon, Upload, Send, User, Mail, MessageCircle, Heart, Sparkles, Eye, GraduationCap, Gamepad2, Newspaper, Library, UserCircle, Video, TrendingUp, Trophy, Gift, Calendar } from 'lucide-react';
 import ConversationChat from '../components/ConversationChat';
 import NewsDisplay from '../components/NewsDisplay';

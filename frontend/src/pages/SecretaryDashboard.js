@@ -7,6 +7,7 @@ import { Textarea } from '../components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
+import { useAuth } from '../hooks/useAuth';
 import { LogOut, Calendar, FileText, MessageCircle, Plus, Trash2, Edit, Save, X, ChevronDown, ChevronUp, Eye } from 'lucide-react';
 
 const SecretaryDashboard = () => {

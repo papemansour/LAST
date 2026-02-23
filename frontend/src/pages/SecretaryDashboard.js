@@ -819,8 +819,7 @@ const SecretaryDashboard = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    logout();
     toast.success('Déconnexion réussie');
     navigate('/secretary-login');
   };

@@ -4919,17 +4919,35 @@ async def get_monthly_teacher_hours(month: int = None, year: int = None, current
     for session in sessions:
         teacher_id = session['teacher_id']
         if teacher_id not in teacher_hours:
+            # Get teacher info if not in session
+            teacher_name = session.get('teacher_name')
+            teacher_email = session.get('teacher_email')
+            
+            if not teacher_name or teacher_name == 'Inconnu':
+                teacher = await db.users.find_one(
+                    {"id": teacher_id},
+                    {"_id": 0, "first_name": 1, "last_name": 1, "email": 1}
+                )
+                if teacher:
+                    teacher_name = f"{teacher.get('first_name', '')} {teacher.get('last_name', '')}".strip()
+                    teacher_email = teacher.get('email', '')
+                else:
+                    teacher_name = 'Inconnu'
+                    teacher_email = ''
+            
             teacher_hours[teacher_id] = {
                 "teacher_id": teacher_id,
-                "teacher_name": session.get('teacher_name', 'Inconnu'),
-                "teacher_email": session.get('teacher_email', ''),
+                "teacher_name": teacher_name,
+                "teacher_email": teacher_email,
                 "total_minutes": 0,
                 "total_sessions": 0,
                 "sessions": []
             }
         
-        # Calculate duration from total_time (in seconds) or from times
-        duration_minutes = session.get('total_time', 0) / 60
+        # Calculate duration from total_time_seconds (primary) or total_time (legacy) or from times
+        duration_minutes = session.get('total_time_seconds', 0) / 60
+        if duration_minutes == 0:
+            duration_minutes = session.get('total_time', 0) / 60
         if duration_minutes == 0 and session.get('start_time') and session.get('end_time'):
             try:
                 start = datetime.fromisoformat(session['start_time'].replace('Z', '+00:00'))

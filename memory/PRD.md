@@ -201,6 +201,13 @@ Plateforme e-learning complète pour l'apprentissage de l'anglais, développée 
 - `GET /api/admin/check-documents-integrity`
 - `POST /api/admin/cleanup-invalid-documents`
 
+### Phase 9 - Décembre 2025 (Fork 7) ✅
+- ✅ **Correction bug de déconnexion (logout)** (Décembre 2025)
+  - Tous les dashboards utilisent maintenant le hook `useAuth` pour le logout
+  - Synchronisation correcte entre le state React et le localStorage
+  - Fichiers modifiés: `AdminDashboard.js`, `TeacherDashboard.js`, `StudentDashboard.js`, `SecretaryDashboard.js`
+  - La fonction `logout()` du `AuthProvider` est maintenant utilisée systématiquement
+
 ## Tests
 - **Backend** : 100% (11/11 tests passés - iteration 7)
 - **Frontend** : 100% (UI vérifiée)

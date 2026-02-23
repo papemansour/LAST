@@ -78,4 +78,4 @@ Pour réinitialiser un mot de passe, l'admin peut :
 
 ---
 
-*Dernière mise à jour: 20 février 2026*
+*Dernière mise à jour: Décembre 2025*

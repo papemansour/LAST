@@ -23,6 +23,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
+import { useAuth } from '../hooks/useAuth';
 import { LogOut, Users, BookOpen, Calendar, MessageCircle, Send, Video, FileText, Upload, Play, Pause, Square, Clock, Heart, Mail, Sparkles, Key, Gamepad2, Timer, Newspaper, Library, UserCircle, CalendarDays, Wallet } from 'lucide-react';
 import AvailabilityScheduler from '../components/AvailabilityScheduler';
 import ConversationChat from '../components/ConversationChat';

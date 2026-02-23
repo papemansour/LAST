@@ -12,6 +12,7 @@ import { LogOut, Calendar, FileText, MessageCircle, Plus, Trash2, Edit, Save, X,
 
 const SecretaryDashboard = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [expandedMeeting, setExpandedMeeting] = useState(null);

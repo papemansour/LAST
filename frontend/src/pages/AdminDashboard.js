@@ -40,6 +40,7 @@ import ImportStudentsCSV from '../components/ImportStudentsCSV';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [user, setUser] = useState(null);
   const [pendingRegistrations, setPendingRegistrations] = useState([]);
   const [allUsers, setAllUsers] = useState([]);

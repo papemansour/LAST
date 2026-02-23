@@ -42,6 +42,7 @@ import RamadanPromoBanner from '../components/RamadanPromoBanner';
 import StudentAvailability from '../components/StudentAvailability';
 const StudentDashboard = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const tabContentRef = useRef(null);
   const [user, setUser] = useState(null);
   const [teacher, setTeacher] = useState(null);

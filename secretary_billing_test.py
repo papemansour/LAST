@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 # Backend URL from environment
-BACKEND_URL = "https://teacher-secretary.preview.emergentagent.com/api"
+BACKEND_URL = "https://elearning-platform-6.preview.emergentagent.com/api"
 
 # Test credentials
 ADMIN_EMAIL = "admin@mykalamaenglish.com"

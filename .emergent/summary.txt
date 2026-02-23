@@ -1,158 +1,171 @@
-<analysis>**original_problem_statement:**
-L'utilisateur a fait plusieurs demandes tout au long de la session, en plus de celles de la session précédente. Les principales demandes sont les suivantes :
-1.  **Tableau de Bord Admin** : Modifier le graphique des revenus pour différencier les revenus **entrants** (reçus des élèves) et **sortants** (paiements des professeurs).
-2.  **UI Professeur** : Supprimer l'onglet Cours de l'espace professeur.
-3.  **Amélioration (Suggestion)** : Ajouter un filtre de devise (EUR/FCFA) sur le graphique des revenus de l'administrateur.
-4.  **Facturation Professeurs** : Supprimer la TVA, et mettre en place un système de déduction où chaque cours manqué entraîne une pénalité de 5€ ou 1500 FCFA. Le bulletin de paie doit afficher la somme initiale, les déductions, et la somme nette.
-5.  **Bug de Documents** : Résoudre le problème des documents qui disparaissent après le déploiement.
-6.  **Nouvelle Fonctionnalité** : Implémenter un système de **cours groupés** avec un tarif fixe de 80€ par personne.
-7.  **Gestion des Utilisateurs** :
-    *   Restaurer tous les comptes (admin, secrétaire, professeurs) et leurs mots de passe après qu'un déploiement a réinitialisé la base de données.
-    *   Récupérer et synchroniser la liste complète des étudiants depuis **Monday.com**.
-    *   Créer 3 nouveaux comptes professeurs spécifiques.
-8.  **Nouvelle Fonctionnalité (Admin)** : Permettre à un administrateur de créer directement un compte étudiant depuis son tableau de bord (nom, prénom, tél, email, mot de passe provisoire, niveau, prix).
-9.  **Amélioration Création Étudiant** : Le formulaire de création d'étudiant doit automatiquement remplir le champ prix en fonction du niveau et de la devise sélectionnés.
+<analysis>
+**original_problem_statement:**
+L'utilisateur a fait plusieurs demandes pour améliorer et ajouter des fonctionnalités à la plateforme d'e-learning MyKalamaEnglish. Les demandes principales incluent :
+
+**Nettoyage et Améliorations UI/UX :**
+1.  **Admin UI** : Supprimer les onglets Groupe, ajouter une option Vider la poubelle.
+2.  **Analytics Admin** : Ajouter une option éditer pour les revenus mensuels et changer le graphique des heures de par semaine à par trimestre/semestre.
+3.  **Promo Banner** : Remplacer la promotion de Noël par une promotion pour le Ramadan, en excluant certains produits.
+4.  **Profil Spécial** : Créer un espace utilisateur pour  avec des onglets et fonctionnalités limités, un titre Espace Privé, et sans les éléments de bienvenue pour les professeurs.
+5.  **Sécurité Espace Secrétaire** : Protéger la section des bulletins de paie récents avec un code d'accès ().
+6.  **Correction Bug de Rafraîchissement** : Empêcher l'application de rediriger vers la page d'accueil lors du rafraîchissement des tableaux de bord (admin, professeur, secrétaire, étudiant).
+7.  **Correction Devise** : Assurer que les totaux des professeurs payés en FCFA affichent la devise FCFA et non EUR.
+
+**Nouvelles Fonctionnalités :**
+1.  **Gestion des Factures et Paies** :
+    *   Implémenter un format de référence de facture .
+    *   Créer une section Solde à venir pour les professeurs, visible à partir du 25 du mois.
+    *   Mettre en place une logique de visibilité différée des bulletins de paie (visibles dans l'espace prof seulement à partir du 29 du mois).
+2.  **Système de Congés** : Permettre aux professeurs de demander des congés depuis leur espace, avec un système de validation par l'administrateur.
+3.  **Système d'Assiduité (À FAIRE)** : Mettre en place un système de pointage pour les professeurs (début, pause, fin de cours) visible par l'admin.
+4.  **Récapitulatif des Heures (À FAIRE)** : Calculer automatiquement le total des heures de chaque professeur le 28 du mois.
+
+**Bugs et Maintenance :**
+1.  **Bug de Connexion Secrétaire** : Résoudre les problèmes de connexion récurrents de l'espace secrétaire.
+2.  **Bug de Redirection Stripe** : Investiguer et corriger un supposé problème de redirection vers la page de paiement Stripe.
+3.  **Maintenance Générale** : Mettre à jour tous les espaces pour corriger les bugs et améliorer la stabilité.
+4.  **Sauvegarde des Identifiants** : Créer un fichier pour sauvegarder les identifiants de connexion.
 
 **User's preferred language**: Français
 
 **what currently exists?**
-L'application est une plateforme d'e-learning fonctionnelle. Les modifications et ajouts récents incluent :
-*   **Tableau de bord analytique Admin** : Le graphique des revenus montre désormais les flux entrants et sortants. Un filtre de devise (EUR/FCFA) a été ajouté.
-*   **Système de paiement des professeurs** : La logique de facturation a été mise à jour pour supprimer la TVA et inclure un système de déductions (5€ ou 1500 FCFA par cours manqué), avec un affichage clair du montant initial et net sur le bulletin de paie.
-*   **Stockage des documents** : Le système de gestion des fichiers a été entièrement revu. Les fichiers sont désormais stockés en Base64 dans la base de données MongoDB, ce qui garantit leur persistance après les déploiements.
-*   **Fonctionnalité de cours groupés** : Un système complet pour la gestion des cours en groupe (création, ajout d'étudiants, prix fixe) a été implémenté côté backend et une interface a été créée dans le tableau de bord de l'administrateur.
-*   **Gestion des utilisateurs par l'Admin** : Un formulaire a été ajouté dans le tableau de bord de l'administrateur (onglet Étudiants) permettant de créer de nouveaux étudiants. Ce formulaire récupère dynamiquement les prix des packs depuis une API et met à jour le tarif automatiquement en fonction du niveau et de la devise choisis.
-*   **Base de données** : Tous les comptes utilisateurs (admin, secrétaire, professeurs, étudiants) ont été recréés ou synchronisés depuis Monday.com après une réinitialisation de la base de données due à un déploiement.
+L'application est une plateforme d'e-learning stable. Les modifications de cette session ont considérablement amélioré l'expérience utilisateur et ajouté plusieurs fonctionnalités clés :
+*   **Tableau de Bord Admin Nettoyé** : Les onglets inutiles (Groupes) ont été supprimés et une fonctionnalité Vider la poubelle a été ajoutée.
+*   **Analytiques Améliorées** : Le graphique des heures est maintenant par trimestre et les revenus mensuels sont éditables.
+*   **Système de Congés** : Un flux complet de demande (professeur) et d'approbation (admin) de congés est en place.
+*   **Espace Secrétaire Sécurisé** : L'accès aux bulletins de paie est protégé par un code. Les références de facture suivent le format .
+*   **Espace Professeur Amélioré** : Une section Solde à venir affiche les revenus futurs, et la logique de visibilité des bulletins de paie est implémentée. Les professeurs payés en FCFA voient leurs totaux dans la bonne devise.
+*   **Profil Spécial Ndeyemane** : Un profil personnalisé avec un accès limité (Espace Privé) est fonctionnel.
+*   **Stabilité de la Session** : Le bug de rafraîchissement a été corrigé. Les utilisateurs restent sur leur tableau de bord après avoir rafraîchi la page.
+*   **Code Backend Assaini** : Plusieurs erreurs de linting et du code mort ont été corrigés dans .
 
 **Last working item**:
-- **Last item agent was working**: L'agent venait de finaliser l'implémentation de la fonctionnalité qui remplit automatiquement le prix dans le formulaire de création d'étudiant (dans le tableau de bord admin) en fonction du niveau et de la devise sélectionnés. Le code a été écrit et les prix sont récupérés depuis l'endpoint .
-- **Status**: USER VERIFICATION PENDING
-- **Agent Testing Done**: N (Seulement une vérification de la compilation a été faite. Pas de test visuel final.)
-- **Which testing method agent to use?**: screenshot tool (Pour vérifier visuellement que le champ prix se met à jour correctement lors de la sélection d'un niveau et d'une devise dans le formulaire de création d'étudiant sur la page , onglet Étudiants.)
+- **Last item agent was working**: L'agent terminait une passe de maintenance générale demandée par l'utilisateur. Il a corrigé plusieurs erreurs de linting (variables non définies, code mort) dans  identifiées par l'outil , puis a vérifié que le backend redémarrait correctement.
+- **Status**: IN PROGRESS (La tâche de maintenance générale était en cours de finalisation)
+- **Agent Testing Done**: Y
+- **Which testing method agent to use?**: testing agent
 - **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
-Aucun problème ou bug critique n'est actuellement en cours. La dernière demande de l'utilisateur concernait une nouvelle fonctionnalité qui vient d'être implémentée.
+Aucun problème bloquant ou en cours. Les problèmes majeurs de cette session (rafraîchissement de page, devises, login) ont été résolus.
 
 **In progress Task List**:
 - **Task 1: Finaliser la refactorisation de  (P1 - Dette Technique)**
-  - **Where to resume**: Le travail a été initié dans une session précédente avec la création de quelques fichiers de routes. Il doit être poursuivi en déplaçant méthodiquement les endpoints et la logique associée de  vers des fichiers de routes dédiés (par exemple, , , , etc.).
-  - **What will be achieved with this?** Améliorer la maintenabilité, la lisibilité et la modularité du code backend, ce qui facilitera les futurs développements.
+  - **Where to resume**: Le fichier  contient encore de nombreuses routes. La tâche de fond consiste à continuer de déplacer la logique des endpoints vers des fichiers dédiés dans le dossier .
+  - **What will be achieved with this?**: Améliorer la maintenabilité, la lisibilité et la structure du code backend.
   - **Status**: IN PROGRESS
-  - **Should Test frontend/backend/both after fix?** both (une refactorisation d'une telle ampleur nécessite des tests de régression complets).
+  - **Should Test frontend/backend/both after fix?**: backend
   - **Blocked on something**: Non.
 
 **Upcoming and Future Tasks**
--   **Upcoming Tasks:**
-    -   (P0) **Validation de la création d'étudiant** : Tester visuellement la dernière fonctionnalité implémentée (prix automatique dans le formulaire de création d'étudiant).
--   **Future Tasks:**
-    -   (P1) **Synchroniser les factures avec Monday.com** : Tâche en attente.
-    -   (P1) **Améliorer l'UI des cours groupés** : L'interface actuelle est basique. Il faudra la peaufiner et s'assurer qu'elle répond aux besoins de l'utilisateur.
-    -   (P2) **Envoi de jeux par le professeur** : Implémenter la logique pour cette fonctionnalité.
-    -   (P2 - SUGGESTION) **Export PDF/CSV des statistiques admin** : Permettre le téléchargement des données du tableau de bord analytique.
+- **Upcoming Tasks:**
+  - (P0) **Fonctionnalité Admin (Assiduité)** : Mettre en place un système où les professeurs peuvent pointer (début, pause, fin de cours). Les données doivent remonter dans un nouvel onglet Assiduité du tableau de bord admin.
+  - (P0) **Fonctionnalité Admin (Récap Heures)** : Créer une tâche (ou un endpoint) qui, chaque 28 du mois, calcule le nombre total d'heures de pointage pour chaque professeur et stocke le résultat.
+- **Future Tasks:**
+  - (P1) **Synchroniser les factures avec Monday.com**.
+  - (P2) **Export PDF/CSV des statistiques admin**.
 
 **Completed work in this session**
--   **Séparation des revenus (Admin)** : Implémenté sur le graphique du tableau de bord analytique pour montrer les entrées vs les sorties. (FAIT)
--   **Filtre de devise EUR/FCFA** : Ajouté au tableau de bord analytique. (FAIT)
--   **Système de déductions professeurs** : La logique de paie a été mise à jour pour supprimer la TVA et appliquer des pénalités de 5€/1500 FCFA. (FAIT)
--   **Suppression de l'onglet Cours (Professeur)** : L'onglet a été retiré du tableau de bord des professeurs. (FAIT)
--   **Persistance des documents** : Le bug a été résolu en migrant le stockage des fichiers vers MongoDB (Base64). (FAIT)
--   **Fonctionnalité de cours groupés** : Création des modèles, des endpoints backend et d'un composant frontend de base. (FAIT)
--   **Création d'étudiant par l'admin** : Implémentation du formulaire et de l'endpoint backend. (FAIT)
--   **Tarification automatique** : Le formulaire de création d'étudiant met désormais à jour le prix automatiquement. (FAIT)
--   **Restauration de la base de données** : Tous les comptes utilisateurs ont été recréés et synchronisés avec succès après un déploiement. (FAIT)
--   **Préparation au déploiement** : Correction des problèmes critiques identifiés par l'agent de déploiement (variables d'environnement, format de fichier .env). (FAIT)
-
-**Known issue recurrence from previous fork**
--   **Issue recurrence in previous fork**: Le bug de téléchargement/prévisualisation de documents (Static file not found).
--   **Recurrence count**: 2+
--   **Status**: RESOLVED
-    **Note**: Le problème a été définitivement résolu en changeant l'architecture de stockage des fichiers. Ils sont maintenant stockés dans MongoDB au lieu du système de fichiers local, ce qui garantit leur persistance.
+- **Correction Bug de Rafraîchissement** : Le problème de redirection vers l'accueil après un F5 est résolu pour tous les rôles (FAIT - , , ).
+- **Profil Spécial Ndeyemane** : Espace privé avec onglets et affichage limités (FAIT - ).
+- **Système de Congés** : Flux complet de demande et d'approbation (FAIT - , , ).
+- **Logique de Paie Avancée** : Ajout du Solde à venir et de la visibilité différée des bulletins (FAIT - , ).
+- **Nettoyage Admin Dashboard** : Suppression des onglets Groupes et ajout du bouton Vider la poubelle (FAIT - , ).
+- **Amélioration Admin Analytics** : Ajout du bouton Éditer pour les revenus et passage aux heures par trimestre (FAIT - ).
+- **Sécurisation Espace Secrétaire** : Ajout d'une protection par code pour les bulletins (FAIT - ).
+- **Format Facture et Correction Devise** : Implémentation du format  et affichage correct du FCFA (FAIT - , ).
+- **Mise à Jour Promo Ramadan** : Changement de la bannière et logique d'exclusion de produits (FAIT - ).
+- **Investigation Bug Stripe** : Confirmation que le flux de paiement fonctionne correctement et n'était pas un bug (FAIT).
+- **Sauvegarde des Identifiants** : Création du fichier  (FAIT).
+- **Correction bug de login** : Résolution du problème de login de Ndeyemane dû à une incohérence du nom de champ du mot de passe haché ( vs ) dans la base de données (FAIT).
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Migration de Stockage de Fichiers** : Passage d'un stockage sur système de fichiers (éphémère en conteneur) à un stockage persistant en Base64 dans MongoDB pour résoudre un bug critique de perte de données.
--   **Intégration API Externe (Monday.com)** : Utilisation de l'API de Monday.com pour synchroniser les données des utilisateurs (étudiants) avec la base de données de l'application.
--   **Remplissage Dynamique de Formulaire (React)** : Utilisation d'un appel API () pour récupérer des données et mettre à jour dynamiquement les champs d'un formulaire en fonction des sélections de l'utilisateur.
--   **Récupération de Base de Données** : Mise en place de scripts pour recréer et synchroniser les utilisateurs après une réinitialisation de la base de données, incluant le hachage des mots de passe avec .
+-   **Persistance de l'État d'Authentification** : Le bug de rafraîchissement a été résolu en enveloppant l'application dans un  () et en initialisant l'état du hook  à partir de . Cela garantit que l'état d'authentification survit au rechargement de la page.
+-   **Rendu Conditionnel pour la Personnalisation de l'UI** : Le profil spécial de Ndeyemane a été implémenté en utilisant un simple booléen basé sur l'email de l'utilisateur pour afficher/masquer conditionnellement des composants (titres, cartes de statistiques, onglets) dans .
+-   **Logique Métier Côté Backend** : La logique complexe de visibilité des bulletins de paie (basée sur la date actuelle) et le calcul du solde à venir ont été implémentés directement dans l'endpoint API , découplant la logique du frontend.
+-   **Débogage d'Authentification** : Le problème de connexion de Ndeyemane a été tracé jusqu'à une incohérence dans le schéma de la base de données (le champ du mot de passe haché était  alors que le code s'attendait à ).
 
 **key DB schema**
--   : Champ  utilisé pour la validation de connexion.
--   : Le champ  est maintenant un . Un nouveau champ  (string) contient le contenu du fichier en Base64.
--    (nouvelle collection): {id, name, teacher_id, student_ids, schedule, meet_link, price_per_student, currency, created_at}
--    (nouvelle collection): {id, group_course_id, session_date, attendees_ids}
--    & : Utilisés pour calculer les revenus entrants/sortants.
+-    (nouvelle collection) : 
+-    : Un champ  a été ajouté/utilisé. La logique de récupération a été modifiée pour gérer la visibilité basée sur la date.
+-    : Le champ contenant le mot de passe haché est . Toute mise à jour manuelle doit cibler ce champ.
 
 **All files of reference**
--   : Le fichier principal du backend. A été massivement modifié pour toutes les nouvelles fonctionnalités et corrections.
--   : Intègre les nouveaux composants pour la création d'étudiants et la gestion des groupes.
--   : Contient la logique de facturation mise à jour pour les professeurs.
--   : Contient la logique du graphique des revenus avec le filtre de devise.
--   : **Nouveau** - Contient le formulaire de création d'étudiant avec la logique de tarification automatique.
--   : **Nouveau** - Interface pour la gestion des cours groupés.
--   : Script utilisé pour la synchronisation avec Monday.com.
--   : Contient maintenant les clés API pour Monday.com.
+-   
+-   
+-   
+-   
+-   
+-   
+-   
+-   
 
 **Areas that need refactoring**:
--   ** (P0)**: Ce fichier monolithe de plus de 6000 lignes reste la principale dette technique. Sa refactorisation en plusieurs fichiers de routes est une priorité pour la maintenabilité.
--   ** et  (P1)**: Ces composants sont devenus très volumineux et complexes. Il serait bénéfique d'extraire certaines logiques (comme la facturation dans ) dans des hooks ou des sous-composants dédiés.
+-   ** (P0)**: Reste la principale dette technique. Le fichier est très volumineux et sa refactorisation en plusieurs fichiers de routes doit continuer.
+-   ** (P1)**: Le composant est devenu très complexe avec la logique de paiement, la liste, l'impression, et maintenant la protection par code. Extraire la logique dans des hooks ou des sous-composants améliorerait sa lisibilité.
+-   ** (P1)**: Gère maintenant deux types de profils. Si d'autres profils spéciaux sont ajoutés, une approche plus évolutive (basée sur les rôles/permissions de l'API) serait préférable au lieu d'ajouter des 
 
 **key api endpoints**
 -   **Nouveaux endpoints**:
-    -   : Crée un nouvel étudiant depuis l'espace admin.
-    -   : Récupère la liste des prix des packs de cours.
-    -   : Sert un fichier stocké dans MongoDB.
-    -   Endpoints CRUD pour les cours groupés : , , , etc.
+    -   : Pour vider la poubelle des utilisateurs.
+    -   : Pour mettre à jour les données de revenus mensuels.
+    -   : Pour qu'un professeur soumette une demande de congé.
+    -   : Pour qu'un professeur voie ses demandes de congé.
+    -   : Pour que l'admin voie toutes les demandes de congé.
+    -   : Pour approuver ou refuser une demande.
 -   **Endpoints modifiés**:
-    -   : Retourne maintenant les revenus entrants, sortants et nets pour les deux devises (EUR/FCFA).
-    -   , , : Stockent désormais les fichiers dans MongoDB.
+    -   : Renvoie maintenant une structure avec  et .
+    -   : Génère maintenant une  au format .
+    -   : Calcule maintenant les heures par trimestre.
 
 **Critical Info for New Agent**
--   **La base de données peut être réinitialisée.** Les déploiements peuvent effacer la base de données. L'historique de chat contient les scripts et la logique pour restaurer complètement les comptes (admin, secrétaire, professeurs, et étudiants via Monday.com). C'est une procédure de récupération essentielle à connaître.
--   **La refactorisation de  est une tâche de fond importante** et a été explicitement demandée. Il faut continuer à avancer sur ce point.
--   **Les sessions du  expirent très vite.** Cela rend les tests visuels en plusieurs étapes difficiles. Privilégiez les tests API pour valider le backend, et pour le frontend, essayez de réaliser des captures d'écran en une seule action (login + navigation directe).
--   **Les identifiants de connexion principaux ont été restaurés** et sont listés dans l'historique de chat. Ils peuvent être nécessaires pour les tests.
+-   **Persistance de Session** : Le bug de rafraîchissement est **résolu**. La solution repose sur  dans  et l'initialisation de  depuis . Ne pas modifier cette structure sans comprendre son impact.
+-   **Débogage de Login** : En cas d'échec de login malgré un mot de passe correct, vérifier la cohérence du nom du champ du mot de passe haché dans la base de données. Le système utilise .
+-   **Flux de Paiement Stripe** : Le paiement Stripe n'est pas un lien direct. Le flux est : Clic sur Pack -> Modal d'inscription -> Modal de choix de paiement -> Redirection Stripe. Il n'y a pas de bug ici.
+-   **Profil Spécial** : Toute modification pour Ndeyemane doit être faite dans  en utilisant la variable .
 
 **documents and test reports created in this job**
--   
--    (mis à jour plusieurs fois)
+-   : Contient les informations de connexion pour les différents rôles.
+-   : A été mis à jour avec les fonctionnalités complétées.
+-   : Rapport de test validant les premières modifications (Admin UI, Analytics).
+-   : Rapport de test de santé générale de la plateforme.
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **Request (Done)**: dans crée un étudiant sur admin quand on séléctione le niveau il met automatiquement le prix du niveau pack qui est sur le site -> L'agent a implémenté la tarification automatique.
-2.  **Request (Done)**: admin peut crée dans son espace un étudiant direct... -> L'agent a implémenté la fonctionnalité de création d'étudiant par l'admin.
-3.  **Request (Done)**: ...deploy ou redeploy le site -> L'agent a lancé une investigation, corrigé des problèmes et préparé l'application pour le déploiement.
-4.  **Request (Done)**: poursuivions une investigation plus approfondie... -> L'agent a effectué des tests API complets avant de lancer l'agent de déploiement.
-5.  **Confirmation (User)**: L'utilisateur confirme que les changements sont corrects et demande de continuer.
-6.  **Request (Done)**: remet tous ce que tu avais réalisé... -> L'utilisateur a signalé que le déploiement avait effacé les données, l'agent a tout restauré (code et base de données).
-7.  **Info (User)**: il me met toujours invalide credential et les changements apporté... ne sont plus disponible -> L'utilisateur signale le problème après le déploiement.
-8.  **Request (Done)**: oui -> L'utilisateur confirme la création des 3 professeurs.
-9.  **Request (Done)**: oui -> L'utilisateur confirme la synchronisation des étudiants depuis Monday.com.
-10. **Request (Done)**: recupere les étudiants sur monday.com -> L'utilisateur demande d'utiliser Monday.com comme source de vérité pour la liste des étudiants.
+1.  **Request (Done)**: Mettre à jour tous les espaces pour corriger les bugs.
+2.  **Request (Done)**: Empêcher le rafraîchissement de page de rediriger vers l'accueil.
+3.  **Request (Done)**: Pour les profs payés en FCFA, la devise du total net doit être en FCFA.
+4.  **Confirmation (User)**: Ndeye Mane et Mamadou Aliou doivent être payés en FCFA.
+5.  **Request (Done)**: Le total net reçu doit afficher FCFA pour les profs concernés.
+6.  **Investigation (Done)**: Corriger une supposée erreur de redirection de paiement Stripe.
+7.  **Request (Done)**: Protéger les bulletins de paie récents dans l'espace secrétaire avec le code .
+8.  **Request (Done)**: Sauvegarder les mots de passe des différents rôles.
+9.  **Request (Done)**: Ajouter une option de demande de congé pour les professeurs.
+10. **Request (Done)**: Pour Ndeyemane, le titre doit être Espace Privé et le mail de bienvenue ne doit pas apparaître.
 
 **Project Health Check:**
--   **Broken:** Aucun. Les problèmes de connexion dus à la réinitialisation de la base de données ont été résolus.
+-   **Broken:** Aucun.
 -   **Mocked:** Aucun.
 
 **3rd Party Integrations**
--   **Stripe (Payments):** Existant.
--   **Monday.com (CRM):** Existant et activement utilisé pour synchroniser la liste des étudiants. Les clés API sont maintenant gérées via le fichier .
--   **Victory (Charts):** Existant.
+-   **Stripe (Payments):** Existant et vérifié.
+-   **Monday.com (CRM):** Existant, aucune modification dans cette session.
 
 **Testing status**
--   **Testing agent used after significant changes**: YES (une fois, pour valider la séparation des revenus).
+-   **Testing agent used after significant changes**: YES
 -   **Troubleshoot agent used after agent stuck in loop**: NO
 -   **Test files created**: []
--   **Known regressions**: Aucune.
+-   **Known regressions**: Aucune. Le bug de rafraîchissement, qui était une régression majeure, a été corrigé.
 
 **Credentials to test flow:**
-Les identifiants ont été réinitialisés plusieurs fois. Les derniers identifiants fonctionnels sont :
-*   **Admin**:  / 
-*   **Secrétaire**:  / 
-*   **Professeurs**: Trois professeurs principaux ont été créés avec des mots de passe spécifiques (ex: Mamadoualiou Sow, ...).
-*   **Étudiants**: 16 étudiants ont été synchronisés depuis Monday.com avec des mots de passe générés.
-*L'historique complet du chat contient la liste détaillée des mots de passe si nécessaire.*
+Se référer au fichier  qui a été créé à cet effet.
 
 **What agent forgot to execute**
-L'agent a été très réactif et a traité toutes les demandes de l'utilisateur dans cette session. Aucune tâche demandée n'a été oubliée.</analysis>
+L'agent a traité une très longue liste de demandes. Les deux seules fonctionnalités majeures de la liste initiale qui n'ont pas encore été abordées sont :
+1.  Le système d'assiduité des professeurs (pointage).
+2.  Le récapitulatif mensuel des heures des professeurs.
+Ces tâches sont listées dans la section Upcoming Tasks.
+save all passwords and all datas. Correct the bug when log out 
+</analysis>

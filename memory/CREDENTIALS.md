@@ -19,9 +19,9 @@
 
 | Nom | Email | Mot de passe | Notes |
 |-----|-------|--------------|-------|
-| Ndeyemane Dieng | ndeyemane.dieng@mykalamaenglish.com | `Teacherc209e87f` | Profil spécial (Espace Privé) |
-| ProfTest Flashcards | proftest.flashcards@mykalamaenglish.com | `teacher123` | Compte de test |
-| Amina Ndiaye | amina.ndiaye@mykalamaenglish.com | `Teacher` + 8 caractères aléatoires | Mot de passe généré |
+| Ndeyemane Dieng | ndeyemane.dieng@mykalamaenglish.com | `Teacher1ed10976` | Profil spécial (Espace Privé) |
+| ProfTest Flashcards | proftest.flashcards@mykalamaenglish.com | `Teacherba45cb1a` | Compte de test |
+| Amina Ndiaye | amina.ndiaye@mykalamaenglish.com | `Teacherc0d3b507` | Mot de passe généré |
 | Mamadoualiou Sow | mamadoualiou.sow@mykalamaenglish.com | `Teacher` + 8 caractères aléatoires | Mot de passe généré |
 | Khaly Diop | khaly.diop@mykalamaenglish.com | `Teacher` + 8 caractères aléatoires | Mot de passe généré |
 | Aminata Ndiaye | aminata.ndiaye@mykalamaenglish.com | `Teacher` + 8 caractères aléatoires | Mot de passe généré |

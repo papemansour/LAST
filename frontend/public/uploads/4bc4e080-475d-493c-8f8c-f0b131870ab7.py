@@ -253,7 +253,7 @@ async def send_admin_notification_email(user_email: str, first_name: str, last_n
     
     Veuillez vous connecter au dashboard admin pour approuver cette inscription.
     
-    Lien dashboard: https://elearning-platform-6.preview.emergentagent.com/admin
+    Lien dashboard: https://attendance-tracker-698.preview.emergentagent.com/admin
     """
     
     # TODO: Implement actual email sending to mykalamaenglish@gmail.com

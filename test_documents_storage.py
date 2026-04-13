@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 # Backend URL from environment
-BACKEND_URL = "https://elearning-platform-6.preview.emergentagent.com/api"
+BACKEND_URL = "https://attendance-tracker-698.preview.emergentagent.com/api"
 
 # Test credentials
 ADMIN_EMAIL = "admin@mykalamaenglish.com"
@@ -259,7 +259,7 @@ startxref
                 return False
             
             # Test direct file access
-            file_access_url = f"https://elearning-platform-6.preview.emergentagent.com/uploads/documents/{filename}"
+            file_access_url = f"https://attendance-tracker-698.preview.emergentagent.com/uploads/documents/{filename}"
             
             async with self.session.get(file_access_url) as response:
                 if response.status == 200:
@@ -342,7 +342,7 @@ startxref
             
             # Use the existing PDF file mentioned in the review request
             existing_filename = "05684018-449e-481d-92d9-95382bca65a7.pdf"
-            file_access_url = f"https://elearning-platform-6.preview.emergentagent.com/uploads/documents/{existing_filename}"
+            file_access_url = f"https://attendance-tracker-698.preview.emergentagent.com/uploads/documents/{existing_filename}"
             
             async with self.session.get(file_access_url) as response:
                 if response.status == 200:

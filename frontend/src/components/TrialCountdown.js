@@ -135,7 +135,7 @@ const TrialCountdown = ({ registrationDate, onUpgradeClick }) => {
             </Button>
             {daysRemaining > 0 && (
               <p className="text-xs text-gray-500 text-center">
-                -10% avec RAMADAN2026
+                Passez au Premium maintenant
               </p>
             )}
           </div>

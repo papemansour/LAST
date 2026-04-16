@@ -61,11 +61,10 @@ const HomePage = () => {
   const [sharedLoginCode, setSharedLoginCode] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   
-  // Check if Ramadan promo is active (Feb 17 - Mar 20, 2026)
-  const currentDate = new Date();
-  const isRamadanPromo = currentDate >= new Date('2026-02-17') && currentDate <= new Date('2026-03-20');
-  const ramadanDiscount = isRamadanPromo ? 0.10 : 0; // 10% discount
-  const RAMADAN_PROMO_CODE = 'promo_1T2s9HI4faCc3GWYXTWySNJ1';
+  // Ramadan promo removed
+  const isRamadanPromo = false;
+  const ramadanDiscount = 0;
+  const RAMADAN_PROMO_CODE = null;
   
   const [pricingData, setPricingData] = useState({
     kkid_eur: 30,
@@ -561,7 +560,7 @@ const HomePage = () => {
           </div>
           
           <p className="text-center text-base sm:text-lg md:text-xl text-emerald-600 font-semibold mb-3 md:mb-4 px-4">
-            🌙 PROMO RAMADAN : -10% sur tous les packs ! Code : RAMADAN2026 - Valable jusqu'au 20 mars 2026
+            Apprenez l'anglais avec MyKalamaEnglish !
           </p>
           <div className="text-center mb-8 md:mb-12 px-4">
             <p className="text-base sm:text-lg md:text-xl font-semibold mb-2">

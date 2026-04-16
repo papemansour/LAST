@@ -150,10 +150,6 @@ const LoginPage = () => {
               <span className="text-3xl">⭐</span>
             </div>
             <p className="text-sm">رمضان مبارك - Que ce mois sacré soit rempli de bénédictions</p>
-            <div className="mt-2 p-2 bg-white/20 rounded-lg">
-              <p className="text-lg font-semibold">🎁 PROMO RAMADAN : -10% sur tous les packs !</p>
-              <p className="text-xs mt-1">Code : RAMADAN2026 - Valable jusqu&apos;au 20 mars 2026</p>
-            </div>
           </div>
         )}
         

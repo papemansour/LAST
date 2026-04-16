@@ -15,7 +15,7 @@ import {
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
 import { useAuth } from '../hooks/useAuth';
-import { LogOut, BookOpen, FileText, Link as LinkIcon, Upload, Send, User, Mail, MessageCircle, Heart, Sparkles, Eye, GraduationCap, Gamepad2, Newspaper, Library, UserCircle, Video, TrendingUp, Trophy, Gift, Calendar } from 'lucide-react';
+import { LogOut, BookOpen, FileText, Link as LinkIcon, Upload, Send, User, Mail, MessageCircle, Heart, Sparkles, Eye, GraduationCap, Gamepad2, Newspaper, Library, UserCircle, Video, TrendingUp, Trophy, Gift, Calendar, Receipt } from 'lucide-react';
 import ConversationChat from '../components/ConversationChat';
 import NewsDisplay from '../components/NewsDisplay';
 import WelcomeLetter from '../components/WelcomeLetter';
@@ -38,6 +38,7 @@ import StudentCourseSummaries from '../components/StudentCourseSummaries';
 import NotificationBell from '../components/NotificationBell';
 import StudentCourseLinks from '../components/StudentCourseLinks';
 import TrialCountdown from '../components/TrialCountdown';
+import StudentPayments from '../components/StudentPayments';
 import RamadanPromoBanner from '../components/RamadanPromoBanner';
 import StudentAvailability from '../components/StudentAvailability';
 const StudentDashboard = () => {
@@ -375,6 +376,15 @@ const StudentDashboard = () => {
             </TabsTrigger>
             
             <TabsTrigger 
+              value="payments" 
+              data-testid="student-tab-payments"
+              className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+            >
+              <Receipt className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
+              <span className="text-xs font-semibold">Paye</span>
+            </TabsTrigger>
+            
+            <TabsTrigger 
               value="links" 
               data-testid="student-tab-links"
               className="h-24 data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
@@ -628,6 +638,11 @@ const StudentDashboard = () => {
                 </div>
               </div>
             )}
+          </TabsContent>
+
+          {/* Paye Tab - Reçus de paiement */}
+          <TabsContent value="payments">
+            <StudentPayments />
           </TabsContent>
 
           {/* Mes Dispos Tab - Disponibilités de l'étudiant */}

@@ -16,6 +16,7 @@ class EmailService:
             self.aws_region = os.environ.get('AWS_REGION', 'us-east-1')
             self.sender_email = os.environ.get('AWS_SES_SENDER_EMAIL', 'papemansour01@gmail.com')
             self.frontend_url = os.environ.get('FRONTEND_URL', '')
+            self.kalamatheque_password = os.environ.get('KALAMATHEQUE_PASSWORD', 'digikode')
             
             if not self.aws_access_key or not self.aws_secret_key:
                 logger.warning("AWS credentials not found. Email sending will be logged only.")
@@ -82,7 +83,7 @@ class EmailService:
                     <div class="credentials">
                         <h3>ACCÈS À LA KALAMATHÈQUE 📚</h3>
                         <p>Bibliothèque numérique de livres et ressources audio</p>
-                        <p><strong>Mot de passe KALAMATHÈQUE :</strong> <code style="background: #f0f0f0; padding: 5px 10px; border-radius: 3px;">digikode</code></p>
+                        <p><strong>Mot de passe KALAMATHÈQUE :</strong> <code style="background: #f0f0f0; padding: 5px 10px; border-radius: 3px;">{self.kalamatheque_password}</code></p>
                     </div>
                     
                     <center>

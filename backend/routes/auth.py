@@ -186,7 +186,8 @@ async def login(credentials: UserLogin):
 @router.post("/auth/secretary-login")
 async def secretary_login(code: str = Body(..., embed=True)):
     """Special login for secretary with secret code - gives admin access"""
-    if code != "secretaire2025":
+    secretary_code = os.environ.get('SECRETARY_LOGIN_CODE', 'secretaire2025')
+    if code != secretary_code:
         raise HTTPException(status_code=401, detail="Code incorrect")
     
     # Find or create secretary user with admin role
@@ -201,9 +202,9 @@ async def secretary_login(code: str = Body(..., embed=True)):
             "first_name": "Secrétaire",
             "last_name": "KALAMA",
             "phone": "+221000000000",
-            "role": "secretary",  # Secretary role to access secretary dashboard
+            "role": "secretary",
             "is_active": True,
-            "password_hash": hash_password("secretaire2025"),
+            "password_hash": hash_password(secretary_code),
             "created_at": datetime.now(timezone.utc).isoformat(),
             "first_login": False
         }

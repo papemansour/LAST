@@ -37,6 +37,7 @@ import AdminMonthlyHours from '../components/AdminMonthlyHours';
 import AdminAnalytics from '../components/AdminAnalytics';
 import CreateStudentForm from '../components/CreateStudentForm';
 import ImportStudentsCSV from '../components/ImportStudentsCSV';
+import LeaveBalanceCard from '../components/LeaveBalanceCard';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -395,52 +396,55 @@ const AdminDashboard = () => {
         </div>
       </nav>
 
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-teal-900 to-slate-900">
       <div className="container mx-auto px-4 py-12 max-w-7xl">
         <div className="mb-8">
-          <h2 className="text-4xl font-bold text-gray-900 mb-2">Tableau de bord Admin</h2>
-          <p className="text-gray-600">Gérez votre plateforme KALAMAENGLISH</p>
+          <h2 className="text-4xl font-bold text-white mb-2">Tableau de bord Admin</h2>
+          <p className="text-teal-200/70">Gerez votre plateforme KALAMAENGLISH</p>
         </div>
 
-        <div className="grid md:grid-cols-4 gap-6 mb-8">
-          <Card>
+        <div className="grid md:grid-cols-5 gap-4 mb-8">
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">En attente</CardTitle>
-              <UserCheck className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-white/80">En attente</CardTitle>
+              <UserCheck className="h-4 w-4 text-red-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-600">{pendingRegistrations.length}</div>
+              <div className="text-2xl font-bold text-red-400">{pendingRegistrations.length}</div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Étudiants</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-white/80">Etudiants</CardTitle>
+              <Users className="h-4 w-4 text-emerald-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{students.length}</div>
+              <div className="text-2xl font-bold text-emerald-400">{students.length}</div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Professeurs</CardTitle>
-              <BookOpen className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-white/80">Professeurs</CardTitle>
+              <BookOpen className="h-4 w-4 text-blue-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{teachers.length}</div>
+              <div className="text-2xl font-bold text-blue-400">{teachers.length}</div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Tests passés</CardTitle>
-              <Award className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-white/80">Tests passes</CardTitle>
+              <Award className="h-4 w-4 text-amber-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{testResults.length}</div>
+              <div className="text-2xl font-bold text-amber-400">{testResults.length}</div>
             </CardContent>
           </Card>
+
+          <LeaveBalanceCard compact={false} />
         </div>
 
         <Tabs defaultValue="pending" className="space-y-6">
@@ -449,7 +453,7 @@ const AdminDashboard = () => {
             <TabsTrigger 
               value="pending" 
               data-testid="admin-tab-pending"
-              className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-red-500 data-[state=active]:to-red-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+              className="h-24 data-[state=active]:bg-teal-600/90 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-teal-500/20 data-[state=active]:scale-105 bg-white/5 backdrop-blur-xl hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer text-white/70"
             >
               <UserCheck className="w-6 h-6" />
               <span className="text-xs font-semibold">En attente</span>
@@ -459,7 +463,7 @@ const AdminDashboard = () => {
             <TabsTrigger 
               value="students" 
               data-testid="admin-tab-students"
-              className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-teal-500 data-[state=active]:to-teal-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+              className="h-24 data-[state=active]:bg-teal-600/90 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-teal-500/20 data-[state=active]:scale-105 bg-white/5 backdrop-blur-xl hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer text-white/70"
             >
               <Users className="w-6 h-6" />
               <span className="text-xs font-semibold">Étudiants</span>
@@ -468,7 +472,7 @@ const AdminDashboard = () => {
             <TabsTrigger 
               value="teachers" 
               data-testid="admin-tab-teachers"
-              className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+              className="h-24 data-[state=active]:bg-teal-600/90 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-teal-500/20 data-[state=active]:scale-105 bg-white/5 backdrop-blur-xl hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer text-white/70"
             >
               <BookOpen className="w-6 h-6" />
               <span className="text-xs font-semibold">Professeurs</span>
@@ -477,7 +481,7 @@ const AdminDashboard = () => {
             <TabsTrigger 
               value="analytics" 
               data-testid="admin-tab-analytics"
-              className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-indigo-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+              className="h-24 data-[state=active]:bg-teal-600/90 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-teal-500/20 data-[state=active]:scale-105 bg-white/5 backdrop-blur-xl hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer text-white/70"
             >
               <TrendingUp className="w-6 h-6" />
               <span className="text-xs font-semibold">📊 Analytics</span>
@@ -486,7 +490,7 @@ const AdminDashboard = () => {
             <TabsTrigger 
               value="assign" 
               data-testid="admin-tab-assign"
-              className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+              className="h-24 data-[state=active]:bg-teal-600/90 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-teal-500/20 data-[state=active]:scale-105 bg-white/5 backdrop-blur-xl hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer text-white/70"
             >
               <UserPlus className="w-6 h-6" />
               <span className="text-xs font-semibold">Assigner</span>
@@ -495,7 +499,7 @@ const AdminDashboard = () => {
             <TabsTrigger 
               value="attendance" 
               data-testid="admin-tab-attendance"
-              className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+              className="h-24 data-[state=active]:bg-teal-600/90 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-teal-500/20 data-[state=active]:scale-105 bg-white/5 backdrop-blur-xl hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer text-white/70"
             >
               <Clock className="w-6 h-6" />
               <span className="text-xs font-semibold">Assiduité</span>
@@ -504,7 +508,7 @@ const AdminDashboard = () => {
             <TabsTrigger 
               value="student-availability" 
               data-testid="admin-tab-student-availability"
-              className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-teal-500 data-[state=active]:to-teal-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+              className="h-24 data-[state=active]:bg-teal-600/90 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-teal-500/20 data-[state=active]:scale-105 bg-white/5 backdrop-blur-xl hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer text-white/70"
             >
               <CalendarDays className="w-6 h-6" />
               <span className="text-xs font-semibold">Dispo Étudiants</span>
@@ -513,7 +517,7 @@ const AdminDashboard = () => {
             <TabsTrigger 
               value="monthly-hours" 
               data-testid="admin-tab-monthly-hours"
-              className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-cyan-500 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+              className="h-24 data-[state=active]:bg-teal-600/90 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-teal-500/20 data-[state=active]:scale-105 bg-white/5 backdrop-blur-xl hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer text-white/70"
             >
               <BarChart3 className="w-6 h-6" />
               <span className="text-xs font-semibold">Récap Heures</span>
@@ -522,7 +526,7 @@ const AdminDashboard = () => {
             <TabsTrigger 
               value="results" 
               data-testid="admin-tab-results"
-              className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-yellow-500 data-[state=active]:to-yellow-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+              className="h-24 data-[state=active]:bg-teal-600/90 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-teal-500/20 data-[state=active]:scale-105 bg-white/5 backdrop-blur-xl hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer text-white/70"
             >
               <Award className="w-6 h-6" />
               <span className="text-xs font-semibold">Résultats</span>
@@ -531,7 +535,7 @@ const AdminDashboard = () => {
             <TabsTrigger 
               value="pricing" 
               data-testid="admin-tab-pricing"
-              className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-green-500 data-[state=active]:to-green-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+              className="h-24 data-[state=active]:bg-teal-600/90 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-teal-500/20 data-[state=active]:scale-105 bg-white/5 backdrop-blur-xl hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer text-white/70"
             >
               <DollarSign className="w-6 h-6" />
               <span className="text-xs font-semibold">Prix</span>
@@ -540,7 +544,7 @@ const AdminDashboard = () => {
             <TabsTrigger 
               value="availability" 
               data-testid="admin-tab-availability"
-              className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-pink-500 data-[state=active]:to-pink-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+              className="h-24 data-[state=active]:bg-teal-600/90 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-teal-500/20 data-[state=active]:scale-105 bg-white/5 backdrop-blur-xl hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer text-white/70"
             >
               <Clock className="w-6 h-6" />
               <span className="text-xs font-semibold">Horaires</span>
@@ -549,7 +553,7 @@ const AdminDashboard = () => {
             <TabsTrigger 
               value="news" 
               data-testid="admin-tab-news"
-              className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-indigo-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+              className="h-24 data-[state=active]:bg-teal-600/90 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-teal-500/20 data-[state=active]:scale-105 bg-white/5 backdrop-blur-xl hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer text-white/70"
             >
               <FileText className="w-6 h-6" />
               <span className="text-xs font-semibold">📰 News</span>
@@ -558,7 +562,7 @@ const AdminDashboard = () => {
             <TabsTrigger 
               value="kalamatheque" 
               data-testid="admin-tab-kalamatheque"
-              className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-cyan-500 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+              className="h-24 data-[state=active]:bg-teal-600/90 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-teal-500/20 data-[state=active]:scale-105 bg-white/5 backdrop-blur-xl hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer text-white/70"
             >
               <BookOpen className="w-6 h-6" />
               <span className="text-xs font-semibold">Kalamathèque</span>
@@ -567,7 +571,7 @@ const AdminDashboard = () => {
             <TabsTrigger 
               value="club" 
               data-testid="admin-tab-club"
-              className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-amber-500 data-[state=active]:to-amber-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+              className="h-24 data-[state=active]:bg-teal-600/90 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-teal-500/20 data-[state=active]:scale-105 bg-white/5 backdrop-blur-xl hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer text-white/70"
             >
               <Award className="w-6 h-6" />
               <span className="text-xs font-semibold">🏆 CLUB</span>
@@ -576,7 +580,7 @@ const AdminDashboard = () => {
             <TabsTrigger 
               value="conversations" 
               data-testid="admin-tab-conversations"
-              className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-rose-500 data-[state=active]:to-rose-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+              className="h-24 data-[state=active]:bg-teal-600/90 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-teal-500/20 data-[state=active]:scale-105 bg-white/5 backdrop-blur-xl hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer text-white/70"
             >
               <Send className="w-6 h-6" />
               <span className="text-xs font-semibold">💬 Messages</span>
@@ -585,7 +589,7 @@ const AdminDashboard = () => {
             <TabsTrigger 
               value="trash"
               data-testid="admin-tab-trash"
-              className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-gray-500 data-[state=active]:to-gray-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+              className="h-24 data-[state=active]:bg-teal-600/90 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-teal-500/20 data-[state=active]:scale-105 bg-white/5 backdrop-blur-xl hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer text-white/70"
             >
               <Trash2 className="w-6 h-6" />
               <span className="text-xs font-semibold">🗑️ Poubelle</span>
@@ -594,7 +598,7 @@ const AdminDashboard = () => {
             <TabsTrigger 
               value="documents" 
               data-testid="admin-tab-documents"
-              className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+              className="h-24 data-[state=active]:bg-teal-600/90 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-teal-500/20 data-[state=active]:scale-105 bg-white/5 backdrop-blur-xl hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer text-white/70"
             >
               <FileText className="w-6 h-6" />
               <span className="text-xs font-semibold">📄 Documents</span>
@@ -603,7 +607,7 @@ const AdminDashboard = () => {
             <TabsTrigger 
               value="test-questions" 
               data-testid="admin-tab-test-questions"
-              className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500 data-[state=active]:to-sky-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+              className="h-24 data-[state=active]:bg-teal-600/90 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-teal-500/20 data-[state=active]:scale-105 bg-white/5 backdrop-blur-xl hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer text-white/70"
             >
               <FileText className="w-6 h-6" />
               <span className="text-xs font-semibold">📝 Questions Test</span>
@@ -612,7 +616,7 @@ const AdminDashboard = () => {
             <TabsTrigger 
               value="badges" 
               data-testid="admin-tab-badges"
-              className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-500 data-[state=active]:to-pink-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+              className="h-24 data-[state=active]:bg-teal-600/90 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-teal-500/20 data-[state=active]:scale-105 bg-white/5 backdrop-blur-xl hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer text-white/70"
             >
               <Award className="w-6 h-6" />
               <span className="text-xs font-semibold">🏆 Badges</span>
@@ -621,7 +625,7 @@ const AdminDashboard = () => {
             <TabsTrigger 
               value="leave-requests" 
               data-testid="admin-tab-leave-requests"
-              className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
+              className="h-24 data-[state=active]:bg-teal-600/90 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-teal-500/20 data-[state=active]:scale-105 bg-white/5 backdrop-blur-xl hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer text-white/70"
             >
               <Plane className="w-6 h-6" />
               <span className="text-xs font-semibold">🏖️ Congés</span>
@@ -2199,6 +2203,7 @@ const AdminDashboard = () => {
           </div>
         </DialogContent>
       </Dialog>
+    </div>
     </div>
   );
 };

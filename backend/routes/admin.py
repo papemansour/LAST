@@ -1187,6 +1187,31 @@ async def approve_leave_request(leave_id: str, data: dict = Body(...), current_u
     }
     await db.notifications.insert_one(notification)
     
+    # Deduct leave days from balance
+    try:
+        from dateutil import parser as dt_parser
+        start = dt_parser.parse(leave['start_date'])
+        end = dt_parser.parse(leave['end_date'])
+        days_taken = max(1, (end - start).days + 1)
+        # Exclude weekends (approximate)
+        working_days = 0
+        current = start
+        while current <= end:
+            if current.weekday() < 5:  # Monday to Friday
+                working_days += 1
+            current += timedelta(days=1)
+        if working_days == 0:
+            working_days = days_taken
+        
+        await db.leave_balances.update_one(
+            {"user_id": leave['teacher_id']},
+            {"$inc": {"total_taken": working_days, "remaining": -working_days}},
+            upsert=False
+        )
+        logger.info(f"Deducted {working_days} leave days from {leave['teacher_id']}")
+    except Exception as e:
+        logger.warning(f"Could not deduct leave days: {e}")
+    
     logger.info(f"Leave request {leave_id} approved by admin")
     return {"message": "Leave request approved"}
 
@@ -1972,3 +1997,177 @@ async def get_promo_codes(current_user: dict = Depends(get_current_user)):
     codes = await db.promo_codes.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
     return codes
 
+
+
+# ============ LEAVE BALANCE (CONGES PAYES) ============
+
+@router.get("/admin/leave-balances")
+async def get_all_leave_balances(current_user: dict = Depends(get_current_user)):
+    """Get leave balances for all employees (teachers, secretary, admin)"""
+    if current_user['role'] not in ['admin', 'secretary']:
+        raise HTTPException(status_code=403, detail="Admin or secretary access required")
+    
+    employees = await db.users.find(
+        {"role": {"$in": ["teacher", "secretary", "admin"]}, "is_active": True},
+        {"_id": 0, "password_hash": 0, "temporary_password": 0}
+    ).to_list(200)
+    
+    results = []
+    for emp in employees:
+        balance = await db.leave_balances.find_one({"user_id": emp['id']}, {"_id": 0})
+        
+        if not balance:
+            # Calculate from creation date
+            created_at = emp.get('created_at')
+            if isinstance(created_at, str):
+                try:
+                    from dateutil import parser as dt_parser
+                    created_date = dt_parser.parse(created_at)
+                except Exception:
+                    created_date = datetime.now(timezone.utc)
+            elif isinstance(created_at, datetime):
+                created_date = created_at
+            else:
+                created_date = datetime.now(timezone.utc)
+            
+            now = datetime.now(timezone.utc)
+            if created_date.tzinfo is None:
+                from datetime import timezone as tz
+                created_date = created_date.replace(tzinfo=tz.utc)
+            
+            months_worked = max(0, (now.year - created_date.year) * 12 + (now.month - created_date.month))
+            total_earned = round(months_worked * 2.5, 1)
+            if total_earned > 30:
+                total_earned = 30.0
+            
+            balance = {
+                "id": str(uuid4()),
+                "user_id": emp['id'],
+                "total_earned": total_earned,
+                "total_taken": 0,
+                "remaining": total_earned,
+                "start_date": created_at if isinstance(created_at, str) else created_at.isoformat() if created_at else datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }
+            await db.leave_balances.insert_one({**balance})
+        else:
+            # Recalculate earned days
+            start = balance.get('start_date', emp.get('created_at'))
+            if isinstance(start, str):
+                try:
+                    from dateutil import parser as dt_parser
+                    start_date = dt_parser.parse(start)
+                except Exception:
+                    start_date = datetime.now(timezone.utc)
+            else:
+                start_date = start or datetime.now(timezone.utc)
+            
+            now = datetime.now(timezone.utc)
+            if start_date.tzinfo is None:
+                from datetime import timezone as tz
+                start_date = start_date.replace(tzinfo=tz.utc)
+            
+            months_worked = max(0, (now.year - start_date.year) * 12 + (now.month - start_date.month))
+            total_earned = round(months_worked * 2.5, 1)
+            if total_earned > 30:
+                total_earned = 30.0
+            
+            total_taken = balance.get('total_taken', 0)
+            remaining = total_earned - total_taken
+            
+            await db.leave_balances.update_one(
+                {"user_id": emp['id']},
+                {"$set": {"total_earned": total_earned, "remaining": remaining, "updated_at": datetime.now(timezone.utc).isoformat()}}
+            )
+            balance['total_earned'] = total_earned
+            balance['remaining'] = remaining
+        
+        results.append({
+            "user_id": emp['id'],
+            "first_name": emp.get('first_name', ''),
+            "last_name": emp.get('last_name', ''),
+            "email": emp.get('email', ''),
+            "role": emp.get('role', ''),
+            "total_earned": balance.get('total_earned', 0),
+            "total_taken": balance.get('total_taken', 0),
+            "remaining": balance.get('remaining', 0),
+            "start_date": balance.get('start_date', '')
+        })
+    
+    return results
+
+
+@router.get("/admin/leave-balance/{user_id}")
+async def get_user_leave_balance(user_id: str, current_user: dict = Depends(get_current_user)):
+    """Get leave balance for a specific user"""
+    if current_user['role'] not in ['admin', 'secretary'] and current_user['id'] != user_id:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    user = await db.users.find_one({"id": user_id}, {"_id": 0, "password_hash": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    balance = await db.leave_balances.find_one({"user_id": user_id}, {"_id": 0})
+    
+    created_at = user.get('created_at')
+    if isinstance(created_at, str):
+        try:
+            from dateutil import parser as dt_parser
+            created_date = dt_parser.parse(created_at)
+        except Exception:
+            created_date = datetime.now(timezone.utc)
+    elif isinstance(created_at, datetime):
+        created_date = created_at
+    else:
+        created_date = datetime.now(timezone.utc)
+    
+    now = datetime.now(timezone.utc)
+    if created_date.tzinfo is None:
+        from datetime import timezone as tz
+        created_date = created_date.replace(tzinfo=tz.utc)
+    
+    months_worked = max(0, (now.year - created_date.year) * 12 + (now.month - created_date.month))
+    total_earned = round(months_worked * 2.5, 1)
+    if total_earned > 30:
+        total_earned = 30.0
+    
+    total_taken = 0
+    if balance:
+        total_taken = balance.get('total_taken', 0)
+    
+    remaining = total_earned - total_taken
+    
+    # Update or create balance
+    if balance:
+        await db.leave_balances.update_one(
+            {"user_id": user_id},
+            {"$set": {"total_earned": total_earned, "remaining": remaining, "updated_at": datetime.now(timezone.utc).isoformat()}}
+        )
+    else:
+        await db.leave_balances.insert_one({
+            "id": str(uuid4()),
+            "user_id": user_id,
+            "total_earned": total_earned,
+            "total_taken": total_taken,
+            "remaining": remaining,
+            "start_date": created_at if isinstance(created_at, str) else created_at.isoformat() if created_at else now.isoformat(),
+            "updated_at": now.isoformat()
+        })
+    
+    # Get approved leaves
+    approved_leaves = await db.leave_requests.find(
+        {"teacher_id": user_id, "status": "approved"},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    
+    return {
+        "user_id": user_id,
+        "first_name": user.get('first_name', ''),
+        "last_name": user.get('last_name', ''),
+        "role": user.get('role', ''),
+        "months_worked": months_worked,
+        "total_earned": total_earned,
+        "total_taken": total_taken,
+        "remaining": remaining,
+        "approved_leaves": approved_leaves
+    }

@@ -58,7 +58,7 @@ const SecretaryLogin = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Code d'accès
+                Code d&apos;accès
               </label>
               <div className="relative">
                 <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-400" />
@@ -69,6 +69,7 @@ const SecretaryLogin = () => {
                   placeholder="Entrez le code secret"
                   className="pl-10 border-purple-200 focus:border-purple-500 focus:ring-purple-500"
                   disabled={loading}
+                  data-testid="secretary-code-input"
                 />
               </div>
             </div>
@@ -77,6 +78,7 @@ const SecretaryLogin = () => {
               type="submit"
               disabled={loading}
               className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-6 text-lg font-semibold"
+              data-testid="secretary-login-submit"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -96,7 +98,7 @@ const SecretaryLogin = () => {
             onClick={() => navigate('/')}
             className="text-purple-600 hover:text-purple-700 text-sm font-medium"
           >
-            ← Retour à l'accueil
+            ← Retour à l&apos;accueil
           </button>
         </div>
       </div>

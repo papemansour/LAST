@@ -1,0 +1,59 @@
+{
+  "summary": "Tested the new leave-balance APIs/calculation, 20 intermediate MCQs, admin glass dashboard, teacher leave card, and secretary RH UI. Backend passed 8/8 tests. Admin and teacher UI flows passed. Secretary RH works after a reload, but code-login initially redirects users to the generic login page.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Secretary code login",
+        "issue": "POST /api/auth/secretary-login succeeds and stores token/user, but navigating to /secretary is immediately redirected to /login. A direct reload of /secretary then works.",
+        "affected_selectors": ["[data-testid='secretary-code-input']", "[data-testid='secretary-login-submit']", "ProtectedRoute"]
+      },
+      {
+        "flow": "Teacher dashboard notifications",
+        "issue": "The notification WebSocket closed before establishing through the public preview URL; this is a previously documented ingress limitation and did not block the leave card.",
+        "affected_selectors": ["NotificationBell"]
+      }
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_leave_balance_features.py",
+    "/app/test_reports/pytest/pytest_leave_balance_features.xml"
+  ],
+  "action_items": [
+    "Fix SecretaryLogin to update AuthProvider state before navigating (for example, add/use a context session-login method or await checkAuth); do not rely only on localStorage.",
+    "Retest secretary code login without a reload, then verify the RH tab still loads employee balances.",
+    "Confirm the intended annual leave policy: current logic reaches a lifetime cap of 30 and never starts a new accrual year."
+  ],
+  "critical_code_review_comments": [
+    "SecretaryLogin writes localStorage directly while ProtectedRoute reads AuthProvider.user; the stale null context causes the reproduced redirect to /login.",
+    "routes/auth.py defaults SECRETARY_LOGIN_CODE to the production-like code in source instead of failing fast on a missing environment variable.",
+    "Leave accrual is based on all months since account creation and permanently capped at 30; if 'max 30 days/year' requires a new entitlement each leave year, employees stop accruing after month 12.",
+    "AdminDashboard.js and TeacherDashboard.js fail static analysis: fetchStudents is undefined in create/import callbacks, and documentData/setDocumentData are undefined in teacher document handlers.",
+    "GiftWelcomeLetter renders <style jsx>, producing a React non-boolean DOM attribute console error on first teacher login.",
+    "AdminDashboard.js, SecretaryDashboard.js, TeacherDashboard.js, admin.py, and teacher.py exceed the 700-line maintainability guideline and should be split into focused modules.",
+    "LeaveBalanceCard silently returns null after API failure and provides no user-visible error or retry state."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_leave_balance_features.py",
+    "/app/frontend/src/pages/SecretaryLogin.js",
+    "/app/frontend/src/pages/SecretaryDashboard.js",
+    "/app/frontend/src/components/SecretaryHR.js",
+    "/app/test_reports/pytest/pytest_leave_balance_features.xml",
+    "/app/test_reports/iteration_10.json"
+  ],
+  "success_rate": {
+    "backend": "100% (8/8)",
+    "frontend": "88% (all requested dashboard content passed; secretary code-login transition failed)"
+  },
+  "seed_data_creation": "Created isolated TEST_ teacher accounts for teacher API/UI validation; all were soft-deleted, purged, and associated leave-balance/welcome-letter artifacts removed.",
+  "should_call_test_agent_after_fix": true,
+  "should_main_agent_self_test": false,
+  "test_credentials": "Required /app/memory/test_credentials.md was missing. Used admin/secretary credentials supplied in the review request; generated isolated teacher credentials through the admin API.",
+  "context_for_next_testing_agent": "Backend leave tests are in test_leave_balance_features.py and pass against REACT_APP_BACKEND_URL. Reproduce secretary login by clearing localStorage, submitting secretaire2025 at /secretary-login, and observing redirect to /login; manually loading /secretary then exposes the fully working RH tab (5 employees during this run).",
+  "rca_of_the_issue": "SecretaryLogin.handleSubmit stores token/user directly in localStorage and calls navigate('/secretary') without updating AuthProvider.user. ProtectedRoute evaluates the still-null context and redirects to /login. A full page load reconstructs AuthProvider from localStorage, which explains why the workaround succeeds."
+}

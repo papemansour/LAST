@@ -426,6 +426,49 @@ async def get_my_leave_requests(current_user: dict = Depends(get_current_user)):
     return leaves
 
 
+@router.get("/teacher/my-leave-balance")
+async def get_my_leave_balance(current_user: dict = Depends(get_current_user)):
+    """Get leave balance for the connected teacher"""
+    if current_user['role'] not in ['teacher', 'secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Employee access required")
+    
+    balance = await db.leave_balances.find_one({"user_id": current_user['id']}, {"_id": 0})
+    
+    created_at = current_user.get('created_at')
+    if isinstance(created_at, str):
+        try:
+            from dateutil import parser as dt_parser
+            created_date = dt_parser.parse(created_at)
+        except Exception:
+            created_date = datetime.now(timezone.utc)
+    elif isinstance(created_at, datetime):
+        created_date = created_at
+    else:
+        created_date = datetime.now(timezone.utc)
+    
+    now = datetime.now(timezone.utc)
+    if created_date.tzinfo is None:
+        from datetime import timezone as tz
+        created_date = created_date.replace(tzinfo=tz.utc)
+    
+    months_worked = max(0, (now.year - created_date.year) * 12 + (now.month - created_date.month))
+    total_earned = round(months_worked * 2.5, 1)
+    if total_earned > 30:
+        total_earned = 30.0
+    
+    total_taken = balance.get('total_taken', 0) if balance else 0
+    remaining = total_earned - total_taken
+    
+    return {
+        "months_worked": months_worked,
+        "total_earned": total_earned,
+        "total_taken": total_taken,
+        "remaining": remaining
+    }
+
+
+
+
 @router.post("/teacher/leave-request")
 async def create_leave_request(leave_data: dict = Body(...), current_user: dict = Depends(get_current_user)):
     """Teacher submits a leave request"""

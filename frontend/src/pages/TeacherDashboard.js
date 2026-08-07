@@ -41,7 +41,7 @@ import GiftWelcomeLetter from '../components/GiftWelcomeLetter';
 import TeacherCourseSummaries from '../components/TeacherCourseSummaries';
 import TeacherStudentsAvailability from '../components/TeacherStudentsAvailability';
 import NotificationBell from '../components/NotificationBell';
-// ActivityFeed removed
+import LeaveBalanceCard from '../components/LeaveBalanceCard';
 
 const TeacherDashboard = () => {
   const navigate = useNavigate();
@@ -352,7 +352,7 @@ const TeacherDashboard = () => {
         <div className="grid md:grid-cols-4 gap-6 mb-8">
           <Card className="border-teal-100">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Mes étudiants</CardTitle>
+              <CardTitle className="text-sm font-medium">Mes etudiants</CardTitle>
               <Users className="h-4 w-4 text-teal-600" />
             </CardHeader>
             <CardContent>
@@ -377,6 +377,16 @@ const TeacherDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-teal-600">{availableRecipients.length}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-teal-100 bg-gradient-to-br from-teal-50 to-emerald-50" data-testid="teacher-leave-card">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Conges Restants</CardTitle>
+              <CalendarDays className="h-4 w-4 text-teal-600" />
+            </CardHeader>
+            <CardContent>
+              <LeaveBalanceCard compact={true} />
             </CardContent>
           </Card>
         </div>

@@ -8,7 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
 import { useAuth } from '../hooks/useAuth';
-import { LogOut, Calendar, FileText, MessageCircle, Plus, Trash2, Edit, Save, X, ChevronDown, ChevronUp, Eye } from 'lucide-react';
+import { LogOut, Calendar, FileText, MessageCircle, Plus, Trash2, Edit, Save, X, ChevronDown, ChevronUp, Eye, Users } from 'lucide-react';
+import SecretaryHR from '../components/SecretaryHR';
 
 const SecretaryDashboard = () => {
   const navigate = useNavigate();
@@ -847,6 +848,7 @@ const SecretaryDashboard = () => {
             onClick={handleLogout}
             variant="outline"
             className="border-purple-200 hover:bg-purple-50"
+            data-testid="secretary-logout-button"
           >
             <LogOut className="w-4 h-4 mr-2" />
             Déconnexion
@@ -876,6 +878,10 @@ const SecretaryDashboard = () => {
             </TabsTrigger>
             <TabsTrigger value="billing" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">
               💰 Facturation
+            </TabsTrigger>
+            <TabsTrigger value="hr" data-testid="secretary-tab-hr" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+              <Users className="w-4 h-4 mr-2" />
+              RH
             </TabsTrigger>
           </TabsList>
 
@@ -2020,6 +2026,11 @@ const SecretaryDashboard = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* HR Tab */}
+          <TabsContent value="hr" className="space-y-6">
+            <SecretaryHR />
           </TabsContent>
         </Tabs>
       </div>

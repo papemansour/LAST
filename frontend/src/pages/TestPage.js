@@ -50,12 +50,12 @@ const TestPage = () => {
     try {
       const response = await axios.get(`${API}/pricing`);
       const data = response.data;
-      // Map API pricing to packs format
+      // Map API pricing to packs format (use nullish coalescing for proper zero handling)
       const updatedPacks = [
-        { id: 'kkid', name: 'Pack K-Kid', desc: 'Enfants 3-9 ans', price: `${data.kkid_eur || 30}€`, color: 'pink' },
-        { id: 'beginner', name: 'Pack K-Débutant', desc: 'Parfait pour commencer', price: `${data.beginner_eur || 60}€`, color: 'teal' },
-        { id: 'intermediate', name: 'Pack K-Intermédiaire', desc: 'Le plus populaire', price: `${data.intermediate_eur || 90}€`, color: 'teal', popular: true },
-        { id: 'advanced', name: 'Pack K-Avancé', desc: 'Professionnel', price: `${data.advanced_eur || 120}€`, color: 'emerald' },
+        { id: 'kkid', name: 'Pack K-Kid', desc: 'Enfants 3-9 ans', price: `${data.kkid_eur ?? 30}€`, color: 'pink' },
+        { id: 'beginner', name: 'Pack K-Débutant', desc: 'Parfait pour commencer', price: `${data.beginner_eur ?? 60}€`, color: 'teal' },
+        { id: 'intermediate', name: 'Pack K-Intermédiaire', desc: 'Le plus populaire', price: `${data.intermediate_eur ?? 90}€`, color: 'teal', popular: true },
+        { id: 'advanced', name: 'Pack K-Avancé', desc: 'Professionnel', price: `${data.advanced_eur ?? 120}€`, color: 'emerald' },
       ];
       setPacks(updatedPacks);
     } catch (error) {
@@ -423,7 +423,7 @@ const TestPage = () => {
                 {questions[currentQuestion]?.question}
               </h3>
 
-              <RadioGroup value={selectedOption?.toString()} onValueChange={(val) => setSelectedOption(parseInt(val))}>
+              <RadioGroup value={selectedOption !== null ? selectedOption.toString() : ""} onValueChange={(val) => setSelectedOption(parseInt(val))}>
                 <div className="space-y-3">
                   {questions[currentQuestion]?.options.map((option, index) => (
                     <div

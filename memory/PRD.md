@@ -73,7 +73,10 @@ E-learning platform pour l'apprentissage de l'anglais avec multi-dashboards (Adm
 
 ## Derniere Mise a Jour: Decembre 2025
 - Fiche Employe complete avec modal accessible
-- Test de niveau avec feedback + blocage Q5 + packs
+- Test de niveau avec feedback + blocage Q5 + packs dynamiques (API /pricing)
 - Protection double-clic sur soumission
 - Correction route /register vers /?openRegister=true#pricing
 - Ajout accessibilite (aria-label, DialogDescription)
+- Onglets secrétariat scrollables sur mobile (overflow-x-auto)
+- Jauge utilisation congés alignée avec le pourcentage affiché
+- Nullish coalescing pour prix API

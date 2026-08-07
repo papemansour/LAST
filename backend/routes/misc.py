@@ -308,6 +308,61 @@ async def get_test(level: str):
     return {"level": level, "questions": questions}
 
 
+
+@router.post("/tests/check-answer")
+async def check_single_answer(data: dict = Body(...)):
+    """Check a single answer and return if it's correct with the correct answer"""
+    level = data.get("level")
+    question_id = data.get("question_id")
+    selected_option = data.get("selected_option")
+    
+    if not level or question_id is None or selected_option is None:
+        raise HTTPException(status_code=400, detail="Missing required fields")
+    
+    # Get question from database first
+    db_question = await db.test_questions.find_one(
+        {"level": level, "id": question_id, "active": True}, 
+        {"_id": 0}
+    )
+    
+    if db_question:
+        correct_answer = db_question.get("correct_answer")
+        options = db_question.get("options", [])
+        
+        # Check if correct_answer is stored as text or index
+        if isinstance(correct_answer, str) and correct_answer in options:
+            # Stored as text, find the index
+            correct_answer_index = options.index(correct_answer)
+            correct_option = correct_answer
+        else:
+            # Stored as index
+            try:
+                correct_answer_index = int(correct_answer) if correct_answer is not None else 0
+            except (ValueError, TypeError):
+                correct_answer_index = 0
+            correct_option = options[correct_answer_index] if correct_answer_index < len(options) else ""
+        
+        is_correct = int(correct_answer_index) == int(selected_option)
+    else:
+        # Fallback to hardcoded questions
+        if level not in TEST_QUESTIONS:
+            raise HTTPException(status_code=404, detail="Question not found")
+        question = next((q for q in TEST_QUESTIONS[level] if q["id"] == question_id), None)
+        if not question:
+            raise HTTPException(status_code=404, detail="Question not found")
+        correct_answer_index = question.get("correct")
+        options = question.get("options", [])
+        correct_option = options[correct_answer_index] if correct_answer_index is not None and correct_answer_index < len(options) else ""
+        is_correct = int(correct_answer_index) == int(selected_option)
+    
+    return {
+        "is_correct": is_correct,
+        "correct_answer_index": correct_answer_index,
+        "correct_option": correct_option
+    }
+
+
+
 @router.post("/tests/submit")
 async def submit_test(submission: TestSubmission):
     # Get questions from database first

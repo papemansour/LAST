@@ -920,7 +920,7 @@ const HomePage = () => {
                 <CardDescription>Parfait pour ceux qui débutent leur apprentissage</CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 mb-4">20 questions - 15 minutes</p>
+                <p className="text-gray-600 mb-4">20 questions</p>
                 <Link to="/test/beginner">
                   <Button className="w-full bg-teal-600 hover:bg-teal-700" data-testid="test-beginner-button">
                     Commencer le test
@@ -935,7 +935,7 @@ const HomePage = () => {
                 <CardDescription>Pour ceux qui ont une bonne base</CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 mb-4">20 questions - 20 minutes</p>
+                <p className="text-gray-600 mb-4">20 questions</p>
                 <Link to="/test/intermediate">
                   <Button className="w-full bg-teal-600 hover:bg-teal-700" data-testid="test-intermediate-button">
                     Commencer le test
@@ -950,7 +950,7 @@ const HomePage = () => {
                 <CardDescription>Pour les utilisateurs expérimentés</CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 mb-4">20 questions - 25 minutes</p>
+                <p className="text-gray-600 mb-4">20 questions</p>
                 <Link to="/test/advanced">
                   <Button className="w-full bg-teal-600 hover:bg-teal-700" data-testid="test-advanced-button">
                     Commencer le test

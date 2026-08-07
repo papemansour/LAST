@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { CalendarDays, Users, TrendingUp, TrendingDown, Clock, Search, AlertTriangle, History, ChevronDown, ChevronUp } from 'lucide-react';
+import { CalendarDays, Users, TrendingUp, TrendingDown, Clock, Search, AlertTriangle, History, ChevronDown, ChevronUp, X, User, Mail, Briefcase, Calendar } from 'lucide-react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from './ui/dialog';
 
 const SecretaryHR = () => {
   const [employees, setEmployees] = useState([]);
@@ -13,6 +19,8 @@ const SecretaryHR = () => {
   const [expandedUser, setExpandedUser] = useState(null);
   const [leaveHistory, setLeaveHistory] = useState({});
   const [loadingHistory, setLoadingHistory] = useState(null);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [showEmployeeModal, setShowEmployeeModal] = useState(false);
 
   useEffect(() => {
     fetchLeaveBalances();
@@ -45,6 +53,23 @@ const SecretaryHR = () => {
       toast.error('Erreur lors du chargement de l\'historique');
     } finally {
       setLoadingHistory(null);
+    }
+  };
+
+  const openEmployeeProfile = async (emp) => {
+    setSelectedEmployee(emp);
+    setShowEmployeeModal(true);
+    // Fetch leave history if not already loaded
+    if (!leaveHistory[emp.user_id]) {
+      setLoadingHistory(emp.user_id);
+      try {
+        const response = await apiClient.get(`/admin/leave-balance/${emp.user_id}`);
+        setLeaveHistory(prev => ({ ...prev, [emp.user_id]: response.data }));
+      } catch (error) {
+        console.error('Error fetching leave history:', error);
+      } finally {
+        setLoadingHistory(null);
+      }
     }
   };
 
@@ -128,7 +153,16 @@ const SecretaryHR = () => {
             </div>
           </td>
           <td className="py-3 pl-2 text-center">
-            {isExpanded ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-teal-600 hover:bg-teal-50 hover:text-teal-700"
+              onClick={(e) => { e.stopPropagation(); openEmployeeProfile(emp); }}
+              data-testid={`view-profile-${emp.user_id}`}
+            >
+              <User className="w-4 h-4" />
+            </Button>
+            {isExpanded ? <ChevronUp className="w-4 h-4 text-gray-400 inline" /> : <ChevronDown className="w-4 h-4 text-gray-400 inline" />}
           </td>
         </tr>
         {isExpanded && (
@@ -171,6 +205,158 @@ const SecretaryHR = () => {
           </tr>
         )}
       </>
+    );
+  };
+
+  // Employee Profile Modal Component
+  const EmployeeProfileModal = () => {
+    if (!selectedEmployee) return null;
+    
+    const emp = selectedEmployee;
+    const history = leaveHistory[emp.user_id];
+    const pct = emp.total_earned > 0 ? (emp.remaining / emp.total_earned) * 100 : 0;
+    const barColor = pct > 50 ? 'bg-emerald-500' : pct > 25 ? 'bg-amber-500' : 'bg-red-500';
+    const isAlert = emp.remaining <= 5 && emp.total_earned > 0;
+
+    return (
+      <Dialog open={showEmployeeModal} onOpenChange={setShowEmployeeModal}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="employee-profile-modal">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${roleColor(emp.role)}`}>
+                <User className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold">{emp.first_name} {emp.last_name}</h2>
+                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${roleColor(emp.role)}`}>
+                  {roleLabel(emp.role)}
+                </span>
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-6 mt-4">
+            {/* Info Section */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                <Mail className="w-5 h-5 text-gray-500" />
+                <div>
+                  <p className="text-xs text-gray-500">Email</p>
+                  <p className="font-medium text-sm">{emp.email}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                <Briefcase className="w-5 h-5 text-gray-500" />
+                <div>
+                  <p className="text-xs text-gray-500">Poste</p>
+                  <p className="font-medium text-sm">{roleLabel(emp.role)}</p>
+                </div>
+              </div>
+              {history && (
+                <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                  <Calendar className="w-5 h-5 text-gray-500" />
+                  <div>
+                    <p className="text-xs text-gray-500">Anciennete</p>
+                    <p className="font-medium text-sm">{history.months_worked} mois</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Leave Balance Section */}
+            <Card className={isAlert ? 'border-red-200 bg-red-50/50' : ''}>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <CalendarDays className="w-5 h-5 text-teal-600" />
+                  Solde de Conges
+                  {isAlert && <AlertTriangle className="w-4 h-4 text-red-500" />}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-4 mb-4">
+                  <div className="text-center p-3 bg-emerald-50 rounded-lg">
+                    <p className="text-2xl font-bold text-emerald-600">{emp.total_earned}j</p>
+                    <p className="text-xs text-emerald-700">Acquis</p>
+                  </div>
+                  <div className="text-center p-3 bg-amber-50 rounded-lg">
+                    <p className="text-2xl font-bold text-amber-600">{emp.total_taken}j</p>
+                    <p className="text-xs text-amber-700">Pris</p>
+                  </div>
+                  <div className="text-center p-3 bg-blue-50 rounded-lg">
+                    <p className="text-2xl font-bold text-blue-600">{emp.remaining}j</p>
+                    <p className="text-xs text-blue-700">Restants</p>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>Utilisation</span>
+                    <span>{Math.round(100 - pct)}%</span>
+                  </div>
+                  <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                    <div className={`h-full rounded-full ${barColor}`} style={{ width: `${Math.min(100, pct)}%` }} />
+                  </div>
+                </div>
+                {isAlert && (
+                  <div className="mt-3 p-2 bg-red-100 border border-red-200 rounded-lg text-center">
+                    <p className="text-sm text-red-700 font-medium flex items-center justify-center gap-1">
+                      <AlertTriangle className="w-4 h-4" />
+                      Solde de conges bas !
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Leave History Section */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <History className="w-5 h-5 text-teal-600" />
+                  Historique des Conges
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {loadingHistory === emp.user_id ? (
+                  <div className="flex justify-center py-8">
+                    <div className="w-6 h-6 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : history?.approved_leaves && history.approved_leaves.length > 0 ? (
+                  <div className="space-y-3 max-h-60 overflow-y-auto">
+                    {history.approved_leaves.map((leave, idx) => {
+                      const s = leaveStatusLabel(leave.status);
+                      const startDate = new Date(leave.start_date);
+                      const endDate = new Date(leave.end_date);
+                      const days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+                      return (
+                        <div key={leave.id || idx} className="p-4 bg-gray-50 rounded-lg border">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className={`px-2 py-0.5 rounded text-xs font-medium ${s.cls}`}>{s.text}</span>
+                            <span className="text-sm font-semibold text-gray-700">{days} jour{days > 1 ? 's' : ''}</span>
+                          </div>
+                          <p className="font-medium text-gray-800">{leave.reason || 'Conge'}</p>
+                          <p className="text-sm text-gray-500 mt-1">
+                            Du {formatDate(leave.start_date)} au {formatDate(leave.end_date)}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-400">
+                    <CalendarDays className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                    <p>Aucun conge pris pour le moment</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Legal Info */}
+            <div className="text-xs text-gray-400 text-center p-3 bg-gray-50 rounded-lg">
+              Acquisition legale: <strong>2,5 jours/mois</strong> | Maximum annuel: <strong>30 jours</strong>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     );
   };
 
@@ -356,6 +542,9 @@ const SecretaryHR = () => {
           </p>
         </CardContent>
       </Card>
+
+      {/* Employee Profile Modal */}
+      <EmployeeProfileModal />
     </div>
   );
 };

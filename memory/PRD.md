@@ -1,94 +1,63 @@
-# MyKalamaEnglish - PRD (Product Requirements Document)
+# MyKalamaEnglish - PRD
 
 ## Plateforme
 E-learning platform pour l'apprentissage de l'anglais avec multi-dashboards (Admin, Professeur, Secretaire, Etudiant).
 
 ## Stack Technique
-- **Frontend**: React + Tailwind CSS + Shadcn/UI
-- **Backend**: FastAPI (Python) - Architecture modulaire avec routes separees
-- **Base de donnees**: MongoDB
-- **Paiements**: Stripe (liens de paiement)
-- **Email**: AWS SES
+- Frontend: React + Tailwind CSS + Shadcn/UI
+- Backend: FastAPI (Python) - Architecture modulaire
+- Base de donnees: MongoDB
+- Paiements: Stripe (liens de paiement)
+- Email: AWS SES
 
-## Architecture Backend (Refactorisee)
+## Architecture Backend
 ```
 /app/backend/
-  server.py          (177 lignes - orchestrateur slim)
-  config.py          (DB, auth, JWT, security)
+  server.py          (177 lignes - orchestrateur)
+  config.py          (DB, auth, JWT)
   models/schemas.py  (Modeles Pydantic)
-  utils/helpers.py   (Fonctions utilitaires partagees)
-  routes/
-    auth.py          (9 routes - inscription, login, mot de passe)
-    admin.py         (55+ routes - gestion utilisateurs, analytics, conges)
-    secretary.py     (24 routes - facturation, reunions, rapports)
-    teacher.py       (65+ routes - sessions, liens Meet, documents, conges)
-    student.py       (30+ routes - cours, jeux, progression, recus)
-    club.py          (18 routes - posts, evenements, leaderboard)
-    news.py          (9 routes - actualites)
-    notifications.py (7 routes - notifications utilisateurs)
-    misc.py          (52 routes - pricing, promo codes, paiements, uploads)
+  utils/helpers.py   (Fonctions utilitaires)
+  routes/ auth.py, admin.py, secretary.py, teacher.py, student.py, club.py, news.py, notifications.py, misc.py
 ```
 
 ## Fonctionnalites Implementees
 
-### Authentification et Roles
-- [x] Login multi-roles (Admin, Professeur, Secretaire, Etudiant)
-- [x] Login secretaire par code (via useAuth context)
-- [x] Changement de mot de passe
-- [x] Lettre de bienvenue personnalisee par niveau
-- [x] Deconnexion synchronisee via useAuth Context
-
-### Dashboard Admin (Glass Effect)
-- [x] Interface glass-morphism (fond sombre + backdrop-blur)
+### Dashboard Admin (Fond Blanc + Glass Effect)
+- [x] Interface glass-morphism fond blanc + backdrop-blur
 - [x] Onglets teal unifies
-- [x] Gestion des utilisateurs (CRUD, approbation, corbeille)
-- [x] Analytics globales
 - [x] Compteur de conges payes (2.5j/mois, max 30j/an)
-- [x] Gestion des conges avec deduction automatique
-- [x] Gestion des questions de test par niveau
+- [x] Gestion utilisateurs, analytics, conges, tests
+
+### Dashboard Secretaire
+- [x] Onglet RH avec historique conges par employe (clic pour derouler)
+- [x] Alertes solde conges (seuil <= 5 jours)
+- [x] Facturation (profs, etudiants, prestataires)
 
 ### Dashboard Professeur
 - [x] Carte compteur de conges payes
-- [x] Gestion des liens Google Meet
-- [x] Systeme de pointage (chronometre, pauses)
-- [x] Bulletins de salaire (Mes Payes)
-- [x] Demandes de conges
-
-### Dashboard Secretaire
-- [x] Facturation professeurs / etudiants / prestataires
-- [x] **Onglet RH** - Vue globale des conges de tous les employes
-- [x] Table employes avec jauge conges (Acquis/Pris/Restants)
-- [x] Reunions et rapports
+- [x] Pointage, Meet, Documents, Salaires
 
 ### Dashboard Etudiant
 - [x] Onglet Paye (recus de paiement)
-- [x] Kalama Club, Jeux, News, Kalamatheque
-- [x] Progression et coffre aux tresors
+- [x] Club, Jeux, News, Kalamatheque
 
 ### Systeme de Conges Payes
-- [x] 2.5 jours ouvrables par mois de travail effectif
-- [x] Maximum 30 jours ouvrables par an (5 semaines)
-- [x] Calcul automatique depuis la date de creation du compte
-- [x] Deduction automatique lors de l'approbation d'un conge
-- [x] Visible dans admin, professeur, et secretaire (RH)
-- [x] Collection MongoDB: leave_balances
+- [x] 2.5 jours/mois, max 30j/an
+- [x] Historique detaille par employe
+- [x] Alertes automatiques quand solde <= 5 jours
+- [x] Deduction auto a l'approbation
 
 ### Tests de Niveau
-- [x] 20 questions debutant (MCQ) - personnalisees
-- [x] 20 questions intermediaire (MCQ) - personnalisees
-- [x] 20 questions avance (MCQ)
+- [x] 20 questions debutant MCQ personnalisees
+- [x] 20 questions intermediaire MCQ personnalisees
+- [x] 20 questions avance MCQ
 
 ## Taches Restantes
-
-### P1 - Priorite Haute
-- [ ] Synchroniser les factures avec Monday.com
-
-### P2 - Priorite Moyenne
-- [ ] Export PDF/CSV des statistiques admin
+- [ ] Sync factures Monday.com (P1)
+- [ ] Export PDF/CSV stats admin (P2)
 
 ## Derniere Mise a Jour: Decembre 2025
-- Effet glass admin dashboard + couleur teal unifiee
-- Systeme complet de conges payes (backend + frontend)
-- Onglet RH dans le secretariat
-- Fix login secretaire (useAuth context)
-- Questions intermediaires personnalisees
+- Fond admin blanc + glass effect
+- Historique conges dans RH avec expand/collapse
+- Alertes solde conges <= 5 jours
+- Suppression textes promo homepage

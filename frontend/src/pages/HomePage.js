@@ -559,13 +559,7 @@ const HomePage = () => {
             <CurrencyToggle />
           </div>
           
-          <p className="text-center text-base sm:text-lg md:text-xl text-emerald-600 font-semibold mb-3 md:mb-4 px-4">
-            Apprenez l'anglais avec MyKalamaEnglish !
-          </p>
           <div className="text-center mb-8 md:mb-12 px-4">
-            <p className="text-base sm:text-lg md:text-xl font-semibold mb-2">
-              🎯 <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">Votre formation, votre rythme</span>
-            </p>
             <p className="text-sm sm:text-base flex items-center justify-center gap-2 flex-wrap">
               <span className="inline-flex items-center gap-1 bg-green-50 px-3 py-1 rounded-full border border-green-300">
                 <span className="text-lg">👤</span> 

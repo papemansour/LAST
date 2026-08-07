@@ -19,10 +19,10 @@ E-learning platform pour l'apprentissage de l'anglais avec multi-dashboards (Adm
   utils/helpers.py   (Fonctions utilitaires partagees)
   routes/
     auth.py          (9 routes - inscription, login, mot de passe)
-    admin.py         (55 routes - gestion utilisateurs, analytics, etc.)
+    admin.py         (55+ routes - gestion utilisateurs, analytics, conges)
     secretary.py     (24 routes - facturation, reunions, rapports)
-    teacher.py       (65 routes - sessions, liens Meet, documents)
-    student.py       (30 routes - cours, jeux, progression, recus)
+    teacher.py       (65+ routes - sessions, liens Meet, documents, conges)
+    student.py       (30+ routes - cours, jeux, progression, recus)
     club.py          (18 routes - posts, evenements, leaderboard)
     news.py          (9 routes - actualites)
     notifications.py (7 routes - notifications utilisateurs)
@@ -33,61 +33,50 @@ E-learning platform pour l'apprentissage de l'anglais avec multi-dashboards (Adm
 
 ### Authentification et Roles
 - [x] Login multi-roles (Admin, Professeur, Secretaire, Etudiant)
-- [x] Login secretaire par code
+- [x] Login secretaire par code (via useAuth context)
 - [x] Changement de mot de passe
 - [x] Lettre de bienvenue personnalisee par niveau
 - [x] Deconnexion synchronisee via useAuth Context
 
-### Dashboard Admin
+### Dashboard Admin (Glass Effect)
+- [x] Interface glass-morphism (fond sombre + backdrop-blur)
+- [x] Onglets teal unifies
 - [x] Gestion des utilisateurs (CRUD, approbation, corbeille)
-- [x] Analytics globales (etudiants, professeurs, inscriptions)
-- [x] Gestion des conges
-- [x] Recapitulatif mensuel des heures des professeurs
+- [x] Analytics globales
+- [x] Compteur de conges payes (2.5j/mois, max 30j/an)
+- [x] Gestion des conges avec deduction automatique
 - [x] Gestion des questions de test par niveau
-- [x] Badges et defis hebdomadaires
 
 ### Dashboard Professeur
+- [x] Carte compteur de conges payes
 - [x] Gestion des liens Google Meet
 - [x] Systeme de pointage (chronometre, pauses)
-- [x] Documents et cours
 - [x] Bulletins de salaire (Mes Payes)
 - [x] Demandes de conges
-- [x] Disponibilites
 
 ### Dashboard Secretaire
-- [x] Facturation professeurs (bulletins de salaire)
-- [x] Recus etudiants (avec notification au student)
-- [x] Factures prestataires
+- [x] Facturation professeurs / etudiants / prestataires
+- [x] **Onglet RH** - Vue globale des conges de tous les employes
+- [x] Table employes avec jauge conges (Acquis/Pris/Restants)
 - [x] Reunions et rapports
-- [x] Statistiques de facturation
 
 ### Dashboard Etudiant
-- [x] Onglet Bienvenue avec lettre personnalisee
-- [x] Kalama Club (posts, evenements, leaderboard)
-- [x] Mon Pack (details du forfait)
-- [x] **Paye (Recus de paiement)** - NOUVEAU
-- [x] Liens de cours (Google Meet)
-- [x] Disponibilites
-- [x] Jeux educatifs (Flashcards, Quiz, Memory)
-- [x] Messages / Conversations
-- [x] Documents
-- [x] Resumes de cours
-- [x] Progression et defis
-- [x] News
-- [x] Kalamatheque (bibliotheque)
-- [x] Profil
-- [x] Coffre aux tresors (points)
+- [x] Onglet Paye (recus de paiement)
+- [x] Kalama Club, Jeux, News, Kalamatheque
+- [x] Progression et coffre aux tresors
+
+### Systeme de Conges Payes
+- [x] 2.5 jours ouvrables par mois de travail effectif
+- [x] Maximum 30 jours ouvrables par an (5 semaines)
+- [x] Calcul automatique depuis la date de creation du compte
+- [x] Deduction automatique lors de l'approbation d'un conge
+- [x] Visible dans admin, professeur, et secretaire (RH)
+- [x] Collection MongoDB: leave_balances
 
 ### Tests de Niveau
 - [x] 20 questions debutant (MCQ) - personnalisees
 - [x] 20 questions intermediaire (MCQ) - personnalisees
 - [x] 20 questions avance (MCQ)
-- [x] Systeme de soumission et scoring
-
-### Systeme de Pointage (Assiduite)
-- [x] Chronometre avec pauses pour les professeurs
-- [x] Enregistrement des sessions avec nom/email
-- [x] Recapitulatif mensuel admin avec heures/sessions par professeur
 
 ## Taches Restantes
 
@@ -97,13 +86,9 @@ E-learning platform pour l'apprentissage de l'anglais avec multi-dashboards (Adm
 ### P2 - Priorite Moyenne
 - [ ] Export PDF/CSV des statistiques admin
 
-### Backlog
-- [ ] Ameliorations UI/UX selon retours utilisateur
-
-## Derniere Mise a Jour
-- Date: 16 Avril 2026
-- Refactorisation complete du backend (8448 -> 177 lignes server.py)
-- Ajout onglet Paye pour les etudiants
-- 20 questions intermediaires personnalisees ajoutees
-- 20 questions debutant personnalisees ajoutees
-- Correction du mapping des champs dans la creation des recus etudiants
+## Derniere Mise a Jour: Decembre 2025
+- Effet glass admin dashboard + couleur teal unifiee
+- Systeme complet de conges payes (backend + frontend)
+- Onglet RH dans le secretariat
+- Fix login secretaire (useAuth context)
+- Questions intermediaires personnalisees

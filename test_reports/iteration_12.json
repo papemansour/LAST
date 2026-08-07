@@ -1,0 +1,44 @@
+{
+  "summary": "Frontend-only regression testing completed for all three requested fixes. At 375x667, the secretary dashboard remained 375px wide, its tab list had overflow-x:auto (341px client width vs 496px scroll width), scrolled horizontally, and the RH tab remained clickable. The employee modal showed 0% Utilisation with a 0%-wide/empty gauge. The unauthenticated beginner test issued GET /api/pricing, gated after five answers, and displayed the live prices 30€, 76€, 90€, and 102€ instead of stale defaults.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "TestPage RadioGroup",
+        "issue": "Selecting an answer logs a controlled/uncontrolled RadioGroup warning on every question. The tested answer and gate flow still works.",
+        "selector": "[role='radio']",
+        "priority": "LOW"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/test_reports/iteration_12.json"
+  ],
+  "action_items": [
+    "Initialize the TestPage RadioGroup with a stable controlled value to remove the repeated React warning.",
+    "For robustness, use nullish fallback for pricing fields and clamp gauge percentages to both 0 and 100."
+  ],
+  "critical_code_review_comments": [
+    "TestPage maps API prices with `value || default`; use `value ?? default` so a legitimate numeric zero from /api/pricing is not replaced by a hardcoded price.",
+    "SecretaryHR clamps utilization width only at the upper bound. Use Math.max(0, Math.min(100, 100 - pct)) to prevent invalid negative percentages if source data is temporarily inconsistent.",
+    "SecretaryDashboard.js remains substantially above the 700-line maintainability threshold and should be split into feature-focused components in a separate refactor."
+  ],
+  "updated_files": [
+    "/app/test_reports/iteration_12.json"
+  ],
+  "success_rate": {
+    "backend": "Not tested (frontend-only request)",
+    "frontend": "100% for the 3 requested regressions (3/3 passed); one unrelated low-priority React console warning remains"
+  },
+  "seed_data_creation": "None; used existing level-test questions, live pricing, existing RH employee data, and the supplied secretary account.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "Read /app/memory/test_credentials.md and authenticated through /login with the supplied secretary email/password.",
+  "context_for_next_testing_agent": "All three iteration-12 fixes passed. Mobile tab metrics at 375px: document 375/375 client/scroll width; tab list 341/496 with max horizontal scroll 155px. First employee profile displayed Utilisation 0%, inline gauge width 0%, and rendered ratio 0%. TestPage observed GET /api/pricing 200 and the Q5 gate matched live EUR values kkid=30, beginner=76, intermediate=90, advanced=102. An initial Playwright attempt could not read a captured response body due to a DevTools protocol limitation; the corrected rerun compared UI against a direct same-origin fetch and passed.",
+  "rca_of_the_issue": "The requested fixes are effective: overflow is contained on the TabsList rather than the document; modal gauge width now uses the same utilization calculation as its label; TestPage fetches /api/pricing and updates pack state before the Q5 gate. The remaining RadioGroup warning occurs because its value is undefined/null before selection and becomes a string after selection, changing control mode."
+}

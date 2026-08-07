@@ -298,7 +298,7 @@ const SecretaryHR = () => {
                     <span>{Math.round(100 - pct)}%</span>
                   </div>
                   <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
-                    <div className={`h-full rounded-full ${barColor}`} style={{ width: `${Math.min(100, pct)}%` }} />
+                    <div className={`h-full rounded-full ${barColor}`} style={{ width: `${Math.min(100, 100 - pct)}%` }} />
                   </div>
                 </div>
                 {isAlert && (

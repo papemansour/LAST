@@ -14,8 +14,8 @@ const API = `${BACKEND_URL}/api`;
 
 const GATE_QUESTION = 5; // Block at question 5 (0-indexed = after 5 answers)
 
-// Packs data for display in gate screen
-const PACKS = [
+// Default packs data (will be updated from API)
+const DEFAULT_PACKS = [
   { id: 'kkid', name: 'Pack K-Kid', desc: 'Enfants 3-9 ans', price: '30€', color: 'pink' },
   { id: 'beginner', name: 'Pack K-Débutant', desc: 'Parfait pour commencer', price: '60€', color: 'teal' },
   { id: 'intermediate', name: 'Pack K-Intermédiaire', desc: 'Le plus populaire', price: '90€', color: 'teal', popular: true },
@@ -37,12 +37,32 @@ const TestPage = () => {
   const [correctCount, setCorrectCount] = useState(0);
   const [correctOption, setCorrectOption] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [packs, setPacks] = useState(DEFAULT_PACKS);
 
   const isLoggedIn = !!localStorage.getItem('token');
 
   useEffect(() => {
     fetchTest();
+    fetchPricing();
   }, [level]);
+
+  const fetchPricing = async () => {
+    try {
+      const response = await axios.get(`${API}/pricing`);
+      const data = response.data;
+      // Map API pricing to packs format
+      const updatedPacks = [
+        { id: 'kkid', name: 'Pack K-Kid', desc: 'Enfants 3-9 ans', price: `${data.kkid_eur || 30}€`, color: 'pink' },
+        { id: 'beginner', name: 'Pack K-Débutant', desc: 'Parfait pour commencer', price: `${data.beginner_eur || 60}€`, color: 'teal' },
+        { id: 'intermediate', name: 'Pack K-Intermédiaire', desc: 'Le plus populaire', price: `${data.intermediate_eur || 90}€`, color: 'teal', popular: true },
+        { id: 'advanced', name: 'Pack K-Avancé', desc: 'Professionnel', price: `${data.advanced_eur || 120}€`, color: 'emerald' },
+      ];
+      setPacks(updatedPacks);
+    } catch (error) {
+      // Keep default prices if API fails
+      console.log('Using default pricing');
+    }
+  };
 
   const fetchTest = async () => {
     try {
@@ -188,7 +208,7 @@ const TestPage = () => {
                 Nos formules d&apos;apprentissage
               </h3>
               <div className="grid grid-cols-2 gap-3">
-                {PACKS.map((pack) => (
+                {packs.map((pack) => (
                   <div 
                     key={pack.id}
                     className={`relative p-3 rounded-xl border-2 transition-all hover:shadow-md cursor-pointer ${

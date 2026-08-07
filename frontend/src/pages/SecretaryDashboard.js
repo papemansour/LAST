@@ -859,27 +859,27 @@ const SecretaryDashboard = () => {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
         <Tabs defaultValue="meetings" className="space-y-6">
-          <TabsList className="bg-white border border-purple-100 p-1 rounded-lg">
-            <TabsTrigger value="meetings" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+          <TabsList className="bg-white border border-purple-100 p-1 rounded-lg overflow-x-auto flex-nowrap w-full">
+            <TabsTrigger value="meetings" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white whitespace-nowrap">
               <Calendar className="w-4 h-4 mr-2" />
               Réunions
             </TabsTrigger>
-            <TabsTrigger value="notes" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+            <TabsTrigger value="notes" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white whitespace-nowrap">
               <FileText className="w-4 h-4 mr-2" />
               Notes
             </TabsTrigger>
-            <TabsTrigger value="reports" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+            <TabsTrigger value="reports" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white whitespace-nowrap">
               <FileText className="w-4 h-4 mr-2" />
               Comptes Rendus
             </TabsTrigger>
-            <TabsTrigger value="messages" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+            <TabsTrigger value="messages" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white whitespace-nowrap">
               <MessageCircle className="w-4 h-4 mr-2" />
               Messages
             </TabsTrigger>
-            <TabsTrigger value="billing" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">
+            <TabsTrigger value="billing" className="data-[state=active]:bg-green-600 data-[state=active]:text-white whitespace-nowrap">
               💰 Facturation
             </TabsTrigger>
-            <TabsTrigger value="hr" data-testid="secretary-tab-hr" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+            <TabsTrigger value="hr" data-testid="secretary-tab-hr" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white whitespace-nowrap">
               <Users className="w-4 h-4 mr-2" />
               RH
             </TabsTrigger>

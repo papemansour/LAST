@@ -36,6 +36,7 @@ const TestPage = () => {
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState(null);
   const [correctCount, setCorrectCount] = useState(0);
   const [correctOption, setCorrectOption] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isLoggedIn = !!localStorage.getItem('token');
 
@@ -59,6 +60,10 @@ const TestPage = () => {
       toast.error('Veuillez selectionner une reponse');
       return;
     }
+
+    // Prevent double submission
+    if (isSubmitting) return;
+    setIsSubmitting(true);
 
     try {
       // Check if answer is correct via API
@@ -88,12 +93,14 @@ const TestPage = () => {
       setAnswers(newAnswers);
     } catch (error) {
       toast.error('Erreur lors de la verification');
+      setIsSubmitting(false);
     }
   };
 
   const handleContinueAfterFeedback = () => {
     setShowFeedback(false);
     setSelectedOption(null);
+    setIsSubmitting(false);
 
     // Gate check: after 5 answers, block if not logged in
     if (answers.length >= GATE_QUESTION && !isLoggedIn) {
@@ -131,6 +138,7 @@ const TestPage = () => {
     setLastAnswerCorrect(null);
     setCorrectCount(0);
     setCorrectOption('');
+    setIsSubmitting(false);
   };
 
   const levelLabel = level === 'beginner' ? 'Debutant' : level === 'intermediate' ? 'Intermediaire' : 'Professionnel';
@@ -190,7 +198,7 @@ const TestPage = () => {
                           ? 'border-pink-200 bg-pink-50/50 hover:border-pink-300' 
                           : 'border-gray-200 bg-white hover:border-teal-300'
                     }`}
-                    onClick={() => navigate('/register')}
+                    onClick={() => navigate('/?openRegister=true#pricing')}
                   >
                     {pack.popular && (
                       <span className="absolute -top-2 right-2 bg-teal-600 text-white text-xs px-2 py-0.5 rounded-full">
@@ -210,7 +218,7 @@ const TestPage = () => {
             </div>
 
             <div className="space-y-3 pt-2">
-              <Link to="/register" className="block">
+              <Link to="/?openRegister=true#pricing" className="block">
                 <Button
                   className="w-full bg-teal-600 hover:bg-teal-700 text-white py-6 text-base font-semibold"
                   data-testid="gate-register-btn"
@@ -425,8 +433,9 @@ const TestPage = () => {
                 onClick={handleNext}
                 className="bg-teal-600 hover:bg-teal-700"
                 data-testid="test-next-button"
+                disabled={isSubmitting}
               >
-                Valider ma reponse
+                {isSubmitting ? 'Verification...' : 'Valider ma reponse'}
               </Button>
             </div>
           </CardContent>

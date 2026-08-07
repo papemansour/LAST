@@ -32,6 +32,7 @@ E-learning platform pour l'apprentissage de l'anglais avec multi-dashboards (Adm
 - [x] Onglet RH avec historique conges par employe (clic pour derouler)
 - [x] Alertes solde conges (seuil <= 5 jours)
 - [x] Facturation (profs, etudiants, prestataires)
+- [x] **Fiche Employe** - Modal detaille avec email, role, anciennete, solde conges, historique (Decembre 2025)
 
 ### Dashboard Professeur
 - [x] Carte compteur de conges payes
@@ -47,17 +48,32 @@ E-learning platform pour l'apprentissage de l'anglais avec multi-dashboards (Adm
 - [x] Alertes automatiques quand solde <= 5 jours
 - [x] Deduction auto a l'approbation
 
-### Tests de Niveau
+### Tests de Niveau (MISE A JOUR Decembre 2025)
 - [x] 20 questions debutant MCQ personnalisees
 - [x] 20 questions intermediaire MCQ personnalisees
 - [x] 20 questions avance MCQ
+- [x] **Feedback immediat** apres chaque question (correct/incorrect + bonne reponse)
+- [x] **Blocage a la 5eme question** pour utilisateurs non connectes
+- [x] **Affichage des packs** (K-Kid, K-Debutant, K-Intermediaire, K-Avance) dans l'ecran de blocage
+- [x] Boutons S'inscrire / Se connecter / Retour au site
+- [x] Protection contre double-clic sur validation
+- [x] Score en temps reel affiche
+
+### API Endpoints Cles
+- `GET /api/tests/{level}` - Recupere les questions (sans reponses correctes)
+- `POST /api/tests/check-answer` - Verifie une reponse individuelle (NEW)
+- `POST /api/tests/submit` - Soumet le test complet
+- `GET /api/admin/leave-balances` - Solde conges de tout le staff
+- `GET /api/admin/leave-balance/{userId}` - Historique conges d'un employe
 
 ## Taches Restantes
 - [ ] Sync factures Monday.com (P1)
 - [ ] Export PDF/CSV stats admin (P2)
+- [ ] Charger prix dynamiques depuis /api/pricing pour packs gate (P2)
 
 ## Derniere Mise a Jour: Decembre 2025
-- Fond admin blanc + glass effect
-- Historique conges dans RH avec expand/collapse
-- Alertes solde conges <= 5 jours
-- Suppression textes promo homepage
+- Fiche Employe complete avec modal accessible
+- Test de niveau avec feedback + blocage Q5 + packs
+- Protection double-clic sur soumission
+- Correction route /register vers /?openRegister=true#pricing
+- Ajout accessibilite (aria-label, DialogDescription)

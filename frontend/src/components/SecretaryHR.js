@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from './ui/dialog';
 
 const SecretaryHR = () => {
@@ -159,6 +160,7 @@ const SecretaryHR = () => {
               className="text-teal-600 hover:bg-teal-50 hover:text-teal-700"
               onClick={(e) => { e.stopPropagation(); openEmployeeProfile(emp); }}
               data-testid={`view-profile-${emp.user_id}`}
+              aria-label={`Voir le profil de ${emp.first_name} ${emp.last_name}`}
             >
               <User className="w-4 h-4" />
             </Button>
@@ -233,6 +235,9 @@ const SecretaryHR = () => {
                 </span>
               </div>
             </DialogTitle>
+            <DialogDescription className="sr-only">
+              Fiche detaillee de {emp.first_name} {emp.last_name}, {roleLabel(emp.role)}
+            </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-6 mt-4">

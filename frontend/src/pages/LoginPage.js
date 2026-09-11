@@ -5,7 +5,7 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { toast } from 'sonner';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Building2 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -203,6 +203,34 @@ const LoginPage = () => {
                   Inscrivez-vous
                 </Link>
               </p>
+            </div>
+
+            {/* Prestataire Section */}
+            <div className="mt-6 pt-6 border-t">
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <Building2 className="w-5 h-5 text-purple-600" />
+                <span className="text-sm font-semibold text-gray-700">Espace Prestataire</span>
+              </div>
+              <div className="flex gap-3">
+                <Link to="/prestataire?mode=login" className="flex-1">
+                  <Button 
+                    variant="outline" 
+                    className="w-full border-purple-300 text-purple-700 hover:bg-purple-50"
+                    data-testid="prestataire-login-link"
+                  >
+                    Se connecter
+                  </Button>
+                </Link>
+                <Link to="/prestataire?mode=register" className="flex-1">
+                  <Button 
+                    variant="outline"
+                    className="w-full border-purple-300 text-purple-700 hover:bg-purple-50"
+                    data-testid="prestataire-register-link"
+                  >
+                    Inscription
+                  </Button>
+                </Link>
+              </div>
             </div>
           </CardContent>
         </Card>

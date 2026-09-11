@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -6,14 +6,16 @@ import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
 import { toast } from 'sonner';
 import { Building2, User, Mail, Phone, FileText, Euro, Clock, ArrowLeft, LogIn, UserPlus, CheckCircle, History } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const PrestatairePage = () => {
-  const [mode, setMode] = useState('choice'); // choice, register, login, dashboard
+  const [searchParams] = useSearchParams();
+  const initialMode = searchParams.get('mode') || 'choice';
+  const [mode, setMode] = useState(initialMode); // choice, register, login, dashboard
   const [loading, setLoading] = useState(false);
   const [prestataire, setPrestataire] = useState(null);
   const [factures, setFactures] = useState([]);

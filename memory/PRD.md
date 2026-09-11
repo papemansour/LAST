@@ -103,3 +103,16 @@ E-learning platform pour l'apprentissage de l'anglais avec multi-dashboards (Adm
 - **Historique modifications**: Affichage des modifications sur les factures (montant initial → nouveau)
 - **Alerte modification dans PDF**: Le PDF affiche les détails de modification si la facture a été modifiée
 - **Migration uploads vers MongoDB**: Les fichiers uploadés sont maintenant stockés en base de données (persistance)
+
+### Mise à jour Septembre 2026 (Suite 2)
+- **Couleurs uniformisées teal**: Dashboard prestataires avec couleurs teal comme les professeurs
+- **Suppression onglet Comptes Rendus**: Onglet retiré du secrétariat
+- **Suppression section Factures Prestataires/Organismes**: Section supprimée de l'onglet Facturation
+- **Gestion prestataires**: La secrétaire peut modifier ou supprimer les prestataires
+- **Attestation sur l'honneur**: Formulaire complet lors du dépôt de facture prestataire avec:
+  - Champ nom/prénom
+  - Sélecteur de service (même liste déroulante)
+  - Lieu de la société (Paris par défaut)
+  - Période de travail (date début → fin)
+  - Lieu et date de signature
+  - Signature automatique avec le nom saisi

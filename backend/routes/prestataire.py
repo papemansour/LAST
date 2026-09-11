@@ -194,6 +194,7 @@ async def submit_facture(data: dict = Body(...)):
         "amount": float(data['amount']),
         "conception_time": data['conception_time'],  # e.g., "20 heures"
         "description": data.get('description', ''),
+        "attestation": data.get('attestation', {}),  # Attestation sur l'honneur data
         "status": "pending",  # pending, paid, rejected
         "submitted_at": datetime.now(timezone.utc).isoformat(),
         "paid_at": None,
@@ -468,6 +469,63 @@ async def reject_facture(facture_id: str, data: dict = Body(...), current_user: 
     logger.info(f"Facture {facture_id} rejected by {current_user['email']}: {rejection_reason}")
     
     return {"message": "Facture refusée"}
+
+
+@router.put("/secretary/prestataire/{prestataire_code}")
+async def update_prestataire(prestataire_code: str, data: dict = Body(...), current_user: dict = Depends(get_current_user)):
+    """Update a prestataire's information"""
+    if current_user['role'] not in ['admin', 'secretary']:
+        raise HTTPException(status_code=403, detail="Accès non autorisé")
+    
+    prestataire = await db.prestataires.find_one({"prestataire_code": prestataire_code})
+    if not prestataire:
+        raise HTTPException(status_code=404, detail="Prestataire non trouvé")
+    
+    update_data = {}
+    if 'first_name' in data:
+        update_data['first_name'] = data['first_name']
+    if 'last_name' in data:
+        update_data['last_name'] = data['last_name']
+    if 'email' in data:
+        update_data['email'] = data['email']
+    if 'phone' in data:
+        update_data['phone'] = data['phone']
+    if 'company_name' in data:
+        update_data['company_name'] = data['company_name']
+    if 'services' in data:
+        update_data['services'] = data['services']
+    
+    update_data['updated_at'] = datetime.now(timezone.utc).isoformat()
+    
+    await db.prestataires.update_one(
+        {"prestataire_code": prestataire_code},
+        {"$set": update_data}
+    )
+    
+    logger.info(f"Prestataire {prestataire_code} updated by {current_user['email']}")
+    
+    return {"message": "Prestataire modifié avec succès"}
+
+
+@router.delete("/secretary/prestataire/{prestataire_code}")
+async def delete_prestataire(prestataire_code: str, current_user: dict = Depends(get_current_user)):
+    """Delete a prestataire and all their invoices"""
+    if current_user['role'] not in ['admin', 'secretary']:
+        raise HTTPException(status_code=403, detail="Accès non autorisé")
+    
+    prestataire = await db.prestataires.find_one({"prestataire_code": prestataire_code})
+    if not prestataire:
+        raise HTTPException(status_code=404, detail="Prestataire non trouvé")
+    
+    # Delete all invoices
+    await db.prestataire_factures.delete_many({"prestataire_code": prestataire_code})
+    
+    # Delete prestataire
+    await db.prestataires.delete_one({"prestataire_code": prestataire_code})
+    
+    logger.info(f"Prestataire {prestataire_code} and invoices deleted by {current_user['email']}")
+    
+    return {"message": "Prestataire et factures supprimés"}
 
 
 @router.get("/secretary/all-prestataires")

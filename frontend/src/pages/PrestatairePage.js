@@ -46,12 +46,18 @@ const PrestatairePage = () => {
   // Login form
   const [accessCode, setAccessCode] = useState('');
 
-  // Facture form
+  // Facture form with attestation
   const [factureForm, setFactureForm] = useState({
     hours: '',
     minutes: '',
     services: '',
-    description: ''
+    // Attestation fields
+    attestation_name: '',
+    attestation_location: 'Paris',
+    attestation_date_start: '',
+    attestation_date_end: '',
+    attestation_signature_location: '',
+    attestation_signature_date: new Date().toLocaleDateString('fr-FR')
   });
 
   // Calculate amount automatically based on time
@@ -135,13 +141,24 @@ const PrestatairePage = () => {
     
     setLoading(true);
 
+    // Build attestation text
+    const attestationText = `Je soussigné(e), ${factureForm.attestation_name}, prestataire de services ${getServiceLabel(factureForm.services)}, atteste sur l'honneur avoir effectué un total de ${conceptionTime} heures de travail pour la société MyKalama, située à ${factureForm.attestation_location}, durant la période du ${factureForm.attestation_date_start} au ${factureForm.attestation_date_end}. Je certifie que ces heures ont été réalisées conformément aux termes de notre contrat et aux exigences de la société. Fait à ${factureForm.attestation_signature_location}, le ${factureForm.attestation_signature_date}. Signature: ${factureForm.attestation_name}`;
+
     try {
       await axios.post(`${API}/prestataire/facture`, {
         prestataire_code: prestataire.prestataire_code,
         amount: amount,
         conception_time: conceptionTime,
         services: factureForm.services,
-        description: factureForm.description
+        description: attestationText,
+        attestation: {
+          name: factureForm.attestation_name,
+          location: factureForm.attestation_location,
+          date_start: factureForm.attestation_date_start,
+          date_end: factureForm.attestation_date_end,
+          signature_location: factureForm.attestation_signature_location,
+          signature_date: factureForm.attestation_signature_date
+        }
       });
       toast.success('Facture déposée avec succès ! Elle est maintenant en attente de validation.');
       
@@ -150,7 +167,15 @@ const PrestatairePage = () => {
       setFactures(facturesRes.data);
       
       // Reset form
-      setFactureForm({ hours: '', minutes: '', services: '', description: '' });
+      setFactureForm({
+        hours: '', minutes: '', services: '',
+        attestation_name: '',
+        attestation_location: 'Paris',
+        attestation_date_start: '',
+        attestation_date_end: '',
+        attestation_signature_location: '',
+        attestation_signature_date: new Date().toLocaleDateString('fr-FR')
+      });
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Erreur lors du dépôt');
     } finally {
@@ -527,21 +552,89 @@ const PrestatairePage = () => {
                   </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="description">Description (optionnel)</Label>
-                  <Textarea
-                    id="description"
-                    value={factureForm.description}
-                    onChange={(e) => setFactureForm({ ...factureForm, description: e.target.value })}
-                    placeholder="Détails supplémentaires..."
-                    rows={2}
-                  />
+                {/* Attestation sur l'honneur */}
+                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 space-y-4">
+                  <h4 className="font-semibold text-gray-800 text-sm">Attestation sur l&apos;honneur</h4>
+                  
+                  <div className="text-sm text-gray-700 leading-relaxed">
+                    <p>
+                      Je soussigné(e), <Input
+                        value={factureForm.attestation_name}
+                        onChange={(e) => setFactureForm({ ...factureForm, attestation_name: e.target.value })}
+                        placeholder="Votre Nom et Prénom"
+                        className="inline-block w-48 h-8 mx-1 text-sm"
+                        required
+                      />, prestataire de services <Select
+                        value={factureForm.services}
+                        onValueChange={(value) => setFactureForm({ ...factureForm, services: value })}
+                      >
+                        <SelectTrigger className="inline-flex w-40 h-8 mx-1 text-sm">
+                          <SelectValue placeholder="Service" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {SERVICES_LIST.map((service) => (
+                            <SelectItem key={service.value} value={service.value}>
+                              {service.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>, atteste sur l&apos;honneur avoir effectué un total de <strong className="text-teal-700">{getConceptionTime() || '___'}</strong> heures de travail pour la société <strong>MyKalama</strong>, située à <Input
+                        value={factureForm.attestation_location}
+                        onChange={(e) => setFactureForm({ ...factureForm, attestation_location: e.target.value })}
+                        placeholder="Ville"
+                        className="inline-block w-28 h-8 mx-1 text-sm"
+                      />, durant la période du <Input
+                        type="date"
+                        value={factureForm.attestation_date_start}
+                        onChange={(e) => setFactureForm({ ...factureForm, attestation_date_start: e.target.value })}
+                        className="inline-block w-36 h-8 mx-1 text-sm"
+                        required
+                      /> au <Input
+                        type="date"
+                        value={factureForm.attestation_date_end}
+                        onChange={(e) => setFactureForm({ ...factureForm, attestation_date_end: e.target.value })}
+                        className="inline-block w-36 h-8 mx-1 text-sm"
+                        required
+                      />.
+                    </p>
+                    
+                    <p className="mt-3">
+                      Je certifie que ces heures ont été réalisées conformément aux termes de notre contrat et aux exigences de la société.
+                    </p>
+                    
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <p>
+                        Fait à <Input
+                          value={factureForm.attestation_signature_location}
+                          onChange={(e) => setFactureForm({ ...factureForm, attestation_signature_location: e.target.value })}
+                          placeholder="Ville"
+                          className="inline-block w-28 h-8 mx-1 text-sm"
+                          required
+                        />, le <Input
+                          value={factureForm.attestation_signature_date}
+                          onChange={(e) => setFactureForm({ ...factureForm, attestation_signature_date: e.target.value })}
+                          placeholder="Date"
+                          className="inline-block w-28 h-8 mx-1 text-sm"
+                          required
+                        />.
+                      </p>
+                      
+                      <div className="mt-3">
+                        <Label className="text-xs text-gray-500">Signature (Nom complet)</Label>
+                        <div className="mt-1 p-3 bg-white border-2 border-dashed border-gray-300 rounded text-center">
+                          <p className="font-signature text-xl text-gray-800 italic">
+                            {factureForm.attestation_name || 'Votre signature'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <Button
                   type="submit"
                   className="w-full bg-teal-600 hover:bg-teal-700"
-                  disabled={loading || parseFloat(calculateAmount()) <= 0}
+                  disabled={loading || parseFloat(calculateAmount()) <= 0 || !factureForm.attestation_name || !factureForm.attestation_date_start || !factureForm.attestation_date_end}
                   data-testid="submit-facture-btn"
                 >
                   {loading ? 'Envoi...' : 'Déposer la facture'}

@@ -1,0 +1,42 @@
+{
+  "summary": "Full backend + frontend test of the new Prestataire system and Secretary HR sub-tabs. Ran 19 pytest cases covering prestataire register/login/facture, secretary search/pay-facture and secretary HR endpoints (leave-balances, availability-calendar, all-teachers-detailed, all-students) - all 19 passed. UI verified end-to-end: /prestataire choice screen shows Se connecter/Créer un compte, registration form accepts all required fields and returns a prestataire_code, invalid access code triggers 'Code d\\'accès invalide'. Secretary dashboard exposes Prestataires tab (3 sub-tabs: Recherche par code, En attente, Tous les prestataires) and HR tab (4 sub-tabs: Conges, Calendrier, Professeurs, Etudiants). Teacher fiches display first_name, last_name, email, phone and ancienneté ('Anciennete: <n> mois'). Student fiches display first_name, last_name, email, phone and level badge (Debutant / K-Kid / Intermediaire / Avance).",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/prestataire/register", "issue": "access_code is returned only via email; no way to retrieve it later. If SMTP is not configured (dev/preview), users cannot login. Consider returning access_code on register when in dev/preview mode or adding an admin endpoint to fetch/regenerate it."},
+      {"endpoint": "POST /api/prestataire/facture", "issue": "Route is public and only guards by prestataire_code (6 alphanumeric = ~2B combos). Consider requiring the access_code as well to prevent facture spoofing if a code leaks."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "SecretaryHR", "issues": ["Labels use unaccented text (Conges, Etudiants, Anciennete, 'Non renseigne', 'trouve'). Inconsistent with rest of app which uses proper French accents (e.g. 'Étudiant Test' student name is accented). Recommend replacing with Congés, Étudiants, Ancienneté, 'Non renseigné', 'trouvé'."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_prestataire_system.py",
+    "/app/test_reports/pytest/prestataire_results.xml"
+  ],
+  "action_items": [
+    "(Optional) Return access_code in register response for dev/preview environments or expose an admin-only endpoint to view/reset a prestataire's access_code, otherwise the whole login flow depends on working outbound email.",
+    "(Optional) Harden POST /api/prestataire/facture with access_code verification.",
+    "Fix missing accents in SecretaryHR French labels (Conges->Congés, Etudiants->Étudiants, Anciennete->Ancienneté, Non renseigne->Non renseigné, trouve->trouvé)."
+  ],
+  "critical_code_review_comments": [
+    "SecretaryDashboard.js is still >2000 lines - should be split as previously flagged.",
+    "prestataire.py: access_code is stored in plaintext. Prefer hashing (bcrypt) and comparing on login, similar to password handling elsewhere in the codebase.",
+    "prestataire.py: register endpoint swallows email-service exceptions and still returns success. Access_code is not returned in the response, so if email fails the user is silently locked out. Log level should be error and consider adding a status flag or fallback delivery.",
+    "Facture amount is coerced with float() without validation - a negative or absurd value will be accepted. Add Pydantic model with amount > 0 constraint and a sane upper bound."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_prestataire_system.py",
+    "/app/test_reports/iteration_13.json"
+  ],
+  "success_rate": {"backend": "100% (19/19 pytest)", "frontend": "100% for tested flows"},
+  "test_credentials": "Read from /app/memory/test_credentials.md - secretary secretaire@mykalamaenglish.com / kalamasecret used.",
+  "seed_data_creation": "Test suite creates TEST_prest_<ts>@example.com prestataires and factures with TEST_ prefix. Not cleaned up in this run (backend has no delete endpoint exposed).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Prestataire feature is fully working end-to-end. Login E2E via UI cannot be fully exercised without SMTP because access_code is only sent by email; backend tests bypass this by directly querying the facture endpoint using prestataire_code returned from register. If E1 adds a way to expose access_code (dev endpoint or return-on-register), full UI E2E including dashboard/facture deposit can be tested. SecretaryHR unaccented labels are a cosmetic issue."
+}

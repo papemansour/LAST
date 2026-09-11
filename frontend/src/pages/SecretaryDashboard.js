@@ -8,8 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
 import { useAuth } from '../hooks/useAuth';
-import { LogOut, Calendar, FileText, MessageCircle, Plus, Trash2, Edit, Save, X, ChevronDown, ChevronUp, Eye, Users } from 'lucide-react';
+import { LogOut, Calendar, FileText, MessageCircle, Plus, Trash2, Edit, Save, X, ChevronDown, ChevronUp, Eye, Users, Building2 } from 'lucide-react';
 import SecretaryHR from '../components/SecretaryHR';
+import SecretaryPrestataires from '../components/SecretaryPrestataires';
 
 const SecretaryDashboard = () => {
   const navigate = useNavigate();
@@ -882,6 +883,10 @@ const SecretaryDashboard = () => {
             <TabsTrigger value="hr" data-testid="secretary-tab-hr" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white whitespace-nowrap">
               <Users className="w-4 h-4 mr-2" />
               RH
+            </TabsTrigger>
+            <TabsTrigger value="prestataires" data-testid="secretary-tab-prestataires" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white whitespace-nowrap">
+              <Building2 className="w-4 h-4 mr-2" />
+              Prestataires
             </TabsTrigger>
           </TabsList>
 
@@ -2031,6 +2036,11 @@ const SecretaryDashboard = () => {
           {/* HR Tab */}
           <TabsContent value="hr" className="space-y-6">
             <SecretaryHR />
+          </TabsContent>
+
+          {/* Prestataires Tab */}
+          <TabsContent value="prestataires" className="space-y-6">
+            <SecretaryPrestataires />
           </TabsContent>
         </Tabs>
       </div>

@@ -133,6 +133,16 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleUnapproveLeave = async (leaveId) => {
+    try {
+      await apiClient.post(`/admin/leave-request/${leaveId}/unapprove`, { comment: 'Annulation par admin' });
+      toast.success('⚠️ Congé annulé - solde restauré');
+      fetchLeaveRequests();
+    } catch (error) {
+      toast.error('Erreur lors de l\'annulation');
+    }
+  };
+
   const fetchData = async () => {
     try {
       const [userRes, pendingRes, usersRes, resultsRes, sessionsRes, conversationsRes, availabilityRes, teacherSessionsRes, pricingRes] = await Promise.all([
@@ -2106,7 +2116,9 @@ const AdminDashboard = () => {
                             <div 
                               key={leave.id} 
                               className={`p-3 rounded-lg border flex items-center justify-between ${
-                                leave.status === 'approved' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+                                leave.status === 'approved' ? 'bg-green-50 border-green-200' : 
+                                leave.status === 'cancelled' ? 'bg-gray-50 border-gray-200' :
+                                'bg-red-50 border-red-200'
                               }`}
                             >
                               <div>
@@ -2118,17 +2130,34 @@ const AdminDashboard = () => {
                                   <p className="text-xs text-gray-500 mt-1">💬 {leave.admin_comment}</p>
                                 )}
                               </div>
-                              <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${
-                                leave.status === 'approved' 
-                                  ? 'bg-green-100 text-green-700' 
-                                  : 'bg-red-100 text-red-700'
-                              }`}>
-                                {leave.status === 'approved' ? (
-                                  <><CheckCircle className="w-4 h-4" /> Approuvé</>
-                                ) : (
-                                  <><XCircle className="w-4 h-4" /> Refusé</>
+                              <div className="flex items-center gap-2">
+                                <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${
+                                  leave.status === 'approved' 
+                                    ? 'bg-green-100 text-green-700' 
+                                    : leave.status === 'cancelled'
+                                    ? 'bg-gray-100 text-gray-700'
+                                    : 'bg-red-100 text-red-700'
+                                }`}>
+                                  {leave.status === 'approved' ? (
+                                    <><CheckCircle className="w-4 h-4" /> Approuvé</>
+                                  ) : leave.status === 'cancelled' ? (
+                                    <><XCircle className="w-4 h-4" /> Annulé</>
+                                  ) : (
+                                    <><XCircle className="w-4 h-4" /> Refusé</>
+                                  )}
+                                </span>
+                                {leave.status === 'approved' && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="text-amber-600 border-amber-300 hover:bg-amber-50"
+                                    onClick={() => handleUnapproveLeave(leave.id)}
+                                    data-testid={`unapprove-leave-${leave.id}`}
+                                  >
+                                    Annuler
+                                  </Button>
                                 )}
-                              </span>
+                              </div>
                             </div>
                           ))}
                         </div>

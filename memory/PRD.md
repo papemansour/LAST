@@ -80,3 +80,10 @@ E-learning platform pour l'apprentissage de l'anglais avec multi-dashboards (Adm
 - Onglets secrétariat scrollables sur mobile (overflow-x-auto)
 - Jauge utilisation congés alignée avec le pourcentage affiché
 - Nullish coalescing pour prix API
+- **Système Prestataires complet**: inscription, connexion par code, dépôt factures
+- **Onglet Prestataires** dans secrétariat: recherche par code, validation paiements
+- **Onglet RH amélioré**: Calendrier disponibilités, Fiches Professeurs (ancienneté), Fiches Étudiants (niveau)
+- **Compteur congés 30j/an** avec possibilité d'annulation par admin
+- Accents français corrigés dans l'interface
+- Jauge utilisation congés alignée avec le pourcentage affiché
+- Nullish coalescing pour prix API

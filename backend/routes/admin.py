@@ -1251,6 +1251,192 @@ async def reject_leave_request(leave_id: str, data: dict = Body(...), current_us
     logger.info(f"Leave request {leave_id} rejected by admin")
     return {"message": "Leave request rejected"}
 
+
+@router.post("/admin/leave-request/{leave_id}/unapprove")
+async def unapprove_leave_request(leave_id: str, data: dict = Body(...), current_user: dict = Depends(get_current_user)):
+    """Admin unapproves (cancels) a previously approved leave request - restores leave balance"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    leave = await db.leave_requests.find_one({"id": leave_id})
+    if not leave:
+        raise HTTPException(status_code=404, detail="Leave request not found")
+    
+    if leave.get('status') != 'approved':
+        raise HTTPException(status_code=400, detail="Only approved leave requests can be unapproved")
+    
+    comment = data.get('comment', '')
+    
+    # Calculate working days to restore
+    try:
+        from dateutil import parser as dt_parser
+        start = dt_parser.parse(leave['start_date'])
+        end = dt_parser.parse(leave['end_date'])
+        working_days = 0
+        current = start
+        while current <= end:
+            if current.weekday() < 5:  # Monday to Friday
+                working_days += 1
+            current += timedelta(days=1)
+        if working_days == 0:
+            working_days = max(1, (end - start).days + 1)
+        
+        # Restore leave balance
+        await db.leave_balances.update_one(
+            {"user_id": leave['teacher_id']},
+            {"$inc": {"total_taken": -working_days, "remaining": working_days}},
+            upsert=False
+        )
+        logger.info(f"Restored {working_days} leave days to {leave['teacher_id']}")
+    except Exception as e:
+        logger.warning(f"Could not restore leave days: {e}")
+    
+    # Update leave request status
+    await db.leave_requests.update_one(
+        {"id": leave_id},
+        {"$set": {
+            "status": "cancelled",
+            "admin_comment": comment,
+            "cancelled_by": current_user['id'],
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Notify employee
+    notification = {
+        "id": str(uuid4()),
+        "user_id": leave['teacher_id'],
+        "message": f"⚠️ Votre congé approuvé ({leave['start_date']} → {leave['end_date']}) a été annulé.{' Motif: ' + comment if comment else ''}",
+        "read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.notifications.insert_one(notification)
+    
+    logger.info(f"Leave request {leave_id} unapproved by admin")
+    return {"message": "Leave request cancelled, balance restored"}
+
+
+@router.get("/admin/availability-calendar")
+async def get_availability_calendar(current_user: dict = Depends(get_current_user)):
+    """Get calendar of all employees showing days they are NOT on leave"""
+    if current_user['role'] not in ['admin', 'secretary']:
+        raise HTTPException(status_code=403, detail="Admin or secretary access required")
+    
+    # Get all employees
+    employees = await db.users.find(
+        {"role": {"$in": ["teacher", "admin", "secretary"]}, "is_active": True},
+        {"_id": 0, "id": 1, "first_name": 1, "last_name": 1, "role": 1, "email": 1, "phone": 1, "created_at": 1}
+    ).to_list(200)
+    
+    # Get all approved leave requests
+    leaves = await db.leave_requests.find(
+        {"status": "approved"},
+        {"_id": 0, "teacher_id": 1, "start_date": 1, "end_date": 1, "reason": 1}
+    ).to_list(500)
+    
+    # Build leave periods per employee
+    leave_by_employee = {}
+    for leave in leaves:
+        emp_id = leave.get('teacher_id')
+        if emp_id not in leave_by_employee:
+            leave_by_employee[emp_id] = []
+        leave_by_employee[emp_id].append({
+            "start": leave.get('start_date'),
+            "end": leave.get('end_date'),
+            "reason": leave.get('reason', 'Congé')
+        })
+    
+    # Build result
+    result = []
+    for emp in employees:
+        emp_leaves = leave_by_employee.get(emp['id'], [])
+        result.append({
+            "user_id": emp['id'],
+            "first_name": emp.get('first_name', ''),
+            "last_name": emp.get('last_name', ''),
+            "role": emp.get('role', ''),
+            "email": emp.get('email', ''),
+            "phone": emp.get('phone', ''),
+            "created_at": emp.get('created_at', ''),
+            "leave_periods": emp_leaves
+        })
+    
+    return result
+
+
+@router.get("/admin/all-students")
+async def get_all_students_detailed(current_user: dict = Depends(get_current_user)):
+    """Get all students with their details including level/pack"""
+    if current_user['role'] not in ['admin', 'secretary']:
+        raise HTTPException(status_code=403, detail="Admin or secretary access required")
+    
+    students = await db.users.find(
+        {"role": "student", "is_active": True},
+        {"_id": 0, "password_hash": 0, "temporary_password": 0}
+    ).to_list(500)
+    
+    result = []
+    for student in students:
+        result.append({
+            "user_id": student.get('id', ''),
+            "first_name": student.get('first_name', ''),
+            "last_name": student.get('last_name', ''),
+            "email": student.get('email', ''),
+            "phone": student.get('phone', ''),
+            "level": student.get('level', student.get('pack', 'beginner')),
+            "pack": student.get('pack', student.get('level', 'beginner')),
+            "created_at": student.get('created_at', ''),
+            "is_active": student.get('is_active', True)
+        })
+    
+    return result
+
+
+@router.get("/admin/all-teachers-detailed")
+async def get_all_teachers_detailed(current_user: dict = Depends(get_current_user)):
+    """Get all teachers with their details including seniority"""
+    if current_user['role'] not in ['admin', 'secretary']:
+        raise HTTPException(status_code=403, detail="Admin or secretary access required")
+    
+    teachers = await db.users.find(
+        {"role": "teacher", "is_active": True},
+        {"_id": 0, "password_hash": 0, "temporary_password": 0}
+    ).to_list(200)
+    
+    result = []
+    for teacher in teachers:
+        # Calculate seniority (months worked)
+        created_at = teacher.get('created_at')
+        months_worked = 0
+        if created_at:
+            try:
+                from dateutil import parser as dt_parser
+                if isinstance(created_at, str):
+                    created_date = dt_parser.parse(created_at)
+                else:
+                    created_date = created_at
+                now = datetime.now(timezone.utc)
+                if created_date.tzinfo is None:
+                    created_date = created_date.replace(tzinfo=timezone.utc)
+                months_worked = max(0, (now.year - created_date.year) * 12 + (now.month - created_date.month))
+            except Exception:
+                pass
+        
+        result.append({
+            "user_id": teacher.get('id', ''),
+            "first_name": teacher.get('first_name', ''),
+            "last_name": teacher.get('last_name', ''),
+            "email": teacher.get('email', ''),
+            "phone": teacher.get('phone', ''),
+            "months_worked": months_worked,
+            "created_at": teacher.get('created_at', ''),
+            "is_active": teacher.get('is_active', True)
+        })
+    
+    return result
+
+
+
 # ============ GROUP CODE ENDPOINTS ============
 
 import random

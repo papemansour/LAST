@@ -2028,6 +2028,7 @@ const HomePage = () => {
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <p className="text-gray-500">© 2025 My KALAMA English. Tous droits réservés.</p>
               <div className="flex gap-6">
+                <Link to="/prestataire" className="text-gray-400 hover:text-teal-400 transition">Espace Prestataire</Link>
                 <Link to="/cgu" className="text-gray-400 hover:text-teal-400 transition">CGU</Link>
                 <Link to="/privacy" className="text-gray-400 hover:text-teal-400 transition">Politique de confidentialité</Link>
                 <Link to="/legal" className="text-gray-400 hover:text-teal-400 transition">Mentions légales</Link>

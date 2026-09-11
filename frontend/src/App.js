@@ -20,6 +20,7 @@ import PrivacyPage from './pages/PrivacyPage';
 import Kalamatheque from './pages/Kalamatheque';
 import KalamathequeAccess from './pages/KalamathequeAccess';
 import BookReader from './pages/BookReader';
+import PrestatairePage from './pages/PrestatairePage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
           <Route path="/kalamatheque-access" element={<KalamathequeAccess />} />
           <Route path="/kalamatheque" element={<Kalamatheque />} />
           <Route path="/kalamatheque/reader/:id" element={<BookReader />} />
+          <Route path="/prestataire" element={<PrestatairePage />} />
           
           <Route path="/student/*" element={
             <ProtectedRoute allowedRoles={['student']}>

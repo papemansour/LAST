@@ -6,6 +6,19 @@ import { Search, Building2, Mail, Phone, Euro, Clock, CheckCircle, FileText, Use
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
 
+// Services list labels
+const SERVICES_LABELS = {
+  'informatique': 'INFORMATIQUE',
+  'communication': 'COMMUNICATION',
+  'marketing': 'MARKETING',
+  'pedagogique': 'PÉDAGOGIQUE',
+  'financier': 'FINANCIER'
+};
+
+const getServiceLabel = (value) => {
+  return SERVICES_LABELS[value] || value?.toUpperCase() || 'Non défini';
+};
+
 const SecretaryPrestataires = () => {
   const [searchCode, setSearchCode] = useState('');
   const [searchResult, setSearchResult] = useState(null);
@@ -350,7 +363,7 @@ const SecretaryPrestataires = () => {
                         </div>
                       </div>
                       <div className="mt-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
-                        {prest.services}
+                        {getServiceLabel(prest.services)}
                       </div>
                     </CardContent>
                   </Card>

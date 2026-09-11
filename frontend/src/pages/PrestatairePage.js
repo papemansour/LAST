@@ -3,14 +3,27 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Textarea } from '../components/ui/textarea';
 import { toast } from 'sonner';
-import { Building2, User, Mail, Phone, FileText, Euro, Clock, ArrowLeft, LogIn, UserPlus, CheckCircle, History } from 'lucide-react';
+import { Building2, User, Mail, Phone, FileText, Euro, Clock, ArrowLeft, LogIn, UserPlus, CheckCircle, History, Calculator } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+
+// Services list
+const SERVICES_LIST = [
+  { value: 'informatique', label: 'INFORMATIQUE' },
+  { value: 'communication', label: 'COMMUNICATION' },
+  { value: 'marketing', label: 'MARKETING' },
+  { value: 'pedagogique', label: 'PÉDAGOGIQUE' },
+  { value: 'financier', label: 'FINANCIER' }
+];
+
+// Rate: 10€ per hour
+const HOURLY_RATE = 10;
 
 const PrestatairePage = () => {
   const [searchParams] = useSearchParams();
@@ -35,11 +48,32 @@ const PrestatairePage = () => {
 
   // Facture form
   const [factureForm, setFactureForm] = useState({
-    amount: '',
-    conception_time: '',
+    hours: '',
+    minutes: '',
     services: '',
     description: ''
   });
+
+  // Calculate amount automatically based on time
+  const calculateAmount = () => {
+    const hours = parseFloat(factureForm.hours) || 0;
+    const minutes = parseFloat(factureForm.minutes) || 0;
+    const totalHours = hours + (minutes / 60);
+    return (totalHours * HOURLY_RATE).toFixed(2);
+  };
+
+  const getConceptionTime = () => {
+    const hours = parseInt(factureForm.hours) || 0;
+    const minutes = parseInt(factureForm.minutes) || 0;
+    if (hours > 0 && minutes > 0) {
+      return `${hours}h${minutes}min`;
+    } else if (hours > 0) {
+      return `${hours}h`;
+    } else if (minutes > 0) {
+      return `${minutes}min`;
+    }
+    return '';
+  };
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -85,24 +119,38 @@ const PrestatairePage = () => {
 
   const handleSubmitFacture = async (e) => {
     e.preventDefault();
+    
+    const amount = parseFloat(calculateAmount());
+    const conceptionTime = getConceptionTime();
+    
+    if (amount <= 0) {
+      toast.error('Veuillez indiquer le temps de conception');
+      return;
+    }
+    
+    if (!factureForm.services) {
+      toast.error('Veuillez sélectionner un service');
+      return;
+    }
+    
     setLoading(true);
 
     try {
       await axios.post(`${API}/prestataire/facture`, {
         prestataire_code: prestataire.prestataire_code,
-        amount: parseFloat(factureForm.amount),
-        conception_time: factureForm.conception_time,
-        services: factureForm.services || prestataire.services,
+        amount: amount,
+        conception_time: conceptionTime,
+        services: factureForm.services,
         description: factureForm.description
       });
-      toast.success('Facture déposée avec succès');
+      toast.success('Facture déposée avec succès ! Elle est maintenant en attente de validation.');
       
       // Refresh factures
       const facturesRes = await axios.get(`${API}/prestataire/my-factures/${prestataire.prestataire_code}`);
       setFactures(facturesRes.data);
       
       // Reset form
-      setFactureForm({ amount: '', conception_time: '', services: prestataire.services, description: '' });
+      setFactureForm({ hours: '', minutes: '', services: '', description: '' });
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Erreur lors du dépôt');
     } finally {
@@ -117,6 +165,11 @@ const PrestatairePage = () => {
       case 'rejected': return { text: 'Refusée', cls: 'bg-red-100 text-red-800' };
       default: return { text: status, cls: 'bg-gray-100 text-gray-800' };
     }
+  };
+
+  const getServiceLabel = (value) => {
+    const service = SERVICES_LIST.find(s => s.value === value);
+    return service ? service.label : value?.toUpperCase() || 'Non défini';
   };
 
   // Choice screen
@@ -229,26 +282,33 @@ const PrestatairePage = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="company_name">Nom de la société *</Label>
+                  <Label htmlFor="company_name">Nom de la société</Label>
                   <Input
                     id="company_name"
                     value={registerForm.company_name}
                     onChange={(e) => setRegisterForm({ ...registerForm, company_name: e.target.value })}
-                    required
+                    placeholder="Optionnel"
                     data-testid="prestataire-company"
                   />
                 </div>
 
                 <div>
                   <Label htmlFor="services">Services concernés *</Label>
-                  <Textarea
-                    id="services"
+                  <Select
                     value={registerForm.services}
-                    onChange={(e) => setRegisterForm({ ...registerForm, services: e.target.value })}
-                    placeholder="Ex: Design graphique, Développement web, Marketing..."
-                    required
-                    data-testid="prestataire-services"
-                  />
+                    onValueChange={(value) => setRegisterForm({ ...registerForm, services: value })}
+                  >
+                    <SelectTrigger data-testid="prestataire-services">
+                      <SelectValue placeholder="Sélectionner un service" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SERVICES_LIST.map((service) => (
+                        <SelectItem key={service.value} value={service.value}>
+                          {service.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <Button
@@ -390,50 +450,76 @@ const PrestatairePage = () => {
                 <FileText className="w-5 h-5 text-teal-600" />
                 Déposer une facture
               </CardTitle>
+              <p className="text-sm text-gray-500">Tarif: 10€ / heure</p>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmitFacture} className="space-y-4">
                 <div>
-                  <Label htmlFor="services">Services concernés</Label>
-                  <Input
-                    id="services"
+                  <Label>Service concerné *</Label>
+                  <Select
                     value={factureForm.services}
-                    onChange={(e) => setFactureForm({ ...factureForm, services: e.target.value })}
-                    placeholder={prestataire?.services}
-                  />
+                    onValueChange={(value) => setFactureForm({ ...factureForm, services: value })}
+                  >
+                    <SelectTrigger data-testid="facture-services">
+                      <SelectValue placeholder="Sélectionner un service" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SERVICES_LIST.map((service) => (
+                        <SelectItem key={service.value} value={service.value}>
+                          {service.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div>
-                  <Label htmlFor="amount">Montant de la facture (€) *</Label>
-                  <div className="relative">
-                    <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input
-                      id="amount"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={factureForm.amount}
-                      onChange={(e) => setFactureForm({ ...factureForm, amount: e.target.value })}
-                      className="pl-10"
-                      required
-                      data-testid="facture-amount"
-                    />
+                  <Label>Temps de conception *</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <div className="relative">
+                        <Input
+                          type="number"
+                          min="0"
+                          max="999"
+                          value={factureForm.hours}
+                          onChange={(e) => setFactureForm({ ...factureForm, hours: e.target.value })}
+                          placeholder="0"
+                          className="pr-12"
+                          data-testid="facture-hours"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">heures</span>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="relative">
+                        <Input
+                          type="number"
+                          min="0"
+                          max="59"
+                          value={factureForm.minutes}
+                          onChange={(e) => setFactureForm({ ...factureForm, minutes: e.target.value })}
+                          placeholder="0"
+                          className="pr-8"
+                          data-testid="facture-minutes"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">min</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="conception_time">Temps de conception mensuel *</Label>
-                  <div className="relative">
-                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input
-                      id="conception_time"
-                      value={factureForm.conception_time}
-                      onChange={(e) => setFactureForm({ ...factureForm, conception_time: e.target.value })}
-                      placeholder="Ex: 20 heures"
-                      className="pl-10"
-                      required
-                      data-testid="facture-time"
-                    />
+                {/* Auto-calculated amount display */}
+                <div className="p-4 bg-teal-50 rounded-lg border border-teal-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Calculator className="w-5 h-5 text-teal-600" />
+                      <span className="text-sm font-medium text-teal-700">Montant calculé</span>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold text-teal-700">{calculateAmount()}€</p>
+                      <p className="text-xs text-teal-600">{getConceptionTime() || '0h'} × 10€/h</p>
+                    </div>
                   </div>
                 </div>
 
@@ -444,14 +530,14 @@ const PrestatairePage = () => {
                     value={factureForm.description}
                     onChange={(e) => setFactureForm({ ...factureForm, description: e.target.value })}
                     placeholder="Détails supplémentaires..."
-                    rows={3}
+                    rows={2}
                   />
                 </div>
 
                 <Button
                   type="submit"
                   className="w-full bg-teal-600 hover:bg-teal-700"
-                  disabled={loading}
+                  disabled={loading || parseFloat(calculateAmount()) <= 0}
                   data-testid="submit-facture-btn"
                 >
                   {loading ? 'Envoi...' : 'Déposer la facture'}
@@ -486,7 +572,7 @@ const PrestatairePage = () => {
                             {s.text}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-600">{facture.services}</p>
+                        <p className="text-sm text-gray-600">{getServiceLabel(facture.services)}</p>
                         <p className="text-xs text-gray-400 mt-1">
                           {new Date(facture.submitted_at).toLocaleDateString('fr-FR')} • {facture.conception_time}
                         </p>

@@ -21,15 +21,22 @@ def generate_access_code():
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
 
 
+# Valid services list
+VALID_SERVICES = ['informatique', 'communication', 'marketing', 'pedagogique', 'financier']
+
 # ============ PRESTATAIRE REGISTRATION ============
 
 @router.post("/prestataire/register")
 async def register_prestataire(data: dict = Body(...)):
     """Register a new prestataire (contractor)"""
-    required_fields = ['first_name', 'last_name', 'email', 'phone', 'company_name', 'services']
+    required_fields = ['first_name', 'last_name', 'email', 'phone', 'services']
     for field in required_fields:
         if not data.get(field):
             raise HTTPException(status_code=400, detail=f"Le champ {field} est requis")
+    
+    # Validate services
+    if data['services'] not in VALID_SERVICES:
+        raise HTTPException(status_code=400, detail="Service non valide")
     
     # Check if email already exists
     existing = await db.prestataires.find_one({"email": data['email'].lower()})
@@ -44,13 +51,18 @@ async def register_prestataire(data: dict = Body(...)):
     while await db.prestataires.find_one({"prestataire_code": prestataire_code}):
         prestataire_code = generate_prestataire_code()
     
+    # Company name is optional - use first_name + last_name if not provided
+    company_name = data.get('company_name', '').strip()
+    if not company_name:
+        company_name = f"{data['first_name']} {data['last_name']}"
+    
     prestataire = {
         "id": str(uuid4()),
         "first_name": data['first_name'],
         "last_name": data['last_name'],
         "email": data['email'].lower(),
         "phone": data['phone'],
-        "company_name": data['company_name'],
+        "company_name": company_name,
         "services": data['services'],
         "prestataire_code": prestataire_code,
         "access_code": access_code,
@@ -95,7 +107,7 @@ async def register_prestataire(data: dict = Body(...)):
     except Exception as e:
         logger.warning(f"Could not send email to prestataire: {e}")
     
-    logger.info(f"New prestataire registered: {data['company_name']} ({prestataire_code})")
+    logger.info(f"New prestataire registered: {company_name} ({prestataire_code})")
     
     return {
         "message": "Inscription réussie ! Un code d'accès vous a été envoyé par email.",

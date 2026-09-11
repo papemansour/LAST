@@ -94,3 +94,12 @@ E-learning platform pour l'apprentissage de l'anglais avec multi-dashboards (Adm
 - **Correction 109 erreurs de linting**: Remplacement des imports star, suppression fonctions redéfinies
 - **Badges service**: Affichage du type de service sur chaque facture
 - **Statistiques améliorées**: Total payé en € affiché dans le dashboard
+
+### Mise à jour Septembre 2026 (Suite)
+- **Design facture premium**: Nouveau design professionnel avec dégradé, icônes par service, polices Google
+- **Modification facture**: La secrétaire peut modifier les heures et le montant avec motif obligatoire
+- **Refus de facture**: La secrétaire peut refuser une facture avec motif (email envoyé au prestataire)
+- **Onglet "Refusées"**: Nouvel onglet pour voir les factures refusées avec motif
+- **Historique modifications**: Affichage des modifications sur les factures (montant initial → nouveau)
+- **Alerte modification dans PDF**: Le PDF affiche les détails de modification si la facture a été modifiée
+- **Migration uploads vers MongoDB**: Les fichiers uploadés sont maintenant stockés en base de données (persistance)

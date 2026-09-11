@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Search, Building2, Mail, Phone, Euro, Clock, CheckCircle, FileText, User } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Search, Building2, Mail, Phone, Euro, Clock, CheckCircle, FileText, User, Download, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 // Services list labels
 const SERVICES_LABELS = {
@@ -14,6 +17,15 @@ const SERVICES_LABELS = {
   'pedagogique': 'PÉDAGOGIQUE',
   'financier': 'FINANCIER'
 };
+
+const SERVICES_LIST = [
+  { value: 'all', label: 'Tous les services' },
+  { value: 'informatique', label: 'INFORMATIQUE' },
+  { value: 'communication', label: 'COMMUNICATION' },
+  { value: 'marketing', label: 'MARKETING' },
+  { value: 'pedagogique', label: 'PÉDAGOGIQUE' },
+  { value: 'financier', label: 'FINANCIER' }
+];
 
 const getServiceLabel = (value) => {
   return SERVICES_LABELS[value] || value?.toUpperCase() || 'Non défini';
@@ -25,7 +37,8 @@ const SecretaryPrestataires = () => {
   const [allFactures, setAllFactures] = useState([]);
   const [allPrestataires, setAllPrestataires] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('search'); // search, pending, all
+  const [activeTab, setActiveTab] = useState('search'); // search, pending, paid, all
+  const [serviceFilter, setServiceFilter] = useState('all'); // Filter by service
 
   useEffect(() => {
     fetchAllFactures();
@@ -83,8 +96,18 @@ const SecretaryPrestataires = () => {
     }
   };
 
-  const pendingFactures = allFactures.filter(f => f.status === 'pending');
-  const paidFactures = allFactures.filter(f => f.status === 'paid');
+  const handleDownloadFacture = (factureId) => {
+    window.open(`${BACKEND_URL}/api/prestataire/facture/${factureId}/download`, '_blank');
+  };
+
+  // Apply service filter to factures
+  const filterByService = (factures) => {
+    if (serviceFilter === 'all') return factures;
+    return factures.filter(f => f.services === serviceFilter);
+  };
+
+  const pendingFactures = filterByService(allFactures.filter(f => f.status === 'pending'));
+  const paidFactures = filterByService(allFactures.filter(f => f.status === 'paid'));
 
   const statusLabel = (status) => {
     switch (status) {
@@ -127,14 +150,14 @@ const SecretaryPrestataires = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b pb-2">
+      <div className="flex flex-wrap gap-2 border-b pb-2">
         <Button
           variant={activeTab === 'search' ? 'default' : 'ghost'}
           onClick={() => setActiveTab('search')}
           className={activeTab === 'search' ? 'bg-purple-600' : ''}
         >
           <Search className="w-4 h-4 mr-2" />
-          Recherche par code
+          Recherche
         </Button>
         <Button
           variant={activeTab === 'pending' ? 'default' : 'ghost'}
@@ -145,13 +168,38 @@ const SecretaryPrestataires = () => {
           En attente ({pendingFactures.length})
         </Button>
         <Button
+          variant={activeTab === 'paid' ? 'default' : 'ghost'}
+          onClick={() => setActiveTab('paid')}
+          className={activeTab === 'paid' ? 'bg-green-600' : ''}
+        >
+          <CheckCircle className="w-4 h-4 mr-2" />
+          Payées ({paidFactures.length})
+        </Button>
+        <Button
           variant={activeTab === 'all' ? 'default' : 'ghost'}
           onClick={() => setActiveTab('all')}
-          className={activeTab === 'all' ? 'bg-green-600' : ''}
+          className={activeTab === 'all' ? 'bg-blue-600' : ''}
         >
           <Building2 className="w-4 h-4 mr-2" />
-          Tous les prestataires
+          Prestataires
         </Button>
+        
+        {/* Service Filter */}
+        <div className="ml-auto flex items-center gap-2">
+          <Filter className="w-4 h-4 text-gray-500" />
+          <Select value={serviceFilter} onValueChange={setServiceFilter}>
+            <SelectTrigger className="w-48" data-testid="service-filter">
+              <SelectValue placeholder="Filtrer par service" />
+            </SelectTrigger>
+            <SelectContent>
+              {SERVICES_LIST.map((service) => (
+                <SelectItem key={service.value} value={service.value}>
+                  {service.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Search Tab */}
@@ -282,6 +330,9 @@ const SecretaryPrestataires = () => {
                           <p className="font-semibold">{facture.company_name}</p>
                           <p className="text-sm text-gray-500">{facture.contact_name}</p>
                         </div>
+                        <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-xs font-medium">
+                          {getServiceLabel(facture.services)}
+                        </span>
                       </div>
                       <div className="mt-2 flex items-center gap-4 text-sm text-gray-600">
                         <span className="flex items-center gap-1">
@@ -298,18 +349,107 @@ const SecretaryPrestataires = () => {
                         </span>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-purple-700">{facture.amount}€</p>
-                      <p className="text-xs text-gray-500 mb-2">
-                        {new Date(facture.submitted_at).toLocaleDateString('fr-FR')}
-                      </p>
+                    <div className="text-right flex items-center gap-3">
+                      <div>
+                        <p className="text-2xl font-bold text-purple-700">{facture.amount}€</p>
+                        <p className="text-xs text-gray-500 mb-2">
+                          {new Date(facture.submitted_at).toLocaleDateString('fr-FR')}
+                        </p>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handlePayFacture(facture.id)}
+                          className="bg-green-600 hover:bg-green-700"
+                          data-testid={`pay-facture-${facture.id}`}
+                        >
+                          <CheckCircle className="w-4 h-4 mr-1" />
+                          Payer
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDownloadFacture(facture.id)}
+                          data-testid={`download-facture-${facture.id}`}
+                        >
+                          <Download className="w-4 h-4 mr-1" />
+                          Facture
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Paid Tab */}
+      {activeTab === 'paid' && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              Factures Payées ({paidFactures.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {paidFactures.length === 0 ? (
+              <div className="text-center py-8 text-gray-400">
+                <FileText className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                <p>Aucune facture payée</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {paidFactures.map((facture) => (
+                  <div key={facture.id} className="p-4 bg-green-50 rounded-lg border border-green-200 flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                          <Building2 className="w-5 h-5 text-green-600" />
+                        </div>
+                        <div>
+                          <p className="font-semibold">{facture.company_name}</p>
+                          <p className="text-sm text-gray-500">{facture.contact_name}</p>
+                        </div>
+                        <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded text-xs font-medium">
+                          {getServiceLabel(facture.services)}
+                        </span>
+                      </div>
+                      <div className="mt-2 flex items-center gap-4 text-sm text-gray-600">
+                        <span className="flex items-center gap-1">
+                          <Mail className="w-3 h-3" />
+                          {facture.email}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {facture.conception_time}
+                        </span>
+                        {facture.paid_at && (
+                          <span className="flex items-center gap-1 text-green-600">
+                            <CheckCircle className="w-3 h-3" />
+                            Payée le {new Date(facture.paid_at).toLocaleDateString('fr-FR')}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right flex items-center gap-3">
+                      <div>
+                        <p className="text-2xl font-bold text-green-700">{facture.amount}€</p>
+                        <p className="text-xs text-gray-500">
+                          Déposée le {new Date(facture.submitted_at).toLocaleDateString('fr-FR')}
+                        </p>
+                      </div>
                       <Button
                         size="sm"
-                        onClick={() => handlePayFacture(facture.id)}
-                        className="bg-green-600 hover:bg-green-700"
+                        variant="outline"
+                        onClick={() => handleDownloadFacture(facture.id)}
+                        className="border-green-300 text-green-700 hover:bg-green-50"
+                        data-testid={`download-paid-facture-${facture.id}`}
                       >
-                        <CheckCircle className="w-4 h-4 mr-1" />
-                        Payer
+                        <Download className="w-4 h-4 mr-1" />
+                        Facture
                       </Button>
                     </div>
                   </div>

@@ -85,5 +85,12 @@ E-learning platform pour l'apprentissage de l'anglais avec multi-dashboards (Adm
 - **Onglet RH amélioré**: Calendrier disponibilités, Fiches Professeurs (ancienneté), Fiches Étudiants (niveau)
 - **Compteur congés 30j/an** avec possibilité d'annulation par admin
 - Accents français corrigés dans l'interface
-- Jauge utilisation congés alignée avec le pourcentage affiché
-- Nullish coalescing pour prix API
+
+### Mise à jour Septembre 2026
+- **Notification email secrétaire**: Email automatique envoyé lors du dépôt d'une facture prestataire
+- **Filtre par service**: Dropdown pour filtrer les factures par type de service (INFORMATIQUE, COMMUNICATION, etc.)
+- **Téléchargement facture PDF**: Bouton pour télécharger/imprimer les factures prestataires (format HTML stylisé)
+- **Onglet "Payées"**: Nouvel onglet dédié aux factures payées avec historique complet
+- **Correction 109 erreurs de linting**: Remplacement des imports star, suppression fonctions redéfinies
+- **Badges service**: Affichage du type de service sur chaque facture
+- **Statistiques améliorées**: Total payé en € affiché dans le dashboard

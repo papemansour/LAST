@@ -6,7 +6,7 @@ import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Textarea } from '../components/ui/textarea';
 import { toast } from 'sonner';
-import { Building2, User, Mail, Phone, FileText, Euro, Clock, ArrowLeft, LogIn, UserPlus, CheckCircle, History, Calculator } from 'lucide-react';
+import { Building2, User, Mail, Phone, FileText, Euro, Clock, ArrowLeft, LogIn, UserPlus, CheckCircle, History, Calculator, Download } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 
@@ -170,6 +170,10 @@ const PrestatairePage = () => {
   const getServiceLabel = (value) => {
     const service = SERVICES_LIST.find(s => s.value === value);
     return service ? service.label : value?.toUpperCase() || 'Non défini';
+  };
+
+  const handleDownloadFacture = (factureId) => {
+    window.open(`${API}/prestataire/facture/${factureId}/download`, '_blank');
   };
 
   // Choice screen
@@ -546,49 +550,136 @@ const PrestatairePage = () => {
             </CardContent>
           </Card>
 
-          {/* Facture History */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <History className="w-5 h-5 text-teal-600" />
-                Mes factures
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {factures.length === 0 ? (
-                <div className="text-center py-8 text-gray-400">
-                  <FileText className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>Aucune facture déposée</p>
-                </div>
-              ) : (
-                <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {factures.map((facture) => {
-                    const s = statusLabel(facture.status);
-                    return (
-                      <div key={facture.id} className="p-3 bg-gray-50 rounded-lg border">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-bold text-teal-700">{facture.amount}€</span>
-                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${s.cls}`}>
-                            {s.text}
-                          </span>
+          {/* Factures Section - Like Teachers */}
+          <div className="space-y-4">
+            {/* Stats Cards */}
+            <div className="grid grid-cols-2 gap-3">
+              <Card className="border-l-4 border-l-yellow-500">
+                <CardContent className="p-4">
+                  <p className="text-sm text-gray-500">En attente</p>
+                  <p className="text-2xl font-bold text-yellow-700">
+                    {factures.filter(f => f.status === 'pending').length}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    {factures.filter(f => f.status === 'pending').reduce((sum, f) => sum + f.amount, 0).toFixed(2)}€
+                  </p>
+                </CardContent>
+              </Card>
+              <Card className="border-l-4 border-l-green-500">
+                <CardContent className="p-4">
+                  <p className="text-sm text-gray-500">Payées</p>
+                  <p className="text-2xl font-bold text-green-700">
+                    {factures.filter(f => f.status === 'paid').length}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    {factures.filter(f => f.status === 'paid').reduce((sum, f) => sum + f.amount, 0).toFixed(2)}€
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Pending Factures */}
+            <Card className="border-yellow-200">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-yellow-700">
+                  <Clock className="w-5 h-5" />
+                  Factures en attente de paiement
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {factures.filter(f => f.status === 'pending').length === 0 ? (
+                  <div className="text-center py-6 text-gray-400">
+                    <CheckCircle className="w-10 h-10 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">Aucune facture en attente</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {factures.filter(f => f.status === 'pending').map((facture) => (
+                      <div key={facture.id} className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-bold text-lg text-yellow-700">{facture.amount}€</p>
+                            <p className="text-sm text-gray-600">{getServiceLabel(facture.services)}</p>
+                            <p className="text-xs text-gray-400 mt-1">
+                              Déposée le {new Date(facture.submitted_at).toLocaleDateString('fr-FR')} • {facture.conception_time}
+                            </p>
+                          </div>
+                          <div className="flex flex-col items-end gap-2">
+                            <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
+                              En attente
+                            </span>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDownloadFacture(facture.id)}
+                              className="text-xs"
+                            >
+                              <Download className="w-3 h-3 mr-1" />
+                              Télécharger
+                            </Button>
+                          </div>
                         </div>
-                        <p className="text-sm text-gray-600">{getServiceLabel(facture.services)}</p>
-                        <p className="text-xs text-gray-400 mt-1">
-                          {new Date(facture.submitted_at).toLocaleDateString('fr-FR')} • {facture.conception_time}
-                        </p>
-                        {facture.status === 'paid' && facture.paid_at && (
-                          <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
-                            <CheckCircle className="w-3 h-3" />
-                            Payée le {new Date(facture.paid_at).toLocaleDateString('fr-FR')}
-                          </p>
-                        )}
                       </div>
-                    );
-                  })}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Paid Factures */}
+            <Card className="border-green-200">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-green-700">
+                  <CheckCircle className="w-5 h-5" />
+                  Factures payées
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {factures.filter(f => f.status === 'paid').length === 0 ? (
+                  <div className="text-center py-6 text-gray-400">
+                    <FileText className="w-10 h-10 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">Aucune facture payée</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-80 overflow-y-auto">
+                    {factures.filter(f => f.status === 'paid').map((facture) => (
+                      <div key={facture.id} className="p-4 bg-green-50 rounded-lg border border-green-200">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-bold text-lg text-green-700">{facture.amount}€</p>
+                            <p className="text-sm text-gray-600">{getServiceLabel(facture.services)}</p>
+                            <p className="text-xs text-gray-400 mt-1">
+                              Déposée le {new Date(facture.submitted_at).toLocaleDateString('fr-FR')} • {facture.conception_time}
+                            </p>
+                            {facture.paid_at && (
+                              <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                                <CheckCircle className="w-3 h-3" />
+                                Payée le {new Date(facture.paid_at).toLocaleDateString('fr-FR')}
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex flex-col items-end gap-2">
+                            <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                              Payée
+                            </span>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDownloadFacture(facture.id)}
+                              className="text-xs border-green-300 text-green-700"
+                            >
+                              <Download className="w-3 h-3 mr-1" />
+                              Télécharger
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>

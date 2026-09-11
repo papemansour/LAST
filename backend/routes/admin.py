@@ -2,7 +2,9 @@
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Body
 from fastapi.responses import Response
 from config import db, logger, get_current_user, hash_password, verify_password, create_access_token, FRONTEND_URL, SECRET_KEY, ALGORITHM, security, pwd_context
-from models.schemas import *
+from models.schemas import (
+    User, TeacherCreate, StudentCreateByAdmin, WelcomeLetter, BadgeCreate, Badge, StudentBadge
+)
 from utils.helpers import create_notification, add_student_points, send_admin_notification_email, generate_welcome_letter_content, TEST_QUESTIONS
 from email_service import email_service
 from websocket_manager import ws_manager
@@ -423,9 +425,6 @@ async def import_students_csv(file: UploadFile = File(...), current_user: dict =
     if not file.filename.endswith('.csv'):
         raise HTTPException(status_code=400, detail="Le fichier doit être au format CSV")
     
-    import csv
-    import io
-    
     content = await file.read()
     try:
         # Essayer d'abord UTF-8, sinon latin-1
@@ -486,7 +485,7 @@ async def import_students_csv(file: UploadFile = File(...), current_user: dict =
                 # Parser le prix
                 try:
                     price = float(price_str.replace(',', '.').replace(' ', '')) if price_str else 0
-                except:
+                except (ValueError, TypeError):
                     price = 0
                 
                 # Normaliser la devise
@@ -563,7 +562,6 @@ Jean;Dupont;jean.dupont@gmail.com;+33612345678;beginner;76;EUR
 Marie;Martin;marie.martin@gmail.com;+221771234567;intermediate;60000;FCFA
 """
     
-    from fastapi.responses import Response
     return Response(
         content=csv_content,
         media_type="text/csv",
@@ -1439,9 +1437,6 @@ async def get_all_teachers_detailed(current_user: dict = Depends(get_current_use
 
 # ============ GROUP CODE ENDPOINTS ============
 
-import random
-import string
-
 def generate_unique_code():
     """Generate a unique 6-character alphanumeric code"""
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
@@ -1596,7 +1591,7 @@ async def get_monthly_teacher_hours(month: int = None, year: int = None, current
                 start = datetime.fromisoformat(session['start_time'].replace('Z', '+00:00'))
                 end = datetime.fromisoformat(session['end_time'].replace('Z', '+00:00'))
                 duration_minutes = (end - start).total_seconds() / 60
-            except:
+            except (ValueError, TypeError):
                 pass
         
         teacher_hours[teacher_id]['total_minutes'] += duration_minutes

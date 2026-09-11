@@ -2,7 +2,10 @@
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Body
 from fastapi.responses import Response
 from config import db, logger, get_current_user, hash_password, verify_password, create_access_token, FRONTEND_URL, SECRET_KEY, ALGORITHM, security, pwd_context
-from models.schemas import *
+from models.schemas import (
+    TestSubmission, TestResult, GroupCourseCreate, GroupCourse, GroupCourseEnrollment,
+    MessageCreate, Message, DocumentCreate, Document, ValidatePromoCodeRequest, PaymentRequest
+)
 from utils.helpers import create_notification, add_student_points, send_admin_notification_email, generate_welcome_letter_content, TEST_QUESTIONS
 from email_service import email_service
 from websocket_manager import ws_manager
@@ -27,10 +30,6 @@ router = APIRouter()
 @router.get("/uploads/{file_path:path}")
 async def serve_uploaded_file_api(file_path: str):
     """Serve uploaded files - tries MongoDB first, then local storage as fallback"""
-    from fastapi.responses import Response
-    import mimetypes
-    import base64
-    
     # Extract potential file_id from path (for new MongoDB files)
     # New format: /api/files/{file_id}
     # Old format: /uploads/documents/{uuid}.ext
@@ -169,21 +168,6 @@ async def delete_document(document_id: str, current_user: dict = Depends(get_cur
     logger.info(f"Document {document_id} deleted by user {current_user['id']}")
     return {"message": "Document supprimé avec succès"}
 
-
-@router.delete("/documents/{document_id}")
-async def delete_document(document_id: str, current_user: dict = Depends(get_current_user)):
-    document = await db.documents.find_one({"id": document_id}, {"_id": 0})
-    
-    if not document:
-        raise HTTPException(status_code=404, detail="Document not found")
-    
-    # Check if user has permission to delete
-    if document['from_user_id'] != current_user['id'] and current_user['role'] != 'admin':
-        raise HTTPException(status_code=403, detail="Not authorized to delete this document")
-    
-    await db.documents.delete_one({"id": document_id})
-    logger.info(f"Document {document_id} deleted by {current_user['id']}")
-    return {"message": "Document deleted successfully"}
 
 # Notification routes
 
@@ -554,6 +538,8 @@ async def create_group_course(course_data: GroupCourseCreate, current_user: dict
     }
     
     await db.group_courses.insert_one(group_course)
+    # Remove _id added by insert_one before returning
+    group_course.pop('_id', None)
     logger.info(f"Group course created: {course_data.name} by {current_user['id']}")
     
     return {"message": "Cours groupé créé avec succès", "group": group_course}
@@ -708,6 +694,8 @@ async def create_group_session(group_id: str, session_data: dict, current_user: 
             }
         )
     
+    # Remove _id added by insert_one before returning
+    session.pop('_id', None)
     return {"message": "Session créée", "session": session}
 
 
@@ -734,9 +722,7 @@ async def update_session_attendance(session_id: str, data: dict, current_user: d
 
 @router.post("/messages/upload-attachment")
 async def upload_message_attachment(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
-    """Upload a file attachment for messages"""
-    from pathlib import Path
-    
+    """Upload a file attachment for messages - stored in MongoDB for persistence"""
     # File size limit: 10MB
     MAX_FILE_SIZE = 10 * 1024 * 1024
     contents = await file.read()
@@ -744,47 +730,46 @@ async def upload_message_attachment(file: UploadFile = File(...), current_user: 
     if len(contents) > MAX_FILE_SIZE:
         raise HTTPException(status_code=400, detail="File too large (max 10MB)")
     
-    # Create upload directory (persistent storage)
-    upload_dir = Path("/app/uploads/messages")
-    upload_dir.mkdir(parents=True, exist_ok=True)
-    
     # Generate unique filename
     file_ext = file.filename.split('.')[-1] if '.' in file.filename else 'file'
     unique_filename = f"{str(uuid4())}.{file_ext}"
-    file_path = upload_dir / unique_filename
     
-    # Save file
-    try:
-        with open(file_path, "wb") as f:
-            f.write(contents)
-        
-        file_url = f"/uploads/messages/{unique_filename}"
-        
-        # Determine file type
-        file_type = "other"
-        if file_ext.lower() in ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']:
-            file_type = "image"
-        elif file_ext.lower() in ['pdf']:
-            file_type = "pdf"
-        elif file_ext.lower() in ['doc', 'docx']:
-            file_type = "document"
-        elif file_ext.lower() in ['xls', 'xlsx']:
-            file_type = "spreadsheet"
-        elif file_ext.lower() in ['mp4', 'avi', 'mov', 'webm']:
-            file_type = "video"
-        elif file_ext.lower() in ['mp3', 'wav', 'ogg']:
-            file_type = "audio"
-        
-        logger.info(f"Message attachment uploaded by {current_user['id']}: {file.filename}")
-        
-        return {
-            "file_url": file_url,
-            "filename": file.filename,
-            "file_type": file_type
-        }
-    except Exception as e:
-        logger.error(f"Upload error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Error uploading file")
+    # Determine file type
+    file_type = "other"
+    if file_ext.lower() in ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']:
+        file_type = "image"
+    elif file_ext.lower() in ['pdf']:
+        file_type = "pdf"
+    elif file_ext.lower() in ['doc', 'docx']:
+        file_type = "document"
+    elif file_ext.lower() in ['xls', 'xlsx']:
+        file_type = "spreadsheet"
+    elif file_ext.lower() in ['mp4', 'avi', 'mov', 'webm']:
+        file_type = "video"
+    elif file_ext.lower() in ['mp3', 'wav', 'ogg']:
+        file_type = "audio"
+    
+    # Store in MongoDB for persistence
+    file_doc = {
+        "id": unique_filename,
+        "filename": file.filename,
+        "content_type": file.content_type or mimetypes.guess_type(file.filename)[0] or 'application/octet-stream',
+        "data": base64.b64encode(contents).decode('utf-8'),
+        "file_type": file_type,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "user_id": current_user['id']
+    }
+    await db.uploaded_files.insert_one(file_doc)
+    
+    file_url = f"/api/files/{unique_filename}"
+    
+    logger.info(f"Message attachment uploaded by {current_user['id']}: {file.filename}")
+    
+    return {
+        "file_url": file_url,
+        "filename": file.filename,
+        "file_type": file_type
+    }
 
 
 @router.post("/messages/send")
@@ -881,6 +866,8 @@ async def add_library_book(book_data: dict, current_user: dict = Depends(get_cur
     }
     
     await db.library_books.insert_one(book)
+    # Remove _id added by insert_one before returning
+    book.pop('_id', None)
     return {"message": "Book added successfully", "book": book}
 
 
@@ -1014,11 +1001,11 @@ async def upload_document(file: UploadFile = File(...), current_user: dict = Dep
 @router.get("/files/{file_id}")
 async def get_file_from_mongodb(file_id: str):
     """Retrieve a file from MongoDB storage"""
-    import base64
-    from fastapi.responses import Response
-    
-    # Find file in MongoDB
+    # Find file in MongoDB - check multiple collections for compatibility
     file_data = await db.file_storage.find_one({"id": file_id}, {"_id": 0})
+    
+    if not file_data:
+        file_data = await db.uploaded_files.find_one({"id": file_id}, {"_id": 0})
     
     if not file_data:
         raise HTTPException(status_code=404, detail="Fichier non trouvé")
@@ -1029,7 +1016,7 @@ async def get_file_from_mongodb(file_id: str):
         
         return Response(
             content=content,
-            media_type=file_data.get('mime_type', 'application/octet-stream'),
+            media_type=file_data.get('mime_type') or file_data.get('content_type', 'application/octet-stream'),
             headers={
                 "Content-Disposition": f'inline; filename="{file_data["filename"]}"',
                 "X-Content-Type-Options": "nosniff",
@@ -1040,6 +1027,36 @@ async def get_file_from_mongodb(file_id: str):
     except Exception as e:
         logger.error(f"Error retrieving file {file_id}: {str(e)}")
         raise HTTPException(status_code=500, detail="Erreur lors de la récupération du fichier")
+
+
+
+@router.get("/audio/{audio_id}")
+async def get_audio_from_mongodb(audio_id: str):
+    """Retrieve an audio file from MongoDB storage"""
+    # Find audio file in MongoDB
+    audio_data = await db.audio_files.find_one({"id": audio_id}, {"_id": 0})
+    
+    if not audio_data:
+        raise HTTPException(status_code=404, detail="Fichier audio non trouvé")
+    
+    try:
+        # Decode Base64 content
+        content = base64.b64decode(audio_data['data'])
+        
+        return Response(
+            content=content,
+            media_type=audio_data.get('content_type', 'audio/mpeg'),
+            headers={
+                "Content-Disposition": f'inline; filename="{audio_data["filename"]}"',
+                "X-Content-Type-Options": "nosniff",
+                "Cache-Control": "public, max-age=86400",
+                "Access-Control-Allow-Origin": "*"
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error retrieving audio {audio_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail="Erreur lors de la récupération du fichier audio")
+
 
 
 @router.post("/documents/send")
@@ -1122,35 +1139,6 @@ async def mark_document_as_read(document_id: str, current_user: dict = Depends(g
     return {"message": "Document marked as read"}
 
 
-@router.delete("/documents/{document_id}")
-async def delete_document(document_id: str, current_user: dict = Depends(get_current_user)):
-    """Delete a document (only sender can delete)"""
-    # Find document
-    document = await db.documents.find_one({"id": document_id}, {"_id": 0})
-    
-    if not document:
-        raise HTTPException(status_code=404, detail="Document not found")
-    
-    # Verify sender
-    if document['sender_id'] != current_user['id']:
-        raise HTTPException(status_code=403, detail="You can only delete your own documents")
-    
-    # Delete from database
-    await db.documents.delete_one({"id": document_id})
-    
-    # Optionally delete file from disk
-    try:
-        from pathlib import Path
-        file_path = Path(f"/app/frontend/public{document['file_url']}")
-        if file_path.exists():
-            file_path.unlink()
-    except Exception as e:
-        logger.warning(f"Could not delete file: {str(e)}")
-    
-    logger.info(f"Document deleted by {current_user['id']}: {document_id}")
-    
-    return {"message": "Document deleted successfully"}
-
 # ==================== PROGRESSION & MEET LINKS ENDPOINTS ====================
 
 
@@ -1205,35 +1193,6 @@ async def get_group_courses():
             course['final_price_fcfa'] = course['price_per_person_fcfa']
     
     return courses
-
-
-@router.post("/group-courses")
-async def create_group_course(course_data: dict = Body(...), current_user: dict = Depends(get_current_user)):
-    """Create a new group course (admin or teacher)"""
-    if current_user['role'] not in ['admin', 'teacher']:
-        raise HTTPException(status_code=403, detail="Admin or teacher access required")
-    
-    course = GroupCourse(
-        title=course_data['title'],
-        description=course_data.get('description', ''),
-        teacher_id=course_data.get('teacher_id', current_user['id']),
-        level=course_data['level'],
-        max_students=course_data.get('max_students', 6),
-        scheduled_days=course_data.get('scheduled_days', []),
-        scheduled_time=course_data.get('scheduled_time', ''),
-        price_per_person_eur=course_data.get('price_per_person_eur', 80.0),
-        price_per_person_fcfa=course_data.get('price_per_person_fcfa', 50000.0),
-        discount_4_plus=course_data.get('discount_4_plus', 10),
-        meet_link=course_data.get('meet_link', ''),
-        start_date=course_data.get('start_date')
-    )
-    
-    doc = course.model_dump()
-    doc['created_at'] = doc['created_at'].isoformat()
-    await db.group_courses.insert_one(doc)
-    
-    logger.info(f"Group course created: {course.title} by {current_user['id']}")
-    return {"message": "Cours groupé créé", "course_id": course.id}
 
 
 @router.post("/group-courses/{course_id}/enroll")
@@ -1294,23 +1253,25 @@ async def enroll_in_group_course(course_id: str, current_user: dict = Depends(ge
 
 @router.post("/uploadfile/")
 async def upload_file(file: UploadFile = File(...)):
-    """Generic file upload endpoint"""
+    """Generic file upload endpoint - stored in MongoDB for persistence"""
     try:
-        # Create uploads directory if not exists (persistent storage)
-        upload_dir = "/app/uploads"
-        os.makedirs(upload_dir, exist_ok=True)
+        content = await file.read()
         
         # Generate unique filename
         file_extension = os.path.splitext(file.filename)[1]
         unique_filename = f"{uuid.uuid4()}{file_extension}"
-        file_path = os.path.join(upload_dir, unique_filename)
         
-        # Save file
-        with open(file_path, "wb") as buffer:
-            content = await file.read()
-            buffer.write(content)
+        # Store in MongoDB for persistence
+        file_doc = {
+            "id": unique_filename,
+            "filename": file.filename,
+            "content_type": file.content_type or mimetypes.guess_type(file.filename)[0] or 'application/octet-stream',
+            "data": base64.b64encode(content).decode('utf-8'),
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.uploaded_files.insert_one(file_doc)
         
-        file_url = f"/uploads/{unique_filename}"
+        file_url = f"/api/files/{unique_filename}"
         logger.info(f"File uploaded: {file.filename} -> {file_url}")
         
         return {

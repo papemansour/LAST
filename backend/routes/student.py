@@ -2,7 +2,7 @@
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Body
 from fastapi.responses import Response
 from config import db, logger, get_current_user, hash_password, verify_password, create_access_token, FRONTEND_URL, SECRET_KEY, ALGORITHM, security, pwd_context
-from models.schemas import *
+from models.schemas import StudentPoints, ChallengeProgress
 from utils.helpers import create_notification, add_student_points, send_admin_notification_email, generate_welcome_letter_content, TEST_QUESTIONS
 from email_service import email_service
 from websocket_manager import ws_manager
@@ -94,6 +94,8 @@ async def ask_summary_question(question_data: dict, current_user: dict = Depends
     }
     
     await db.summary_questions.insert_one(question)
+    # Remove _id added by insert_one before returning
+    question.pop('_id', None)
     
     # Notify teacher via database notification
     try:
@@ -138,15 +140,20 @@ async def upload_question_audio(file: UploadFile = File(...), current_user: dict
     
     file_extension = file.filename.split('.')[-1] if '.' in file.filename else 'webm'
     unique_filename = f"student_audio_{uuid4()}.{file_extension}"
-    file_path = f"/app/uploads/audio/{unique_filename}"
     
-    os.makedirs("/app/uploads/audio", exist_ok=True)
+    # Store audio file in MongoDB GridFS for persistence
+    content = await file.read()
+    audio_doc = {
+        "id": unique_filename,
+        "filename": unique_filename,
+        "content_type": file.content_type,
+        "data": base64.b64encode(content).decode('utf-8'),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "user_id": current_user['id']
+    }
+    await db.audio_files.insert_one(audio_doc)
     
-    with open(file_path, "wb") as f:
-        content = await file.read()
-        f.write(content)
-    
-    file_url = f"/uploads/audio/{unique_filename}"
+    file_url = f"/api/audio/{unique_filename}"
     return {"file_url": file_url, "message": "Audio uploadé avec succès"}
 
 

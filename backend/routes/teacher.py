@@ -2,7 +2,11 @@
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Body
 from fastapi.responses import Response
 from config import db, logger, get_current_user, hash_password, verify_password, create_access_token, FRONTEND_URL, SECRET_KEY, ALGORITHM, security, pwd_context
-from models.schemas import *
+from models.schemas import (
+    GroupCodeCreate, GroupCode, GenerateGroupMagicCode, CourseCreate, Course,
+    AttendanceCreate, Attendance, MeetLinkCreate, MeetLink
+)
+from pydantic import BaseModel, Field, ConfigDict
 from utils.helpers import create_notification, add_student_points, send_admin_notification_email, generate_welcome_letter_content, TEST_QUESTIONS
 from email_service import email_service
 from websocket_manager import ws_manager
@@ -23,6 +27,11 @@ import csv
 import stripe
 
 router = APIRouter()
+
+def generate_unique_code():
+    """Generate a unique 6-character alphanumeric code"""
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+
 
 @router.get("/teacher/documents-from-admin")
 async def get_teacher_documents_from_admin(current_user: dict = Depends(get_current_user)):
@@ -108,6 +117,9 @@ async def teacher_send_kkid_video(video_data: dict, current_user: dict = Depends
         notification_type="new_video",
         data={"message": f"Nouvelle vidéo de {current_user['first_name']}: {video_data['title']}"}
     )
+    
+    # Remove _id added by insert_one before returning
+    video.pop('_id', None)
     
     logger.info(f"K-Kid video uploaded by teacher {current_user['id']} for student {video_data['student_id']}: {video_data['title']}")
     return {"message": "Vidéo envoyée avec succès à l'élève K-Kid", "video": video}
@@ -357,19 +369,22 @@ async def upload_audio_answer(file: UploadFile = File(...), current_user: dict =
     if file.content_type not in allowed_types:
         raise HTTPException(status_code=400, detail="Invalid audio file type")
     
-    # Save file
+    # Save file to MongoDB for persistence
     file_extension = file.filename.split('.')[-1] if '.' in file.filename else 'mp3'
-    unique_filename = f"audio_{uuid4()}.{file_extension}"
-    file_path = f"/app/frontend/public/uploads/audio/{unique_filename}"
+    unique_filename = f"audio_{uuid.uuid4()}.{file_extension}"
     
-    # Ensure directory exists
-    os.makedirs("/app/frontend/public/uploads/audio", exist_ok=True)
+    content = await file.read()
+    audio_doc = {
+        "id": unique_filename,
+        "filename": unique_filename,
+        "content_type": file.content_type,
+        "data": base64.b64encode(content).decode('utf-8'),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "user_id": current_user['id']
+    }
+    await db.audio_files.insert_one(audio_doc)
     
-    with open(file_path, "wb") as f:
-        content = await file.read()
-        f.write(content)
-    
-    file_url = f"/uploads/audio/{unique_filename}"
+    file_url = f"/api/audio/{unique_filename}"
     logger.info(f"Audio answer uploaded by teacher {current_user['id']}: {file_url}")
     
     return {"file_url": file_url, "message": "Audio uploadé avec succès"}
@@ -844,7 +859,7 @@ async def get_teacher_my_payments(current_user: dict = Depends(get_current_user)
                 visible_date = datetime.fromisoformat(visible_from.replace('Z', '+00:00'))
                 if now >= visible_date:
                     visible_payments.append(payment)
-            except:
+            except (ValueError, TypeError):
                 visible_payments.append(payment)
         else:
             # Old payments without visibility date - show them
@@ -1062,6 +1077,8 @@ async def create_course_new(course_data: dict, current_user: dict = Depends(get_
     }
     
     await db.courses.insert_one(course)
+    # Remove _id added by insert_one before returning
+    course.pop('_id', None)
     return {"message": "Course created", "course": course}
 
 
@@ -1363,32 +1380,6 @@ async def get_students_availability_for_teacher(current_user: dict = Depends(get
         })
     
     return result
-
-
-@router.get("/teacher/my-group-courses")
-async def get_teacher_group_courses(current_user: dict = Depends(get_current_user)):
-    """Get all group courses taught by the teacher"""
-    if current_user['role'] != 'teacher':
-        raise HTTPException(status_code=403, detail="Teacher access required")
-    
-    courses = await db.group_courses.find(
-        {"teacher_id": current_user['id']},
-        {"_id": 0}
-    ).to_list(100)
-    
-    for course in courses:
-        course['enrolled_count'] = len(course.get('current_students', []))
-        # Get student details
-        course['students'] = []
-        for student_id in course.get('current_students', []):
-            student = await db.users.find_one(
-                {"id": student_id},
-                {"_id": 0, "first_name": 1, "last_name": 1, "email": 1}
-            )
-            if student:
-                course['students'].append(student)
-    
-    return courses
 
 
 @router.post("/teacher/group-courses/{course_id}/send-link")

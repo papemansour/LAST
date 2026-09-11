@@ -2,7 +2,7 @@
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Body
 from fastapi.responses import Response
 from config import db, logger, get_current_user, hash_password, verify_password, create_access_token, FRONTEND_URL, SECRET_KEY, ALGORITHM, security, pwd_context
-from models.schemas import *
+from models.schemas import User, WelcomeLetter
 from utils.helpers import create_notification, add_student_points, send_admin_notification_email, generate_welcome_letter_content, TEST_QUESTIONS
 from email_service import email_service
 from websocket_manager import ws_manager
@@ -563,48 +563,6 @@ async def reset_billing_stats(current_user: dict = Depends(get_current_user)):
             "prestataire_invoices": deleted_invoices.deleted_count
         }
     }
-
-
-@router.delete("/secretary/teacher-payments/{payment_id}")
-async def delete_teacher_payment(payment_id: str, current_user: dict = Depends(get_current_user)):
-    """Delete a teacher payment"""
-    if current_user['role'] not in ['secretary', 'admin']:
-        raise HTTPException(status_code=403, detail="Secretary or admin access required")
-    
-    result = await db.teacher_payments.delete_one({"id": payment_id})
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Paiement non trouvé")
-    
-    logger.info(f"Teacher payment {payment_id} deleted by {current_user['id']}")
-    return {"message": "Paiement supprimé avec succès"}
-
-
-@router.delete("/secretary/student-receipts/{receipt_id}")
-async def delete_student_receipt(receipt_id: str, current_user: dict = Depends(get_current_user)):
-    """Delete a student receipt"""
-    if current_user['role'] not in ['secretary', 'admin']:
-        raise HTTPException(status_code=403, detail="Secretary or admin access required")
-    
-    result = await db.student_receipts.delete_one({"id": receipt_id})
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Reçu non trouvé")
-    
-    logger.info(f"Student receipt {receipt_id} deleted by {current_user['id']}")
-    return {"message": "Reçu supprimé avec succès"}
-
-
-@router.delete("/secretary/prestataire-invoices/{invoice_id}")
-async def delete_prestataire_invoice(invoice_id: str, current_user: dict = Depends(get_current_user)):
-    """Delete a prestataire invoice"""
-    if current_user['role'] not in ['secretary', 'admin']:
-        raise HTTPException(status_code=403, detail="Secretary or admin access required")
-    
-    result = await db.prestataire_invoices.delete_one({"id": invoice_id})
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Facture non trouvée")
-    
-    logger.info(f"Prestataire invoice {invoice_id} deleted by {current_user['id']}")
-    return {"message": "Facture supprimée avec succès"}
 
 
 @router.get("/secretary/teachers-list")

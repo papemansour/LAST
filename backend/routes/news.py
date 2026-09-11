@@ -2,7 +2,7 @@
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Body
 from fastapi.responses import Response
 from config import db, logger, get_current_user, hash_password, verify_password, create_access_token, FRONTEND_URL, SECRET_KEY, ALGORITHM, security, pwd_context
-from models.schemas import *
+from models.schemas import News, NewsCreate
 from utils.helpers import create_notification, add_student_points, send_admin_notification_email, generate_welcome_letter_content, TEST_QUESTIONS
 from email_service import email_service
 from websocket_manager import ws_manager
@@ -25,15 +25,6 @@ import stripe
 router = APIRouter()
 
 @router.get("/news/all")
-async def get_all_news():
-    news = await db.news.find(
-        {},
-        {"_id": 0}
-    ).sort("created_at", -1).to_list(100)
-    return news
-
-
-@router.get("/news")
 async def get_all_news():
     """Get all news (public access for students and teachers)"""
     news_list = await db.news.find({}, {"_id": 0}).sort("published_date", -1).to_list(1000)

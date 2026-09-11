@@ -629,6 +629,13 @@ const PrestatairePage = () => {
                       </div>
                     </div>
                   </div>
+                  
+                  {/* Legal warning - Article 441-7 */}
+                  <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-xs text-red-700 leading-relaxed">
+                      <strong>Conformément à l&apos;article 441-7 du Code pénal :</strong> Le fait d&apos;établir une attestation comportant des faits matériellement inexacts est puni de 1 an d&apos;emprisonnement et 15 000 € d&apos;amende. Ces peines peuvent être portées à 3 ans de prison et 45 000 € d&apos;amende.
+                    </p>
+                  </div>
                 </div>
 
                 <Button

@@ -116,3 +116,8 @@ E-learning platform pour l'apprentissage de l'anglais avec multi-dashboards (Adm
   - Période de travail (date début → fin)
   - Lieu et date de signature
   - Signature automatique avec le nom saisi
+
+### Mise à jour Septembre 2026 (Suite 3)
+- **Avertissement Article 441-7**: Encadré rouge en bas de l'attestation rappelant les peines pour fausse attestation (1 an + 15000€, jusqu'à 3 ans + 45000€)
+- **Format facture simplifié**: Design simple une page avec couleurs teal (même style que professeurs)
+- **Suppression doublon Admin Kalama**: Nettoyage de la base de données pour ne garder qu'un seul admin

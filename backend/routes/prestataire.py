@@ -546,519 +546,180 @@ async def get_all_prestataires(current_user: dict = Depends(get_current_user)):
 
 @router.get("/prestataire/facture/{facture_id}/download")
 async def download_facture_pdf(facture_id: str):
-    """Generate and download facture as PDF-like HTML with premium design"""
+    """Generate and download facture as simple one-page PDF (same style as teachers)"""
     facture = await db.prestataire_factures.find_one({"id": facture_id}, {"_id": 0})
     
     if not facture:
         raise HTTPException(status_code=404, detail="Facture non trouvée")
     
-    # Get service label and icon
-    services_config = {
-        'informatique': {'label': 'INFORMATIQUE', 'icon': '💻', 'color': '#3b82f6'},
-        'communication': {'label': 'COMMUNICATION', 'icon': '📢', 'color': '#8b5cf6'},
-        'marketing': {'label': 'MARKETING', 'icon': '📊', 'color': '#ec4899'},
-        'pedagogique': {'label': 'PÉDAGOGIQUE', 'icon': '📚', 'color': '#10b981'},
-        'financier': {'label': 'FINANCIER', 'icon': '💰', 'color': '#f59e0b'}
+    # Service labels
+    services_labels = {
+        'informatique': 'INFORMATIQUE',
+        'communication': 'COMMUNICATION',
+        'marketing': 'MARKETING',
+        'pedagogique': 'PÉDAGOGIQUE',
+        'financier': 'FINANCIER'
     }
-    service_info = services_config.get(facture.get('services', ''), {'label': 'SERVICE', 'icon': '🔧', 'color': '#6b7280'})
+    service_label = services_labels.get(facture.get('services', ''), facture.get('services', '').upper())
     
     # Format dates
-    submitted_date = datetime.fromisoformat(facture['submitted_at'].replace('Z', '+00:00')).strftime('%d/%m/%Y à %H:%M')
+    submitted_date = datetime.fromisoformat(facture['submitted_at'].replace('Z', '+00:00')).strftime('%d/%m/%Y')
     paid_date = ""
-    rejected_date = ""
-    modified_date = ""
-    
     if facture.get('paid_at'):
-        paid_date = datetime.fromisoformat(facture['paid_at'].replace('Z', '+00:00')).strftime('%d/%m/%Y à %H:%M')
-    if facture.get('rejected_at'):
-        rejected_date = datetime.fromisoformat(facture['rejected_at'].replace('Z', '+00:00')).strftime('%d/%m/%Y à %H:%M')
-    if facture.get('modified_at'):
-        modified_date = datetime.fromisoformat(facture['modified_at'].replace('Z', '+00:00')).strftime('%d/%m/%Y à %H:%M')
+        paid_date = datetime.fromisoformat(facture['paid_at'].replace('Z', '+00:00')).strftime('%d/%m/%Y')
     
-    # Status configuration
+    # Status
     status = facture.get('status', 'pending')
-    status_config = {
-        'paid': {'text': 'PAYÉE', 'color': '#16a34a', 'bg': '#dcfce7', 'icon': '✓'},
-        'pending': {'text': 'EN ATTENTE', 'color': '#ca8a04', 'bg': '#fef9c3', 'icon': '⏳'},
-        'rejected': {'text': 'REFUSÉE', 'color': '#dc2626', 'bg': '#fee2e2', 'icon': '✗'}
-    }
-    status_info = status_config.get(status, status_config['pending'])
+    status_text = {'paid': 'PAYÉE', 'pending': 'EN ATTENTE', 'rejected': 'REFUSÉE'}.get(status, 'EN ATTENTE')
+    status_color = {'paid': '#0d9488', 'pending': '#d97706', 'rejected': '#dc2626'}.get(status, '#d97706')
     
-    # Generate invoice number
+    # Invoice number
     invoice_number = f"PREST-{facture['id'][:8].upper()}"
     
-    # Check if modified
-    was_modified = facture.get('original_amount') is not None
-    modification_note = ""
-    if was_modified:
-        orig_amount = facture.get('original_amount', 0)
-        orig_time = facture.get('original_conception_time', '')
-        reason = facture.get('modification_reason', 'Non spécifié')
-        modification_note = f"""
-        <div class="modification-alert">
-            <div class="alert-icon">⚠️</div>
-            <div class="alert-content">
-                <strong>Facture modifiée par le secrétariat</strong>
-                <p>Montant initial : {orig_amount:.2f}€ | Temps initial : {orig_time}</p>
-                <p>Motif : {reason}</p>
-                <p class="alert-date">Modifiée le {modified_date}</p>
-            </div>
+    # Modification note
+    modification_html = ""
+    if facture.get('original_amount') is not None:
+        modification_html = f"""
+        <tr style="background: #fef3c7;">
+            <td style="padding: 8px; border: 1px solid #e5e7eb;">⚠️ Modification</td>
+            <td style="padding: 8px; border: 1px solid #e5e7eb;">
+                Montant initial: {facture.get('original_amount')}€ → {facture.get('amount')}€<br>
+                <small>{facture.get('modification_reason', '')}</small>
+            </td>
+        </tr>
+        """
+    
+    # Attestation info
+    attestation = facture.get('attestation', {})
+    attestation_html = ""
+    if attestation:
+        attestation_html = f"""
+        <div style="margin-top: 20px; padding: 15px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <h4 style="margin: 0 0 10px 0; color: #0d9488; font-size: 12px;">ATTESTATION SUR L'HONNEUR</h4>
+            <p style="font-size: 11px; color: #374151; line-height: 1.6; margin: 0;">
+                Je soussigné(e), <strong>{attestation.get('name', facture.get('contact_name', ''))}</strong>, 
+                prestataire de services {service_label}, atteste sur l'honneur avoir effectué un total de 
+                <strong>{facture.get('conception_time', '')}</strong> heures de travail pour la société MyKalama, 
+                située à {attestation.get('location', 'Paris')}, durant la période du {attestation.get('date_start', '')} au {attestation.get('date_end', '')}.
+            </p>
+            <p style="font-size: 11px; color: #374151; margin: 10px 0 0 0;">
+                Fait à {attestation.get('signature_location', '')}, le {attestation.get('signature_date', '')}
+            </p>
+            <p style="font-size: 14px; font-style: italic; margin: 10px 0 0 0; text-align: right;">
+                Signature: <strong>{attestation.get('name', facture.get('contact_name', ''))}</strong>
+            </p>
+        </div>
+        <div style="margin-top: 10px; padding: 10px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px;">
+            <p style="font-size: 9px; color: #991b1b; margin: 0;">
+                <strong>Article 441-7 du Code pénal :</strong> Le fait d'établir une attestation comportant des faits matériellement inexacts est puni de 1 an d'emprisonnement et 15 000 € d'amende. Ces peines peuvent être portées à 3 ans de prison et 45 000 € d'amende.
+            </p>
         </div>
         """
     
-    # Rejection note
-    rejection_note = ""
-    if status == 'rejected':
-        rejection_note = f"""
-        <div class="rejection-alert">
-            <div class="alert-icon">❌</div>
-            <div class="alert-content">
-                <strong>Facture refusée</strong>
-                <p>Motif : {facture.get('rejection_reason', 'Non spécifié')}</p>
-                <p class="alert-date">Refusée le {rejected_date}</p>
-            </div>
-        </div>
-        """
-    
-    # HTML content with premium design
+    # Simple one-page HTML (same style as teacher invoices - teal theme)
     html_content = f"""
     <!DOCTYPE html>
     <html lang="fr">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Facture {invoice_number}</title>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
         <style>
-            @media print {{
-                body {{ -webkit-print-color-adjust: exact; print-color-adjust: exact; }}
-                .no-print {{ display: none !important; }}
-            }}
+            @media print {{ body {{ -webkit-print-color-adjust: exact; }} .no-print {{ display: none; }} }}
             * {{ margin: 0; padding: 0; box-sizing: border-box; }}
-            body {{ 
-                font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                min-height: 100vh;
-                padding: 40px 20px;
-            }}
-            .invoice-container {{
-                max-width: 900px;
-                margin: 0 auto;
-            }}
-            .invoice {{ 
-                background: white; 
-                border-radius: 24px;
-                box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-                overflow: hidden;
-            }}
-            
-            /* Header */
-            .header {{
-                background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-                padding: 40px;
-                position: relative;
-                overflow: hidden;
-            }}
-            .header::before {{
-                content: '';
-                position: absolute;
-                top: -50%;
-                right: -20%;
-                width: 400px;
-                height: 400px;
-                background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-                border-radius: 50%;
-            }}
-            .header-content {{
-                display: flex;
-                justify-content: space-between;
-                align-items: flex-start;
-                position: relative;
-                z-index: 1;
-            }}
-            .brand {{
-                color: white;
-            }}
-            .brand h1 {{
-                font-size: 32px;
-                font-weight: 700;
-                letter-spacing: -0.5px;
-                margin-bottom: 8px;
-            }}
-            .brand p {{
-                opacity: 0.7;
-                font-size: 14px;
-            }}
-            .invoice-info {{
-                text-align: right;
-                color: white;
-            }}
-            .invoice-label {{
-                font-size: 11px;
-                text-transform: uppercase;
-                letter-spacing: 2px;
-                opacity: 0.6;
-                margin-bottom: 4px;
-            }}
-            .invoice-number {{
-                font-size: 24px;
-                font-weight: 700;
-                margin-bottom: 12px;
-            }}
-            .status-badge {{
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
-                padding: 8px 16px;
-                border-radius: 50px;
-                font-size: 12px;
-                font-weight: 600;
-                background: {status_info['bg']};
-                color: {status_info['color']};
-            }}
-            
-            /* Service Banner */
-            .service-banner {{
-                background: linear-gradient(135deg, {service_info['color']}15 0%, {service_info['color']}05 100%);
-                border-left: 4px solid {service_info['color']};
-                padding: 20px 30px;
-                display: flex;
-                align-items: center;
-                gap: 15px;
-            }}
-            .service-icon {{
-                width: 50px;
-                height: 50px;
-                background: {service_info['color']};
-                border-radius: 12px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 24px;
-            }}
-            .service-info h3 {{
-                font-size: 18px;
-                color: #1e293b;
-                margin-bottom: 4px;
-            }}
-            .service-info p {{
-                font-size: 13px;
-                color: #64748b;
-            }}
-            
-            /* Body */
-            .body {{
-                padding: 40px;
-            }}
-            
-            /* Parties */
-            .parties {{
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 40px;
-                margin-bottom: 40px;
-            }}
-            .party-card {{
-                padding: 24px;
-                border-radius: 16px;
-                background: #f8fafc;
-            }}
-            .party-card.prestataire {{
-                border: 2px solid #e2e8f0;
-            }}
-            .party-card.client {{
-                background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
-                color: white;
-            }}
-            .party-label {{
-                font-size: 10px;
-                text-transform: uppercase;
-                letter-spacing: 2px;
-                opacity: 0.6;
-                margin-bottom: 12px;
-            }}
-            .party-name {{
-                font-size: 20px;
-                font-weight: 700;
-                margin-bottom: 8px;
-            }}
-            .party-details {{
-                font-size: 14px;
-                line-height: 1.8;
-                opacity: 0.8;
-            }}
-            
-            /* Alerts */
-            .modification-alert, .rejection-alert {{
-                display: flex;
-                gap: 15px;
-                padding: 20px;
-                border-radius: 12px;
-                margin-bottom: 30px;
-            }}
-            .modification-alert {{
-                background: #fef3c7;
-                border: 1px solid #fcd34d;
-            }}
-            .rejection-alert {{
-                background: #fee2e2;
-                border: 1px solid #fca5a5;
-            }}
-            .alert-icon {{
-                font-size: 24px;
-            }}
-            .alert-content {{
-                flex: 1;
-            }}
-            .alert-content strong {{
-                display: block;
-                margin-bottom: 8px;
-                color: #1e293b;
-            }}
-            .alert-content p {{
-                font-size: 13px;
-                color: #64748b;
-                margin-bottom: 4px;
-            }}
-            .alert-date {{
-                font-size: 12px;
-                color: #94a3b8;
-            }}
-            
-            /* Details Table */
-            .details-table {{
-                width: 100%;
-                border-collapse: collapse;
-                margin-bottom: 30px;
-            }}
-            .details-table th {{
-                text-align: left;
-                font-size: 11px;
-                text-transform: uppercase;
-                letter-spacing: 1px;
-                color: #64748b;
-                padding: 12px 16px;
-                background: #f1f5f9;
-                border-radius: 8px 8px 0 0;
-            }}
-            .details-table td {{
-                padding: 16px;
-                border-bottom: 1px solid #e2e8f0;
-                font-size: 15px;
-            }}
-            .details-table tr:last-child td {{
-                border-bottom: none;
-            }}
-            .details-table .label {{
-                color: #64748b;
-            }}
-            .details-table .value {{
-                font-weight: 600;
-                color: #1e293b;
-                text-align: right;
-            }}
-            
-            /* Total */
-            .total-section {{
-                background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-                border-radius: 16px;
-                padding: 30px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                color: white;
-                position: relative;
-                overflow: hidden;
-            }}
-            .total-section::before {{
-                content: '€';
-                position: absolute;
-                right: 30px;
-                top: 50%;
-                transform: translateY(-50%);
-                font-size: 150px;
-                font-weight: 700;
-                opacity: 0.05;
-            }}
-            .total-label {{
-                font-size: 14px;
-                opacity: 0.7;
-                margin-bottom: 4px;
-            }}
-            .total-title {{
-                font-size: 20px;
-                font-weight: 600;
-            }}
-            .total-amount {{
-                font-size: 48px;
-                font-weight: 700;
-                position: relative;
-                z-index: 1;
-            }}
-            
-            /* Footer */
-            .footer {{
-                background: #f8fafc;
-                padding: 24px 40px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                font-size: 12px;
-                color: #64748b;
-            }}
-            .footer-brand {{
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }}
-            .footer-brand img {{
-                width: 24px;
-                height: 24px;
-            }}
-            
-            /* Print Button */
-            .print-actions {{
-                position: fixed;
-                bottom: 30px;
-                right: 30px;
-                display: flex;
-                gap: 10px;
-            }}
-            .print-btn {{
-                background: white;
-                color: #1e293b;
-                border: none;
-                padding: 14px 28px;
-                border-radius: 12px;
-                cursor: pointer;
-                font-size: 14px;
-                font-weight: 600;
-                box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                transition: all 0.2s;
-            }}
-            .print-btn:hover {{
-                transform: translateY(-2px);
-                box-shadow: 0 15px 30px rgba(0,0,0,0.25);
-            }}
-            .print-btn.primary {{
-                background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
-                color: white;
-            }}
-            
-            @media print {{
-                body {{ background: white; padding: 0; }}
-                .invoice {{ box-shadow: none; border-radius: 0; }}
-                .print-actions {{ display: none; }}
-            }}
+            body {{ font-family: Arial, sans-serif; background: #f3f4f6; padding: 20px; }}
+            .invoice {{ max-width: 800px; margin: 0 auto; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden; }}
+            .header {{ background: linear-gradient(135deg, #0d9488, #14b8a6); color: white; padding: 25px; display: flex; justify-content: space-between; align-items: center; }}
+            .header h1 {{ font-size: 22px; margin-bottom: 5px; }}
+            .header p {{ font-size: 12px; opacity: 0.9; }}
+            .header-right {{ text-align: right; }}
+            .header-right .number {{ font-size: 18px; font-weight: bold; }}
+            .status {{ display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; background: rgba(255,255,255,0.2); margin-top: 5px; }}
+            .body {{ padding: 25px; }}
+            .info-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }}
+            .info-box {{ padding: 15px; background: #f8fafc; border-radius: 6px; border-left: 3px solid #0d9488; }}
+            .info-box h3 {{ font-size: 10px; color: #0d9488; text-transform: uppercase; margin-bottom: 8px; }}
+            .info-box p {{ font-size: 13px; color: #374151; margin: 3px 0; }}
+            .info-box .name {{ font-weight: bold; font-size: 15px; color: #111827; }}
+            table {{ width: 100%; border-collapse: collapse; margin: 20px 0; }}
+            th {{ background: #0d9488; color: white; padding: 10px; text-align: left; font-size: 12px; }}
+            td {{ padding: 10px; border: 1px solid #e5e7eb; font-size: 13px; }}
+            .total-row {{ background: #0d9488; color: white; }}
+            .total-row td {{ font-weight: bold; font-size: 16px; }}
+            .footer {{ text-align: center; padding: 15px; background: #f8fafc; font-size: 11px; color: #6b7280; }}
+            .print-btn {{ position: fixed; bottom: 20px; right: 20px; background: #0d9488; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 14px; }}
+            .print-btn:hover {{ background: #0f766e; }}
+            @media print {{ body {{ background: white; padding: 0; }} .invoice {{ box-shadow: none; }} }}
         </style>
     </head>
     <body>
-        <div class="invoice-container">
-            <div class="invoice">
-                <!-- Header -->
-                <div class="header">
-                    <div class="header-content">
-                        <div class="brand">
-                            <h1>MyKalamaEnglish</h1>
-                            <p>Plateforme E-Learning</p>
-                            <p>contact@mykalamaenglish.com</p>
-                        </div>
-                        <div class="invoice-info">
-                            <div class="invoice-label">Facture Prestataire</div>
-                            <div class="invoice-number">{invoice_number}</div>
-                            <div class="status-badge">
-                                <span>{status_info['icon']}</span>
-                                <span>{status_info['text']}</span>
-                            </div>
-                        </div>
+        <div class="invoice">
+            <div class="header">
+                <div>
+                    <h1>MyKalamaEnglish</h1>
+                    <p>Plateforme E-Learning</p>
+                </div>
+                <div class="header-right">
+                    <p>FACTURE PRESTATAIRE</p>
+                    <p class="number">{invoice_number}</p>
+                    <span class="status" style="background: {status_color};">{status_text}</span>
+                </div>
+            </div>
+            
+            <div class="body">
+                <div class="info-grid">
+                    <div class="info-box">
+                        <h3>Prestataire</h3>
+                        <p class="name">{facture.get('company_name', '')}</p>
+                        <p>{facture.get('contact_name', '')}</p>
+                        <p>{facture.get('email', '')}</p>
+                        <p>{facture.get('phone', '')}</p>
+                    </div>
+                    <div class="info-box">
+                        <h3>Client</h3>
+                        <p class="name">MyKalamaEnglish</p>
+                        <p>Formation linguistique</p>
+                        <p>contact@mykalamaenglish.com</p>
                     </div>
                 </div>
                 
-                <!-- Service Banner -->
-                <div class="service-banner">
-                    <div class="service-icon">{service_info['icon']}</div>
-                    <div class="service-info">
-                        <h3>Service {service_info['label']}</h3>
-                        <p>Prestation de service - {facture.get('conception_time', '')}</p>
-                    </div>
-                </div>
+                <table>
+                    <tr>
+                        <th>Description</th>
+                        <th style="width: 150px;">Détail</th>
+                    </tr>
+                    <tr>
+                        <td>Service</td>
+                        <td><strong>{service_label}</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Temps de conception</td>
+                        <td>{facture.get('conception_time', '')}</td>
+                    </tr>
+                    <tr>
+                        <td>Tarif horaire</td>
+                        <td>10,00 €</td>
+                    </tr>
+                    <tr>
+                        <td>Date de dépôt</td>
+                        <td>{submitted_date}</td>
+                    </tr>
+                    {"<tr><td>Date de paiement</td><td>" + paid_date + "</td></tr>" if paid_date else ""}
+                    {modification_html}
+                    <tr class="total-row">
+                        <td>MONTANT TOTAL</td>
+                        <td>{facture.get('amount', 0):.2f} €</td>
+                    </tr>
+                </table>
                 
-                <!-- Body -->
-                <div class="body">
-                    {rejection_note}
-                    {modification_note}
-                    
-                    <!-- Parties -->
-                    <div class="parties">
-                        <div class="party-card prestataire">
-                            <div class="party-label">Prestataire</div>
-                            <div class="party-name">{facture.get('company_name', '')}</div>
-                            <div class="party-details">
-                                {facture.get('contact_name', '')}<br>
-                                {facture.get('email', '')}<br>
-                                {facture.get('phone', '')}
-                            </div>
-                        </div>
-                        <div class="party-card client">
-                            <div class="party-label">Client</div>
-                            <div class="party-name">MyKalamaEnglish</div>
-                            <div class="party-details">
-                                Formation linguistique<br>
-                                Plateforme E-Learning
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Details -->
-                    <table class="details-table">
-                        <tr>
-                            <th colspan="2">Détails de la prestation</th>
-                        </tr>
-                        <tr>
-                            <td class="label">Temps de conception</td>
-                            <td class="value">{facture.get('conception_time', '')}</td>
-                        </tr>
-                        <tr>
-                            <td class="label">Tarif horaire</td>
-                            <td class="value">10,00 €</td>
-                        </tr>
-                        <tr>
-                            <td class="label">Date de dépôt</td>
-                            <td class="value">{submitted_date}</td>
-                        </tr>
-                        {"<tr><td class='label'>Date de paiement</td><td class='value'>" + paid_date + "</td></tr>" if paid_date else ""}
-                        {("<tr><td class='label'>Description</td><td class='value'>" + facture.get('description', '') + "</td></tr>") if facture.get('description') else ""}
-                    </table>
-                    
-                    <!-- Total -->
-                    <div class="total-section">
-                        <div>
-                            <div class="total-label">Montant à payer</div>
-                            <div class="total-title">Total TTC</div>
-                        </div>
-                        <div class="total-amount">{facture.get('amount', 0):.2f} €</div>
-                    </div>
-                </div>
-                
-                <!-- Footer -->
-                <div class="footer">
-                    <div class="footer-brand">
-                        <span>📄</span>
-                        <span>Document généré automatiquement</span>
-                    </div>
-                    <div>Code Prestataire: <strong>{facture.get('prestataire_code', '')}</strong></div>
-                </div>
+                {attestation_html}
+            </div>
+            
+            <div class="footer">
+                Code Prestataire: {facture.get('prestataire_code', '')} | Généré automatiquement par MyKalamaEnglish
             </div>
         </div>
         
-        <!-- Print Actions -->
-        <div class="print-actions no-print">
-            <button class="print-btn" onclick="window.history.back()">← Retour</button>
-            <button class="print-btn primary" onclick="window.print()">🖨️ Imprimer / PDF</button>
-        </div>
+        <button class="print-btn no-print" onclick="window.print()">🖨️ Imprimer</button>
     </body>
     </html>
     """

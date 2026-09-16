@@ -1587,9 +1587,20 @@ async def create_checkout_session(payment: PaymentRequest):
         )
     
     # Ajouter le code promo à l'URL si fourni
-    # Code promo par défaut de l'utilisateur
-    default_promo = "promo_1SYGM3I4faCc3GWYbdYRPXX8"
-    promo_to_apply = promo_code if promo_code else default_promo
+    # Code promo KALAMA20 = 20% de réduction (uniquement pour EUR)
+    # promo_1UGN8OI4faCc3GWYv1BVZFjd est le Stripe Promotion Code ID pour KALAMA20
+    KALAMA20_PROMO_ID = "promo_1UGN8OI4faCc3GWYv1BVZFjd"
+    
+    promo_to_apply = None
+    
+    # Appliquer la réduction UNIQUEMENT pour les paiements en EUR
+    if currency and currency.upper() == "EUR":
+        # Si l'utilisateur a saisi KALAMA20 (ou variantes), appliquer le code promo Stripe
+        if promo_code and promo_code.upper().replace(" ", "") in ["KALAMA20", "KALAMA-20", "KALAMA 20"]:
+            promo_to_apply = KALAMA20_PROMO_ID
+        # Si pas de code promo explicite, on peut aussi l'appliquer par défaut pour tous les packs EUR
+        elif not promo_code:
+            promo_to_apply = KALAMA20_PROMO_ID
     
     if promo_to_apply:
         # Ajouter le code promo comme paramètre URL

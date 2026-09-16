@@ -192,6 +192,7 @@ async def submit_facture(data: dict = Body(...)):
         "phone": prestataire['phone'],
         "services": data.get('services', prestataire['services']),
         "amount": float(data['amount']),
+        "currency": data.get('currency', 'EUR'),  # EUR or FCFA
         "conception_time": data['conception_time'],  # e.g., "20 heures"
         "description": data.get('description', ''),
         "attestation": data.get('attestation', {}),  # Attestation sur l'honneur data
@@ -573,17 +574,24 @@ async def download_facture_pdf(facture_id: str):
     status_text = {'paid': 'PAYÉE', 'pending': 'EN ATTENTE', 'rejected': 'REFUSÉE'}.get(status, 'EN ATTENTE')
     status_color = {'paid': '#0d9488', 'pending': '#d97706', 'rejected': '#dc2626'}.get(status, '#d97706')
     
+    # Currency and rates
+    currency = facture.get('currency', 'EUR')
+    currency_symbol = 'FCFA' if currency == 'FCFA' else '€'
+    hourly_rate = '6 500 FCFA' if currency == 'FCFA' else '10,00 €'
+    
     # Invoice number
     invoice_number = f"PREST-{facture['id'][:8].upper()}"
     
     # Modification note
     modification_html = ""
     if facture.get('original_amount') is not None:
+        orig_currency = facture.get('original_currency', currency)
+        orig_symbol = 'FCFA' if orig_currency == 'FCFA' else '€'
         modification_html = f"""
         <tr style="background: #fef3c7;">
             <td style="padding: 8px; border: 1px solid #e5e7eb;">⚠️ Modification</td>
             <td style="padding: 8px; border: 1px solid #e5e7eb;">
-                Montant initial: {facture.get('original_amount')}€ → {facture.get('amount')}€<br>
+                Montant initial: {facture.get('original_amount')} {orig_symbol} → {facture.get('amount')} {currency_symbol}<br>
                 <small>{facture.get('modification_reason', '')}</small>
             </td>
         </tr>
@@ -697,7 +705,7 @@ async def download_facture_pdf(facture_id: str):
                     </tr>
                     <tr>
                         <td>Tarif horaire</td>
-                        <td>10,00 €</td>
+                        <td>{hourly_rate}</td>
                     </tr>
                     <tr>
                         <td>Date de dépôt</td>
@@ -707,7 +715,7 @@ async def download_facture_pdf(facture_id: str):
                     {modification_html}
                     <tr class="total-row">
                         <td>MONTANT TOTAL</td>
-                        <td>{facture.get('amount', 0):.2f} €</td>
+                        <td>{facture.get('amount', 0):,.0f} {currency_symbol}</td>
                     </tr>
                 </table>
                 

@@ -304,7 +304,7 @@ const SecretaryPrestataires = () => {
               <p className={`text-2xl font-bold ${
                 facture.status === 'paid' ? 'text-teal-700' :
                 facture.status === 'rejected' ? 'text-red-700' : 'text-amber-700'
-              }`}>{facture.amount}€</p>
+              }`}>{facture.amount?.toLocaleString('fr-FR')} {facture.currency === 'FCFA' ? 'FCFA' : '€'}</p>
               <p className="text-xs text-gray-500">
                 {new Date(facture.submitted_at).toLocaleDateString('fr-FR')}
               </p>

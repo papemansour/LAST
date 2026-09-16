@@ -22,9 +22,6 @@ const SERVICES_LIST = [
   { value: 'financier', label: 'FINANCIER' }
 ];
 
-// Rate: 10€ per hour
-const HOURLY_RATE = 10;
-
 const PrestatairePage = () => {
   const [searchParams] = useSearchParams();
   const initialMode = searchParams.get('mode') || 'choice';
@@ -51,6 +48,7 @@ const PrestatairePage = () => {
     hours: '',
     minutes: '',
     services: '',
+    currency: 'EUR', // EUR or FCFA
     // Attestation fields
     attestation_name: '',
     attestation_location: 'Paris',
@@ -60,12 +58,24 @@ const PrestatairePage = () => {
     attestation_signature_date: new Date().toLocaleDateString('fr-FR')
   });
 
-  // Calculate amount automatically based on time
+  // Hourly rates by currency
+  const HOURLY_RATES = {
+    EUR: 10,
+    FCFA: 6500
+  };
+
+  // Calculate amount automatically based on time and currency
   const calculateAmount = () => {
     const hours = parseFloat(factureForm.hours) || 0;
     const minutes = parseFloat(factureForm.minutes) || 0;
     const totalHours = hours + (minutes / 60);
-    return (totalHours * HOURLY_RATE).toFixed(2);
+    const rate = HOURLY_RATES[factureForm.currency] || HOURLY_RATES.EUR;
+    return (totalHours * rate).toFixed(factureForm.currency === 'FCFA' ? 0 : 2);
+  };
+
+  // Get currency symbol
+  const getCurrencySymbol = () => {
+    return factureForm.currency === 'FCFA' ? 'FCFA' : '€';
   };
 
   const getConceptionTime = () => {
@@ -148,6 +158,7 @@ const PrestatairePage = () => {
       await axios.post(`${API}/prestataire/facture`, {
         prestataire_code: prestataire.prestataire_code,
         amount: amount,
+        currency: factureForm.currency,
         conception_time: conceptionTime,
         services: factureForm.services,
         description: attestationText,
@@ -168,7 +179,7 @@ const PrestatairePage = () => {
       
       // Reset form
       setFactureForm({
-        hours: '', minutes: '', services: '',
+        hours: '', minutes: '', services: '', currency: 'EUR',
         attestation_name: '',
         attestation_location: 'Paris',
         attestation_date_start: '',
@@ -538,6 +549,39 @@ const PrestatairePage = () => {
                   </div>
                 </div>
 
+                {/* Currency selector */}
+                <div>
+                  <Label>Devise *</Label>
+                  <div className="grid grid-cols-2 gap-3 mt-2">
+                    <button
+                      type="button"
+                      onClick={() => setFactureForm({ ...factureForm, currency: 'EUR' })}
+                      className={`p-3 rounded-lg border-2 flex items-center justify-center gap-2 transition-all ${
+                        factureForm.currency === 'EUR' 
+                          ? 'border-teal-500 bg-teal-50 text-teal-700' 
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <span className="text-lg">🇪🇺</span>
+                      <span className="font-medium">EUR (€)</span>
+                      <span className="text-xs text-gray-500">10€/h</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFactureForm({ ...factureForm, currency: 'FCFA' })}
+                      className={`p-3 rounded-lg border-2 flex items-center justify-center gap-2 transition-all ${
+                        factureForm.currency === 'FCFA' 
+                          ? 'border-teal-500 bg-teal-50 text-teal-700' 
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <span className="text-lg">🇸🇳</span>
+                      <span className="font-medium">FCFA</span>
+                      <span className="text-xs text-gray-500">6500 FCFA/h</span>
+                    </button>
+                  </div>
+                </div>
+
                 {/* Auto-calculated amount display */}
                 <div className="p-4 bg-teal-50 rounded-lg border border-teal-200">
                   <div className="flex items-center justify-between">
@@ -546,8 +590,12 @@ const PrestatairePage = () => {
                       <span className="text-sm font-medium text-teal-700">Montant calculé</span>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-teal-700">{calculateAmount()}€</p>
-                      <p className="text-xs text-teal-600">{getConceptionTime() || '0h'} × 10€/h</p>
+                      <p className="text-2xl font-bold text-teal-700">
+                        {calculateAmount()} {getCurrencySymbol()}
+                      </p>
+                      <p className="text-xs text-teal-600">
+                        {getConceptionTime() || '0h'} × {HOURLY_RATES[factureForm.currency]} {getCurrencySymbol()}/h
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -698,7 +746,9 @@ const PrestatairePage = () => {
                       <div key={facture.id} className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="font-bold text-lg text-yellow-700">{facture.amount}€</p>
+                            <p className="font-bold text-lg text-yellow-700">
+                              {facture.amount} {facture.currency === 'FCFA' ? 'FCFA' : '€'}
+                            </p>
                             <p className="text-sm text-gray-600">{getServiceLabel(facture.services)}</p>
                             <p className="text-xs text-gray-400 mt-1">
                               Déposée le {new Date(facture.submitted_at).toLocaleDateString('fr-FR')} • {facture.conception_time}
@@ -746,7 +796,9 @@ const PrestatairePage = () => {
                       <div key={facture.id} className="p-4 bg-green-50 rounded-lg border border-green-200">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="font-bold text-lg text-green-700">{facture.amount}€</p>
+                            <p className="font-bold text-lg text-green-700">
+                              {facture.amount} {facture.currency === 'FCFA' ? 'FCFA' : '€'}
+                            </p>
                             <p className="text-sm text-gray-600">{getServiceLabel(facture.services)}</p>
                             <p className="text-xs text-gray-400 mt-1">
                               Déposée le {new Date(facture.submitted_at).toLocaleDateString('fr-FR')} • {facture.conception_time}

@@ -23,7 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
 import { useAuth } from '../hooks/useAuth';
-import { LogOut, Users, UserCheck, UserPlus, Award, BookOpen, Clock, Send, FileText, DollarSign, Lock, Trash2, Phone, CalendarDays, BarChart3, TrendingUp, Plane, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { LogOut, Users, UserCheck, UserPlus, Award, BookOpen, Clock, Send, FileText, DollarSign, Lock, Trash2, Phone, CalendarDays, BarChart3, TrendingUp, Plane, CheckCircle, XCircle, AlertCircle, Download } from 'lucide-react';
 import KalamathequeAdmin from '../components/KalamathequeAdmin';
 import NewsManager from '../components/NewsManager';
 import ConversationChat from '../components/ConversationChat';
@@ -701,6 +701,38 @@ const AdminDashboard = () => {
                       <option value="intermediate">Intermédiaire</option>
                       <option value="advanced">Professionnel</option>
                     </select>
+                    
+                    {/* Bouton export Excel */}
+                    <Button
+                      onClick={async () => {
+                        try {
+                          toast.info('Génération du fichier Excel...');
+                          const response = await axios.get(`${API}/admin/export-students-excel`, {
+                            headers: { Authorization: `Bearer ${token}` },
+                            responseType: 'blob'
+                          });
+                          const url = window.URL.createObjectURL(new Blob([response.data]));
+                          const link = document.createElement('a');
+                          link.href = url;
+                          link.setAttribute('download', `etudiants_kalama_${new Date().toISOString().split('T')[0]}.xlsx`);
+                          document.body.appendChild(link);
+                          link.click();
+                          link.remove();
+                          window.URL.revokeObjectURL(url);
+                          toast.success('Export Excel téléchargé !');
+                        } catch (error) {
+                          toast.error('Erreur lors de l\'export');
+                          console.error(error);
+                        }
+                      }}
+                      variant="outline"
+                      size="sm"
+                      className="border-teal-500 text-teal-600 hover:bg-teal-50"
+                      data-testid="export-students-excel"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Export Excel
+                    </Button>
 
                     {/* Bouton suppression multiple */}
                     {selectedStudents.length > 0 && (

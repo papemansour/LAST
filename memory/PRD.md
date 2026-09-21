@@ -123,9 +123,15 @@ E-learning platform pour l'apprentissage de l'anglais avec multi-dashboards (Adm
 - **Suppression doublon Admin Kalama**: Nettoyage de la base de données pour ne garder qu'un seul admin
 
 
-### Mise à jour Septembre 2026 (Suite 4) - Code Promo KALAMA20
-- **Code promo KALAMA20**: Réduction de 20% sur tous les packs (K-Kid, K-Débutant, K-Intermédiaire, K-Professionnel)
+### Mise à jour Septembre 2026 (Suite 4) - Code Promo KALAMA2020
+- **Code promo KALAMA2020**: Réduction de 20% sur tous les packs (K-Kid, K-Débutant, K-Intermédiaire, K-Professionnel)
 - **Code promo Stripe**: `promo_1UGN8OI4faCc3GWYv1BVZFjd` appliqué automatiquement à tous les paiements EUR
 - **Restriction par devise**: Le code promo est UNIQUEMENT applicable pour les paiements en EUR (pas FCFA)
-- **Affichage dynamique**: Badge "-20% avec le code KALAMA20" visible uniquement quand EUR est sélectionné
-- **Saisie manuelle**: L'utilisateur peut aussi taper "KALAMA20" manuellement (accepte variantes: KALAMA-20, KALAMA 20)
+- **Affichage dynamique**: Badge "-20% avec le code KALAMA2020" visible uniquement quand EUR est sélectionné
+- **Saisie manuelle**: L'utilisateur peut aussi taper "KALAMA2020" manuellement
+
+### Mise à jour Septembre 2026 (Suite 5) - Export Excel Étudiants
+- **Export Excel Admin**: Bouton "Export Excel" dans l'onglet Étudiants du dashboard admin
+- **Données exportées**: Prénom, Nom, Email, Téléphone, Niveau, Statut, Date d'inscription
+- **Format**: Fichier .xlsx avec entêtes stylisées (couleur teal)
+- **Endpoint API**: `GET /api/admin/export-students-excel`

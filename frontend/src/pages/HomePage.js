@@ -618,7 +618,7 @@ const HomePage = () => {
                       </div>
                       <div className="text-center mt-1">
                         <span className="inline-block bg-green-600 text-white px-3 py-1 rounded-md font-bold text-sm md:text-base tracking-wider">
-                          KALAMA20
+                          KALAMA2020
                         </span>
                       </div>
                     </div>
@@ -695,7 +695,7 @@ const HomePage = () => {
                       </div>
                       <div className="text-center mt-1">
                         <span className="inline-block bg-green-600 text-white px-3 py-1 rounded-md font-bold text-sm md:text-base tracking-wider">
-                          KALAMA20
+                          KALAMA2020
                         </span>
                       </div>
                     </div>
@@ -770,7 +770,7 @@ const HomePage = () => {
                       </div>
                       <div className="text-center mt-1">
                         <span className="inline-block bg-green-600 text-white px-3 py-1 rounded-md font-bold text-sm md:text-base tracking-wider">
-                          KALAMA20
+                          KALAMA2020
                         </span>
                       </div>
                     </div>
@@ -844,7 +844,7 @@ const HomePage = () => {
                       </div>
                       <div className="text-center mt-1">
                         <span className="inline-block bg-green-600 text-white px-3 py-1 rounded-md font-bold text-sm md:text-base tracking-wider">
-                          KALAMA20
+                          KALAMA2020
                         </span>
                       </div>
                     </div>

@@ -1595,8 +1595,8 @@ async def create_checkout_session(payment: PaymentRequest):
     
     # Appliquer la réduction UNIQUEMENT pour les paiements en EUR
     if currency and currency.upper() == "EUR":
-        # Si l'utilisateur a saisi KALAMA20 (ou variantes), appliquer le code promo Stripe
-        if promo_code and promo_code.upper().replace(" ", "") in ["KALAMA20", "KALAMA-20", "KALAMA 20"]:
+        # Si l'utilisateur a saisi KALAMA2020 (ou variantes), appliquer le code promo Stripe
+        if promo_code and promo_code.upper().replace(" ", "").replace("-", "") in ["KALAMA2020", "KALAMA20"]:
             promo_to_apply = KALAMA20_PROMO_ID
         # Si pas de code promo explicite, on peut aussi l'appliquer par défaut pour tous les packs EUR
         elif not promo_code:

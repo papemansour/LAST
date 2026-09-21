@@ -1391,17 +1391,39 @@ async def get_all_students_detailed(current_user: dict = Depends(get_current_use
 
 
 @router.get("/admin/export-students-excel")
-async def export_students_excel(current_user: dict = Depends(get_current_user)):
-    """Export all students to Excel file (prénom, nom, email, téléphone, niveau)"""
+async def export_students_excel(
+    current_user: dict = Depends(get_current_user),
+    level: str = None,
+    date_from: str = None,
+    date_to: str = None
+):
+    """Export students to Excel file with optional filters (niveau, date)"""
     if current_user['role'] not in ['admin', 'secretary']:
         raise HTTPException(status_code=403, detail="Admin or secretary access required")
     
     from openpyxl import Workbook
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
     
-    # Get all students
+    # Build query with filters
+    query = {"role": "student"}
+    
+    # Filter by level
+    if level and level != "all":
+        query["$or"] = [{"level": level}, {"pack": level}]
+    
+    # Filter by date range
+    if date_from or date_to:
+        date_filter = {}
+        if date_from:
+            date_filter["$gte"] = date_from
+        if date_to:
+            date_filter["$lte"] = date_to + "T23:59:59"
+        if date_filter:
+            query["created_at"] = date_filter
+    
+    # Get students with filters
     students = await db.users.find(
-        {"role": "student"},
+        query,
         {"_id": 0}
     ).sort("last_name", 1).to_list(1000)
     

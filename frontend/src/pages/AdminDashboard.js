@@ -61,6 +61,12 @@ const AdminDashboard = () => {
   const [teacherAvailability, setTeacherAvailability] = useState([]);
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [levelFilter, setLevelFilter] = useState('all');
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportFilters, setExportFilters] = useState({
+    level: 'all',
+    dateFrom: '',
+    dateTo: ''
+  });
   const [prices, setPrices] = useState({
     kkid_eur: 30,
     kkid_fcfa: 10000,
@@ -702,29 +708,9 @@ const AdminDashboard = () => {
                       <option value="advanced">Professionnel</option>
                     </select>
                     
-                    {/* Bouton export Excel */}
+                    {/* Bouton export Excel avec filtres */}
                     <Button
-                      onClick={async () => {
-                        try {
-                          toast.info('Génération du fichier Excel...');
-                          const response = await axios.get(`${API}/admin/export-students-excel`, {
-                            headers: { Authorization: `Bearer ${token}` },
-                            responseType: 'blob'
-                          });
-                          const url = window.URL.createObjectURL(new Blob([response.data]));
-                          const link = document.createElement('a');
-                          link.href = url;
-                          link.setAttribute('download', `etudiants_kalama_${new Date().toISOString().split('T')[0]}.xlsx`);
-                          document.body.appendChild(link);
-                          link.click();
-                          link.remove();
-                          window.URL.revokeObjectURL(url);
-                          toast.success('Export Excel téléchargé !');
-                        } catch (error) {
-                          toast.error('Erreur lors de l\'export');
-                          console.error(error);
-                        }
-                      }}
+                      onClick={() => setShowExportModal(true)}
                       variant="outline"
                       size="sm"
                       className="border-teal-500 text-teal-600 hover:bg-teal-50"
@@ -2261,6 +2247,126 @@ const AdminDashboard = () => {
                 Confirmer
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Excel Modal with Filters */}
+      <Dialog open={showExportModal} onOpenChange={setShowExportModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-teal-700">Export Excel des Étudiants</DialogTitle>
+            <DialogDescription>
+              Filtrez les étudiants avant l'export
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {/* Filtre par niveau */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Niveau
+              </label>
+              <select
+                value={exportFilters.level}
+                onChange={(e) => setExportFilters({...exportFilters, level: e.target.value})}
+                className="w-full px-3 py-2 border rounded-md"
+              >
+                <option value="all">Tous les niveaux</option>
+                <option value="kkid">K-Kid (Enfant)</option>
+                <option value="beginner">Débutant</option>
+                <option value="intermediate">Intermédiaire</option>
+                <option value="advanced">Avancé/Professionnel</option>
+              </select>
+            </div>
+            
+            {/* Filtre par date */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Date début
+                </label>
+                <input
+                  type="date"
+                  value={exportFilters.dateFrom}
+                  onChange={(e) => setExportFilters({...exportFilters, dateFrom: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-md"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Date fin
+                </label>
+                <input
+                  type="date"
+                  value={exportFilters.dateTo}
+                  onChange={(e) => setExportFilters({...exportFilters, dateTo: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-md"
+                />
+              </div>
+            </div>
+            
+            {/* Info */}
+            <p className="text-xs text-gray-500">
+              Laissez les dates vides pour exporter tous les étudiants
+            </p>
+          </div>
+          
+          <div className="flex gap-3 justify-end">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setExportFilters({ level: 'all', dateFrom: '', dateTo: '' });
+                setShowExportModal(false);
+              }}
+            >
+              Annuler
+            </Button>
+            <Button
+              onClick={async () => {
+                try {
+                  toast.info('Génération du fichier Excel...');
+                  
+                  // Build query params
+                  const params = new URLSearchParams();
+                  if (exportFilters.level !== 'all') params.append('level', exportFilters.level);
+                  if (exportFilters.dateFrom) params.append('date_from', exportFilters.dateFrom);
+                  if (exportFilters.dateTo) params.append('date_to', exportFilters.dateTo);
+                  
+                  const response = await axios.get(
+                    `${API}/admin/export-students-excel${params.toString() ? '?' + params.toString() : ''}`, 
+                    {
+                      headers: { Authorization: `Bearer ${token}` },
+                      responseType: 'blob'
+                    }
+                  );
+                  
+                  const url = window.URL.createObjectURL(new Blob([response.data]));
+                  const link = document.createElement('a');
+                  link.href = url;
+                  
+                  // Filename with filters info
+                  let filename = 'etudiants_kalama';
+                  if (exportFilters.level !== 'all') filename += `_${exportFilters.level}`;
+                  filename += `_${new Date().toISOString().split('T')[0]}.xlsx`;
+                  
+                  link.setAttribute('download', filename);
+                  document.body.appendChild(link);
+                  link.click();
+                  link.remove();
+                  window.URL.revokeObjectURL(url);
+                  
+                  toast.success('Export Excel téléchargé !');
+                  setShowExportModal(false);
+                } catch (error) {
+                  toast.error('Erreur lors de l\'export');
+                  console.error(error);
+                }
+              }}
+              className="bg-teal-600 hover:bg-teal-700"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Télécharger
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

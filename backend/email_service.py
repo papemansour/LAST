@@ -528,133 +528,132 @@ class EmailService:
     ) -> bool:
         """
         Send level-based welcome email to newly approved student
+        Format exact demandé par l'utilisateur
         """
-        subject = "Bienvenue sur MYKALMA ! 🎉"
+        # Map level to display name
+        level_display = {
+            "kkid": "K-Kid (Enfant)",
+            "beginner": "Débutant",
+            "intermediate": "Intermédiaire",
+            "advanced": "Avancé/Professionnel"
+        }
+        level_name = level_display.get(level, level.capitalize() if level else "Débutant")
         
-        # Determine content based on level
-        if level == "beginner":
-            content_title = "Débutant"
-            content_body = f"""
-                    <p>Hello <strong>{first_name} {last_name}</strong>,</p>
-                    
-                    <p>Nous sommes ravis de vous accueillir sur <strong>MYKALMA</strong> ! Vous vous êtes inscrit avec succès à notre cours en ligne de niveau débutant, et nous sommes impatients de vous accompagner dans votre apprentissage de la langue.</p>
-                    
-                    <ul>
-                        <li>✅ <strong>Leçons interactives :</strong> un contenu engageant adapté à votre niveau pour vous aider à construire une base solide en anglais.</li>
-                        <li>✅ <strong>Apprentissage flexible :</strong> accédez à vos cours à tout moment, partout, à votre propre rythme.</li>
-                        <li>✅ <strong>Communauté de soutien :</strong> rejoignez notre communauté dynamique d'apprenants et d'instructeurs qui sont là pour vous aider à réussir.</li>
-                    </ul>
-            """
-        elif level == "intermediate":
-            content_title = "Intermédiaire"
-            content_body = f"""
-                    <p>Hello <strong>{first_name} {last_name}</strong>,</p>
-                    
-                    <p>Nous sommes ravis de vous accueillir sur <strong>MYKALMA</strong> ! Vous vous êtes inscrit avec succès à notre cours en ligne de niveau intermédiaire, et nous sommes impatients de vous accompagner dans votre apprentissage de la langue.</p>
-                    
-                    <ul>
-                        <li>✅ <strong>Leçons interactives :</strong> un contenu engageant adapté à votre niveau pour vous aider à approfondir vos connaissances en anglais.</li>
-                        <li>✅ <strong>Apprentissage flexible :</strong> accédez à vos cours à tout moment, partout, à votre propre rythme.</li>
-                        <li>✅ <strong>Communauté de soutien :</strong> rejoignez notre communauté dynamique d'apprenants et d'instructeurs qui sont là pour vous aider à réussir.</li>
-                    </ul>
-            """
-        else:  # advanced / Pack professionnel
-            content_title = "Professionnel"
-            content_body = f"""
-                    <p>Hello <strong>{first_name} {last_name}</strong>,</p>
-                    
-                    <p>Nous sommes ravis de vous accueillir sur <strong>MYKALMA</strong> ! Vous vous êtes inscrit avec succès à notre cours en ligne de niveau professionnel, et nous sommes impatients de vous accompagner dans votre apprentissage de la langue.</p>
-                    
-                    <ul>
-                        <li>✅ <strong>Leçons interactives :</strong> un contenu engageant adapté à votre niveau pour vous aider à perfectionner vos compétences en anglais professionnel.</li>
-                        <li>✅ <strong>Apprentissage flexible :</strong> accédez à vos cours à tout moment, partout, à votre propre rythme.</li>
-                        <li>✅ <strong>Communauté de soutien :</strong> rejoignez notre communauté dynamique d'apprenants et d'instructeurs qui sont là pour vous aider à réussir.</li>
-                    </ul>
-            """
+        subject = "Hello and Welcome"
         
         html_body = f"""
         <!DOCTYPE html>
         <html>
         <head>
+            <meta charset="UTF-8">
             <style>
-                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                body {{ font-family: Arial, sans-serif; line-height: 1.8; color: #333; margin: 0; padding: 0; }}
                 .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
                 .header {{ background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%); 
                           color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }}
-                .content {{ background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }}
-                .credentials {{ background: white; padding: 20px; border-left: 4px solid #14b8a6; 
-                               margin: 20px 0; border-radius: 5px; }}
-                .features {{ background: white; padding: 20px; margin: 20px 0; border-radius: 5px; }}
-                .button {{ display: inline-block; padding: 15px 30px; background: #14b8a6; 
-                          color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }}
-                .footer {{ text-align: center; margin-top: 30px; color: #666; font-size: 12px; }}
-                ul {{ padding-left: 20px; }}
-                li {{ margin: 10px 0; }}
+                .header h1 {{ margin: 0; font-size: 24px; }}
+                .content {{ background: #ffffff; padding: 30px; border: 1px solid #e0e0e0; border-top: none; }}
+                .credentials {{ background: #f8f9fa; padding: 20px; border-left: 4px solid #14b8a6; 
+                               margin: 25px 0; border-radius: 0 8px 8px 0; }}
+                .credentials h3 {{ margin-top: 0; color: #14b8a6; }}
+                .kalamatheque {{ background: #fff3cd; padding: 20px; border-left: 4px solid #ffc107; 
+                               margin: 25px 0; border-radius: 0 8px 8px 0; }}
+                .features {{ background: #e8f5e9; padding: 20px; border-radius: 8px; margin: 20px 0; }}
+                .features ul {{ margin: 0; padding-left: 20px; }}
+                .features li {{ margin: 10px 0; color: #2e7d32; }}
+                .button {{ display: inline-block; padding: 15px 40px; background: #14b8a6; 
+                          color: white; text-decoration: none; border-radius: 8px; margin: 25px 0;
+                          font-weight: bold; font-size: 16px; }}
+                .button:hover {{ background: #0d9488; }}
+                .footer {{ text-align: center; padding: 20px; color: #666; font-size: 14px;
+                          background: #f8f9fa; border-radius: 0 0 10px 10px; border: 1px solid #e0e0e0; border-top: none; }}
+                .highlight {{ background: #e3f2fd; padding: 3px 8px; border-radius: 4px; font-family: monospace; }}
             </style>
         </head>
         <body>
             <div class="container">
                 <div class="header">
-                    <h1>Bienvenue sur MYKALMAENGLISH !</h1>
-                    <p>Niveau : {content_title}</p>
+                    <h1>🎉 Hello and Welcome!</h1>
                 </div>
                 <div class="content">
-                    {content_body}
+                    <p>Votre inscription à notre cours d'anglais en ligne niveau <strong>{level_name}</strong> est confirmée.</p>
+                    
+                    <p>Nous sommes ravis de vous accompagner dans votre apprentissage.</p>
+                    
+                    <div class="features">
+                        <p><strong>Vous aurez accès à :</strong></p>
+                        <ul>
+                            <li>📚 Des leçons interactives adaptées à votre niveau</li>
+                            <li>⏰ Une formation flexible accessible à tout moment</li>
+                            <li>🎯 Un accompagnement pour progresser efficacement</li>
+                        </ul>
+                    </div>
                     
                     <div class="credentials">
-                        <h3>Vos identifiants de connexion :</h3>
-                        <p>📧 <strong>Email :</strong> {to_email}</p>
-                        <p>🔑 <strong>Mot de passe provisoire :</strong> <code style="background: #f0f0f0; padding: 5px 10px; border-radius: 3px; font-size: 16px;">{temp_password}</code></p>
-                        <p style="margin-top: 15px; font-style: italic; color: #555;">Digita votre mot de passe pour accéder à Kalamathèque notre bibliothèque en ligne disponible depuis votre espace.</p>
+                        <h3>🔐 Vos identifiants de connexion :</h3>
+                        <p>📧 <strong>Email :</strong> <span class="highlight">{to_email}</span></p>
+                        <p>🔑 <strong>Mot de passe provisoire :</strong> <span class="highlight">{temp_password}</span></p>
+                    </div>
+                    
+                    <div class="kalamatheque">
+                        <p>📖 <strong>Votre accès à Kalamathèque</strong>, notre bibliothèque en ligne, est également disponible depuis votre espace personnel, pour lire des livres en anglais.</p>
+                        <p>🔑 <strong>Mot de passe de la Kalamathèque :</strong> <span class="highlight">Digika</span></p>
                     </div>
                     
                     <center>
+                        <p><strong>Connectez-vous dès maintenant sur :</strong></p>
                         <a href="{self.frontend_url}/login" class="button">
-                            Connecte-toi sur mykalama
+                            🚀 Accéder à Mykalama
                         </a>
                     </center>
                     
-                    <p>Nous vous souhaitons une expérience d'apprentissage enrichissante et agréable !</p>
+                    <p style="margin-top: 30px;">Nous vous souhaitons une excellente formation !</p>
                     
                     <p>Cordialement,<br>
-                    <strong>L'équipe MYKALMA</strong></p>
+                    <strong>L'équipe MYKALAMA</strong></p>
                 </div>
                 <div class="footer">
-                    <p>MYKALMA - Plateforme d'apprentissage de l'anglais</p>
-                    <p>📧 info.kalamaenglish@gmail.com</p>
-                    <p>© 2025 MyKalama. Tous droits réservés.</p>
+                    <p>© {self._get_current_year()} MYKALMAENGLISH - Tous droits réservés</p>
+                    <p>Cet email a été envoyé à {to_email}</p>
                 </div>
             </div>
         </body>
         </html>
         """
         
-        text_body = f"""
-        Hello {first_name},
-        
-        Bienvenue sur MYKALMAENGLISH !
-        Niveau : {content_title}
-        
-        VOS IDENTIFIANTS:
-        - Email: {to_email}
-        - Mot de passe provisoire: {temp_password}
-        
-        VOS ACCÈS:
-        - Kalamathèque : Bibliothèque en ligne avec accès illimité
-        - News : Actualités et événements
-        - Profil : Changez votre mot de passe provisoire
-        
-        LIEN DE CONNEXION:
-        {self.frontend_url}/login
-        
-        Pour commencer, connectez-vous simplement à votre compte et explorez les cours disponibles.
-        
-        Cordialement,
-        L'équipe MYKALMAENGLISH
-        info.kalamaenglish@gmail.com
-        """
+        # Plain text version
+        text_body = f"""Hello and Welcome!
+
+Votre inscription à notre cours d'anglais en ligne niveau {level_name} est confirmée.
+
+Nous sommes ravis de vous accompagner dans votre apprentissage.
+
+Vous aurez accès à :
+- Des leçons interactives adaptées à votre niveau
+- Une formation flexible accessible à tout moment
+- Un accompagnement pour progresser efficacement
+
+Vos identifiants de connexion :
+- Email : {to_email}
+- Mot de passe provisoire : {temp_password}
+
+Votre accès à Kalamathèque, notre bibliothèque en ligne, est également disponible depuis votre espace personnel, pour lire des livres en anglais.
+- Mot de passe de la Kalamathèque : Digika
+
+Connectez-vous dès maintenant sur : {self.frontend_url}/login
+
+Nous vous souhaitons une excellente formation !
+
+Cordialement,
+L'équipe MYKALAMA
+"""
         
         return await self._send_email(to_email, subject, html_body, text_body)
+    
+    def _get_current_year(self):
+        """Get current year for footer"""
+        from datetime import datetime
+        return datetime.now().year
     
     async def send_invoice_email(
         self,

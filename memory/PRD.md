@@ -135,3 +135,18 @@ E-learning platform pour l'apprentissage de l'anglais avec multi-dashboards (Adm
 - **Données exportées**: Prénom, Nom, Email, Téléphone, Niveau, Statut, Date d'inscription
 - **Format**: Fichier .xlsx avec entêtes stylisées (couleur teal)
 - **Endpoint API**: `GET /api/admin/export-students-excel`
+- **Filtres disponibles**: 
+  - Filtre par niveau (K-Kid, Débutant, Intermédiaire, Avancé/Professionnel)
+  - Filtre par plage de dates (date début, date fin)
+- **Modale de filtres**: Interface conviviale avec dropdown et date pickers
+
+### Mise à jour Septembre 2026 (Suite 6) - Email de Bienvenue
+- **Envoi automatique**: Email envoyé lors de la validation de l'inscription par l'admin
+- **Objet**: "Hello and Welcome"
+- **Contenu**:
+  - Confirmation inscription avec niveau
+  - Accès aux leçons interactives, formation flexible, accompagnement
+  - Identifiants de connexion (email + mot de passe provisoire)
+  - Accès Kalamathèque avec mot de passe "Digika"
+  - Lien de connexion vers Mykalama
+- **From**: mykalamaenglish.com (via AWS SES)

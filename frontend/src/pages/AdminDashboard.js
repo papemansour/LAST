@@ -2332,10 +2332,9 @@ const AdminDashboard = () => {
                   if (exportFilters.dateFrom) params.append('date_from', exportFilters.dateFrom);
                   if (exportFilters.dateTo) params.append('date_to', exportFilters.dateTo);
                   
-                  const response = await axios.get(
-                    `${API}/admin/export-students-excel${params.toString() ? '?' + params.toString() : ''}`, 
+                  const response = await apiClient.get(
+                    `/admin/export-students-excel${params.toString() ? '?' + params.toString() : ''}`, 
                     {
-                      headers: { Authorization: `Bearer ${token}` },
                       responseType: 'blob'
                     }
                   );

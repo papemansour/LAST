@@ -11,7 +11,7 @@
 
 ## Communication (Chargé(e) de Com)
 - Email: com@mykalamaenglish.com
-- Password: Staffcbc7ee55
+- Password: COMKALAMA
 
 ## Teachers
 - mansour.diagne@mykalamaenglish.com (active)

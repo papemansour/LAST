@@ -534,10 +534,6 @@ const CommunicationDashboard = () => {
               <StickyNote className="h-4 w-4 mr-2" />
               Notes
             </TabsTrigger>
-            <TabsTrigger value="leaves" className="data-[state=active]:bg-teal-600 data-[state=active]:text-white" data-testid="com-tab-leaves">
-              <Plane className="h-4 w-4 mr-2" />
-              Congés
-            </TabsTrigger>
             <TabsTrigger value="kalamatheque" className="data-[state=active]:bg-teal-600 data-[state=active]:text-white" data-testid="com-tab-kalamatheque">
               <BookOpen className="h-4 w-4 mr-2" />
               Kalamathèque
@@ -711,43 +707,6 @@ const CommunicationDashboard = () => {
             </Card>
           </TabsContent>
 
-          {/* LEAVES/CONGÉS TAB */}
-          <TabsContent value="leaves">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle className="text-teal-700">Mes Congés</CardTitle>
-                  <CardDescription>Gérez vos demandes de congés</CardDescription>
-                </div>
-                <Button onClick={() => setShowLeaveModal(true)} className="bg-teal-600 hover:bg-teal-700">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Demander un congé
-                </Button>
-              </CardHeader>
-              <CardContent>
-                {leaves.length === 0 ? (
-                  <p className="text-center text-gray-500 py-8">Aucune demande de congé</p>
-                ) : (
-                  <div className="space-y-3">
-                    {leaves.map(leave => (
-                      <div key={leave.id} className={`flex items-center justify-between p-4 rounded-lg border ${leave.status === 'approved' ? 'bg-green-50 border-green-200' : leave.status === 'rejected' ? 'bg-red-50 border-red-200' : 'bg-yellow-50 border-yellow-200'}`}>
-                        <div>
-                          <p className="font-semibold">
-                            {new Date(leave.start_date).toLocaleDateString('fr-FR')} - {new Date(leave.end_date).toLocaleDateString('fr-FR')}
-                          </p>
-                          <p className="text-sm text-gray-600">{leave.reason}</p>
-                        </div>
-                        <span className={`px-3 py-1 text-sm rounded-full font-medium ${leave.status === 'approved' ? 'bg-green-200 text-green-800' : leave.status === 'rejected' ? 'bg-red-200 text-red-800' : 'bg-yellow-200 text-yellow-800'}`}>
-                          {leave.status === 'approved' ? 'Approuvé' : leave.status === 'rejected' ? 'Refusé' : 'En attente'}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
           {/* KALAMATHEQUE TAB */}
           <TabsContent value="kalamatheque">
             <Card>
@@ -856,26 +815,6 @@ const CommunicationDashboard = () => {
           <div className="flex justify-end gap-3 mt-4">
             <Button variant="outline" onClick={() => setShowNoteModal(false)}>Annuler</Button>
             <Button onClick={handleSaveNote} className="bg-teal-600 hover:bg-teal-700" disabled={!noteForm.content}>Enregistrer</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Leave Modal */}
-      <Dialog open={showLeaveModal} onOpenChange={setShowLeaveModal}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="text-teal-700">Demande de Congé</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div><Label>Date début *</Label><Input type="date" value={leaveForm.start_date} onChange={(e) => setLeaveForm({...leaveForm, start_date: e.target.value})} /></div>
-              <div><Label>Date fin *</Label><Input type="date" value={leaveForm.end_date} onChange={(e) => setLeaveForm({...leaveForm, end_date: e.target.value})} /></div>
-            </div>
-            <div><Label>Motif *</Label><Textarea value={leaveForm.reason} onChange={(e) => setLeaveForm({...leaveForm, reason: e.target.value})} rows={3} /></div>
-          </div>
-          <div className="flex justify-end gap-3 mt-4">
-            <Button variant="outline" onClick={() => setShowLeaveModal(false)}>Annuler</Button>
-            <Button onClick={handleSaveLeave} className="bg-teal-600 hover:bg-teal-700" disabled={!leaveForm.start_date || !leaveForm.end_date || !leaveForm.reason}>Envoyer</Button>
           </div>
         </DialogContent>
       </Dialog>

@@ -16,149 +16,107 @@ async def get_communication_stats(current_user: dict = Depends(get_current_user)
     total_students = await db.users.count_documents({"role": "student", "is_active": True})
     total_teachers = await db.users.count_documents({"role": "teacher", "is_active": True})
     total_news = await db.news.count_documents({})
-    total_testimonials = await db.testimonials.count_documents({})
     
     return {
         "totalStudents": total_students,
         "totalTeachers": total_teachers,
-        "totalNews": total_news,
-        "totalTestimonials": total_testimonials
+        "totalNews": total_news
     }
 
 
-# ==================== TESTIMONIALS ====================
-@router.get("/communication/testimonials")
-async def get_testimonials(current_user: dict = Depends(get_current_user)):
-    """Get all testimonials"""
+# ==================== AVAILABILITY ====================
+@router.get("/communication/availability/{com_code}")
+async def get_availability(com_code: str, current_user: dict = Depends(get_current_user)):
+    """Get availability for a specific communication manager"""
     if current_user['role'] not in ['admin', 'communication', 'secretary']:
         raise HTTPException(status_code=403, detail="Access denied")
     
-    testimonials = await db.testimonials.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
-    return testimonials
+    # Validate com_code
+    if com_code.upper() not in ['MBM', 'FZT']:
+        raise HTTPException(status_code=400, detail="Invalid communication code")
+    
+    availability = await db.communication_availability.find(
+        {"com_code": com_code.upper()},
+        {"_id": 0}
+    ).sort("date", 1).to_list(100)
+    
+    return availability
 
 
-@router.post("/communication/testimonials")
-async def create_testimonial(data: dict = Body(...), current_user: dict = Depends(get_current_user)):
-    """Create a new testimonial"""
+@router.post("/communication/availability")
+async def create_availability(data: dict = Body(...), current_user: dict = Depends(get_current_user)):
+    """Create a new availability entry"""
     if current_user['role'] not in ['admin', 'communication']:
         raise HTTPException(status_code=403, detail="Access denied")
     
-    testimonial = {
+    com_code = data.get("com_code", "").upper()
+    if com_code not in ['MBM', 'FZT']:
+        raise HTTPException(status_code=400, detail="Invalid communication code")
+    
+    # Check if already exists for this date
+    existing = await db.communication_availability.find_one({
+        "com_code": com_code,
+        "date": data.get("date")
+    })
+    
+    if existing:
+        # Update existing
+        await db.communication_availability.update_one(
+            {"id": existing['id']},
+            {"$set": {
+                "start_time": data.get("start_time", "09:00"),
+                "end_time": data.get("end_time", "17:00"),
+                "status": data.get("status", "available"),
+                "note": data.get("note", ""),
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }}
+        )
+        logger.info(f"Availability updated for {com_code} on {data.get('date')}")
+        return {"message": "Availability updated", "id": existing['id']}
+    
+    availability_entry = {
         "id": str(uuid4()),
-        "name": data.get("name", ""),
-        "role": data.get("role", ""),
-        "content": data.get("content", ""),
-        "rating": data.get("rating", 5),
-        "image_url": data.get("image_url", ""),
-        "is_active": True,
+        "com_code": com_code,
+        "date": data.get("date", ""),
+        "start_time": data.get("start_time", "09:00"),
+        "end_time": data.get("end_time", "17:00"),
+        "status": data.get("status", "available"),  # available, busy, tentative
+        "note": data.get("note", ""),
         "created_by": current_user['id'],
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     
-    await db.testimonials.insert_one(testimonial)
-    logger.info(f"Testimonial created by {current_user['email']}: {testimonial['name']}")
+    await db.communication_availability.insert_one(availability_entry)
+    logger.info(f"Availability created for {com_code} on {data.get('date')}: {data.get('status')}")
     
-    return {"message": "Testimonial created", "id": testimonial['id']}
+    return {"message": "Availability created", "id": availability_entry['id']}
 
 
-@router.delete("/communication/testimonials/{testimonial_id}")
-async def delete_testimonial(testimonial_id: str, current_user: dict = Depends(get_current_user)):
-    """Delete a testimonial"""
+@router.delete("/communication/availability/{availability_id}")
+async def delete_availability(availability_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete an availability entry"""
     if current_user['role'] not in ['admin', 'communication']:
         raise HTTPException(status_code=403, detail="Access denied")
     
-    result = await db.testimonials.delete_one({"id": testimonial_id})
+    result = await db.communication_availability.delete_one({"id": availability_id})
     
     if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Testimonial not found")
+        raise HTTPException(status_code=404, detail="Availability not found")
     
-    logger.info(f"Testimonial {testimonial_id} deleted by {current_user['email']}")
-    return {"message": "Testimonial deleted"}
+    logger.info(f"Availability {availability_id} deleted by {current_user['email']}")
+    return {"message": "Availability deleted"}
 
 
-# ==================== SOCIAL POSTS ====================
-@router.get("/communication/social-posts")
-async def get_social_posts(current_user: dict = Depends(get_current_user)):
-    """Get all social media posts"""
-    if current_user['role'] not in ['admin', 'communication']:
+# ==================== ALL AVAILABILITY (for admin view) ====================
+@router.get("/communication/availability-all")
+async def get_all_availability(current_user: dict = Depends(get_current_user)):
+    """Get availability for all communication managers (admin view)"""
+    if current_user['role'] not in ['admin', 'secretary']:
         raise HTTPException(status_code=403, detail="Access denied")
     
-    posts = await db.social_posts.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
-    return posts
-
-
-@router.post("/communication/social-posts")
-async def create_social_post(data: dict = Body(...), current_user: dict = Depends(get_current_user)):
-    """Create a new social media post"""
-    if current_user['role'] not in ['admin', 'communication']:
-        raise HTTPException(status_code=403, detail="Access denied")
+    availability = await db.communication_availability.find(
+        {},
+        {"_id": 0}
+    ).sort("date", 1).to_list(200)
     
-    post = {
-        "id": str(uuid4()),
-        "platform": data.get("platform", "facebook"),
-        "content": data.get("content", ""),
-        "image_url": data.get("image_url", ""),
-        "scheduled_date": data.get("scheduled_date", ""),
-        "status": data.get("status", "draft"),  # draft, scheduled, published
-        "created_by": current_user['id'],
-        "created_at": datetime.now(timezone.utc).isoformat()
-    }
-    
-    await db.social_posts.insert_one(post)
-    logger.info(f"Social post created by {current_user['email']}: {post['platform']}")
-    
-    return {"message": "Social post created", "id": post['id']}
-
-
-@router.put("/communication/social-posts/{post_id}")
-async def update_social_post(post_id: str, data: dict = Body(...), current_user: dict = Depends(get_current_user)):
-    """Update a social media post"""
-    if current_user['role'] not in ['admin', 'communication']:
-        raise HTTPException(status_code=403, detail="Access denied")
-    
-    update_data = {
-        "platform": data.get("platform"),
-        "content": data.get("content"),
-        "scheduled_date": data.get("scheduled_date"),
-        "status": data.get("status"),
-        "updated_at": datetime.now(timezone.utc).isoformat()
-    }
-    
-    # Remove None values
-    update_data = {k: v for k, v in update_data.items() if v is not None}
-    
-    result = await db.social_posts.update_one(
-        {"id": post_id},
-        {"$set": update_data}
-    )
-    
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Post not found")
-    
-    return {"message": "Post updated"}
-
-
-@router.delete("/communication/social-posts/{post_id}")
-async def delete_social_post(post_id: str, current_user: dict = Depends(get_current_user)):
-    """Delete a social media post"""
-    if current_user['role'] not in ['admin', 'communication']:
-        raise HTTPException(status_code=403, detail="Access denied")
-    
-    result = await db.social_posts.delete_one({"id": post_id})
-    
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Post not found")
-    
-    logger.info(f"Social post {post_id} deleted by {current_user['email']}")
-    return {"message": "Post deleted"}
-
-
-# ==================== PUBLIC TESTIMONIALS (for homepage) ====================
-@router.get("/public/testimonials")
-async def get_public_testimonials():
-    """Get active testimonials for public display"""
-    testimonials = await db.testimonials.find(
-        {"is_active": True},
-        {"_id": 0, "created_by": 0}
-    ).sort("created_at", -1).limit(10).to_list(10)
-    return testimonials
+    return availability

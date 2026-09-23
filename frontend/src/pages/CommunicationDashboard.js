@@ -26,21 +26,24 @@ import { useAuth } from '../hooks/useAuth';
 import { 
   LogOut, 
   Megaphone, 
-  MessageSquare, 
-  Image, 
   Calendar, 
   BarChart3, 
-  Send, 
   Plus, 
   Edit, 
   Trash2, 
-  Eye,
   Users,
   TrendingUp,
   FileText,
-  Star,
-  Globe
+  Clock,
+  Check,
+  X
 } from 'lucide-react';
+
+// Codes personnels des chargés de com
+const COM_CODES = {
+  'MBM': { name: 'MBM', fullName: 'Chargé(e) de Com MBM' },
+  'FZT': { name: 'FZT', fullName: 'Chargé(e) de Com FZT' }
+};
 
 const CommunicationDashboard = () => {
   const navigate = useNavigate();
@@ -48,6 +51,12 @@ const CommunicationDashboard = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('news');
+  
+  // Code personnel verification
+  const [showCodeModal, setShowCodeModal] = useState(true);
+  const [personalCode, setPersonalCode] = useState('');
+  const [verifiedCode, setVerifiedCode] = useState(null);
+  const [codeError, setCodeError] = useState('');
   
   // News state
   const [news, setNews] = useState([]);
@@ -61,40 +70,53 @@ const CommunicationDashboard = () => {
     is_published: true
   });
   
-  // Testimonials state
-  const [testimonials, setTestimonials] = useState([]);
-  const [showTestimonialModal, setShowTestimonialModal] = useState(false);
-  const [testimonialForm, setTestimonialForm] = useState({
-    name: '',
-    role: '',
-    content: '',
-    rating: 5,
-    image_url: ''
-  });
-  
   // Stats
   const [stats, setStats] = useState({
     totalStudents: 0,
     totalTeachers: 0,
-    totalNews: 0,
-    totalTestimonials: 0
+    totalNews: 0
   });
   
-  // Social posts state
-  const [socialPosts, setSocialPosts] = useState([]);
-  const [showSocialModal, setShowSocialModal] = useState(false);
-  const [socialForm, setSocialForm] = useState({
-    platform: 'facebook',
-    content: '',
-    scheduled_date: '',
-    status: 'draft'
+  // Availability/Calendar state
+  const [availability, setAvailability] = useState([]);
+  const [showAvailabilityModal, setShowAvailabilityModal] = useState(false);
+  const [availabilityForm, setAvailabilityForm] = useState({
+    date: '',
+    start_time: '09:00',
+    end_time: '17:00',
+    status: 'available',
+    note: ''
   });
 
+  // Days of the week for calendar view
+  const weekDays = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+
   useEffect(() => {
-    fetchData();
+    // Check if code was already verified in this session
+    const savedCode = sessionStorage.getItem('com_code');
+    if (savedCode && COM_CODES[savedCode]) {
+      setVerifiedCode(savedCode);
+      setShowCodeModal(false);
+      fetchData(savedCode);
+    }
   }, []);
 
-  const fetchData = async () => {
+  const verifyCode = () => {
+    const code = personalCode.toUpperCase().trim();
+    if (COM_CODES[code]) {
+      setVerifiedCode(code);
+      setShowCodeModal(false);
+      setCodeError('');
+      sessionStorage.setItem('com_code', code);
+      fetchData(code);
+      toast.success(`Bienvenue ${COM_CODES[code].fullName} !`);
+    } else {
+      setCodeError('Code invalide. Utilisez MBM ou FZT.');
+    }
+  };
+
+  const fetchData = async (code) => {
     try {
       const [userRes, newsRes, statsRes] = await Promise.all([
         apiClient.get('/auth/me'),
@@ -109,20 +131,12 @@ const CommunicationDashboard = () => {
         setStats(statsRes.data);
       }
       
-      // Fetch testimonials
+      // Fetch availability for this specific code
       try {
-        const testimonialsRes = await apiClient.get('/communication/testimonials');
-        setTestimonials(testimonialsRes.data || []);
+        const availRes = await apiClient.get(`/communication/availability/${code}`);
+        setAvailability(availRes.data || []);
       } catch (e) {
-        console.log('Testimonials not available');
-      }
-      
-      // Fetch social posts
-      try {
-        const socialRes = await apiClient.get('/communication/social-posts');
-        setSocialPosts(socialRes.data || []);
-      } catch (e) {
-        console.log('Social posts not available');
+        console.log('Availability not available');
       }
       
     } catch (error) {
@@ -134,6 +148,7 @@ const CommunicationDashboard = () => {
   };
 
   const handleLogout = () => {
+    sessionStorage.removeItem('com_code');
     logout();
     navigate('/login');
   };
@@ -145,13 +160,13 @@ const CommunicationDashboard = () => {
         await apiClient.put(`/news/${editingNews.id}`, newsForm);
         toast.success('Actualité mise à jour');
       } else {
-        await apiClient.post('/news', newsForm);
+        await apiClient.post('/news', {...newsForm, created_by_code: verifiedCode});
         toast.success('Actualité créée');
       }
       setShowNewsModal(false);
       setEditingNews(null);
       setNewsForm({ title: '', content: '', category: 'general', image_url: '', is_published: true });
-      fetchData();
+      fetchData(verifiedCode);
     } catch (error) {
       toast.error('Erreur lors de la sauvegarde');
     }
@@ -162,7 +177,7 @@ const CommunicationDashboard = () => {
     try {
       await apiClient.delete(`/news/${id}`);
       toast.success('Actualité supprimée');
-      fetchData();
+      fetchData(verifiedCode);
     } catch (error) {
       toast.error('Erreur lors de la suppression');
     }
@@ -180,31 +195,114 @@ const CommunicationDashboard = () => {
     setShowNewsModal(true);
   };
 
-  // Testimonial handlers
-  const handleSaveTestimonial = async () => {
+  // Availability handlers
+  const handleSaveAvailability = async () => {
     try {
-      await apiClient.post('/communication/testimonials', testimonialForm);
-      toast.success('Témoignage ajouté');
-      setShowTestimonialModal(false);
-      setTestimonialForm({ name: '', role: '', content: '', rating: 5, image_url: '' });
-      fetchData();
+      await apiClient.post('/communication/availability', {
+        ...availabilityForm,
+        com_code: verifiedCode
+      });
+      toast.success('Disponibilité enregistrée');
+      setShowAvailabilityModal(false);
+      setAvailabilityForm({ date: '', start_time: '09:00', end_time: '17:00', status: 'available', note: '' });
+      fetchData(verifiedCode);
     } catch (error) {
-      toast.error('Erreur lors de l\'ajout');
+      toast.error('Erreur lors de l\'enregistrement');
     }
   };
 
-  // Social post handlers
-  const handleSaveSocialPost = async () => {
+  const handleDeleteAvailability = async (id) => {
     try {
-      await apiClient.post('/communication/social-posts', socialForm);
-      toast.success('Post planifié');
-      setShowSocialModal(false);
-      setSocialForm({ platform: 'facebook', content: '', scheduled_date: '', status: 'draft' });
-      fetchData();
+      await apiClient.delete(`/communication/availability/${id}`);
+      toast.success('Disponibilité supprimée');
+      fetchData(verifiedCode);
     } catch (error) {
-      toast.error('Erreur lors de la planification');
+      toast.error('Erreur lors de la suppression');
     }
   };
+
+  // Calendar helpers
+  const getDaysInMonth = (date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const days = [];
+    
+    // Add empty slots for days before the first day of month
+    const startDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+    for (let i = 0; i < startDay; i++) {
+      days.push(null);
+    }
+    
+    // Add all days of the month
+    for (let i = 1; i <= lastDay.getDate(); i++) {
+      days.push(new Date(year, month, i));
+    }
+    
+    return days;
+  };
+
+  const getAvailabilityForDate = (date) => {
+    if (!date) return null;
+    const dateStr = date.toISOString().split('T')[0];
+    return availability.find(a => a.date === dateStr);
+  };
+
+  const formatMonth = (date) => {
+    return date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  };
+
+  // Code verification modal
+  if (showCodeModal) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center">
+        <Card className="w-full max-w-md mx-4">
+          <CardHeader className="text-center">
+            <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Megaphone className="h-8 w-8 text-purple-600" />
+            </div>
+            <CardTitle className="text-purple-700">Espace Communication</CardTitle>
+            <CardDescription>Entrez votre code personnel pour accéder à votre espace</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label>Code Personnel</Label>
+              <Input
+                value={personalCode}
+                onChange={(e) => {
+                  setPersonalCode(e.target.value.toUpperCase());
+                  setCodeError('');
+                }}
+                placeholder="MBM ou FZT"
+                className="text-center text-2xl font-bold tracking-widest"
+                maxLength={3}
+                onKeyPress={(e) => e.key === 'Enter' && verifyCode()}
+              />
+              {codeError && (
+                <p className="text-red-500 text-sm mt-2 text-center">{codeError}</p>
+              )}
+            </div>
+            <Button 
+              onClick={verifyCode}
+              className="w-full bg-purple-600 hover:bg-purple-700"
+              disabled={personalCode.length < 3}
+            >
+              Accéder à mon espace
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={handleLogout}
+              className="w-full"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Déconnexion
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -221,7 +319,12 @@ const CommunicationDashboard = () => {
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-purple-700">MYKALAMA - Communication</h1>
-            <p className="text-sm text-gray-600">Espace Chargé(e) de Communication</p>
+            <p className="text-sm text-gray-600">
+              Espace {COM_CODES[verifiedCode]?.fullName || 'Chargé(e) de Com'}
+              <span className="ml-2 px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-xs font-bold">
+                {verifiedCode}
+              </span>
+            </p>
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-600">
@@ -256,20 +359,6 @@ const CommunicationDashboard = () => {
             </CardContent>
           </Card>
           
-          <Card className="bg-white border-pink-100">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-pink-100 rounded-lg">
-                  <Star className="h-5 w-5 text-pink-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-pink-700">{testimonials.length}</p>
-                  <p className="text-xs text-gray-500">Témoignages</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
           <Card className="bg-white border-blue-100">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
@@ -288,11 +377,29 @@ const CommunicationDashboard = () => {
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-green-100 rounded-lg">
-                  <Globe className="h-5 w-5 text-green-600" />
+                  <Calendar className="h-5 w-5 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-green-700">{socialPosts.length}</p>
-                  <p className="text-xs text-gray-500">Posts Sociaux</p>
+                  <p className="text-2xl font-bold text-green-700">
+                    {availability.filter(a => a.status === 'available').length}
+                  </p>
+                  <p className="text-xs text-gray-500">Jours disponibles</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-white border-orange-100">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-orange-100 rounded-lg">
+                  <Clock className="h-5 w-5 text-orange-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-orange-700">
+                    {availability.filter(a => a.status === 'busy').length}
+                  </p>
+                  <p className="text-xs text-gray-500">Jours occupés</p>
                 </div>
               </div>
             </CardContent>
@@ -310,25 +417,11 @@ const CommunicationDashboard = () => {
               Actualités
             </TabsTrigger>
             <TabsTrigger 
-              value="testimonials"
-              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
-            >
-              <Star className="h-4 w-4 mr-2" />
-              Témoignages
-            </TabsTrigger>
-            <TabsTrigger 
-              value="social"
-              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
-            >
-              <MessageSquare className="h-4 w-4 mr-2" />
-              Réseaux Sociaux
-            </TabsTrigger>
-            <TabsTrigger 
               value="calendar"
               className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
             >
               <Calendar className="h-4 w-4 mr-2" />
-              Calendrier
+              Mes Disponibilités
             </TabsTrigger>
             <TabsTrigger 
               value="stats"
@@ -412,165 +505,166 @@ const CommunicationDashboard = () => {
             </Card>
           </TabsContent>
 
-          {/* TESTIMONIALS TAB */}
-          <TabsContent value="testimonials">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle className="text-purple-700">Témoignages Clients</CardTitle>
-                  <CardDescription>Gérez les témoignages affichés sur le site</CardDescription>
-                </div>
-                <Button 
-                  onClick={() => setShowTestimonialModal(true)}
-                  className="bg-purple-600 hover:bg-purple-700"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Ajouter un Témoignage
-                </Button>
-              </CardHeader>
-              <CardContent>
-                {testimonials.length === 0 ? (
-                  <p className="text-center text-gray-500 py-8">Aucun témoignage pour le moment</p>
-                ) : (
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {testimonials.map((item) => (
-                      <div 
-                        key={item.id} 
-                        className="border rounded-lg p-4 bg-gradient-to-br from-purple-50 to-pink-50"
-                      >
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="w-10 h-10 bg-purple-200 rounded-full flex items-center justify-center">
-                            <span className="text-purple-700 font-bold">
-                              {item.name?.charAt(0) || '?'}
-                            </span>
-                          </div>
-                          <div>
-                            <p className="font-semibold">{item.name}</p>
-                            <p className="text-xs text-gray-500">{item.role}</p>
-                          </div>
-                        </div>
-                        <p className="text-gray-600 text-sm italic">"{item.content}"</p>
-                        <div className="flex mt-2">
-                          {[...Array(item.rating || 5)].map((_, i) => (
-                            <Star key={i} className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* SOCIAL MEDIA TAB */}
-          <TabsContent value="social">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle className="text-purple-700">Réseaux Sociaux</CardTitle>
-                  <CardDescription>Planifiez vos publications sur les réseaux sociaux</CardDescription>
-                </div>
-                <Button 
-                  onClick={() => setShowSocialModal(true)}
-                  className="bg-purple-600 hover:bg-purple-700"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Nouveau Post
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-3 gap-4 mb-6">
-                  <Card className="border-blue-200 bg-blue-50">
-                    <CardContent className="p-4 text-center">
-                      <div className="text-3xl mb-2">📘</div>
-                      <p className="font-semibold text-blue-700">Facebook</p>
-                      <p className="text-xs text-gray-500">Connecté</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="border-pink-200 bg-pink-50">
-                    <CardContent className="p-4 text-center">
-                      <div className="text-3xl mb-2">📸</div>
-                      <p className="font-semibold text-pink-700">Instagram</p>
-                      <p className="text-xs text-gray-500">Connecté</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="border-sky-200 bg-sky-50">
-                    <CardContent className="p-4 text-center">
-                      <div className="text-3xl mb-2">🐦</div>
-                      <p className="font-semibold text-sky-700">Twitter/X</p>
-                      <p className="text-xs text-gray-500">Non connecté</p>
-                    </CardContent>
-                  </Card>
-                </div>
-                
-                {socialPosts.length === 0 ? (
-                  <p className="text-center text-gray-500 py-8">Aucun post planifié</p>
-                ) : (
-                  <div className="space-y-4">
-                    {socialPosts.map((post) => (
-                      <div key={post.id} className="border rounded-lg p-4 bg-white">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <span className={`px-2 py-1 text-xs rounded-full ${
-                              post.platform === 'facebook' ? 'bg-blue-100 text-blue-700' :
-                              post.platform === 'instagram' ? 'bg-pink-100 text-pink-700' :
-                              'bg-sky-100 text-sky-700'
-                            }`}>
-                              {post.platform}
-                            </span>
-                            <p className="mt-2 text-gray-700">{post.content}</p>
-                            <p className="text-xs text-gray-400 mt-2">
-                              Prévu: {post.scheduled_date || 'Non planifié'}
-                            </p>
-                          </div>
-                          <span className={`px-2 py-1 text-xs rounded-full ${
-                            post.status === 'published' ? 'bg-green-100 text-green-700' :
-                            post.status === 'scheduled' ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-gray-100 text-gray-700'
-                          }`}>
-                            {post.status === 'published' ? 'Publié' : 
-                             post.status === 'scheduled' ? 'Planifié' : 'Brouillon'}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* CALENDAR TAB */}
+          {/* CALENDAR/AVAILABILITY TAB */}
           <TabsContent value="calendar">
             <Card>
-              <CardHeader>
-                <CardTitle className="text-purple-700">Calendrier Éditorial</CardTitle>
-                <CardDescription>Planifiez vos communications à venir</CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-purple-700">Mes Disponibilités - {verifiedCode}</CardTitle>
+                  <CardDescription>Gérez votre calendrier de disponibilités</CardDescription>
+                </div>
+                <Button 
+                  onClick={() => setShowAvailabilityModal(true)}
+                  className="bg-purple-600 hover:bg-purple-700"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Ajouter une disponibilité
+                </Button>
               </CardHeader>
               <CardContent>
-                <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-8 text-center">
-                  <Calendar className="h-16 w-16 text-purple-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-purple-700 mb-2">
-                    Calendrier Éditorial
+                {/* Month Navigation */}
+                <div className="flex items-center justify-between mb-4">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))}
+                  >
+                    ← Mois précédent
+                  </Button>
+                  <h3 className="text-lg font-semibold text-purple-700 capitalize">
+                    {formatMonth(currentMonth)}
                   </h3>
-                  <p className="text-gray-600 mb-4">
-                    Organisez vos publications et événements de communication
-                  </p>
-                  <div className="grid md:grid-cols-3 gap-4 mt-6">
-                    <div className="bg-white rounded-lg p-4 border">
-                      <p className="text-2xl font-bold text-purple-600">{news.filter(n => n.is_published).length}</p>
-                      <p className="text-sm text-gray-500">Publiés ce mois</p>
-                    </div>
-                    <div className="bg-white rounded-lg p-4 border">
-                      <p className="text-2xl font-bold text-yellow-600">{news.filter(n => !n.is_published).length}</p>
-                      <p className="text-sm text-gray-500">En attente</p>
-                    </div>
-                    <div className="bg-white rounded-lg p-4 border">
-                      <p className="text-2xl font-bold text-green-600">{socialPosts.filter(p => p.status === 'scheduled').length}</p>
-                      <p className="text-sm text-gray-500">Posts planifiés</p>
-                    </div>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))}
+                  >
+                    Mois suivant →
+                  </Button>
+                </div>
+
+                {/* Calendar Grid */}
+                <div className="border rounded-lg overflow-hidden">
+                  {/* Header */}
+                  <div className="grid grid-cols-7 bg-purple-100">
+                    {weekDays.map(day => (
+                      <div key={day} className="p-2 text-center font-semibold text-purple-700 text-sm">
+                        {day}
+                      </div>
+                    ))}
                   </div>
+                  
+                  {/* Days */}
+                  <div className="grid grid-cols-7">
+                    {getDaysInMonth(currentMonth).map((day, index) => {
+                      const avail = day ? getAvailabilityForDate(day) : null;
+                      const isToday = day && day.toDateString() === new Date().toDateString();
+                      
+                      return (
+                        <div 
+                          key={index} 
+                          className={`min-h-[80px] border-t border-r p-1 ${
+                            !day ? 'bg-gray-50' : 
+                            isToday ? 'bg-purple-50' : 'bg-white'
+                          }`}
+                        >
+                          {day && (
+                            <>
+                              <div className={`text-sm font-medium ${isToday ? 'text-purple-700' : 'text-gray-700'}`}>
+                                {day.getDate()}
+                              </div>
+                              {avail && (
+                                <div 
+                                  className={`mt-1 p-1 rounded text-xs cursor-pointer ${
+                                    avail.status === 'available' 
+                                      ? 'bg-green-100 text-green-700' 
+                                      : avail.status === 'busy'
+                                      ? 'bg-red-100 text-red-700'
+                                      : 'bg-yellow-100 text-yellow-700'
+                                  }`}
+                                  onClick={() => handleDeleteAvailability(avail.id)}
+                                  title="Cliquez pour supprimer"
+                                >
+                                  {avail.status === 'available' ? '✓ Dispo' : 
+                                   avail.status === 'busy' ? '✗ Occupé' : '? Incertain'}
+                                  {avail.start_time && (
+                                    <div className="text-[10px]">{avail.start_time}-{avail.end_time}</div>
+                                  )}
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Legend */}
+                <div className="flex gap-4 mt-4 justify-center">
+                  <div className="flex items-center gap-1">
+                    <div className="w-4 h-4 bg-green-100 rounded"></div>
+                    <span className="text-sm text-gray-600">Disponible</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-4 h-4 bg-red-100 rounded"></div>
+                    <span className="text-sm text-gray-600">Occupé</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-4 h-4 bg-yellow-100 rounded"></div>
+                    <span className="text-sm text-gray-600">Incertain</span>
+                  </div>
+                </div>
+
+                {/* Upcoming availability list */}
+                <div className="mt-6">
+                  <h4 className="font-semibold text-purple-700 mb-3">Prochaines disponibilités</h4>
+                  {availability.length === 0 ? (
+                    <p className="text-gray-500 text-center py-4">Aucune disponibilité enregistrée</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {availability
+                        .filter(a => new Date(a.date) >= new Date())
+                        .sort((a, b) => new Date(a.date) - new Date(b.date))
+                        .slice(0, 5)
+                        .map(avail => (
+                          <div 
+                            key={avail.id}
+                            className={`flex items-center justify-between p-3 rounded-lg ${
+                              avail.status === 'available' ? 'bg-green-50 border border-green-200' :
+                              avail.status === 'busy' ? 'bg-red-50 border border-red-200' :
+                              'bg-yellow-50 border border-yellow-200'
+                            }`}
+                          >
+                            <div>
+                              <p className="font-medium">
+                                {new Date(avail.date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                {avail.start_time} - {avail.end_time}
+                                {avail.note && ` • ${avail.note}`}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                avail.status === 'available' ? 'bg-green-200 text-green-800' :
+                                avail.status === 'busy' ? 'bg-red-200 text-red-800' :
+                                'bg-yellow-200 text-yellow-800'
+                              }`}>
+                                {avail.status === 'available' ? 'Disponible' : 
+                                 avail.status === 'busy' ? 'Occupé' : 'Incertain'}
+                              </span>
+                              <Button 
+                                size="sm" 
+                                variant="ghost"
+                                className="text-red-600 hover:bg-red-50"
+                                onClick={() => handleDeleteAvailability(avail.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -580,49 +674,41 @@ const CommunicationDashboard = () => {
           <TabsContent value="stats">
             <Card>
               <CardHeader>
-                <CardTitle className="text-purple-700">Statistiques de Communication</CardTitle>
-                <CardDescription>Suivez les performances de vos communications</CardDescription>
+                <CardTitle className="text-purple-700">Statistiques</CardTitle>
+                <CardDescription>Vue d'ensemble de vos activités</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="bg-gradient-to-br from-purple-100 to-purple-50 rounded-lg p-6">
                     <h3 className="font-semibold text-purple-700 mb-4 flex items-center gap-2">
                       <TrendingUp className="h-5 w-5" />
-                      Engagement
+                      Activité
                     </h3>
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">Actualités publiées</span>
+                        <span className="text-sm text-gray-600">Actualités créées</span>
                         <span className="font-bold text-purple-700">{news.length}</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">Témoignages collectés</span>
-                        <span className="font-bold text-purple-700">{testimonials.length}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">Posts réseaux sociaux</span>
-                        <span className="font-bold text-purple-700">{socialPosts.length}</span>
+                        <span className="text-sm text-gray-600">Jours de disponibilité</span>
+                        <span className="font-bold text-purple-700">{availability.length}</span>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="bg-gradient-to-br from-pink-100 to-pink-50 rounded-lg p-6">
-                    <h3 className="font-semibold text-pink-700 mb-4 flex items-center gap-2">
+                  <div className="bg-gradient-to-br from-blue-100 to-blue-50 rounded-lg p-6">
+                    <h3 className="font-semibold text-blue-700 mb-4 flex items-center gap-2">
                       <Users className="h-5 w-5" />
                       Audience
                     </h3>
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-600">Étudiants actifs</span>
-                        <span className="font-bold text-pink-700">{stats.totalStudents || 0}</span>
+                        <span className="font-bold text-blue-700">{stats.totalStudents || 0}</span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-600">Professeurs</span>
-                        <span className="font-bold text-pink-700">{stats.totalTeachers || 0}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">Visiteurs estimés</span>
-                        <span className="font-bold text-pink-700">~{(stats.totalStudents || 0) * 3}</span>
+                        <span className="font-bold text-blue-700">{stats.totalTeachers || 0}</span>
                       </div>
                     </div>
                   </div>
@@ -641,7 +727,7 @@ const CommunicationDashboard = () => {
               {editingNews ? 'Modifier l\'actualité' : 'Nouvelle Actualité'}
             </DialogTitle>
             <DialogDescription>
-              {editingNews ? 'Modifiez les informations de l\'actualité' : 'Créez une nouvelle actualité pour la plateforme'}
+              {editingNews ? 'Modifiez les informations de l\'actualité' : 'Créez une nouvelle actualité'}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -679,14 +765,6 @@ const CommunicationDashboard = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label>URL Image (optionnel)</Label>
-              <Input
-                value={newsForm.image_url}
-                onChange={(e) => setNewsForm({...newsForm, image_url: e.target.value})}
-                placeholder="https://..."
-              />
-            </div>
             <div className="flex items-center gap-2">
               <input
                 type="checkbox"
@@ -713,145 +791,78 @@ const CommunicationDashboard = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Testimonial Modal */}
-      <Dialog open={showTestimonialModal} onOpenChange={setShowTestimonialModal}>
-        <DialogContent className="max-w-lg">
+      {/* Availability Modal */}
+      <Dialog open={showAvailabilityModal} onOpenChange={setShowAvailabilityModal}>
+        <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-purple-700">Ajouter un Témoignage</DialogTitle>
+            <DialogTitle className="text-purple-700">Ajouter une disponibilité</DialogTitle>
             <DialogDescription>
-              Ajoutez un témoignage client à afficher sur le site
+              Indiquez vos disponibilités pour {verifiedCode}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>Nom *</Label>
+              <Label>Date *</Label>
               <Input
-                value={testimonialForm.name}
-                onChange={(e) => setTestimonialForm({...testimonialForm, name: e.target.value})}
-                placeholder="Nom du client"
+                type="date"
+                value={availabilityForm.date}
+                onChange={(e) => setAvailabilityForm({...availabilityForm, date: e.target.value})}
+                min={new Date().toISOString().split('T')[0]}
               />
             </div>
-            <div>
-              <Label>Rôle/Profession</Label>
-              <Input
-                value={testimonialForm.role}
-                onChange={(e) => setTestimonialForm({...testimonialForm, role: e.target.value})}
-                placeholder="Ex: Étudiant, Professionnel..."
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Heure début</Label>
+                <Input
+                  type="time"
+                  value={availabilityForm.start_time}
+                  onChange={(e) => setAvailabilityForm({...availabilityForm, start_time: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label>Heure fin</Label>
+                <Input
+                  type="time"
+                  value={availabilityForm.end_time}
+                  onChange={(e) => setAvailabilityForm({...availabilityForm, end_time: e.target.value})}
+                />
+              </div>
             </div>
             <div>
-              <Label>Témoignage *</Label>
-              <Textarea
-                value={testimonialForm.content}
-                onChange={(e) => setTestimonialForm({...testimonialForm, content: e.target.value})}
-                placeholder="Le témoignage du client..."
-                rows={3}
-              />
-            </div>
-            <div>
-              <Label>Note (1-5)</Label>
+              <Label>Statut *</Label>
               <Select
-                value={String(testimonialForm.rating)}
-                onValueChange={(value) => setTestimonialForm({...testimonialForm, rating: parseInt(value)})}
+                value={availabilityForm.status}
+                onValueChange={(value) => setAvailabilityForm({...availabilityForm, status: value})}
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="5">⭐⭐⭐⭐⭐ (5)</SelectItem>
-                  <SelectItem value="4">⭐⭐⭐⭐ (4)</SelectItem>
-                  <SelectItem value="3">⭐⭐⭐ (3)</SelectItem>
-                  <SelectItem value="2">⭐⭐ (2)</SelectItem>
-                  <SelectItem value="1">⭐ (1)</SelectItem>
+                  <SelectItem value="available">✓ Disponible</SelectItem>
+                  <SelectItem value="busy">✗ Occupé</SelectItem>
+                  <SelectItem value="tentative">? Incertain</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div>
+              <Label>Note (optionnel)</Label>
+              <Input
+                value={availabilityForm.note}
+                onChange={(e) => setAvailabilityForm({...availabilityForm, note: e.target.value})}
+                placeholder="Ex: Réunion client, Télétravail..."
+              />
             </div>
           </div>
           <div className="flex justify-end gap-3 mt-4">
-            <Button variant="outline" onClick={() => setShowTestimonialModal(false)}>
+            <Button variant="outline" onClick={() => setShowAvailabilityModal(false)}>
               Annuler
             </Button>
             <Button 
-              onClick={handleSaveTestimonial}
+              onClick={handleSaveAvailability}
               className="bg-purple-600 hover:bg-purple-700"
-              disabled={!testimonialForm.name || !testimonialForm.content}
+              disabled={!availabilityForm.date}
             >
-              Ajouter
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Social Post Modal */}
-      <Dialog open={showSocialModal} onOpenChange={setShowSocialModal}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="text-purple-700">Nouveau Post Social</DialogTitle>
-            <DialogDescription>
-              Planifiez une publication sur les réseaux sociaux
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>Plateforme *</Label>
-              <Select
-                value={socialForm.platform}
-                onValueChange={(value) => setSocialForm({...socialForm, platform: value})}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="facebook">📘 Facebook</SelectItem>
-                  <SelectItem value="instagram">📸 Instagram</SelectItem>
-                  <SelectItem value="twitter">🐦 Twitter/X</SelectItem>
-                  <SelectItem value="linkedin">💼 LinkedIn</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Contenu *</Label>
-              <Textarea
-                value={socialForm.content}
-                onChange={(e) => setSocialForm({...socialForm, content: e.target.value})}
-                placeholder="Votre message..."
-                rows={4}
-              />
-            </div>
-            <div>
-              <Label>Date de publication</Label>
-              <Input
-                type="datetime-local"
-                value={socialForm.scheduled_date}
-                onChange={(e) => setSocialForm({...socialForm, scheduled_date: e.target.value})}
-              />
-            </div>
-            <div>
-              <Label>Statut</Label>
-              <Select
-                value={socialForm.status}
-                onValueChange={(value) => setSocialForm({...socialForm, status: value})}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="draft">Brouillon</SelectItem>
-                  <SelectItem value="scheduled">Planifié</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div className="flex justify-end gap-3 mt-4">
-            <Button variant="outline" onClick={() => setShowSocialModal(false)}>
-              Annuler
-            </Button>
-            <Button 
-              onClick={handleSaveSocialPost}
-              className="bg-purple-600 hover:bg-purple-700"
-              disabled={!socialForm.content}
-            >
-              Planifier
+              Enregistrer
             </Button>
           </div>
         </DialogContent>

@@ -154,18 +154,19 @@ E-learning platform pour l'apprentissage de l'anglais avec multi-dashboards (Adm
 
 ### Mise à jour Septembre 2026 (Suite 7) - Espace Chargé(e) de Communication
 - **Nouveau rôle**: `communication` - Chargé(e) de communication avec dashboard dédié
+- **Codes personnels**: MBM et FZT - Chaque chargé de com a son propre espace
+- **Authentification en 2 étapes**: 
+  1. Email + mot de passe (com@mykalamaenglish.com / COMKALAMA)
+  2. Code personnel (MBM ou FZT) pour accéder à son espace
 - **Dashboard Communication** (`/communication`):
-  - Statistiques: Actualités, Témoignages, Étudiants, Posts Sociaux
+  - Statistiques: Actualités, Étudiants, Jours disponibles, Jours occupés
   - Onglet Actualités: Créer, modifier, supprimer des news
-  - Onglet Témoignages: Gérer les témoignages clients
-  - Onglet Réseaux Sociaux: Planifier des publications (Facebook, Instagram, Twitter, LinkedIn)
-  - Onglet Calendrier: Vue d'ensemble des publications planifiées
+  - Onglet Mes Disponibilités: Calendrier mensuel avec gestion des disponibilités
+    - Statuts: Disponible, Occupé, Incertain
+    - Heures de début/fin
+    - Notes optionnelles
   - Onglet Statistiques: Métriques de communication
-- **Création de compte Staff**: Via Admin > Onglet "Équipe"
-  - Dropdown Rôle: Chargé(e) de Communication ou Secrétaire
-  - Génération automatique de mot de passe provisoire
 - **Endpoints API**:
   - `GET /api/communication/stats` - Statistiques
-  - `GET/POST /api/communication/testimonials` - Témoignages
-  - `GET/POST/PUT/DELETE /api/communication/social-posts` - Posts réseaux sociaux
+  - `GET/POST/DELETE /api/communication/availability/{com_code}` - Disponibilités par code
   - `POST /api/admin/create-staff` - Création compte staff

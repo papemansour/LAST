@@ -12,6 +12,9 @@
 ## Communication (Chargé(e) de Com)
 - Email: com@mykalamaenglish.com
 - Password: COMKALAMA
+- **Codes personnels** (à entrer après connexion):
+  - MBM : Premier(e) chargé(e) de com
+  - FZT : Second(e) chargé(e) de com
 
 ## Teachers
 - mansour.diagne@mykalamaenglish.com (active)

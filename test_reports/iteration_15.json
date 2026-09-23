@@ -1,0 +1,45 @@
+{
+  "summary": "Tested new Secretary STAFF management (Paie & Congés) endpoints and UI. Backend: 8/8 pytest passed in test_secretary_staff.py covering GET /api/secretary/all-staff (returns 1+ staff w/ 30d leaves_total, 401 without token), full CRUD on /api/secretary/staff-payments (POST computes montant_net = amount+bonus-deductions*deduction_unit, EUR=5€/deduction; invoice_ref STAFF-XXX-YYYYMM-####; GET & DELETE verified) and /api/secretary/staff-leaves (POST persists 5-day leave, GET returns it with status='approved', DELETE removes it). Frontend: Secretary code login secretaire2025 succeeds → /secretary; Facturation tab renders 'Bulletin de Salaire - STAFFS' section (with 'Membre du Staff' dropdown showing 'Chargé(e) de Com (communication)'), and 'Gestion des Congés - STAFFS (30j/an)' section with Solde by staff (24j restants after 6d existing leave) + Bulletins/Congés Récents lists. All 6 requested Tests 1–6 pass.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/secretary/staff-payments", "issue": "amount/bonus/deductions float()/int() coerced with no bounds check — negative values accepted (montant_net clamped >=0 but negative amount/bonus not blocked). Add Pydantic validation (ge=0)."},
+      {"endpoint": "POST /api/secretary/staff-leaves", "issue": "No validation that end_date >= start_date, and days_used trusted from client (not recomputed from dates). Client could send 5 days but 100 days_used. Also no check against remaining balance (30j/an) — server accepts overuse; UI-only enforcement."},
+      {"endpoint": "GET /api/secretary/all-staff", "issue": "leaves_used is hard-coded to 0 regardless of existing staff_leaves records; UI computes remaining separately, but endpoint contract is misleading. Consider aggregating from db.staff_leaves."},
+      {"endpoint": "GET /api/secretary/all-staff", "issue": "When no staff users exist, endpoint returns fake seed [MBM, FZT] with id='MBM'/'FZT' (strings, not user UUIDs) — could break staff_payments.staff_id foreign linkage if referenced elsewhere."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "SecretaryDashboard - STAFFS Facturation", "issues": ["No data-testid on 'Membre du Staff' select, amount/bonus/deductions inputs, '✅ Enregistrer le Bulletin de Salaire' button, nor on Congé form. Automated testing had to fall back to French label selectors."]},
+      {"screen": "SecretaryDashboard", "issues": ["File remains >2300 lines (SecretaryDashboard.js) — repeatedly flagged since iteration_13. Consider splitting Facturation/STAFFS/RH into sub-components."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_secretary_staff.py",
+    "/app/test_reports/pytest/secretary_staff_results.xml"
+  ],
+  "action_items": [
+    "Add Pydantic validation on staff-payments (amount/bonus>=0, deductions>=0, valid currency enum) and staff-leaves (end_date>=start_date, days_used derived server-side, respect 30j/an remaining balance).",
+    "Fix GET /secretary/all-staff so leaves_used reflects real db.staff_leaves sum; consider removing the hard-coded MBM/FZT fallback (or return real user IDs).",
+    "Add data-testid attributes on STAFFS section: staff-select, staff-amount-input, staff-bonus-input, staff-deductions-input, staff-payment-submit, staff-leave-*."
+  ],
+  "critical_code_review_comments": [
+    "secretary.py all-staff seeds fake IDs (MBM/FZT) when no communication user exists — will not resolve to real user records elsewhere.",
+    "staff-payments & staff-leaves reuse both camelCase and snake_case keys AND persist both in the document — bloats storage; pick one convention or normalize on read.",
+    "SecretaryDashboard.js is >2300 lines — flagged in iteration_13 & 14, still unresolved.",
+    "Logo integration was documented but not visually verified (would require printing PDF from browser); recommend main agent self-verify by clicking print buttons."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_secretary_staff.py",
+    "/app/test_reports/iteration_15.json"
+  ],
+  "success_rate": {"backend": "100% (8/8 pytest)", "frontend": "100% for the 6 requested tests"},
+  "test_credentials": "Read from /app/memory/test_credentials.md. Used: secretary code secretaire2025 for UI; secretaire@mykalamaenglish.com/kalamasecret for backend token.",
+  "seed_data_creation": "Backend tests create+delete TEST_ staff payment (MBM 2026-01, 400+50-10=440€) and TEST_ staff leave (MBM 2026-02-01→05, 5j). Full teardown performed in tests. One pre-existing leave (Chargé(e) de Com 6j, 20-25/12/2025) present from prior manual testing.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "All 6 requested test cases pass end-to-end. Regression suite: /app/backend/tests/test_secretary_staff.py. UI selectors currently rely on French text ('Membre du Staff', 'Bulletin de Salaire - STAFFS', 'Gestion des Congés - STAFFS') — add data-testid before writing more Playwright. Logo-in-PDF change (printReceipt, printTeacherInvoice, prestataire.py download_facture_pdf) was NOT visually verified; main agent should open a bulletin/reçu and confirm the MyKalama logo renders."
+}

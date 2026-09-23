@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { CalendarDays, Users, TrendingUp, Clock, Search, AlertTriangle, History, ChevronDown, ChevronUp, User, Mail, Briefcase, Calendar, Phone, GraduationCap, ChevronLeft, ChevronRight } from 'lucide-react';
+import { CalendarDays, Users, TrendingUp, Clock, Search, AlertTriangle, History, ChevronDown, ChevronUp, User, Mail, Briefcase, Calendar, Phone, GraduationCap, ChevronLeft, ChevronRight, Edit, Trash2, Save, X } from 'lucide-react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { Label } from './ui/label';
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
 import {
@@ -28,6 +29,17 @@ const SecretaryHR = () => {
   const [showEmployeeModal, setShowEmployeeModal] = useState(false);
   const [activeTab, setActiveTab] = useState('conges');
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  
+  // Teacher edit/delete state
+  const [showEditTeacherModal, setShowEditTeacherModal] = useState(false);
+  const [editingTeacher, setEditingTeacher] = useState(null);
+  const [teacherForm, setTeacherForm] = useState({
+    first_name: '',
+    last_name: '',
+    email: '',
+    phone: ''
+  });
+  const [savingTeacher, setSavingTeacher] = useState(false);
 
   useEffect(() => {
     fetchLeaveBalances();
@@ -72,6 +84,49 @@ const SecretaryHR = () => {
       setCalendarData(response.data);
     } catch (error) {
       console.error('Error fetching calendar:', error);
+    }
+  };
+
+  // Teacher edit handlers
+  const openEditTeacher = (teacher) => {
+    setEditingTeacher(teacher);
+    setTeacherForm({
+      first_name: teacher.first_name || '',
+      last_name: teacher.last_name || '',
+      email: teacher.email || '',
+      phone: teacher.phone || ''
+    });
+    setShowEditTeacherModal(true);
+  };
+
+  const handleSaveTeacher = async () => {
+    if (!editingTeacher) return;
+    setSavingTeacher(true);
+    try {
+      await apiClient.put(`/admin/update-user/${editingTeacher.user_id}`, teacherForm);
+      toast.success('Professeur modifié avec succès');
+      setShowEditTeacherModal(false);
+      setEditingTeacher(null);
+      fetchTeachers();
+    } catch (error) {
+      console.error('Error updating teacher:', error);
+      toast.error('Erreur lors de la modification');
+    } finally {
+      setSavingTeacher(false);
+    }
+  };
+
+  const handleDeleteTeacher = async (teacher) => {
+    if (!window.confirm(`Supprimer ${teacher.first_name} ${teacher.last_name} ?\nCette action déplacera le professeur vers la corbeille.`)) {
+      return;
+    }
+    try {
+      await apiClient.delete(`/admin/delete-user/${teacher.user_id}`);
+      toast.success('Professeur supprimé (déplacé vers la corbeille)');
+      fetchTeachers();
+    } catch (error) {
+      console.error('Error deleting teacher:', error);
+      toast.error('Erreur lors de la suppression');
     }
   };
 
@@ -708,7 +763,7 @@ const SecretaryHR = () => {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredTeachers.map((teacher) => (
-                  <Card key={teacher.user_id} className="hover:shadow-md transition-shadow">
+                  <Card key={teacher.user_id} className="hover:shadow-md transition-shadow" data-testid={`teacher-card-${teacher.user_id}`}>
                     <CardContent className="p-4">
                       <div className="flex items-start gap-3">
                         <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
@@ -736,6 +791,29 @@ const SecretaryHR = () => {
                           <Clock className="w-4 h-4" />
                           <span>Ancienneté: <strong>{teacher.months_worked} mois</strong></span>
                         </div>
+                      </div>
+                      {/* Edit/Delete buttons */}
+                      <div className="flex gap-2 mt-4 pt-3 border-t">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="flex-1 text-blue-600 hover:bg-blue-50"
+                          onClick={() => openEditTeacher(teacher)}
+                          data-testid={`edit-teacher-${teacher.user_id}`}
+                        >
+                          <Edit className="w-4 h-4 mr-1" />
+                          Modifier
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="flex-1 text-red-600 hover:bg-red-50"
+                          onClick={() => handleDeleteTeacher(teacher)}
+                          data-testid={`delete-teacher-${teacher.user_id}`}
+                        >
+                          <Trash2 className="w-4 h-4 mr-1" />
+                          Supprimer
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -810,6 +888,73 @@ const SecretaryHR = () => {
 
       {/* Employee Profile Modal */}
       <EmployeeProfileModal />
+
+      {/* Edit Teacher Modal */}
+      <Dialog open={showEditTeacherModal} onOpenChange={setShowEditTeacherModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-teal-700 flex items-center gap-2">
+              <Edit className="w-5 h-5" />
+              Modifier le Professeur
+            </DialogTitle>
+            <DialogDescription>
+              Modifiez les informations du professeur
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div>
+              <Label>Prénom</Label>
+              <Input 
+                value={teacherForm.first_name} 
+                onChange={(e) => setTeacherForm({...teacherForm, first_name: e.target.value})}
+                placeholder="Prénom"
+              />
+            </div>
+            <div>
+              <Label>Nom</Label>
+              <Input 
+                value={teacherForm.last_name} 
+                onChange={(e) => setTeacherForm({...teacherForm, last_name: e.target.value})}
+                placeholder="Nom"
+              />
+            </div>
+            <div>
+              <Label>Email</Label>
+              <Input 
+                type="email"
+                value={teacherForm.email} 
+                onChange={(e) => setTeacherForm({...teacherForm, email: e.target.value})}
+                placeholder="email@example.com"
+              />
+            </div>
+            <div>
+              <Label>Téléphone</Label>
+              <Input 
+                value={teacherForm.phone} 
+                onChange={(e) => setTeacherForm({...teacherForm, phone: e.target.value})}
+                placeholder="+33 6 00 00 00 00"
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 mt-6">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowEditTeacherModal(false)}
+            >
+              <X className="w-4 h-4 mr-1" />
+              Annuler
+            </Button>
+            <Button 
+              onClick={handleSaveTeacher}
+              className="bg-teal-600 hover:bg-teal-700"
+              disabled={savingTeacher || !teacherForm.first_name || !teacherForm.last_name}
+            >
+              <Save className="w-4 h-4 mr-1" />
+              {savingTeacher ? 'Enregistrement...' : 'Enregistrer'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

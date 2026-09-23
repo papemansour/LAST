@@ -38,7 +38,6 @@ async def set_com_availability(data: dict = Body(...), current_user: dict = Depe
     if com_code not in VALID_COM_CODES:
         raise HTTPException(status_code=400, detail="Invalid communication code (MBM or FZT)")
     
-    # availability format: { "monday": ["09:00", "10:00", "14:00"], "tuesday": [...], ... }
     availability_entry = {
         "id": str(uuid4()),
         "com_code": com_code,
@@ -46,7 +45,6 @@ async def set_com_availability(data: dict = Body(...), current_user: dict = Depe
         "updated_at": datetime.now(timezone.utc).isoformat()
     }
     
-    # Replace existing availability for this code
     await db.communication_availability.delete_many({"com_code": com_code})
     await db.communication_availability.insert_one(availability_entry)
     
@@ -64,11 +62,7 @@ async def get_com_availability(com_code: str, current_user: dict = Depends(get_c
     if code not in VALID_COM_CODES:
         raise HTTPException(status_code=400, detail="Invalid communication code")
     
-    availability = await db.communication_availability.find_one(
-        {"com_code": code},
-        {"_id": 0}
-    )
-    
+    availability = await db.communication_availability.find_one({"com_code": code}, {"_id": 0})
     return availability or {"availability": {}, "com_code": code}
 
 
@@ -78,12 +72,8 @@ async def get_all_com_availability(current_user: dict = Depends(get_current_user
     if current_user['role'] not in ['admin', 'secretary']:
         raise HTTPException(status_code=403, detail="Access denied")
     
-    availabilities = await db.communication_availability.find(
-        {},
-        {"_id": 0}
-    ).to_list(10)
+    availabilities = await db.communication_availability.find({}, {"_id": 0}).to_list(10)
     
-    # Ensure both codes have entries
     result = []
     codes_found = [a['com_code'] for a in availabilities]
     
@@ -96,10 +86,10 @@ async def get_all_com_availability(current_user: dict = Depends(get_current_user
     return result
 
 
-# ==================== PAYSLIPS (Fiches de paie) ====================
-@router.get("/communication/payslips/{com_code}")
-async def get_com_payslips(com_code: str, current_user: dict = Depends(get_current_user)):
-    """Get payslips for a communication manager"""
+# ==================== BALANCE/PAYSLIPS (like teachers) ====================
+@router.get("/communication/balance/{com_code}")
+async def get_com_balance(com_code: str, current_user: dict = Depends(get_current_user)):
+    """Get balance and payment history for a communication manager"""
     if current_user['role'] not in ['admin', 'communication', 'secretary']:
         raise HTTPException(status_code=403, detail="Access denied")
     
@@ -107,17 +97,28 @@ async def get_com_payslips(com_code: str, current_user: dict = Depends(get_curre
     if code not in VALID_COM_CODES:
         raise HTTPException(status_code=400, detail="Invalid communication code")
     
-    payslips = await db.communication_payslips.find(
+    # Get all payments for this code
+    payments = await db.communication_payments.find(
         {"com_code": code},
         {"_id": 0}
-    ).sort("date", -1).to_list(50)
+    ).sort("created_at", -1).to_list(100)
     
-    return payslips
+    # Calculate totals
+    pending_amount = sum(p.get('amount', 0) for p in payments if p.get('status') == 'pending')
+    paid_amount = sum(p.get('amount', 0) for p in payments if p.get('status') == 'paid')
+    total_hours = sum(p.get('hours', 0) for p in payments)
+    
+    return {
+        "pendingAmount": pending_amount,
+        "paidAmount": paid_amount,
+        "totalHours": total_hours,
+        "payments": payments
+    }
 
 
-@router.post("/communication/payslips")
-async def create_com_payslip(data: dict = Body(...), current_user: dict = Depends(get_current_user)):
-    """Create a payslip for a communication manager (admin only)"""
+@router.post("/communication/payments")
+async def create_com_payment(data: dict = Body(...), current_user: dict = Depends(get_current_user)):
+    """Create a payment entry for a communication manager (admin only)"""
     if current_user['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
     
@@ -125,41 +126,154 @@ async def create_com_payslip(data: dict = Body(...), current_user: dict = Depend
     if com_code not in VALID_COM_CODES:
         raise HTTPException(status_code=400, detail="Invalid communication code")
     
-    payslip = {
+    payment = {
         "id": str(uuid4()),
         "com_code": com_code,
         "month": data.get("month", ""),
         "year": data.get("year", datetime.now().year),
-        "amount": data.get("amount", 0),
-        "currency": data.get("currency", "EUR"),
-        "status": data.get("status", "pending"),  # pending, paid
-        "date": data.get("date", datetime.now(timezone.utc).isoformat()),
+        "amount": float(data.get("amount", 0)),
+        "hours": float(data.get("hours", 0)),
+        "status": data.get("status", "pending"),
         "notes": data.get("notes", ""),
         "created_by": current_user['id'],
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     
-    await db.communication_payslips.insert_one(payslip)
-    logger.info(f"Payslip created for {com_code} by {current_user['email']}")
+    await db.communication_payments.insert_one(payment)
+    logger.info(f"Payment created for {com_code} by {current_user['email']}: {payment['amount']}€")
     
-    return {"message": "Fiche de paie créée", "id": payslip['id']}
+    return {"message": "Paiement créé", "id": payment['id']}
 
 
-@router.put("/communication/payslips/{payslip_id}/status")
-async def update_payslip_status(payslip_id: str, data: dict = Body(...), current_user: dict = Depends(get_current_user)):
-    """Update payslip status"""
+@router.put("/communication/payments/{payment_id}/status")
+async def update_payment_status(payment_id: str, data: dict = Body(...), current_user: dict = Depends(get_current_user)):
+    """Update payment status"""
     if current_user['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
     
-    result = await db.communication_payslips.update_one(
-        {"id": payslip_id},
+    result = await db.communication_payments.update_one(
+        {"id": payment_id},
         {"$set": {"status": data.get("status", "paid"), "updated_at": datetime.now(timezone.utc).isoformat()}}
     )
     
     if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Payslip not found")
+        raise HTTPException(status_code=404, detail="Payment not found")
     
     return {"message": "Statut mis à jour"}
+
+
+@router.get("/communication/all-payments")
+async def get_all_payments(current_user: dict = Depends(get_current_user)):
+    """Get all payments for admin view"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    payments = await db.communication_payments.find({}, {"_id": 0}).sort("created_at", -1).to_list(200)
+    return payments
+
+
+# ==================== NOTES ====================
+@router.get("/communication/notes/{com_code}")
+async def get_com_notes(com_code: str, current_user: dict = Depends(get_current_user)):
+    """Get notes for a communication manager"""
+    if current_user['role'] not in ['admin', 'communication']:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    code = com_code.upper()
+    notes = await db.communication_notes.find({"com_code": code}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return notes
+
+
+@router.post("/communication/notes")
+async def create_com_note(data: dict = Body(...), current_user: dict = Depends(get_current_user)):
+    """Create a note"""
+    if current_user['role'] not in ['admin', 'communication']:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    com_code = data.get("com_code", "").upper()
+    
+    note = {
+        "id": str(uuid4()),
+        "com_code": com_code,
+        "title": data.get("title", ""),
+        "content": data.get("content", ""),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.communication_notes.insert_one(note)
+    return {"message": "Note créée", "id": note['id']}
+
+
+@router.delete("/communication/notes/{note_id}")
+async def delete_com_note(note_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a note"""
+    if current_user['role'] not in ['admin', 'communication']:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    await db.communication_notes.delete_one({"id": note_id})
+    return {"message": "Note supprimée"}
+
+
+# ==================== LEAVES/CONGÉS ====================
+@router.get("/communication/leaves/{com_code}")
+async def get_com_leaves(com_code: str, current_user: dict = Depends(get_current_user)):
+    """Get leave requests for a communication manager"""
+    if current_user['role'] not in ['admin', 'communication', 'secretary']:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    code = com_code.upper()
+    leaves = await db.communication_leaves.find({"com_code": code}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return leaves
+
+
+@router.post("/communication/leaves")
+async def create_com_leave(data: dict = Body(...), current_user: dict = Depends(get_current_user)):
+    """Create a leave request"""
+    if current_user['role'] not in ['admin', 'communication']:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    com_code = data.get("com_code", "").upper()
+    
+    leave = {
+        "id": str(uuid4()),
+        "com_code": com_code,
+        "start_date": data.get("start_date", ""),
+        "end_date": data.get("end_date", ""),
+        "reason": data.get("reason", ""),
+        "status": "pending",  # pending, approved, rejected
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.communication_leaves.insert_one(leave)
+    logger.info(f"Leave request created by {com_code}")
+    return {"message": "Demande de congé envoyée", "id": leave['id']}
+
+
+@router.put("/communication/leaves/{leave_id}/status")
+async def update_leave_status(leave_id: str, data: dict = Body(...), current_user: dict = Depends(get_current_user)):
+    """Update leave request status (admin only)"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    result = await db.communication_leaves.update_one(
+        {"id": leave_id},
+        {"$set": {"status": data.get("status", "approved"), "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Leave not found")
+    
+    return {"message": "Statut mis à jour"}
+
+
+@router.get("/communication/all-leaves")
+async def get_all_leaves(current_user: dict = Depends(get_current_user)):
+    """Get all leave requests for admin view"""
+    if current_user['role'] not in ['admin', 'secretary']:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    leaves = await db.communication_leaves.find({}, {"_id": 0}).sort("created_at", -1).to_list(200)
+    return leaves
 
 
 # ==================== INTERNAL MESSAGES ====================
@@ -171,12 +285,10 @@ async def get_com_messages(com_code: str, current_user: dict = Depends(get_curre
     
     code = com_code.upper()
     
-    # Get messages where this code is sender or recipient
     messages = await db.internal_messages.find(
         {"$or": [
             {"sender_code": code},
-            {"recipient_code": code},
-            {"recipient_code": "ALL"}  # Broadcast messages
+            {"recipient_code": code}
         ]},
         {"_id": 0}
     ).sort("created_at", -1).to_list(100)
@@ -190,29 +302,19 @@ async def send_internal_message(data: dict = Body(...), current_user: dict = Dep
     if current_user['role'] not in ['admin', 'communication', 'secretary']:
         raise HTTPException(status_code=403, detail="Access denied")
     
-    sender_code = data.get("sender_code", "").upper()
-    recipient_code = data.get("recipient_code", "").upper()
-    
-    # Validate codes
-    valid_codes = VALID_COM_CODES + ['ADMIN', 'SECRETARY', 'ALL']
-    if sender_code not in valid_codes:
-        raise HTTPException(status_code=400, detail="Invalid sender code")
-    if recipient_code not in valid_codes:
-        raise HTTPException(status_code=400, detail="Invalid recipient code")
-    
     message = {
         "id": str(uuid4()),
-        "sender_code": sender_code,
+        "sender_code": data.get("sender_code", "").upper(),
         "sender_name": data.get("sender_name", ""),
         "sender_email": current_user['email'],
-        "recipient_code": recipient_code,
+        "recipient_code": data.get("recipient_code", "").upper(),
         "content": data.get("content", ""),
         "is_read": False,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     
     await db.internal_messages.insert_one(message)
-    logger.info(f"Message sent from {sender_code} to {recipient_code}")
+    logger.info(f"Message sent from {message['sender_code']} to {message['recipient_code']}")
     
     return {"message": "Message envoyé", "id": message['id']}
 
@@ -220,10 +322,7 @@ async def send_internal_message(data: dict = Body(...), current_user: dict = Dep
 @router.put("/communication/messages/{message_id}/read")
 async def mark_message_read(message_id: str, current_user: dict = Depends(get_current_user)):
     """Mark a message as read"""
-    await db.internal_messages.update_one(
-        {"id": message_id},
-        {"$set": {"is_read": True}}
-    )
+    await db.internal_messages.update_one({"id": message_id}, {"$set": {"is_read": True}})
     return {"message": "Message marqué comme lu"}
 
 
@@ -233,12 +332,9 @@ async def get_unread_count(com_code: str, current_user: dict = Depends(get_curre
     code = com_code.upper()
     
     count = await db.internal_messages.count_documents({
-        "$or": [
-            {"recipient_code": code},
-            {"recipient_code": "ALL"}
-        ],
+        "recipient_code": code,
         "is_read": False,
-        "sender_code": {"$ne": code}  # Don't count own messages
+        "sender_code": {"$ne": code}
     })
     
     return {"unread_count": count}

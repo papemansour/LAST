@@ -847,11 +847,43 @@ async def delete_admin_document(document_id: str, current_user: dict = Depends(g
     return {"message": "Document supprimé avec succès"}
 
 
+@router.put("/admin/update-user/{user_id}")
+async def admin_update_user(user_id: str, data: dict = Body(...), current_user: dict = Depends(get_current_user)):
+    """Admin or Secretary updates a user (teacher/student)"""
+    if current_user['role'] not in ['admin', 'secretary']:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    # Get the user first
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if user['role'] == 'admin':
+        raise HTTPException(status_code=403, detail="Cannot modify admin")
+    
+    # Prepare update data
+    update_data = {"updated_at": datetime.now(timezone.utc).isoformat()}
+    
+    # Allowed fields to update
+    allowed_fields = ['first_name', 'last_name', 'email', 'phone', 'level', 'is_active']
+    for field in allowed_fields:
+        if field in data:
+            update_data[field] = data[field]
+    
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": update_data}
+    )
+    
+    logger.info(f"User {user_id} updated by {current_user['email']}: {list(update_data.keys())}")
+    return {"message": f"{user['role'].capitalize()} mis à jour avec succès"}
+
+
 @router.delete("/admin/delete-user/{user_id}")
 async def admin_delete_user(user_id: str, current_user: dict = Depends(get_current_user)):
-    """Admin soft-deletes a user (student/teacher) - moves to trash"""
-    if current_user['role'] != 'admin':
-        raise HTTPException(status_code=403, detail="Admin access required")
+    """Admin or Secretary soft-deletes a user (student/teacher) - moves to trash"""
+    if current_user['role'] not in ['admin', 'secretary']:
+        raise HTTPException(status_code=403, detail="Access denied")
     
     # Get the user first
     user = await db.users.find_one({"id": user_id}, {"_id": 0})

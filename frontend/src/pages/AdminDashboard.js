@@ -60,6 +60,17 @@ const AdminDashboard = () => {
   const [teacherSessions, setTeacherSessions] = useState([]);
   const [teacherAvailability, setTeacherAvailability] = useState([]);
   const [comAvailability, setComAvailability] = useState([]);
+  const [comPayments, setComPayments] = useState([]);
+  const [comLeaves, setComLeaves] = useState([]);
+  const [showComPaymentModal, setShowComPaymentModal] = useState(false);
+  const [comPaymentForm, setComPaymentForm] = useState({
+    com_code: 'MBM',
+    month: '',
+    year: new Date().getFullYear(),
+    amount: '',
+    hours: '',
+    notes: ''
+  });
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [levelFilter, setLevelFilter] = useState('all');
   const [showExportModal, setShowExportModal] = useState(false);
@@ -187,6 +198,22 @@ const AdminDashboard = () => {
         setComAvailability(comAvailRes.data || []);
       } catch (e) {
         console.log('Com availability not available');
+      }
+      
+      // Fetch communication payments
+      try {
+        const comPaymentsRes = await apiClient.get('/communication/all-payments');
+        setComPayments(comPaymentsRes.data || []);
+      } catch (e) {
+        console.log('Com payments not available');
+      }
+      
+      // Fetch communication leaves
+      try {
+        const comLeavesRes = await apiClient.get('/communication/all-leaves');
+        setComLeaves(comLeavesRes.data || []);
+      } catch (e) {
+        console.log('Com leaves not available');
       }
       setTeacherSessions(teacherSessionsRes.data || []);
       setPrices(pricingRes.data || prices);
@@ -2368,6 +2395,111 @@ const AdminDashboard = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Com Payments Management */}
+            <Card className="mt-6">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-purple-700">💰 Fiches de Paie - Chargés de Com</CardTitle>
+                  <CardDescription>Créez et gérez les paiements pour MBM et FZT</CardDescription>
+                </div>
+                <Button 
+                  onClick={() => setShowComPaymentModal(true)}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nouveau Paiement
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {['MBM', 'FZT'].map(code => (
+                    <div key={code} className="border rounded-lg p-4 bg-gradient-to-br from-green-50 to-emerald-50">
+                      <h3 className="font-semibold text-lg text-green-700 mb-3">{code}</h3>
+                      <div className="space-y-2">
+                        {comPayments && comPayments.filter(p => p.com_code === code).length > 0 ? (
+                          comPayments.filter(p => p.com_code === code).slice(0, 3).map(payment => (
+                            <div key={payment.id} className={`flex justify-between items-center p-2 rounded ${payment.status === 'paid' ? 'bg-green-100' : 'bg-yellow-100'}`}>
+                              <div>
+                                <p className="font-medium text-sm">{payment.month} {payment.year}</p>
+                                <p className="text-xs text-gray-600">{payment.hours}h</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="font-bold">{payment.amount}€</p>
+                                <button 
+                                  onClick={async () => {
+                                    try {
+                                      await apiClient.put(`/communication/payments/${payment.id}/status`, { status: payment.status === 'paid' ? 'pending' : 'paid' });
+                                      toast.success('Statut mis à jour');
+                                      fetchData();
+                                    } catch (e) { toast.error('Erreur'); }
+                                  }}
+                                  className={`text-xs px-2 py-0.5 rounded-full ${payment.status === 'paid' ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800'}`}
+                                >
+                                  {payment.status === 'paid' ? '✓ Payé' : '⏳ En attente'}
+                                </button>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-gray-500 text-sm text-center py-4">Aucun paiement</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Com Leaves Management */}
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle className="text-purple-700">🏖️ Demandes de Congés - Chargés de Com</CardTitle>
+                <CardDescription>Approuvez ou refusez les demandes de congés</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {comLeaves && comLeaves.length > 0 ? (
+                  <div className="space-y-3">
+                    {comLeaves.map(leave => (
+                      <div key={leave.id} className={`flex items-center justify-between p-4 rounded-lg border ${leave.status === 'approved' ? 'bg-green-50 border-green-200' : leave.status === 'rejected' ? 'bg-red-50 border-red-200' : 'bg-yellow-50 border-yellow-200'}`}>
+                        <div>
+                          <p className="font-semibold">{leave.com_code}</p>
+                          <p className="text-sm">{new Date(leave.start_date).toLocaleDateString('fr-FR')} - {new Date(leave.end_date).toLocaleDateString('fr-FR')}</p>
+                          <p className="text-xs text-gray-600">{leave.reason}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          {leave.status === 'pending' && (
+                            <>
+                              <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={async () => {
+                                try {
+                                  await apiClient.put(`/communication/leaves/${leave.id}/status`, { status: 'approved' });
+                                  toast.success('Congé approuvé');
+                                  fetchData();
+                                } catch (e) { toast.error('Erreur'); }
+                              }}>Approuver</Button>
+                              <Button size="sm" variant="destructive" onClick={async () => {
+                                try {
+                                  await apiClient.put(`/communication/leaves/${leave.id}/status`, { status: 'rejected' });
+                                  toast.success('Congé refusé');
+                                  fetchData();
+                                } catch (e) { toast.error('Erreur'); }
+                              }}>Refuser</Button>
+                            </>
+                          )}
+                          {leave.status !== 'pending' && (
+                            <span className={`px-3 py-1 rounded-full text-sm ${leave.status === 'approved' ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'}`}>
+                              {leave.status === 'approved' ? 'Approuvé' : 'Refusé'}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-gray-500 py-8">Aucune demande de congé</p>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
         </Tabs>
@@ -2635,6 +2767,99 @@ const AdminDashboard = () => {
               className="bg-purple-600 hover:bg-purple-700"
             >
               Créer le compte
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Com Payment Modal */}
+      <Dialog open={showComPaymentModal} onOpenChange={setShowComPaymentModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-green-700">💰 Nouveau Paiement - Chargé de Com</DialogTitle>
+            <DialogDescription>Créez une fiche de paie pour MBM ou FZT</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Chargé de Com *</Label>
+              <Select value={comPaymentForm.com_code} onValueChange={(v) => setComPaymentForm({...comPaymentForm, com_code: v})}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="MBM">MBM</SelectItem>
+                  <SelectItem value="FZT">FZT</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Mois *</Label>
+                <Select value={comPaymentForm.month} onValueChange={(v) => setComPaymentForm({...comPaymentForm, month: v})}>
+                  <SelectTrigger><SelectValue placeholder="Choisir..." /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Janvier">Janvier</SelectItem>
+                    <SelectItem value="Février">Février</SelectItem>
+                    <SelectItem value="Mars">Mars</SelectItem>
+                    <SelectItem value="Avril">Avril</SelectItem>
+                    <SelectItem value="Mai">Mai</SelectItem>
+                    <SelectItem value="Juin">Juin</SelectItem>
+                    <SelectItem value="Juillet">Juillet</SelectItem>
+                    <SelectItem value="Août">Août</SelectItem>
+                    <SelectItem value="Septembre">Septembre</SelectItem>
+                    <SelectItem value="Octobre">Octobre</SelectItem>
+                    <SelectItem value="Novembre">Novembre</SelectItem>
+                    <SelectItem value="Décembre">Décembre</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Année *</Label>
+                <Input type="number" value={comPaymentForm.year} onChange={(e) => setComPaymentForm({...comPaymentForm, year: parseInt(e.target.value)})} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Montant (€) *</Label>
+                <Input type="number" value={comPaymentForm.amount} onChange={(e) => setComPaymentForm({...comPaymentForm, amount: e.target.value})} placeholder="0" />
+              </div>
+              <div>
+                <Label>Heures</Label>
+                <Input type="number" value={comPaymentForm.hours} onChange={(e) => setComPaymentForm({...comPaymentForm, hours: e.target.value})} placeholder="0" />
+              </div>
+            </div>
+            <div>
+              <Label>Notes</Label>
+              <Input value={comPaymentForm.notes} onChange={(e) => setComPaymentForm({...comPaymentForm, notes: e.target.value})} placeholder="Notes optionnelles" />
+            </div>
+          </div>
+          <div className="flex gap-3 justify-end">
+            <Button variant="outline" onClick={() => setShowComPaymentModal(false)}>Annuler</Button>
+            <Button 
+              onClick={async () => {
+                if (!comPaymentForm.month || !comPaymentForm.amount) {
+                  toast.error('Veuillez remplir les champs obligatoires');
+                  return;
+                }
+                try {
+                  await apiClient.post('/communication/payments', {
+                    com_code: comPaymentForm.com_code,
+                    month: comPaymentForm.month,
+                    year: comPaymentForm.year,
+                    amount: parseFloat(comPaymentForm.amount),
+                    hours: parseFloat(comPaymentForm.hours || 0),
+                    notes: comPaymentForm.notes,
+                    status: 'pending'
+                  });
+                  toast.success('Paiement créé');
+                  setShowComPaymentModal(false);
+                  setComPaymentForm({ com_code: 'MBM', month: '', year: new Date().getFullYear(), amount: '', hours: '', notes: '' });
+                  fetchData();
+                } catch (error) {
+                  toast.error('Erreur lors de la création');
+                }
+              }}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              Créer le paiement
             </Button>
           </div>
         </DialogContent>

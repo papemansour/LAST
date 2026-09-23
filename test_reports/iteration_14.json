@@ -1,0 +1,48 @@
+{
+  "summary": "Tested new Communication staff dashboard (2-step auth + 7 tabs) and Secretary teacher edit/delete under RH → Professeurs. Backend: 14/14 pytest cases passed in test_communication_and_secretary.py covering /api/auth/login (admin/secretary/communication), /api/communication/{stats, set-availability, my-availability, balance, notes CRUD, leaves, payments (admin), payments/status}, and /api/admin/{all-teachers-detailed, update-user, delete-user} incl. secretary permissions and admin-modify protection. Frontend: Communication user logs in with COMKALAMA, personal-code modal accepts MBM, dashboard renders header + 5 stat cards + all 7 expected tabs (Actualités, Disponibilités, Soldes, Messages, Notes, Congés, Kalamathèque); Soldes correctly shows pending 450€ + paid 250.5€ TEST_payment created via admin API. Secretary → RH → Professeurs shows Fiches Professeurs with Modifier and Supprimer buttons; Modifier opens a modal pre-filled with first_name/last_name/email/phone.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/communication/payments", "issue": "amount/hours are float()-coerced without validation. Negative/absurd values are accepted; add Pydantic model with amount >= 0, hours >= 0."},
+      {"endpoint": "POST /api/communication/notes and leaves and set-availability", "issue": "com_code from body is trusted for the communication role. A logged-in communication user can post data as ANY code (MBM or FZT). Server should either verify the logged-in user is that code, or bind com_code to the user record instead of body input."},
+      {"endpoint": "PUT /api/admin/update-user/{user_id}", "issue": "No email uniqueness check when updating - a secretary could change teacher A's email to match teacher B's email, breaking login. Also 'level' & 'is_active' are updatable by secretary; if unintended, restrict allowed_fields per role."},
+      {"endpoint": "PUT /api/communication/messages/{message_id}/read", "issue": "No auth/role guard beyond current_user Depends - any authenticated user can mark any message as read (no ownership check)."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "CommunicationDashboard", "issues": ["No data-testid attributes on tabs, buttons or inputs. Testing must rely on visible French labels which collide with stat-card labels (e.g. 'Congés' matches both the tab and the stat card). Recommend adding data-testid to TabsTrigger, personal-code input, Accéder button, stat cards."]},
+      {"screen": "SecretaryHR / Professeurs", "issues": ["Modifier/Supprimer buttons and edit modal inputs lack data-testid. Both accented labels ('Ancienneté', 'Non renseigné') now render correctly - previous iteration_13 issue is fixed."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_communication_and_secretary.py",
+    "/app/test_reports/pytest/comm_secretary_results.xml"
+  ],
+  "action_items": [
+    "Add Pydantic validation on POST /api/communication/payments (amount >= 0, hours >= 0, valid status enum).",
+    "Bind com_code to the authenticated communication user (or verify body com_code == user.com_code) on notes/leaves/set-availability POSTs so one Chargé de Com cannot post as the other.",
+    "Add email-uniqueness check in PUT /api/admin/update-user/{user_id}. Optionally restrict secretary from editing 'level' and 'is_active'.",
+    "Add ownership/role guard on PUT /api/communication/messages/{message_id}/read.",
+    "Add data-testid attributes on CommunicationDashboard tabs/inputs/buttons and on SecretaryHR teacher edit/delete controls for reliable automated testing."
+  ],
+  "critical_code_review_comments": [
+    "communication.py trusts com_code from request body for role='communication' — real authorization bug (privilege between MBM and FZT).",
+    "admin.py update-user allows secretary to update 'is_active' and 'level' — verify this is intended (probably OK for level, but is_active can disable accounts).",
+    "CommunicationDashboard.js is 934 lines — approaching split threshold; extract each tab into its own component.",
+    "Repeat: SecretaryDashboard.js remains >2000 lines (flagged in iteration_13, still unfixed).",
+    "communication.py: payments amount coerced with float(data.get('amount', 0)) — no bounds check, allowing negative payments."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_communication_and_secretary.py",
+    "/app/test_reports/iteration_14.json"
+  ],
+  "success_rate": {"backend": "100% (14/14 pytest)", "frontend": "100% for tested flows"},
+  "test_credentials": "Read from /app/memory/test_credentials.md. Used: admin@mykalamaenglish.com/adminco, secretaire@mykalamaenglish.com/kalamasecret, com@mykalamaenglish.com/COMKALAMA (code MBM).",
+  "seed_data_creation": "Created TEST_ payment for MBM (Janvier 2026, 250.5€ then marked paid), TEST_Note (deleted in-test), TEST_conge leave (pending, not cleaned), and one TESTteach<ts>.autotest teacher which was created + edited + soft-deleted during the test.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "All 7 requested features work end-to-end. Reusable pytest suite at /app/backend/tests/test_communication_and_secretary.py covers auth + communication CRUD + secretary teacher update/delete. Known unresolved (not blockers): (1) com_code trust from body across communication endpoints, (2) no email-uniqueness in admin update-user, (3) payments amount not validated, (4) missing data-testid across CommunicationDashboard and SecretaryHR — will make future UI automation flaky (had to fall back to French text selectors, which collide with stat-card labels)."
+}

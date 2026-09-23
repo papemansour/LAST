@@ -126,14 +126,31 @@ async def create_com_payment(data: dict = Body(...), current_user: dict = Depend
     if com_code not in VALID_COM_CODES:
         raise HTTPException(status_code=400, detail="Invalid communication code")
     
+    # Validate amount and hours
+    try:
+        amount = float(data.get("amount", 0))
+        hours = float(data.get("hours", 0))
+        if amount < 0:
+            raise HTTPException(status_code=400, detail="Le montant doit être positif")
+        if hours < 0:
+            raise HTTPException(status_code=400, detail="Les heures doivent être positives")
+    except (ValueError, TypeError):
+        raise HTTPException(status_code=400, detail="Montant ou heures invalides")
+    
+    # Validate status
+    valid_statuses = ['pending', 'paid']
+    status = data.get("status", "pending")
+    if status not in valid_statuses:
+        status = "pending"
+    
     payment = {
         "id": str(uuid4()),
         "com_code": com_code,
         "month": data.get("month", ""),
         "year": data.get("year", datetime.now().year),
-        "amount": float(data.get("amount", 0)),
-        "hours": float(data.get("hours", 0)),
-        "status": data.get("status", "pending"),
+        "amount": amount,
+        "hours": hours,
+        "status": status,
         "notes": data.get("notes", ""),
         "created_by": current_user['id'],
         "created_at": datetime.now(timezone.utc).isoformat()

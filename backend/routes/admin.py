@@ -864,11 +864,21 @@ async def admin_update_user(user_id: str, data: dict = Body(...), current_user: 
     # Prepare update data
     update_data = {"updated_at": datetime.now(timezone.utc).isoformat()}
     
-    # Allowed fields to update
-    allowed_fields = ['first_name', 'last_name', 'email', 'phone', 'level', 'is_active']
+    # Allowed fields to update (secretary cannot change is_active)
+    if current_user['role'] == 'admin':
+        allowed_fields = ['first_name', 'last_name', 'email', 'phone', 'level', 'is_active']
+    else:  # secretary
+        allowed_fields = ['first_name', 'last_name', 'email', 'phone', 'level']
+    
     for field in allowed_fields:
         if field in data:
             update_data[field] = data[field]
+    
+    # Check email uniqueness if changing email
+    if 'email' in update_data and update_data['email'] != user.get('email'):
+        existing = await db.users.find_one({"email": update_data['email'], "id": {"$ne": user_id}})
+        if existing:
+            raise HTTPException(status_code=400, detail="Cet email est déjà utilisé par un autre utilisateur")
     
     await db.users.update_one(
         {"id": user_id},

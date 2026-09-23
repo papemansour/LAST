@@ -365,15 +365,17 @@ const CommunicationDashboard = () => {
                 className="text-center text-2xl font-bold tracking-widest"
                 maxLength={3}
                 onKeyPress={(e) => e.key === 'Enter' && verifyCode()}
+                data-testid="com-personal-code-input"
               />
               {codeError && (
-                <p className="text-red-500 text-sm mt-2 text-center">{codeError}</p>
+                <p className="text-red-500 text-sm mt-2 text-center" data-testid="com-code-error">{codeError}</p>
               )}
             </div>
             <Button 
               onClick={verifyCode}
               className="w-full bg-purple-600 hover:bg-purple-700"
               disabled={personalCode.length < 3}
+              data-testid="com-access-btn"
             >
               Accéder à mon espace
             </Button>
@@ -381,6 +383,7 @@ const CommunicationDashboard = () => {
               variant="outline"
               onClick={handleLogout}
               className="w-full"
+              data-testid="com-logout-btn"
             >
               <LogOut className="h-4 w-4 mr-2" />
               Déconnexion
@@ -510,33 +513,33 @@ const CommunicationDashboard = () => {
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="bg-white border border-purple-100 p-1 flex-wrap h-auto gap-1">
-            <TabsTrigger value="news" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+          <TabsList className="bg-white border border-purple-100 p-1 flex-wrap h-auto gap-1" data-testid="com-tabs-list">
+            <TabsTrigger value="news" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white" data-testid="com-tab-news">
               <Megaphone className="h-4 w-4 mr-2" />
               Actualités
             </TabsTrigger>
-            <TabsTrigger value="availability" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+            <TabsTrigger value="availability" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white" data-testid="com-tab-availability">
               <Calendar className="h-4 w-4 mr-2" />
               Disponibilités
             </TabsTrigger>
-            <TabsTrigger value="balance" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+            <TabsTrigger value="balance" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white" data-testid="com-tab-balance">
               <DollarSign className="h-4 w-4 mr-2" />
               Soldes
             </TabsTrigger>
-            <TabsTrigger value="messages" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white relative">
+            <TabsTrigger value="messages" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white relative" data-testid="com-tab-messages">
               <MessageSquare className="h-4 w-4 mr-2" />
               Messages
               {unreadCount > 0 && <span className="ml-1 bg-red-500 text-white text-xs rounded-full px-1.5">{unreadCount}</span>}
             </TabsTrigger>
-            <TabsTrigger value="notes" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+            <TabsTrigger value="notes" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white" data-testid="com-tab-notes">
               <StickyNote className="h-4 w-4 mr-2" />
               Notes
             </TabsTrigger>
-            <TabsTrigger value="leaves" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+            <TabsTrigger value="leaves" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white" data-testid="com-tab-leaves">
               <Plane className="h-4 w-4 mr-2" />
               Congés
             </TabsTrigger>
-            <TabsTrigger value="kalamatheque" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+            <TabsTrigger value="kalamatheque" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white" data-testid="com-tab-kalamatheque">
               <BookOpen className="h-4 w-4 mr-2" />
               Kalamathèque
             </TabsTrigger>

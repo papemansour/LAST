@@ -161,13 +161,30 @@ E-learning platform pour l'apprentissage de l'anglais avec multi-dashboards (Adm
 - **Dashboard Communication** (`/communication`):
   - **Actualités**: Créer, modifier, supprimer des news
   - **Disponibilités**: Grille horaires (08:00-19:00) × jours (Lun-Dim) comme les professeurs
-  - **Fiches de Paie**: Consulter les fiches de paie
+  - **Soldes/Fiches de Paie**: Consulter les paiements et historique
   - **Messages Internes**: Communication entre MBM, FZT, Secrétaire et Admin
+  - **Notes**: Notes personnelles par chargé de com
+  - **Congés**: Demandes de congés avec statut (pending/approved/rejected)
   - **Kalamathèque**: Accès à la bibliothèque (code: Digika)
-  - **Statistiques**: Vue d'ensemble des activités
 - **Vue Admin Disponibilités**: Section dédiée dans Horaires pour voir MBM et FZT côte à côte
 - **Endpoints API**:
   - `GET/POST /api/communication/set-availability` - Définir disponibilités
   - `GET /api/communication/all-availability` - Voir toutes les disponibilités (admin)
-  - `GET/POST /api/communication/payslips/{code}` - Fiches de paie
+  - `GET/POST /api/communication/payments` - Fiches de paie (admin crée, com consulte)
+  - `GET/POST /api/communication/notes/{code}` - Notes personnelles
+  - `GET/POST /api/communication/leaves/{code}` - Demandes de congés
   - `GET/POST /api/communication/messages/{code}` - Messages internes
+
+
+### Mise à jour Septembre 2026 (Suite 8) - Module RH Secrétaire Amélioré
+- **Modification des professeurs**: La secrétaire peut modifier les informations des professeurs (nom, prénom, email, téléphone)
+- **Suppression des professeurs**: La secrétaire peut supprimer un professeur (soft-delete vers corbeille)
+- **Endpoint API**: 
+  - `PUT /api/admin/update-user/{user_id}` - Modifier un utilisateur (validation email unique)
+  - `DELETE /api/admin/delete-user/{user_id}` - Supprimer un utilisateur (soft-delete)
+- **Validation améliorée**:
+  - Vérification d'unicité email lors de la modification
+  - Validation montant/heures positifs pour les paiements communication
+  - Secrétaire ne peut pas modifier le champ `is_active`
+- **Data-testid ajoutés** pour faciliter les tests automatisés
+

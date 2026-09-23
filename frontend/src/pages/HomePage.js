@@ -69,12 +69,16 @@ const HomePage = () => {
   const [pricingData, setPricingData] = useState({
     kkid_eur: 30,
     kkid_discount: 0,
-    beginner_eur: 60,
+    kkid_fcfa: 15000,
+    beginner_eur: 80,       // Prix avec KALAMA2020 appliqué
     beginner_discount: 0,
-    intermediate_eur: 90,
+    beginner_fcfa: 25000,
+    intermediate_eur: 100,  // Prix avec KALAMA2020 appliqué
     intermediate_discount: 0,
-    advanced_eur: 120,
-    advanced_discount: 0
+    intermediate_fcfa: 35000,
+    advanced_eur: 150,      // Prix avec KALAMA2020 appliqué
+    advanced_discount: 0,
+    advanced_fcfa: 50000
   });
   const [formData, setFormData] = useState({
     first_name: '',

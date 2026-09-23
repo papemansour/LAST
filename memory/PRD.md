@@ -210,4 +210,23 @@ E-learning platform pour l'apprentissage de l'anglais avec multi-dashboards (Adm
   - 2 personnes : 120€
   - Personne supplémentaire : +30€
   - Calcul dynamique du prix affiché dans le formulaire
-- **Logo MyKalama** intégré dans le dashboard Communication
+
+
+### Mise à jour Septembre 2026 (Suite 10) - Quiz Adaptatif & Tarifs Mis à Jour
+- **Quiz Adaptatif Kalamai** : Système de quiz intelligent généré par IA
+  - 5 catégories : Grammaire, Vocabulaire, Conjugaison, Compréhension, Expressions
+  - Questions adaptées au niveau de l'étudiant (K-Kid, Beginner, Intermediate, Advanced)
+  - Apprentissage des erreurs pour personnaliser les prochains quiz
+  - Historique des résultats et progression
+  - Explications pédagogiques après chaque réponse
+- **Endpoints API Quiz**:
+  - `POST /api/kalamai/generate-quiz` - Génère un quiz adaptatif
+  - `GET /api/kalamai/quiz-history` - Historique des quiz
+  - `POST /api/kalamai/save-quiz-result` - Sauvegarde les résultats
+- **Interface Kalamai** : Onglets Conversation et Quiz Adaptatif dans le tuteur
+- **Logo retiré du Dashboard Communication** : Logo présent uniquement sur la page d'accueil et dans les documents (factures, fiches de paie, reçus)
+- **Nouveaux Tarifs avec réduction KALAMA2020 appliquée** :
+  - Pack K-Kid : 30€ / 15,000 FCFA
+  - Pack Débutant : 80€ / 25,000 FCFA
+  - Pack Intermédiaire : 100€ / 35,000 FCFA
+  - Pack Avancé : 150€ / 50,000 FCFA

@@ -346,11 +346,9 @@ const CommunicationDashboard = () => {
       <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50 flex items-center justify-center">
         <Card className="w-full max-w-md mx-4 bg-white/70 backdrop-blur-md border-2 border-white/30 shadow-xl">
           <CardHeader className="text-center">
-            <img 
-              src="https://customer-assets-gfyr7b9c.emergentagent.net/job_0231dd73-3288-45b1-94c8-b711e90646ba/artifacts/jawlqd6l_dcc5e2c7-dea7-45dc-b2b6-6d6c615a529b.jpeg" 
-              alt="MyKalama Logo" 
-              className="h-16 w-auto mx-auto mb-4"
-            />
+            <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Megaphone className="h-8 w-8 text-teal-600" />
+            </div>
             <CardTitle className="text-teal-700">Espace Communication</CardTitle>
             <CardDescription>Entrez votre code personnel pour accéder à votre espace</CardDescription>
           </CardHeader>
@@ -410,11 +408,9 @@ const CommunicationDashboard = () => {
       <header className="bg-white/70 backdrop-blur-md shadow-sm border-b border-teal-100">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <img 
-              src="https://customer-assets-gfyr7b9c.emergentagent.net/job_0231dd73-3288-45b1-94c8-b711e90646ba/artifacts/jawlqd6l_dcc5e2c7-dea7-45dc-b2b6-6d6c615a529b.jpeg" 
-              alt="MyKalama Logo" 
-              className="h-10 w-auto"
-            />
+            <div className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center">
+              <Megaphone className="h-5 w-5 text-teal-600" />
+            </div>
             <h1 className="text-2xl font-bold text-teal-700">MYKALAMA - Communication</h1>
             <p className="text-sm text-gray-600">
               Espace {COM_CODES[verifiedCode]?.fullName || 'Chargé(e) de Com'}

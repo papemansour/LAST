@@ -95,19 +95,23 @@ async def serve_uploaded_file_api(file_path: str):
 
 @router.get("/pricing")
 async def get_pricing():
-    """Get current pricing - Public endpoint"""
+    """Get current pricing - Public endpoint (prices include KALAMA2020 -20% promo)"""
     pricing = await db.pricing.find_one({"id": "pricing"}, {"_id": 0})
     if not pricing:
-        # Default pricing structure matching frontend expectations
+        # Default pricing structure with KALAMA2020 promo applied
         return {
             "kkid_eur": 30,
             "kkid_discount": 0,
-            "beginner_eur": 76,
+            "kkid_fcfa": 15000,
+            "beginner_eur": 80,
             "beginner_discount": 0,
-            "intermediate_eur": 90,
+            "beginner_fcfa": 25000,
+            "intermediate_eur": 100,
             "intermediate_discount": 0,
-            "advanced_eur": 102,
-            "advanced_discount": 0
+            "intermediate_fcfa": 35000,
+            "advanced_eur": 150,
+            "advanced_discount": 0,
+            "advanced_fcfa": 50000
         }
     return pricing
 

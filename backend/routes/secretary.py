@@ -686,40 +686,56 @@ async def get_admin_info_for_secretary(current_user: dict = Depends(get_current_
 
 @router.get("/secretary/all-staff")
 async def get_all_staff(current_user: dict = Depends(get_current_user)):
-    """Get all staff members (communication + other staff created by admin)"""
+    """Get ALL staff members (admin, secretary, teachers, communication, and any user created by admin)"""
     if current_user['role'] not in ['secretary', 'admin']:
         raise HTTPException(status_code=403, detail="Secretary or admin access required")
     
-    # Get communication staff and any other staff (not teacher, student, admin)
+    # Get ALL staff: admin, secretary, teachers, communication, staff (everyone except students)
     staff_users = await db.users.find(
         {
-            "role": {"$in": ["communication", "staff"]},
+            "role": {"$in": ["admin", "secretary", "teacher", "communication", "staff"]},
             "is_active": True
         },
         {"_id": 0, "id": 1, "first_name": 1, "last_name": 1, "email": 1, "role": 1, "phone": 1}
-    ).to_list(100)
+    ).to_list(200)
+    
+    # Get all staff leaves to calculate used days
+    all_leaves = await db.staff_leaves.find({}, {"_id": 0, "staff_id": 1, "days_used": 1, "daysUsed": 1}).to_list(500)
+    
+    # Calculate leaves used per staff
+    leaves_by_staff = {}
+    for leave in all_leaves:
+        staff_id = leave.get("staff_id") or leave.get("staffId")
+        days = leave.get("days_used") or leave.get("daysUsed") or 0
+        if staff_id:
+            leaves_by_staff[staff_id] = leaves_by_staff.get(staff_id, 0) + int(days)
+    
+    # Role labels for display
+    role_labels = {
+        "admin": "Admin",
+        "secretary": "Secrétaire",
+        "teacher": "Professeur",
+        "communication": "Chargé(e) de Com",
+        "staff": "Staff"
+    }
     
     # Build staff list with name for display
     result = []
     for staff in staff_users:
+        staff_id = staff.get("id")
+        leaves_used = leaves_by_staff.get(staff_id, 0)
         result.append({
-            "id": staff.get("id"),
+            "id": staff_id,
             "name": f"{staff.get('first_name', '')} {staff.get('last_name', '')}".strip(),
             "first_name": staff.get("first_name", ""),
             "last_name": staff.get("last_name", ""),
             "email": staff.get("email", ""),
             "role": staff.get("role", "staff"),
+            "role_label": role_labels.get(staff.get("role", ""), staff.get("role", "")),
             "phone": staff.get("phone", ""),
-            "leaves_used": 0,
+            "leaves_used": leaves_used,
             "leaves_total": 30
         })
-    
-    # If no staff found, provide default communication staff (MBM, FZT)
-    if len(result) == 0:
-        result = [
-            {"id": "MBM", "name": "MBM", "role": "communication", "leaves_used": 0, "leaves_total": 30},
-            {"id": "FZT", "name": "FZT", "role": "communication", "leaves_used": 0, "leaves_total": 30}
-        ]
     
     return result
 

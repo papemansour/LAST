@@ -4,10 +4,93 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { ScrollArea } from './ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { Send, Bot, User, Sparkles, Trash2, Plus, Clock, Loader2, MessageCircle, Brain } from 'lucide-react';
+import { Send, User, Sparkles, Trash2, Plus, Clock, Loader2, MessageCircle, Brain } from 'lucide-react';
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
 import KalamaiQuiz from './KalamaiQuiz';
+
+// Kalamai Mascot - Cute green plush with big pink eyes
+const KalamaiMascot = ({ size = 'md', className = '' }) => {
+  const sizes = {
+    sm: 'w-8 h-8',
+    md: 'w-10 h-10',
+    lg: 'w-12 h-12',
+    xl: 'w-16 h-16'
+  };
+  
+  return (
+    <div className={`${sizes[size]} ${className} relative`}>
+      {/* Body - Green plush */}
+      <svg viewBox="0 0 100 100" className="w-full h-full">
+        {/* Soft body shadow */}
+        <ellipse cx="50" cy="85" rx="35" ry="8" fill="#2d8a5e" opacity="0.3"/>
+        
+        {/* Main body - Soft green plush shape */}
+        <ellipse cx="50" cy="55" rx="38" ry="40" fill="url(#bodyGradient)"/>
+        
+        {/* Fuzzy texture overlay */}
+        <ellipse cx="50" cy="55" rx="38" ry="40" fill="url(#fuzzyPattern)" opacity="0.15"/>
+        
+        {/* Belly - Lighter green */}
+        <ellipse cx="50" cy="62" rx="25" ry="22" fill="#7dd3a8"/>
+        
+        {/* Left ear */}
+        <ellipse cx="22" cy="25" rx="12" ry="15" fill="url(#bodyGradient)" transform="rotate(-15 22 25)"/>
+        <ellipse cx="22" cy="25" rx="7" ry="9" fill="#ff9ecd" transform="rotate(-15 22 25)"/>
+        
+        {/* Right ear */}
+        <ellipse cx="78" cy="25" rx="12" ry="15" fill="url(#bodyGradient)" transform="rotate(15 78 25)"/>
+        <ellipse cx="78" cy="25" rx="7" ry="9" fill="#ff9ecd" transform="rotate(15 78 25)"/>
+        
+        {/* Left eye - Big pink eye */}
+        <ellipse cx="35" cy="45" rx="14" ry="16" fill="white"/>
+        <ellipse cx="35" cy="45" rx="14" ry="16" fill="none" stroke="#ffb6d9" strokeWidth="2"/>
+        <circle cx="37" cy="46" r="9" fill="#ff6eb4"/>
+        <circle cx="37" cy="46" r="6" fill="#ff1493"/>
+        <circle cx="34" cy="43" r="3" fill="white"/>
+        <circle cx="40" cy="49" r="1.5" fill="white" opacity="0.7"/>
+        
+        {/* Right eye - Big pink eye */}
+        <ellipse cx="65" cy="45" rx="14" ry="16" fill="white"/>
+        <ellipse cx="65" cy="45" rx="14" ry="16" fill="none" stroke="#ffb6d9" strokeWidth="2"/>
+        <circle cx="67" cy="46" r="9" fill="#ff6eb4"/>
+        <circle cx="67" cy="46" r="6" fill="#ff1493"/>
+        <circle cx="64" cy="43" r="3" fill="white"/>
+        <circle cx="70" cy="49" r="1.5" fill="white" opacity="0.7"/>
+        
+        {/* Cute blush spots */}
+        <ellipse cx="20" cy="55" rx="8" ry="5" fill="#ffb6d9" opacity="0.6"/>
+        <ellipse cx="80" cy="55" rx="8" ry="5" fill="#ffb6d9" opacity="0.6"/>
+        
+        {/* Small cute nose */}
+        <ellipse cx="50" cy="58" rx="4" ry="3" fill="#3d9970"/>
+        
+        {/* Cute smile */}
+        <path d="M 40 67 Q 50 75 60 67" fill="none" stroke="#3d9970" strokeWidth="2.5" strokeLinecap="round"/>
+        
+        {/* Little arms */}
+        <ellipse cx="15" cy="65" rx="8" ry="12" fill="url(#bodyGradient)" transform="rotate(-20 15 65)"/>
+        <ellipse cx="85" cy="65" rx="8" ry="12" fill="url(#bodyGradient)" transform="rotate(20 85 65)"/>
+        
+        {/* Little feet */}
+        <ellipse cx="35" cy="90" rx="12" ry="7" fill="url(#bodyGradient)"/>
+        <ellipse cx="65" cy="90" rx="12" ry="7" fill="url(#bodyGradient)"/>
+        
+        {/* Gradients */}
+        <defs>
+          <linearGradient id="bodyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#5dd39e"/>
+            <stop offset="50%" stopColor="#3dba7b"/>
+            <stop offset="100%" stopColor="#2d9a5e"/>
+          </linearGradient>
+          <pattern id="fuzzyPattern" patternUnits="userSpaceOnUse" width="4" height="4">
+            <circle cx="2" cy="2" r="0.5" fill="#2d8a5e"/>
+          </pattern>
+        </defs>
+      </svg>
+    </div>
+  );
+};
 
 const KalamaiTutor = ({ userLevel = 'intermediate' }) => {
   const [activeTab, setActiveTab] = useState('chat');
@@ -209,9 +292,7 @@ const KalamaiTutor = ({ userLevel = 'intermediate' }) => {
             <CardHeader className="pb-3 border-b bg-white/80 backdrop-blur-sm">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-full flex items-center justify-center shadow-lg">
-                    <Bot className="h-5 w-5 text-white" />
-                  </div>
+                  <KalamaiMascot size="md" className="shadow-lg rounded-full" />
                   <div>
                     <CardTitle className="text-teal-700 text-base flex items-center gap-2">
                       Kalamai Chat
@@ -279,13 +360,13 @@ const KalamaiTutor = ({ userLevel = 'intermediate' }) => {
                       className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                       <div className={`flex items-start gap-2 max-w-[85%] ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                          msg.role === 'user' 
-                            ? 'bg-blue-500 text-white' 
-                            : 'bg-gradient-to-br from-teal-500 to-emerald-500 text-white'
-                        }`}>
-                          {msg.role === 'user' ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
-                        </div>
+                        {msg.role === 'user' ? (
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-blue-500 text-white">
+                            <User className="h-4 w-4" />
+                          </div>
+                        ) : (
+                          <KalamaiMascot size="sm" className="shrink-0" />
+                        )}
                         <div className={`rounded-2xl px-4 py-2 ${
                           msg.role === 'user'
                             ? 'bg-blue-500 text-white rounded-br-none'
@@ -299,9 +380,7 @@ const KalamaiTutor = ({ userLevel = 'intermediate' }) => {
                   {isLoading && messages[messages.length - 1]?.role === 'user' && (
                     <div className="flex justify-start">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-500 to-emerald-500 flex items-center justify-center">
-                          <Loader2 className="h-4 w-4 text-white animate-spin" />
-                        </div>
+                        <KalamaiMascot size="sm" className="animate-bounce" />
                         <div className="bg-white shadow-sm border border-teal-100 rounded-2xl rounded-bl-none px-4 py-2">
                           <div className="flex gap-1">
                             <span className="w-2 h-2 bg-teal-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>

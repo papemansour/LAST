@@ -4,11 +4,67 @@ import { Button } from './ui/button';
 import { Progress } from './ui/progress';
 import { Badge } from './ui/badge';
 import { 
-  Brain, CheckCircle, XCircle, Trophy, RotateCcw, Sparkles, 
+  CheckCircle, XCircle, Trophy, RotateCcw, Sparkles, 
   ArrowRight, Lightbulb, Target, Star, Loader2 
 } from 'lucide-react';
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
+
+// Kalamai Mascot - Cute green plush with big pink eyes
+const KalamaiMascot = ({ size = 'md', className = '' }) => {
+  const sizes = {
+    sm: 'w-8 h-8',
+    md: 'w-10 h-10',
+    lg: 'w-12 h-12',
+    xl: 'w-16 h-16',
+    xxl: 'w-20 h-20'
+  };
+  
+  return (
+    <div className={`${sizes[size]} ${className} relative`}>
+      <svg viewBox="0 0 100 100" className="w-full h-full">
+        <ellipse cx="50" cy="85" rx="35" ry="8" fill="#2d8a5e" opacity="0.3"/>
+        <ellipse cx="50" cy="55" rx="38" ry="40" fill="url(#bodyGradientQuiz)"/>
+        <ellipse cx="50" cy="55" rx="38" ry="40" fill="url(#fuzzyPatternQuiz)" opacity="0.15"/>
+        <ellipse cx="50" cy="62" rx="25" ry="22" fill="#7dd3a8"/>
+        <ellipse cx="22" cy="25" rx="12" ry="15" fill="url(#bodyGradientQuiz)" transform="rotate(-15 22 25)"/>
+        <ellipse cx="22" cy="25" rx="7" ry="9" fill="#ff9ecd" transform="rotate(-15 22 25)"/>
+        <ellipse cx="78" cy="25" rx="12" ry="15" fill="url(#bodyGradientQuiz)" transform="rotate(15 78 25)"/>
+        <ellipse cx="78" cy="25" rx="7" ry="9" fill="#ff9ecd" transform="rotate(15 78 25)"/>
+        <ellipse cx="35" cy="45" rx="14" ry="16" fill="white"/>
+        <ellipse cx="35" cy="45" rx="14" ry="16" fill="none" stroke="#ffb6d9" strokeWidth="2"/>
+        <circle cx="37" cy="46" r="9" fill="#ff6eb4"/>
+        <circle cx="37" cy="46" r="6" fill="#ff1493"/>
+        <circle cx="34" cy="43" r="3" fill="white"/>
+        <circle cx="40" cy="49" r="1.5" fill="white" opacity="0.7"/>
+        <ellipse cx="65" cy="45" rx="14" ry="16" fill="white"/>
+        <ellipse cx="65" cy="45" rx="14" ry="16" fill="none" stroke="#ffb6d9" strokeWidth="2"/>
+        <circle cx="67" cy="46" r="9" fill="#ff6eb4"/>
+        <circle cx="67" cy="46" r="6" fill="#ff1493"/>
+        <circle cx="64" cy="43" r="3" fill="white"/>
+        <circle cx="70" cy="49" r="1.5" fill="white" opacity="0.7"/>
+        <ellipse cx="20" cy="55" rx="8" ry="5" fill="#ffb6d9" opacity="0.6"/>
+        <ellipse cx="80" cy="55" rx="8" ry="5" fill="#ffb6d9" opacity="0.6"/>
+        <ellipse cx="50" cy="58" rx="4" ry="3" fill="#3d9970"/>
+        <path d="M 40 67 Q 50 75 60 67" fill="none" stroke="#3d9970" strokeWidth="2.5" strokeLinecap="round"/>
+        <ellipse cx="15" cy="65" rx="8" ry="12" fill="url(#bodyGradientQuiz)" transform="rotate(-20 15 65)"/>
+        <ellipse cx="85" cy="65" rx="8" ry="12" fill="url(#bodyGradientQuiz)" transform="rotate(20 85 65)"/>
+        <ellipse cx="35" cy="90" rx="12" ry="7" fill="url(#bodyGradientQuiz)"/>
+        <ellipse cx="65" cy="90" rx="12" ry="7" fill="url(#bodyGradientQuiz)"/>
+        <defs>
+          <linearGradient id="bodyGradientQuiz" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#5dd39e"/>
+            <stop offset="50%" stopColor="#3dba7b"/>
+            <stop offset="100%" stopColor="#2d9a5e"/>
+          </linearGradient>
+          <pattern id="fuzzyPatternQuiz" patternUnits="userSpaceOnUse" width="4" height="4">
+            <circle cx="2" cy="2" r="0.5" fill="#2d8a5e"/>
+          </pattern>
+        </defs>
+      </svg>
+    </div>
+  );
+};
 
 const QUIZ_CATEGORIES = [
   { id: 'grammar', name: 'Grammaire', icon: '📝', color: 'bg-blue-100 text-blue-700' },
@@ -145,9 +201,7 @@ const KalamaiQuiz = ({ userLevel = 'intermediate' }) => {
       <Card className="bg-gradient-to-br from-teal-50 to-emerald-50 border-teal-200" data-testid="kalamai-quiz">
         <CardHeader>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-full flex items-center justify-center shadow-lg">
-              <Brain className="h-7 w-7 text-white" />
-            </div>
+            <KalamaiMascot size="lg" className="shadow-lg" />
             <div>
               <CardTitle className="text-teal-700 flex items-center gap-2">
                 Quiz Adaptatif Kalamai
@@ -209,7 +263,7 @@ const KalamaiQuiz = ({ userLevel = 'intermediate' }) => {
     return (
       <Card className="bg-gradient-to-br from-teal-50 to-emerald-50 border-teal-200">
         <CardContent className="py-16 flex flex-col items-center justify-center">
-          <Loader2 className="h-12 w-12 text-teal-600 animate-spin mb-4" />
+          <KalamaiMascot size="xl" className="animate-bounce mb-4" />
           <p className="text-teal-700 font-medium">Kalamai prépare votre quiz...</p>
           <p className="text-sm text-gray-500 mt-2">Génération de questions personnalisées</p>
         </CardContent>
@@ -323,9 +377,7 @@ const KalamaiQuiz = ({ userLevel = 'intermediate' }) => {
     return (
       <Card className="bg-gradient-to-br from-teal-50 to-emerald-50 border-teal-200">
         <CardContent className="py-8 text-center space-y-6">
-          <div className="w-20 h-20 mx-auto bg-gradient-to-br from-teal-500 to-emerald-500 rounded-full flex items-center justify-center shadow-lg">
-            <Trophy className="h-10 w-10 text-white" />
-          </div>
+          <KalamaiMascot size="xxl" className="mx-auto shadow-lg" />
           
           <div>
             <h3 className={`text-2xl font-bold ${scoreMessage.color}`}>{scoreMessage.text}</h3>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { CalendarDays, Users, TrendingUp, Clock, Search, AlertTriangle, History, ChevronDown, ChevronUp, User, Mail, Briefcase, Calendar, Phone, GraduationCap, ChevronLeft, ChevronRight, Edit, Trash2, Save, X } from 'lucide-react';
+import { CalendarDays, Users, TrendingUp, Clock, Search, AlertTriangle, History, ChevronDown, ChevronUp, User, Mail, Briefcase, Calendar, Phone, GraduationCap, ChevronLeft, ChevronRight, Edit, Trash2, Save, X, Umbrella } from 'lucide-react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
@@ -41,12 +41,83 @@ const SecretaryHR = () => {
   });
   const [savingTeacher, setSavingTeacher] = useState(false);
 
+  // Staff leaves state (moved from SecretaryDashboard)
+  const [allStaff, setAllStaff] = useState([]);
+  const [staffLeaves, setStaffLeaves] = useState([]);
+  const [newStaffLeave, setNewStaffLeave] = useState({
+    staffId: '',
+    staffName: '',
+    startDate: '',
+    endDate: '',
+    reason: ''
+  });
+
   useEffect(() => {
     fetchLeaveBalances();
     fetchTeachers();
     fetchStudents();
     fetchCalendar();
+    fetchAllStaff();
+    fetchStaffLeaves();
   }, []);
+
+  const fetchAllStaff = async () => {
+    try {
+      const response = await apiClient.get('/secretary/all-staff');
+      setAllStaff(response.data || []);
+    } catch (error) {
+      console.error('Error fetching all staff:', error);
+    }
+  };
+
+  const fetchStaffLeaves = async () => {
+    try {
+      const response = await apiClient.get('/secretary/staff-leaves');
+      setStaffLeaves(response.data || []);
+    } catch (error) {
+      console.error('Error fetching staff leaves:', error);
+    }
+  };
+
+  const getStaffLeavesUsed = (staffId) => {
+    return staffLeaves
+      .filter(l => (l.staffId === staffId || l.staff_id === staffId))
+      .reduce((sum, l) => sum + (l.daysUsed || l.days_used || 0), 0);
+  };
+
+  const handleAddStaffLeave = async () => {
+    if (!newStaffLeave.staffId || !newStaffLeave.startDate || !newStaffLeave.endDate) {
+      toast.error('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+    const daysUsed = Math.ceil((new Date(newStaffLeave.endDate) - new Date(newStaffLeave.startDate)) / (1000 * 60 * 60 * 24)) + 1;
+    try {
+      await apiClient.post('/secretary/staff-leaves', {
+        ...newStaffLeave,
+        daysUsed
+      });
+      toast.success('Congé enregistré avec succès');
+      setNewStaffLeave({ staffId: '', staffName: '', startDate: '', endDate: '', reason: '' });
+      fetchStaffLeaves();
+      fetchAllStaff();
+    } catch (error) {
+      console.error('Error adding staff leave:', error);
+      toast.error('Erreur lors de l\'enregistrement du congé');
+    }
+  };
+
+  const handleDeleteStaffLeave = async (leaveId) => {
+    if (!window.confirm('Supprimer ce congé ?')) return;
+    try {
+      await apiClient.delete(`/secretary/staff-leaves/${leaveId}`);
+      toast.success('Congé supprimé');
+      fetchStaffLeaves();
+      fetchAllStaff();
+    } catch (error) {
+      console.error('Error deleting staff leave:', error);
+      toast.error('Erreur lors de la suppression');
+    }
+  };
 
   const fetchLeaveBalances = async () => {
     try {
@@ -585,6 +656,10 @@ const SecretaryHR = () => {
             <CalendarDays className="w-4 h-4 mr-2" />
             Congés
           </TabsTrigger>
+          <TabsTrigger value="conges-staffs" className="data-[state=active]:bg-yellow-600 data-[state=active]:text-white whitespace-nowrap">
+            <Umbrella className="w-4 h-4 mr-2" />
+            Congés STAFFS
+          </TabsTrigger>
           <TabsTrigger value="calendrier" className="data-[state=active]:bg-teal-600 data-[state=active]:text-white whitespace-nowrap">
             <Calendar className="w-4 h-4 mr-2" />
             Calendrier
@@ -645,6 +720,159 @@ const SecretaryHR = () => {
                 {filteredEmployees.length === 0 && (
                   <p className="text-center text-gray-400 py-8">Aucun employé trouvé</p>
                 )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Congés STAFFS Tab (30j/an) - Admin, Secrétaire, Profs, Chargés de Com, etc. */}
+        <TabsContent value="conges-staffs" className="space-y-4">
+          <Card className="border-yellow-200">
+            <CardHeader className="bg-gradient-to-r from-yellow-50 to-orange-50">
+              <CardTitle className="flex items-center gap-2 text-yellow-700">
+                <Umbrella className="w-5 h-5" />
+                Gestion des Congés - STAFFS (30j/an)
+              </CardTitle>
+              <p className="text-sm text-gray-600">
+                Admin, Secrétaire, Professeurs, Chargés de Com et tout utilisateur créé par l'admin
+              </p>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Leave Form */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Membre du Staff *</label>
+                    <select
+                      value={newStaffLeave.staffId}
+                      onChange={(e) => {
+                        const selectedStaff = allStaff.find(s => s.id === e.target.value);
+                        setNewStaffLeave({
+                          ...newStaffLeave,
+                          staffId: e.target.value,
+                          staffName: selectedStaff?.name || `${selectedStaff?.first_name || ''} ${selectedStaff?.last_name || ''}`
+                        });
+                      }}
+                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                      data-testid="staff-leave-select"
+                    >
+                      <option value="">-- Sélectionner un membre --</option>
+                      {allStaff.map(s => (
+                        <option key={s.id} value={s.id}>
+                          {s.name || `${s.first_name || ''} ${s.last_name || ''}`} ({s.role_label || s.role}) - {30 - (s.leaves_used || getStaffLeavesUsed(s.id))}j restants
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Date début *</label>
+                      <Input
+                        type="date"
+                        value={newStaffLeave.startDate}
+                        onChange={(e) => setNewStaffLeave({...newStaffLeave, startDate: e.target.value})}
+                        data-testid="staff-leave-start"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Date fin *</label>
+                      <Input
+                        type="date"
+                        value={newStaffLeave.endDate}
+                        onChange={(e) => setNewStaffLeave({...newStaffLeave, endDate: e.target.value})}
+                        data-testid="staff-leave-end"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Motif</label>
+                    <Input
+                      value={newStaffLeave.reason}
+                      onChange={(e) => setNewStaffLeave({...newStaffLeave, reason: e.target.value})}
+                      placeholder="Ex: Vacances, Maladie, Personnel..."
+                      data-testid="staff-leave-reason"
+                    />
+                  </div>
+
+                  {newStaffLeave.startDate && newStaffLeave.endDate && (
+                    <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200 text-center">
+                      <p className="text-lg font-bold text-yellow-700">
+                        {Math.ceil((new Date(newStaffLeave.endDate) - new Date(newStaffLeave.startDate)) / (1000 * 60 * 60 * 24)) + 1} jours
+                      </p>
+                    </div>
+                  )}
+
+                  <Button 
+                    onClick={handleAddStaffLeave} 
+                    className="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-3"
+                    data-testid="staff-leave-submit"
+                  >
+                    ✅ Enregistrer le Congé
+                  </Button>
+                </div>
+
+                {/* Staff Leave Summary */}
+                <div>
+                  <h4 className="font-semibold text-sm mb-3 text-gray-700">📊 Solde des Congés par Staff</h4>
+                  <div className="space-y-2 max-h-[250px] overflow-y-auto mb-4">
+                    {allStaff.map(s => {
+                      const used = s.leaves_used || getStaffLeavesUsed(s.id);
+                      const remaining = 30 - used;
+                      return (
+                        <div key={s.id} className="flex justify-between items-center p-2 bg-gray-50 rounded-lg">
+                          <div className="flex-1 min-w-0">
+                            <span className="text-sm font-medium block truncate">{s.name || `${s.first_name || ''} ${s.last_name || ''}`}</span>
+                            <span className="text-xs text-gray-500">{s.role_label || s.role}</span>
+                          </div>
+                          <div className="flex items-center gap-2 ml-2">
+                            <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
+                              <div 
+                                className={`h-full ${remaining > 10 ? 'bg-green-500' : remaining > 5 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                                style={{ width: `${(remaining / 30) * 100}%` }}
+                              />
+                            </div>
+                            <span className={`text-sm font-bold min-w-[35px] text-right ${remaining > 10 ? 'text-green-600' : remaining > 5 ? 'text-yellow-600' : 'text-red-600'}`}>
+                              {remaining}j
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {allStaff.length === 0 && (
+                      <p className="text-gray-500 text-sm text-center py-4">Aucun staff trouvé</p>
+                    )}
+                  </div>
+
+                  <h4 className="font-semibold text-sm mb-3 text-gray-700">📋 Congés Récents</h4>
+                  <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                    {staffLeaves.length === 0 ? (
+                      <p className="text-gray-500 text-sm text-center py-4">Aucun congé enregistré</p>
+                    ) : (
+                      staffLeaves.slice(0, 10).map(leave => (
+                        <div key={leave.id} className="flex justify-between items-center p-2 bg-yellow-50 rounded-lg border border-yellow-100">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm truncate">{leave.staffName || leave.staff_name}</p>
+                            <p className="text-xs text-gray-500">
+                              {new Date(leave.startDate || leave.start_date).toLocaleDateString('fr-FR')} - {new Date(leave.endDate || leave.end_date).toLocaleDateString('fr-FR')}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2 ml-2">
+                            <span className="text-sm font-bold text-yellow-600">{leave.daysUsed || leave.days_used}j</span>
+                            <button 
+                              onClick={() => handleDeleteStaffLeave(leave.id)} 
+                              className="p-1 text-red-500 hover:bg-red-100 rounded"
+                              data-testid={`delete-leave-${leave.id}`}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

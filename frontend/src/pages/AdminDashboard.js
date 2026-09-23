@@ -59,6 +59,7 @@ const AdminDashboard = () => {
   const [sessions, setSessions] = useState([]);
   const [teacherSessions, setTeacherSessions] = useState([]);
   const [teacherAvailability, setTeacherAvailability] = useState([]);
+  const [comAvailability, setComAvailability] = useState([]);
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [levelFilter, setLevelFilter] = useState('all');
   const [showExportModal, setShowExportModal] = useState(false);
@@ -179,6 +180,14 @@ const AdminDashboard = () => {
       setSessions(sessionsRes.data || []);
       setConversations(conversationsRes.data || []);
       setTeacherAvailability(availabilityRes.data || []);
+      
+      // Fetch communication availability
+      try {
+        const comAvailRes = await apiClient.get('/communication/all-availability');
+        setComAvailability(comAvailRes.data || []);
+      } catch (e) {
+        console.log('Com availability not available');
+      }
       setTeacherSessions(teacherSessionsRes.data || []);
       setPrices(pricingRes.data || prices);
       setLoading(false);
@@ -1720,6 +1729,82 @@ const AdminDashboard = () => {
                           </div>
                         ) : (
                           <p className="text-gray-500 italic">Aucune disponibilité définie</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Communication Managers Availability */}
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle>📢 Disponibilités des Chargés de Communication</CardTitle>
+                <CardDescription>Consultez les horaires disponibles de MBM et FZT</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button 
+                  onClick={async () => {
+                    try {
+                      const res = await apiClient.get('/communication/all-availability');
+                      setComAvailability(res.data || []);
+                      toast.success('Disponibilités Com actualisées');
+                    } catch (error) {
+                      toast.error('Erreur de chargement');
+                    }
+                  }}
+                  className="mb-4 bg-purple-600 hover:bg-purple-700"
+                >
+                  🔄 Actualiser les disponibilités Com
+                </Button>
+
+                {comAvailability.length === 0 ? (
+                  <p className="text-gray-500 text-center py-8">Aucune disponibilité enregistrée</p>
+                ) : (
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {comAvailability.map((item) => (
+                      <div key={item.com_code} className="border rounded-lg p-4 bg-gradient-to-br from-purple-50 to-pink-50">
+                        <div className="mb-4">
+                          <h3 className="font-semibold text-lg text-purple-700">
+                            {item.com_code === 'MBM' ? '👩‍💼 MBM' : '👨‍💼 FZT'} - Chargé(e) de Com
+                          </h3>
+                          <p className="text-sm text-gray-600">
+                            {item.updated_at ? `Mis à jour: ${new Date(item.updated_at).toLocaleDateString('fr-FR')}` : 'Non défini'}
+                          </p>
+                        </div>
+
+                        {item.availability && Object.keys(item.availability).length > 0 ? (
+                          <div className="grid grid-cols-7 gap-1">
+                            {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((day, idx) => {
+                              const dayKeys = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+                              const daySlots = item.availability[dayKeys[idx]] || [];
+                              
+                              return (
+                                <div key={idx} className="border rounded p-2 bg-white">
+                                  <p className="font-semibold text-center mb-2 text-xs text-purple-700">{day}</p>
+                                  <div className="space-y-1">
+                                    {daySlots.length > 0 ? (
+                                      daySlots.slice(0, 4).map((slot, slotIdx) => (
+                                        <div key={slotIdx} className="bg-purple-100 text-purple-800 text-xs px-1 py-0.5 rounded text-center">
+                                          {slot}
+                                        </div>
+                                      ))
+                                    ) : (
+                                      <div className="bg-gray-100 text-gray-500 text-xs px-1 py-0.5 rounded text-center">
+                                        -
+                                      </div>
+                                    )}
+                                    {daySlots.length > 4 && (
+                                      <div className="text-xs text-purple-600 text-center">+{daySlots.length - 4}</div>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <p className="text-gray-500 italic text-center py-4">Aucune disponibilité définie</p>
                         )}
                       </div>
                     ))}

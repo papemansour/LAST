@@ -159,14 +159,15 @@ E-learning platform pour l'apprentissage de l'anglais avec multi-dashboards (Adm
   1. Email + mot de passe (com@mykalamaenglish.com / COMKALAMA)
   2. Code personnel (MBM ou FZT) pour accéder à son espace
 - **Dashboard Communication** (`/communication`):
-  - Statistiques: Actualités, Étudiants, Jours disponibles, Jours occupés
-  - Onglet Actualités: Créer, modifier, supprimer des news
-  - Onglet Mes Disponibilités: Calendrier mensuel avec gestion des disponibilités
-    - Statuts: Disponible, Occupé, Incertain
-    - Heures de début/fin
-    - Notes optionnelles
-  - Onglet Statistiques: Métriques de communication
+  - **Actualités**: Créer, modifier, supprimer des news
+  - **Disponibilités**: Grille horaires (08:00-19:00) × jours (Lun-Dim) comme les professeurs
+  - **Fiches de Paie**: Consulter les fiches de paie
+  - **Messages Internes**: Communication entre MBM, FZT, Secrétaire et Admin
+  - **Kalamathèque**: Accès à la bibliothèque (code: Digika)
+  - **Statistiques**: Vue d'ensemble des activités
+- **Vue Admin Disponibilités**: Section dédiée dans Horaires pour voir MBM et FZT côte à côte
 - **Endpoints API**:
-  - `GET /api/communication/stats` - Statistiques
-  - `GET/POST/DELETE /api/communication/availability/{com_code}` - Disponibilités par code
-  - `POST /api/admin/create-staff` - Création compte staff
+  - `GET/POST /api/communication/set-availability` - Définir disponibilités
+  - `GET /api/communication/all-availability` - Voir toutes les disponibilités (admin)
+  - `GET/POST /api/communication/payslips/{code}` - Fiches de paie
+  - `GET/POST /api/communication/messages/{code}` - Messages internes

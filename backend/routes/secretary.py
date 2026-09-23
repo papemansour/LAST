@@ -681,3 +681,180 @@ async def get_admin_info_for_secretary(current_user: dict = Depends(get_current_
     return admin
 
 
+# ============ GENERIC STAFF MANAGEMENT ENDPOINTS ============
+# For all staff: communication, secretary, and any admin-created staff
+
+@router.get("/secretary/all-staff")
+async def get_all_staff(current_user: dict = Depends(get_current_user)):
+    """Get all staff members (communication + other staff created by admin)"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    # Get communication staff and any other staff (not teacher, student, admin)
+    staff_users = await db.users.find(
+        {
+            "role": {"$in": ["communication", "staff"]},
+            "is_active": True
+        },
+        {"_id": 0, "id": 1, "first_name": 1, "last_name": 1, "email": 1, "role": 1, "phone": 1}
+    ).to_list(100)
+    
+    # Build staff list with name for display
+    result = []
+    for staff in staff_users:
+        result.append({
+            "id": staff.get("id"),
+            "name": f"{staff.get('first_name', '')} {staff.get('last_name', '')}".strip(),
+            "first_name": staff.get("first_name", ""),
+            "last_name": staff.get("last_name", ""),
+            "email": staff.get("email", ""),
+            "role": staff.get("role", "staff"),
+            "phone": staff.get("phone", ""),
+            "leaves_used": 0,
+            "leaves_total": 30
+        })
+    
+    # If no staff found, provide default communication staff (MBM, FZT)
+    if len(result) == 0:
+        result = [
+            {"id": "MBM", "name": "MBM", "role": "communication", "leaves_used": 0, "leaves_total": 30},
+            {"id": "FZT", "name": "FZT", "role": "communication", "leaves_used": 0, "leaves_total": 30}
+        ]
+    
+    return result
+
+
+@router.get("/secretary/staff-payments")
+async def get_staff_payments(current_user: dict = Depends(get_current_user)):
+    """Get all staff payments"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    payments = await db.staff_payments.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return payments
+
+
+@router.post("/secretary/staff-payments")
+async def create_staff_payment(payment_data: dict = Body(...), current_user: dict = Depends(get_current_user)):
+    """Create a staff payment (like teacher payment with bonuses/deductions)"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    staff_id = payment_data.get("staffId") or payment_data.get("staff_id", "")
+    staff_name = payment_data.get("staffName") or payment_data.get("staff_name", "")
+    staff_role = payment_data.get("staffRole") or payment_data.get("staff_role", "staff")
+    
+    currency = payment_data.get("currency", "EUR")
+    deduction_rate = 1500 if currency == "FCFA" else 5
+    
+    amount = float(payment_data.get("amount", 0))
+    bonus = float(payment_data.get("bonus", 0))
+    deductions = int(payment_data.get("deductions", 0))
+    deductions_amount = deductions * deduction_rate
+    montant_net = max(0, amount + bonus - deductions_amount)
+    
+    # Generate invoice reference
+    invoice_ref = f"STAFF-{staff_id[:3].upper() if staff_id else 'XXX'}-{datetime.now().strftime('%Y%m')}-{random.randint(1000, 9999)}"
+    
+    payment = {
+        "id": str(uuid4()),
+        "staff_id": staff_id,
+        "staffId": staff_id,
+        "staff_name": staff_name,
+        "staffName": staff_name,
+        "staff_role": staff_role,
+        "staffRole": staff_role,
+        "month": payment_data.get("month", ""),
+        "amount": amount,
+        "currency": currency,
+        "hours_worked": payment_data.get("hoursWorked") or payment_data.get("hours_worked", 0),
+        "hourly_rate": payment_data.get("hourlyRate") or payment_data.get("hourly_rate", 0),
+        "bonus": bonus,
+        "deductions": deductions,
+        "deductions_amount": deductions_amount,
+        "montant_net": montant_net,
+        "description": payment_data.get("description", "Travail staff"),
+        "notes": payment_data.get("notes", ""),
+        "invoice_ref": invoice_ref,
+        "status": "pending",
+        "created_by": current_user['id'],
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.staff_payments.insert_one(payment)
+    logger.info(f"Staff payment created for: {staff_name} ({staff_role}) - Net: {montant_net} {currency} - Ref: {invoice_ref}")
+    return {"message": "Payment created", "id": payment['id'], "montant_net": montant_net, "invoice_ref": invoice_ref}
+
+
+@router.delete("/secretary/staff-payments/{payment_id}")
+async def delete_staff_payment(payment_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a staff payment"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    result = await db.staff_payments.delete_one({"id": payment_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Payment not found")
+    
+    return {"message": "Payment deleted"}
+
+
+@router.get("/secretary/staff-leaves")
+async def get_staff_leaves(current_user: dict = Depends(get_current_user)):
+    """Get all staff leaves"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    leaves = await db.staff_leaves.find({}, {"_id": 0}).sort("created_at", -1).to_list(200)
+    return leaves
+
+
+@router.post("/secretary/staff-leaves")
+async def create_staff_leave(leave_data: dict = Body(...), current_user: dict = Depends(get_current_user)):
+    """Create a staff leave record"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    staff_id = leave_data.get("staffId") or leave_data.get("staff_id", "")
+    staff_name = leave_data.get("staffName") or leave_data.get("staff_name", "")
+    start_date = leave_data.get("startDate") or leave_data.get("start_date", "")
+    end_date = leave_data.get("endDate") or leave_data.get("end_date", "")
+    days_used = int(leave_data.get("daysUsed") or leave_data.get("days_used", 0))
+    reason = leave_data.get("reason", "")
+    
+    leave = {
+        "id": str(uuid4()),
+        "staff_id": staff_id,
+        "staffId": staff_id,
+        "staff_name": staff_name,
+        "staffName": staff_name,
+        "start_date": start_date,
+        "startDate": start_date,
+        "end_date": end_date,
+        "endDate": end_date,
+        "days_used": days_used,
+        "daysUsed": days_used,
+        "reason": reason,
+        "status": "approved",
+        "created_by": current_user['id'],
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.staff_leaves.insert_one(leave)
+    logger.info(f"Staff leave created for: {staff_name} - {days_used} days from {start_date} to {end_date}")
+    return {"message": "Leave created", "id": leave['id'], "days_used": days_used}
+
+
+@router.delete("/secretary/staff-leaves/{leave_id}")
+async def delete_staff_leave(leave_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a staff leave"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    result = await db.staff_leaves.delete_one({"id": leave_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Leave not found")
+    
+    return {"message": "Leave deleted"}
+
+

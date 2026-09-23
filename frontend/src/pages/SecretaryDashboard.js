@@ -108,15 +108,14 @@ const SecretaryDashboard = () => {
     pendingPayments: 0
   });
 
-  // Chargés de Com state
-  const [comStaff, setComStaff] = useState([
-    { id: 'MBM', name: 'MBM - Chargé(e) de Com', email: 'mbm@mykalamaenglish.com' },
-    { id: 'FZT', name: 'FZT - Chargé(e) de Com', email: 'fzt@mykalamaenglish.com' }
-  ]);
-  const [comPayments, setComPayments] = useState([]);
-  const [newComPayment, setNewComPayment] = useState({
-    comCode: 'MBM',
-    comName: 'MBM - Chargé(e) de Com',
+  // STAFFS state (Chargés de Com + Équipes créées par Admin)
+  const [allStaff, setAllStaff] = useState([]);
+  const [staffPayments, setStaffPayments] = useState([]);
+  const [staffLeaves, setStaffLeaves] = useState([]);
+  const [newStaffPayment, setNewStaffPayment] = useState({
+    staffId: '',
+    staffName: '',
+    staffRole: '',
     month: new Date().toISOString().slice(0, 7),
     amount: '',
     currency: 'EUR',
@@ -124,8 +123,16 @@ const SecretaryDashboard = () => {
     hourlyRate: '',
     bonus: '0',
     deductions: 0,
-    description: 'Travail de communication',
+    description: '',
     notes: ''
+  });
+  const [newStaffLeave, setNewStaffLeave] = useState({
+    staffId: '',
+    staffName: '',
+    startDate: '',
+    endDate: '',
+    reason: '',
+    daysUsed: 0
   });
 
   // Taux de conversion EUR -> FCFA
@@ -247,6 +254,35 @@ const SecretaryDashboard = () => {
       }
     } catch (error) {
       console.log('Billing data not available yet');
+    }
+
+    // Charger tous les STAFFS (Chargés de Com + Équipes)
+    try {
+      const staffRes = await apiClient.get('/secretary/all-staff');
+      setAllStaff(staffRes.data || []);
+    } catch (error) {
+      console.log('Staff data not available');
+      // Fallback: utiliser les chargés de com par défaut
+      setAllStaff([
+        { id: 'MBM', name: 'MBM', role: 'communication', leaves_used: 0, leaves_total: 30 },
+        { id: 'FZT', name: 'FZT', role: 'communication', leaves_used: 0, leaves_total: 30 }
+      ]);
+    }
+
+    // Charger les paiements STAFFS
+    try {
+      const staffPaymentsRes = await apiClient.get('/secretary/staff-payments');
+      setStaffPayments(staffPaymentsRes.data || []);
+    } catch (error) {
+      console.log('Staff payments not available');
+    }
+
+    // Charger les congés STAFFS
+    try {
+      const staffLeavesRes = await apiClient.get('/secretary/staff-leaves');
+      setStaffLeaves(staffLeavesRes.data || []);
+    } catch (error) {
+      console.log('Staff leaves not available');
     }
     
     // Charger la conversation avec l'admin
@@ -502,20 +538,21 @@ const SecretaryDashboard = () => {
     }
   };
 
-  // Chargés de Com payment handlers
-  const handleAddComPayment = async () => {
-    if (!newComPayment.comCode || !newComPayment.month || !newComPayment.amount) {
+  // STAFFS payment handlers
+  const handleAddStaffPayment = async () => {
+    if (!newStaffPayment.staffId || !newStaffPayment.month || !newStaffPayment.amount) {
       toast.error('Veuillez remplir tous les champs obligatoires');
       return;
     }
 
     try {
-      await apiClient.post('/secretary/com-payments', newComPayment);
-      const res = await apiClient.get('/secretary/com-payments');
-      setComPayments(res.data || []);
-      setNewComPayment({
-        comCode: 'MBM',
-        comName: 'MBM - Chargé(e) de Com',
+      await apiClient.post('/secretary/staff-payments', newStaffPayment);
+      const res = await apiClient.get('/secretary/staff-payments');
+      setStaffPayments(res.data || []);
+      setNewStaffPayment({
+        staffId: '',
+        staffName: '',
+        staffRole: '',
         month: new Date().toISOString().slice(0, 7),
         amount: '',
         currency: 'EUR',
@@ -523,26 +560,78 @@ const SecretaryDashboard = () => {
         hourlyRate: '',
         bonus: '0',
         deductions: 0,
-        description: 'Travail de communication',
+        description: '',
         notes: ''
       });
-      toast.success('🪙 Paiement Chargé de Com enregistré !');
+      toast.success('🪙 Bulletin de salaire STAFF enregistré !');
     } catch (error) {
-      console.error('Error adding com payment:', error);
+      console.error('Error adding staff payment:', error);
       toast.error('Erreur lors de l\'enregistrement du paiement');
     }
   };
 
-  const handleDeleteComPayment = async (id) => {
+  const handleDeleteStaffPayment = async (id) => {
     if (window.confirm('Supprimer ce paiement ?')) {
       try {
-        await apiClient.delete(`/secretary/com-payments/${id}`);
-        setComPayments(comPayments.filter(p => p.id !== id));
+        await apiClient.delete(`/secretary/staff-payments/${id}`);
+        setStaffPayments(staffPayments.filter(p => p.id !== id));
         toast.success('Paiement supprimé');
       } catch (error) {
         toast.error('Erreur lors de la suppression');
       }
     }
+  };
+
+  // STAFFS leave handlers
+  const handleAddStaffLeave = async () => {
+    if (!newStaffLeave.staffId || !newStaffLeave.startDate || !newStaffLeave.endDate) {
+      toast.error('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+
+    // Calculate days
+    const start = new Date(newStaffLeave.startDate);
+    const end = new Date(newStaffLeave.endDate);
+    const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+
+    try {
+      await apiClient.post('/secretary/staff-leaves', {
+        ...newStaffLeave,
+        daysUsed: days
+      });
+      const res = await apiClient.get('/secretary/staff-leaves');
+      setStaffLeaves(res.data || []);
+      setNewStaffLeave({
+        staffId: '',
+        staffName: '',
+        startDate: '',
+        endDate: '',
+        reason: '',
+        daysUsed: 0
+      });
+      toast.success(`🏖️ Congé enregistré (${days} jours) !`);
+    } catch (error) {
+      console.error('Error adding staff leave:', error);
+      toast.error('Erreur lors de l\'enregistrement du congé');
+    }
+  };
+
+  const handleDeleteStaffLeave = async (id) => {
+    if (window.confirm('Supprimer ce congé ?')) {
+      try {
+        await apiClient.delete(`/secretary/staff-leaves/${id}`);
+        setStaffLeaves(staffLeaves.filter(l => l.id !== id));
+        toast.success('Congé supprimé');
+      } catch (error) {
+        toast.error('Erreur lors de la suppression');
+      }
+    }
+  };
+
+  const getStaffLeavesUsed = (staffId) => {
+    return staffLeaves
+      .filter(l => l.staffId === staffId || l.staff_id === staffId)
+      .reduce((sum, l) => sum + (l.daysUsed || l.days_used || 0), 0);
   };
 
   const handleDeleteReceipt = async (id) => {
@@ -556,6 +645,9 @@ const SecretaryDashboard = () => {
       }
     }
   };
+
+  // Logo URL for documents
+  const KALAMA_LOGO_URL = 'https://customer-assets-gfyr7b9c.emergentagent.net/job_0231dd73-3288-45b1-94c8-b711e90646ba/artifacts/jawlqd6l_dcc5e2c7-dea7-45dc-b2b6-6d6c615a529b.jpeg';
 
   const printReceipt = (receipt) => {
     const currency = receipt.currency || 'EUR';
@@ -571,7 +663,9 @@ const SecretaryDashboard = () => {
         <style>
           body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; color: #333; }
           .header { display: flex; justify-content: space-between; border-bottom: 3px solid #3b82f6; padding-bottom: 20px; margin-bottom: 30px; }
-          .logo { font-size: 24px; font-weight: bold; color: #3b82f6; }
+          .logo-container { display: flex; align-items: center; gap: 12px; }
+          .logo-img { height: 50px; width: auto; }
+          .logo-text { font-size: 24px; font-weight: bold; color: #3b82f6; }
           .invoice-info { text-align: right; }
           .invoice-number { font-size: 20px; font-weight: bold; color: #3b82f6; }
           .parties { display: flex; justify-content: space-between; margin: 30px 0; }
@@ -592,9 +686,12 @@ const SecretaryDashboard = () => {
       </head>
       <body>
         <div class="header">
-          <div>
-            <div class="logo">🎓 MyKalama English</div>
-            <p style="margin-top: 10px; color: #666;">Société de Formation en Langues</p>
+          <div class="logo-container">
+            <img src="${KALAMA_LOGO_URL}" alt="MyKalama Logo" class="logo-img" />
+            <div>
+              <div class="logo-text">MyKalama English</div>
+              <p style="margin-top: 5px; color: #666; font-size: 12px;">Société de Formation en Langues</p>
+            </div>
           </div>
           <div class="invoice-info">
             <div class="invoice-number">REÇU DE PAIEMENT</div>
@@ -699,7 +796,9 @@ const SecretaryDashboard = () => {
         <style>
           body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; color: #333; }
           .header { display: flex; justify-content: space-between; border-bottom: 3px solid #059669; padding-bottom: 20px; margin-bottom: 30px; }
-          .logo { font-size: 24px; font-weight: bold; color: #059669; }
+          .logo-container { display: flex; align-items: center; gap: 12px; }
+          .logo-img { height: 50px; width: auto; }
+          .logo-text { font-size: 24px; font-weight: bold; color: #059669; }
           .invoice-info { text-align: right; }
           .invoice-number { font-size: 20px; font-weight: bold; color: #059669; }
           .parties { display: flex; justify-content: space-between; margin: 30px 0; }
@@ -723,9 +822,12 @@ const SecretaryDashboard = () => {
       </head>
       <body>
         <div class="header">
-          <div>
-            <div class="logo">🎓 MyKalama English</div>
-            <p style="margin-top: 10px; color: #666;">Société de Formation en Langues</p>
+          <div class="logo-container">
+            <img src="${KALAMA_LOGO_URL}" alt="MyKalama Logo" class="logo-img" />
+            <div>
+              <div class="logo-text">MyKalama English</div>
+              <p style="margin-top: 5px; color: #666; font-size: 12px;">Société de Formation en Langues</p>
+            </div>
           </div>
           <div class="invoice-info">
             <div class="invoice-number">BULLETIN DE SALAIRE</div>
@@ -1885,34 +1987,39 @@ const SecretaryDashboard = () => {
               </Card>
             </div>
 
-            {/* Com Staff Payments Section */}
+            {/* STAFFS Section - Bulletins de Salaire + Gestion des Congés */}
             <Card className="border-purple-200 mt-6">
               <CardHeader className="bg-gradient-to-r from-purple-50 to-fuchsia-50">
                 <CardTitle className="flex items-center gap-2 text-purple-700">
-                  📢 Bulletin de Salaire - Chargé(e) de Communication
+                  👥 Bulletin de Salaire - STAFFS
                 </CardTitle>
+                <p className="text-sm text-gray-600">Chargés de Com + Équipes créées par l'Admin</p>
               </CardHeader>
               <CardContent className="pt-6 space-y-4">
                 <div className="grid md:grid-cols-2 gap-6">
                   {/* Form */}
                   <div className="space-y-4">
-                    {/* Chargé de Com */}
+                    {/* Staff Selection */}
                     <div>
-                      <label className="block text-sm font-medium mb-1">Chargé(e) de Com *</label>
+                      <label className="block text-sm font-medium mb-1">Membre du Staff *</label>
                       <select
-                        value={newComPayment.comCode}
+                        value={newStaffPayment.staffId}
                         onChange={(e) => {
-                          const selectedCom = comStaff.find(c => c.id === e.target.value);
-                          setNewComPayment({
-                            ...newComPayment,
-                            comCode: e.target.value,
-                            comName: selectedCom?.name || ''
+                          const selectedStaff = allStaff.find(s => s.id === e.target.value);
+                          setNewStaffPayment({
+                            ...newStaffPayment,
+                            staffId: e.target.value,
+                            staffName: selectedStaff?.name || selectedStaff?.first_name || '',
+                            staffRole: selectedStaff?.role || ''
                           });
                         }}
                         className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                       >
-                        {comStaff.map(c => (
-                          <option key={c.id} value={c.id}>{c.name}</option>
+                        <option value="">-- Sélectionner un membre --</option>
+                        {allStaff.map(s => (
+                          <option key={s.id} value={s.id}>
+                            {s.name || `${s.first_name || ''} ${s.last_name || ''}`} ({s.role || 'staff'})
+                          </option>
                         ))}
                       </select>
                     </div>
@@ -1922,8 +2029,8 @@ const SecretaryDashboard = () => {
                       <label className="block text-sm font-medium mb-1">Période / Mois *</label>
                       <Input
                         type="month"
-                        value={newComPayment.month}
-                        onChange={(e) => setNewComPayment({...newComPayment, month: e.target.value})}
+                        value={newStaffPayment.month}
+                        onChange={(e) => setNewStaffPayment({...newStaffPayment, month: e.target.value})}
                       />
                     </div>
 
@@ -1933,16 +2040,16 @@ const SecretaryDashboard = () => {
                         <label className="block text-sm font-medium mb-1">Montant de base *</label>
                         <Input
                           type="number"
-                          value={newComPayment.amount}
-                          onChange={(e) => setNewComPayment({...newComPayment, amount: e.target.value})}
+                          value={newStaffPayment.amount}
+                          onChange={(e) => setNewStaffPayment({...newStaffPayment, amount: e.target.value})}
                           placeholder="0"
                         />
                       </div>
                       <div>
                         <label className="block text-sm font-medium mb-1">Devise</label>
                         <select
-                          value={newComPayment.currency}
-                          onChange={(e) => setNewComPayment({...newComPayment, currency: e.target.value})}
+                          value={newStaffPayment.currency}
+                          onChange={(e) => setNewStaffPayment({...newStaffPayment, currency: e.target.value})}
                           className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                         >
                           <option value="EUR">EUR (€)</option>
@@ -1957,8 +2064,8 @@ const SecretaryDashboard = () => {
                         <label className="block text-sm font-medium mb-1">Heures travaillées</label>
                         <Input
                           type="number"
-                          value={newComPayment.hoursWorked}
-                          onChange={(e) => setNewComPayment({...newComPayment, hoursWorked: e.target.value})}
+                          value={newStaffPayment.hoursWorked}
+                          onChange={(e) => setNewStaffPayment({...newStaffPayment, hoursWorked: e.target.value})}
                           placeholder="0"
                         />
                       </div>
@@ -1966,8 +2073,8 @@ const SecretaryDashboard = () => {
                         <label className="block text-sm font-medium mb-1">Taux horaire</label>
                         <Input
                           type="number"
-                          value={newComPayment.hourlyRate}
-                          onChange={(e) => setNewComPayment({...newComPayment, hourlyRate: e.target.value})}
+                          value={newStaffPayment.hourlyRate}
+                          onChange={(e) => setNewStaffPayment({...newStaffPayment, hourlyRate: e.target.value})}
                           placeholder="0"
                         />
                       </div>
@@ -1979,8 +2086,8 @@ const SecretaryDashboard = () => {
                         <label className="block text-sm font-medium mb-1 text-green-600">💚 Bonus</label>
                         <Input
                           type="number"
-                          value={newComPayment.bonus}
-                          onChange={(e) => setNewComPayment({...newComPayment, bonus: e.target.value})}
+                          value={newStaffPayment.bonus}
+                          onChange={(e) => setNewStaffPayment({...newStaffPayment, bonus: e.target.value})}
                           placeholder="0"
                           className="border-green-300 focus:border-green-500"
                         />
@@ -1989,8 +2096,8 @@ const SecretaryDashboard = () => {
                         <label className="block text-sm font-medium mb-1 text-red-600">❌ Déductions (nb)</label>
                         <Input
                           type="number"
-                          value={newComPayment.deductions}
-                          onChange={(e) => setNewComPayment({...newComPayment, deductions: parseInt(e.target.value) || 0})}
+                          value={newStaffPayment.deductions}
+                          onChange={(e) => setNewStaffPayment({...newStaffPayment, deductions: parseInt(e.target.value) || 0})}
                           placeholder="0"
                           className="border-red-300 focus:border-red-500"
                         />
@@ -1999,32 +2106,32 @@ const SecretaryDashboard = () => {
                     </div>
 
                     {/* Récapitulatif */}
-                    {newComPayment.amount && (
+                    {newStaffPayment.amount && (
                       <div className="bg-purple-50 p-3 rounded-lg border border-purple-200">
                         <div className="flex justify-between items-center text-sm">
                           <span>Montant de base:</span>
-                          <span>{parseFloat(newComPayment.amount || 0).toFixed(2)} {newComPayment.currency}</span>
+                          <span>{parseFloat(newStaffPayment.amount || 0).toFixed(2)} {newStaffPayment.currency}</span>
                         </div>
-                        {parseInt(newComPayment.bonus || 0) > 0 && (
+                        {parseInt(newStaffPayment.bonus || 0) > 0 && (
                           <div className="flex justify-between items-center text-sm text-green-600">
                             <span>+ Bonus:</span>
-                            <span>+{parseFloat(newComPayment.bonus || 0).toFixed(2)} {newComPayment.currency}</span>
+                            <span>+{parseFloat(newStaffPayment.bonus || 0).toFixed(2)} {newStaffPayment.currency}</span>
                           </div>
                         )}
-                        {parseInt(newComPayment.deductions || 0) > 0 && (
+                        {parseInt(newStaffPayment.deductions || 0) > 0 && (
                           <div className="flex justify-between items-center text-sm text-red-600">
-                            <span>- Déductions ({newComPayment.deductions} × {newComPayment.currency === 'FCFA' ? '1500' : '5'}):</span>
-                            <span>-{(parseInt(newComPayment.deductions || 0) * (newComPayment.currency === 'FCFA' ? 1500 : 5)).toFixed(2)} {newComPayment.currency}</span>
+                            <span>- Déductions ({newStaffPayment.deductions} × {newStaffPayment.currency === 'FCFA' ? '1500' : '5'}):</span>
+                            <span>-{(parseInt(newStaffPayment.deductions || 0) * (newStaffPayment.currency === 'FCFA' ? 1500 : 5)).toFixed(2)} {newStaffPayment.currency}</span>
                           </div>
                         )}
                         <div className="flex justify-between items-center mt-2 pt-2 border-t border-purple-300 font-bold text-lg text-purple-700">
                           <span>💰 MONTANT NET:</span>
                           <span>
                             {Math.max(0, 
-                              parseFloat(newComPayment.amount || 0) + 
-                              parseFloat(newComPayment.bonus || 0) - 
-                              (parseInt(newComPayment.deductions || 0) * (newComPayment.currency === 'FCFA' ? 1500 : 5))
-                            ).toFixed(2)} {newComPayment.currency}
+                              parseFloat(newStaffPayment.amount || 0) + 
+                              parseFloat(newStaffPayment.bonus || 0) - 
+                              (parseInt(newStaffPayment.deductions || 0) * (newStaffPayment.currency === 'FCFA' ? 1500 : 5))
+                            ).toFixed(2)} {newStaffPayment.currency}
                           </span>
                         </div>
                       </div>
@@ -2034,26 +2141,26 @@ const SecretaryDashboard = () => {
                     <div>
                       <label className="block text-sm font-medium mb-1">Notes</label>
                       <textarea
-                        value={newComPayment.notes}
-                        onChange={(e) => setNewComPayment({...newComPayment, notes: e.target.value})}
+                        value={newStaffPayment.notes}
+                        onChange={(e) => setNewStaffPayment({...newStaffPayment, notes: e.target.value})}
                         placeholder="Ajouter un commentaire..."
                         className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm min-h-[60px]"
                       />
                     </div>
 
-                    <Button onClick={handleAddComPayment} className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3">
+                    <Button onClick={handleAddStaffPayment} className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3">
                       ✅ Enregistrer le Bulletin de Salaire
                     </Button>
                   </div>
 
-                  {/* Recent Com Payments */}
+                  {/* Recent Staff Payments */}
                   <div>
-                    <h4 className="font-semibold text-sm mb-3 text-gray-700">📋 Bulletins Récents - Chargés de Com</h4>
-                    <div className="space-y-2 max-h-[500px] overflow-y-auto">
-                      {comPayments.length === 0 ? (
+                    <h4 className="font-semibold text-sm mb-3 text-gray-700">📋 Bulletins Récents - STAFFS</h4>
+                    <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                      {staffPayments.length === 0 ? (
                         <p className="text-gray-500 text-sm text-center py-4">Aucun paiement enregistré</p>
                       ) : (
-                        comPayments.slice(0, 10).map(payment => {
+                        staffPayments.slice(0, 10).map(payment => {
                           const montantNet = Math.max(0,
                             parseFloat(payment.amount || 0) + 
                             parseFloat(payment.bonus || 0) - 
@@ -2062,22 +2169,152 @@ const SecretaryDashboard = () => {
                           return (
                             <div key={payment.id} className="flex justify-between items-center p-3 bg-purple-50 rounded-lg border border-purple-100">
                               <div>
-                                <p className="font-medium text-sm">{payment.comCode || payment.com_code} - {payment.month}</p>
+                                <p className="font-medium text-sm">{payment.staffName || payment.staff_name} - {payment.month}</p>
                                 <p className="text-xs text-gray-500">
-                                  Base: {payment.amount} {payment.currency || 'EUR'}
+                                  {payment.staffRole || payment.staff_role} | Base: {payment.amount} {payment.currency || 'EUR'}
                                   {payment.bonus > 0 && <span className="text-green-600 ml-1">+{payment.bonus}</span>}
                                   {payment.deductions > 0 && <span className="text-red-600 ml-1">-{payment.deductions}déd</span>}
                                 </p>
                               </div>
                               <div className="flex items-center gap-2">
                                 <span className="font-bold text-purple-600">{montantNet.toFixed(0)} {payment.currency || 'EUR'}</span>
-                                <button onClick={() => handleDeleteComPayment(payment.id)} className="p-1.5 text-red-500 hover:bg-red-100 rounded" title="Supprimer">
+                                <button onClick={() => handleDeleteStaffPayment(payment.id)} className="p-1.5 text-red-500 hover:bg-red-100 rounded" title="Supprimer">
                                   🗑️
                                 </button>
                               </div>
                             </div>
                           );
                         })
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Gestion des Congés STAFFS (30j/an) */}
+            <Card className="border-yellow-200 mt-6">
+              <CardHeader className="bg-gradient-to-r from-yellow-50 to-orange-50">
+                <CardTitle className="flex items-center gap-2 text-yellow-700">
+                  🏖️ Gestion des Congés - STAFFS (30j/an)
+                </CardTitle>
+                <p className="text-sm text-gray-600">Enregistrer les congés pour les Chargés de Com et les Équipes</p>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Leave Form */}
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Membre du Staff *</label>
+                      <select
+                        value={newStaffLeave.staffId}
+                        onChange={(e) => {
+                          const selectedStaff = allStaff.find(s => s.id === e.target.value);
+                          setNewStaffLeave({
+                            ...newStaffLeave,
+                            staffId: e.target.value,
+                            staffName: selectedStaff?.name || `${selectedStaff?.first_name || ''} ${selectedStaff?.last_name || ''}`
+                          });
+                        }}
+                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                      >
+                        <option value="">-- Sélectionner un membre --</option>
+                        {allStaff.map(s => (
+                          <option key={s.id} value={s.id}>
+                            {s.name || `${s.first_name || ''} ${s.last_name || ''}`} - {30 - getStaffLeavesUsed(s.id)}j restants
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Date début *</label>
+                        <Input
+                          type="date"
+                          value={newStaffLeave.startDate}
+                          onChange={(e) => setNewStaffLeave({...newStaffLeave, startDate: e.target.value})}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Date fin *</label>
+                        <Input
+                          type="date"
+                          value={newStaffLeave.endDate}
+                          onChange={(e) => setNewStaffLeave({...newStaffLeave, endDate: e.target.value})}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Motif</label>
+                      <Input
+                        value={newStaffLeave.reason}
+                        onChange={(e) => setNewStaffLeave({...newStaffLeave, reason: e.target.value})}
+                        placeholder="Ex: Vacances, Maladie, Personnel..."
+                      />
+                    </div>
+
+                    {newStaffLeave.startDate && newStaffLeave.endDate && (
+                      <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200 text-center">
+                        <p className="text-lg font-bold text-yellow-700">
+                          {Math.ceil((new Date(newStaffLeave.endDate) - new Date(newStaffLeave.startDate)) / (1000 * 60 * 60 * 24)) + 1} jours
+                        </p>
+                      </div>
+                    )}
+
+                    <Button onClick={handleAddStaffLeave} className="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-3">
+                      ✅ Enregistrer le Congé
+                    </Button>
+                  </div>
+
+                  {/* Staff Leave Summary */}
+                  <div>
+                    <h4 className="font-semibold text-sm mb-3 text-gray-700">📊 Solde des Congés par Staff</h4>
+                    <div className="space-y-2 max-h-[200px] overflow-y-auto mb-4">
+                      {allStaff.map(s => {
+                        const used = getStaffLeavesUsed(s.id);
+                        const remaining = 30 - used;
+                        return (
+                          <div key={s.id} className="flex justify-between items-center p-2 bg-gray-50 rounded-lg">
+                            <span className="text-sm font-medium">{s.name || `${s.first_name || ''} ${s.last_name || ''}`}</span>
+                            <div className="flex items-center gap-2">
+                              <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div 
+                                  className={`h-full ${remaining > 10 ? 'bg-green-500' : remaining > 5 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                                  style={{ width: `${(remaining / 30) * 100}%` }}
+                                />
+                              </div>
+                              <span className={`text-sm font-bold ${remaining > 10 ? 'text-green-600' : remaining > 5 ? 'text-yellow-600' : 'text-red-600'}`}>
+                                {remaining}j
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <h4 className="font-semibold text-sm mb-3 text-gray-700">📋 Congés Récents</h4>
+                    <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                      {staffLeaves.length === 0 ? (
+                        <p className="text-gray-500 text-sm text-center py-4">Aucun congé enregistré</p>
+                      ) : (
+                        staffLeaves.slice(0, 8).map(leave => (
+                          <div key={leave.id} className="flex justify-between items-center p-2 bg-yellow-50 rounded-lg border border-yellow-100">
+                            <div>
+                              <p className="font-medium text-sm">{leave.staffName || leave.staff_name}</p>
+                              <p className="text-xs text-gray-500">
+                                {new Date(leave.startDate || leave.start_date).toLocaleDateString('fr-FR')} - {new Date(leave.endDate || leave.end_date).toLocaleDateString('fr-FR')}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-bold text-yellow-600">{leave.daysUsed || leave.days_used}j</span>
+                              <button onClick={() => handleDeleteStaffLeave(leave.id)} className="p-1 text-red-500 hover:bg-red-100 rounded">
+                                🗑️
+                              </button>
+                            </div>
+                          </div>
+                        ))
                       )}
                     </div>
                   </div>

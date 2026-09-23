@@ -624,6 +624,9 @@ async def download_facture_pdf(facture_id: str):
         </div>
         """
     
+    # Logo URL
+    KALAMA_LOGO_URL = 'https://customer-assets-gfyr7b9c.emergentagent.net/job_0231dd73-3288-45b1-94c8-b711e90646ba/artifacts/jawlqd6l_dcc5e2c7-dea7-45dc-b2b6-6d6c615a529b.jpeg'
+    
     # Simple one-page HTML (same style as teacher invoices - teal theme)
     html_content = f"""
     <!DOCTYPE html>
@@ -637,6 +640,8 @@ async def download_facture_pdf(facture_id: str):
             body {{ font-family: Arial, sans-serif; background: #f3f4f6; padding: 20px; }}
             .invoice {{ max-width: 800px; margin: 0 auto; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden; }}
             .header {{ background: linear-gradient(135deg, #0d9488, #14b8a6); color: white; padding: 25px; display: flex; justify-content: space-between; align-items: center; }}
+            .header-left {{ display: flex; align-items: center; gap: 15px; }}
+            .header-logo {{ height: 50px; width: auto; border-radius: 4px; }}
             .header h1 {{ font-size: 22px; margin-bottom: 5px; }}
             .header p {{ font-size: 12px; opacity: 0.9; }}
             .header-right {{ text-align: right; }}
@@ -662,9 +667,12 @@ async def download_facture_pdf(facture_id: str):
     <body>
         <div class="invoice">
             <div class="header">
-                <div>
-                    <h1>MyKalamaEnglish</h1>
-                    <p>Plateforme E-Learning</p>
+                <div class="header-left">
+                    <img src="{KALAMA_LOGO_URL}" alt="MyKalama Logo" class="header-logo" />
+                    <div>
+                        <h1>MyKalamaEnglish</h1>
+                        <p>Plateforme E-Learning</p>
+                    </div>
                 </div>
                 <div class="header-right">
                     <p>FACTURE PRESTATAIRE</p>

@@ -150,3 +150,22 @@ E-learning platform pour l'apprentissage de l'anglais avec multi-dashboards (Adm
   - Accès Kalamathèque avec mot de passe "Digika"
   - Lien de connexion vers Mykalama
 - **From**: mykalamaenglish.com (via AWS SES)
+
+
+### Mise à jour Septembre 2026 (Suite 7) - Espace Chargé(e) de Communication
+- **Nouveau rôle**: `communication` - Chargé(e) de communication avec dashboard dédié
+- **Dashboard Communication** (`/communication`):
+  - Statistiques: Actualités, Témoignages, Étudiants, Posts Sociaux
+  - Onglet Actualités: Créer, modifier, supprimer des news
+  - Onglet Témoignages: Gérer les témoignages clients
+  - Onglet Réseaux Sociaux: Planifier des publications (Facebook, Instagram, Twitter, LinkedIn)
+  - Onglet Calendrier: Vue d'ensemble des publications planifiées
+  - Onglet Statistiques: Métriques de communication
+- **Création de compte Staff**: Via Admin > Onglet "Équipe"
+  - Dropdown Rôle: Chargé(e) de Communication ou Secrétaire
+  - Génération automatique de mot de passe provisoire
+- **Endpoints API**:
+  - `GET /api/communication/stats` - Statistiques
+  - `GET/POST /api/communication/testimonials` - Témoignages
+  - `GET/POST/PUT/DELETE /api/communication/social-posts` - Posts réseaux sociaux
+  - `POST /api/admin/create-staff` - Création compte staff

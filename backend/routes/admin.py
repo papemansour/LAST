@@ -416,6 +416,63 @@ async def create_student_by_admin(student_data: StudentCreateByAdmin, current_us
     }
 
 
+@router.post("/admin/create-staff")
+async def create_staff_user(data: dict = Body(...), current_user: dict = Depends(get_current_user)):
+    """Créer un compte staff (secrétaire ou chargé de communication)"""
+    if current_user['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    role = data.get("role", "communication")
+    if role not in ["secretary", "communication"]:
+        raise HTTPException(status_code=400, detail="Role must be 'secretary' or 'communication'")
+    
+    email = data.get("email", "").lower().strip()
+    first_name = data.get("first_name", "").strip()
+    last_name = data.get("last_name", "").strip()
+    
+    if not email or not first_name or not last_name:
+        raise HTTPException(status_code=400, detail="Email, first_name and last_name are required")
+    
+    # Check if email exists
+    existing = await db.users.find_one({"email": email}, {"_id": 0})
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already exists")
+    
+    # Generate password
+    temp_password = f"Staff{uuid.uuid4().hex[:8]}"
+    password_hash = hash_password(temp_password)
+    
+    staff_user = User(
+        email=email,
+        first_name=first_name,
+        last_name=last_name,
+        phone=data.get("phone", ""),
+        role=role,
+        is_active=True,
+        password_hash=password_hash,
+        temporary_password=temp_password
+    )
+    
+    doc = staff_user.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    await db.users.insert_one(doc)
+    
+    role_label = "Chargé(e) de Communication" if role == "communication" else "Secrétaire"
+    logger.info(f"{role_label} {staff_user.id} created by admin {current_user['id']}")
+    
+    return {
+        "message": f"{role_label} créé(e) avec succès",
+        "user": {
+            "id": staff_user.id,
+            "email": email,
+            "first_name": first_name,
+            "last_name": last_name,
+            "role": role
+        },
+        "temporary_password": temp_password
+    }
+
+
 @router.post("/admin/import-students-csv")
 async def import_students_csv(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
     """Importer des étudiants en masse depuis un fichier CSV"""

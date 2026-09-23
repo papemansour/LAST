@@ -23,7 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
 import { useAuth } from '../hooks/useAuth';
-import { LogOut, Users, UserCheck, UserPlus, Award, BookOpen, Clock, Send, FileText, DollarSign, Lock, Trash2, Phone, CalendarDays, BarChart3, TrendingUp, Plane, CheckCircle, XCircle, AlertCircle, Download } from 'lucide-react';
+import { LogOut, Users, UserCheck, UserPlus, Award, BookOpen, Clock, Send, FileText, DollarSign, Lock, Trash2, Phone, CalendarDays, BarChart3, TrendingUp, Plane, CheckCircle, XCircle, AlertCircle, Download, Megaphone, Plus } from 'lucide-react';
 import KalamathequeAdmin from '../components/KalamathequeAdmin';
 import NewsManager from '../components/NewsManager';
 import ConversationChat from '../components/ConversationChat';
@@ -67,6 +67,15 @@ const AdminDashboard = () => {
     dateFrom: '',
     dateTo: ''
   });
+  const [showStaffModal, setShowStaffModal] = useState(false);
+  const [staffForm, setStaffForm] = useState({
+    first_name: '',
+    last_name: '',
+    email: '',
+    phone: '',
+    role: 'communication'
+  });
+  const [staffUsers, setStaffUsers] = useState([]);
   const [prices, setPrices] = useState({
     kkid_eur: 30,
     kkid_fcfa: 10000,
@@ -609,6 +618,15 @@ const AdminDashboard = () => {
             >
               <Trash2 className="w-6 h-6" />
               <span className="text-xs font-semibold">🗑️ Poubelle</span>
+            </TabsTrigger>
+            
+            <TabsTrigger 
+              value="staff"
+              data-testid="admin-tab-staff"
+              className="h-24 data-[state=active]:bg-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-purple-200/50 data-[state=active]:scale-105 bg-white/70 backdrop-blur-xl hover:bg-white border border-gray-200/60 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer text-gray-600 shadow-sm"
+            >
+              <Megaphone className="w-6 h-6" />
+              <span className="text-xs font-semibold">👥 Équipe</span>
             </TabsTrigger>
             
             <TabsTrigger 
@@ -2192,6 +2210,81 @@ const AdminDashboard = () => {
             <AdminTrash />
           </TabsContent>
 
+          {/* Staff Tab - Équipe */}
+          <TabsContent value="staff">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-purple-700">Gestion de l'Équipe</CardTitle>
+                  <CardDescription>Gérez les comptes staff (Secrétaire, Chargé(e) de Communication)</CardDescription>
+                </div>
+                <Button 
+                  onClick={() => {
+                    setStaffForm({ first_name: '', last_name: '', email: '', phone: '', role: 'communication' });
+                    setShowStaffModal(true);
+                  }}
+                  className="bg-purple-600 hover:bg-purple-700"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nouveau Staff
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {/* Existing staff users */}
+                  {allUsers.filter(u => u.role === 'secretary' || u.role === 'communication').length === 0 ? (
+                    <p className="text-center text-gray-500 py-8">Aucun compte staff pour le moment</p>
+                  ) : (
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {allUsers
+                        .filter(u => u.role === 'secretary' || u.role === 'communication')
+                        .map(staff => (
+                          <div 
+                            key={staff.id}
+                            className={`border rounded-lg p-4 ${
+                              staff.role === 'communication' 
+                                ? 'bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200' 
+                                : 'bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${
+                                staff.role === 'communication' ? 'bg-purple-600' : 'bg-blue-600'
+                              }`}>
+                                {staff.first_name?.charAt(0)}{staff.last_name?.charAt(0)}
+                              </div>
+                              <div className="flex-1">
+                                <h3 className="font-semibold">{staff.first_name} {staff.last_name}</h3>
+                                <p className="text-sm text-gray-600">{staff.email}</p>
+                                <span className={`inline-block px-2 py-0.5 text-xs rounded-full mt-1 ${
+                                  staff.role === 'communication' 
+                                    ? 'bg-purple-100 text-purple-700' 
+                                    : 'bg-blue-100 text-blue-700'
+                                }`}>
+                                  {staff.role === 'communication' ? '📢 Chargé(e) de Com' : '📋 Secrétaire'}
+                                </span>
+                              </div>
+                              <div className={`px-2 py-1 text-xs rounded-full ${
+                                staff.is_active !== false ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                              }`}>
+                                {staff.is_active !== false ? 'Actif' : 'Inactif'}
+                              </div>
+                            </div>
+                            {staff.temporary_password && (
+                              <div className="mt-3 p-2 bg-white rounded border border-gray-200">
+                                <p className="text-xs text-gray-500">Mot de passe provisoire:</p>
+                                <code className="text-sm font-mono text-purple-600">{staff.temporary_password}</code>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
         </Tabs>
       </div>
       
@@ -2365,6 +2458,98 @@ const AdminDashboard = () => {
             >
               <Download className="h-4 w-4 mr-2" />
               Télécharger
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Staff Creation Modal */}
+      <Dialog open={showStaffModal} onOpenChange={setShowStaffModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-purple-700">Créer un Compte Staff</DialogTitle>
+            <DialogDescription>
+              Créez un compte pour un membre de l'équipe
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Prénom *</Label>
+                <Input
+                  value={staffForm.first_name}
+                  onChange={(e) => setStaffForm({...staffForm, first_name: e.target.value})}
+                  placeholder="Prénom"
+                />
+              </div>
+              <div>
+                <Label>Nom *</Label>
+                <Input
+                  value={staffForm.last_name}
+                  onChange={(e) => setStaffForm({...staffForm, last_name: e.target.value})}
+                  placeholder="Nom"
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Email *</Label>
+              <Input
+                type="email"
+                value={staffForm.email}
+                onChange={(e) => setStaffForm({...staffForm, email: e.target.value})}
+                placeholder="email@example.com"
+              />
+            </div>
+            <div>
+              <Label>Téléphone</Label>
+              <Input
+                value={staffForm.phone}
+                onChange={(e) => setStaffForm({...staffForm, phone: e.target.value})}
+                placeholder="+33 6 12 34 56 78"
+              />
+            </div>
+            <div>
+              <Label>Rôle *</Label>
+              <Select
+                value={staffForm.role}
+                onValueChange={(value) => setStaffForm({...staffForm, role: value})}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="communication">📢 Chargé(e) de Communication</SelectItem>
+                  <SelectItem value="secretary">📋 Secrétaire</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="flex gap-3 justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setShowStaffModal(false)}
+            >
+              Annuler
+            </Button>
+            <Button
+              onClick={async () => {
+                if (!staffForm.first_name || !staffForm.last_name || !staffForm.email) {
+                  toast.error('Veuillez remplir tous les champs obligatoires');
+                  return;
+                }
+                try {
+                  const response = await apiClient.post('/admin/create-staff', staffForm);
+                  toast.success(`${staffForm.role === 'communication' ? 'Chargé(e) de Com' : 'Secrétaire'} créé(e) !`);
+                  toast.info(`Mot de passe: ${response.data.temporary_password}`, { duration: 10000 });
+                  setShowStaffModal(false);
+                  fetchData();
+                } catch (error) {
+                  toast.error(error.response?.data?.detail || 'Erreur lors de la création');
+                }
+              }}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              Créer le compte
             </Button>
           </div>
         </DialogContent>

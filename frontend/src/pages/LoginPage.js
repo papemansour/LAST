@@ -30,6 +30,8 @@ const LoginPage = () => {
       navigate('/admin', { replace: true });
     } else if (role === 'secretary') {
       navigate('/secretary', { replace: true });
+    } else if (role === 'communication') {
+      navigate('/communication', { replace: true });
     } else if (role === 'teacher') {
       navigate('/teacher', { replace: true });
     } else if (role === 'student') {

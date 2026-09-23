@@ -9,6 +9,10 @@
 - Email: secretaire@mykalamaenglish.com
 - Password: kalamasecret
 
+## Communication (Chargé(e) de Com)
+- Email: com@mykalamaenglish.com
+- Password: Staffcbc7ee55
+
 ## Teachers
 - mansour.diagne@mykalamaenglish.com (active)
 - proftest.nouveau@mykalamaenglish.com (active)

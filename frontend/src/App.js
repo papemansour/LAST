@@ -13,6 +13,7 @@ import TeacherDashboard from './pages/TeacherDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import SecretaryLogin from './pages/SecretaryLogin';
 import SecretaryDashboard from './pages/SecretaryDashboard';
+import CommunicationDashboard from './pages/CommunicationDashboard';
 import TestPage from './pages/TestPage';
 import LegalPage from './pages/LegalPage';
 import CGUPage from './pages/CGUPage';
@@ -71,6 +72,12 @@ function App() {
           <Route path="/secretary/*" element={
             <ProtectedRoute allowedRoles={['secretary']}>
               <SecretaryDashboard />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/communication/*" element={
+            <ProtectedRoute allowedRoles={['communication']}>
+              <CommunicationDashboard />
             </ProtectedRoute>
           } />
         </Routes>

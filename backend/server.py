@@ -27,6 +27,7 @@ from routes.news import router as news_router
 from routes.notifications import router as notifications_router
 from routes.misc import router as misc_router
 from routes.prestataire import router as prestataire_router
+from routes.communication import router as communication_router
 
 app = FastAPI()
 
@@ -44,6 +45,7 @@ api_router.include_router(news_router)
 api_router.include_router(notifications_router)
 api_router.include_router(misc_router)
 api_router.include_router(prestataire_router)
+api_router.include_router(communication_router)
 
 # Root API endpoint
 @api_router.get("/")

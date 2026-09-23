@@ -62,7 +62,7 @@ const SecretaryDashboard = () => {
   const [prestataireInvoices, setPrestataireInvoices] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [students, setStudents] = useState([]);
-  const [billingTab, setBillingTab] = useState('teachers'); // teachers, students, prestataires
+  const [billingTab, setBillingTab] = useState('teachers'); // teachers, students, prestataires, com
   
   // Security code for viewing teacher payments
   const [paymentsUnlocked, setPaymentsUnlocked] = useState(false);
@@ -106,6 +106,26 @@ const SecretaryDashboard = () => {
     totalReceipts: 0,
     totalPrestataires: 0,
     pendingPayments: 0
+  });
+
+  // Chargés de Com state
+  const [comStaff, setComStaff] = useState([
+    { id: 'MBM', name: 'MBM - Chargé(e) de Com', email: 'mbm@mykalamaenglish.com' },
+    { id: 'FZT', name: 'FZT - Chargé(e) de Com', email: 'fzt@mykalamaenglish.com' }
+  ]);
+  const [comPayments, setComPayments] = useState([]);
+  const [newComPayment, setNewComPayment] = useState({
+    comCode: 'MBM',
+    comName: 'MBM - Chargé(e) de Com',
+    month: new Date().toISOString().slice(0, 7),
+    amount: '',
+    currency: 'EUR',
+    hoursWorked: '',
+    hourlyRate: '',
+    bonus: '0',
+    deductions: 0,
+    description: 'Travail de communication',
+    notes: ''
   });
 
   // Taux de conversion EUR -> FCFA
@@ -217,6 +237,14 @@ const SecretaryDashboard = () => {
         totalPrestataires: (prestataireRes.data || []).length,
         pendingPayments: pendingCount
       });
+
+      // Charger les paiements des Chargés de Com
+      try {
+        const comPaymentsRes = await apiClient.get('/secretary/com-payments');
+        setComPayments(comPaymentsRes.data || []);
+      } catch (error) {
+        console.log('Com payments not available');
+      }
     } catch (error) {
       console.log('Billing data not available yet');
     }
@@ -467,6 +495,49 @@ const SecretaryDashboard = () => {
       try {
         await apiClient.delete(`/secretary/teacher-payments/${id}`);
         setTeacherPayments(teacherPayments.filter(p => p.id !== id));
+        toast.success('Paiement supprimé');
+      } catch (error) {
+        toast.error('Erreur lors de la suppression');
+      }
+    }
+  };
+
+  // Chargés de Com payment handlers
+  const handleAddComPayment = async () => {
+    if (!newComPayment.comCode || !newComPayment.month || !newComPayment.amount) {
+      toast.error('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+
+    try {
+      await apiClient.post('/secretary/com-payments', newComPayment);
+      const res = await apiClient.get('/secretary/com-payments');
+      setComPayments(res.data || []);
+      setNewComPayment({
+        comCode: 'MBM',
+        comName: 'MBM - Chargé(e) de Com',
+        month: new Date().toISOString().slice(0, 7),
+        amount: '',
+        currency: 'EUR',
+        hoursWorked: '',
+        hourlyRate: '',
+        bonus: '0',
+        deductions: 0,
+        description: 'Travail de communication',
+        notes: ''
+      });
+      toast.success('🪙 Paiement Chargé de Com enregistré !');
+    } catch (error) {
+      console.error('Error adding com payment:', error);
+      toast.error('Erreur lors de l\'enregistrement du paiement');
+    }
+  };
+
+  const handleDeleteComPayment = async (id) => {
+    if (window.confirm('Supprimer ce paiement ?')) {
+      try {
+        await apiClient.delete(`/secretary/com-payments/${id}`);
+        setComPayments(comPayments.filter(p => p.id !== id));
         toast.success('Paiement supprimé');
       } catch (error) {
         toast.error('Erreur lors de la suppression');
@@ -1813,6 +1884,206 @@ const SecretaryDashboard = () => {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Com Staff Payments Section */}
+            <Card className="border-purple-200 mt-6">
+              <CardHeader className="bg-gradient-to-r from-purple-50 to-fuchsia-50">
+                <CardTitle className="flex items-center gap-2 text-purple-700">
+                  📢 Bulletin de Salaire - Chargé(e) de Communication
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6 space-y-4">
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Form */}
+                  <div className="space-y-4">
+                    {/* Chargé de Com */}
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Chargé(e) de Com *</label>
+                      <select
+                        value={newComPayment.comCode}
+                        onChange={(e) => {
+                          const selectedCom = comStaff.find(c => c.id === e.target.value);
+                          setNewComPayment({
+                            ...newComPayment,
+                            comCode: e.target.value,
+                            comName: selectedCom?.name || ''
+                          });
+                        }}
+                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                      >
+                        {comStaff.map(c => (
+                          <option key={c.id} value={c.id}>{c.name}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Période */}
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Période / Mois *</label>
+                      <Input
+                        type="month"
+                        value={newComPayment.month}
+                        onChange={(e) => setNewComPayment({...newComPayment, month: e.target.value})}
+                      />
+                    </div>
+
+                    {/* Montant et Devise */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Montant de base *</label>
+                        <Input
+                          type="number"
+                          value={newComPayment.amount}
+                          onChange={(e) => setNewComPayment({...newComPayment, amount: e.target.value})}
+                          placeholder="0"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Devise</label>
+                        <select
+                          value={newComPayment.currency}
+                          onChange={(e) => setNewComPayment({...newComPayment, currency: e.target.value})}
+                          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                        >
+                          <option value="EUR">EUR (€)</option>
+                          <option value="FCFA">FCFA</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Heures et Taux */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Heures travaillées</label>
+                        <Input
+                          type="number"
+                          value={newComPayment.hoursWorked}
+                          onChange={(e) => setNewComPayment({...newComPayment, hoursWorked: e.target.value})}
+                          placeholder="0"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Taux horaire</label>
+                        <Input
+                          type="number"
+                          value={newComPayment.hourlyRate}
+                          onChange={(e) => setNewComPayment({...newComPayment, hourlyRate: e.target.value})}
+                          placeholder="0"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Bonus et Déductions */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-sm font-medium mb-1 text-green-600">💚 Bonus</label>
+                        <Input
+                          type="number"
+                          value={newComPayment.bonus}
+                          onChange={(e) => setNewComPayment({...newComPayment, bonus: e.target.value})}
+                          placeholder="0"
+                          className="border-green-300 focus:border-green-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1 text-red-600">❌ Déductions (nb)</label>
+                        <Input
+                          type="number"
+                          value={newComPayment.deductions}
+                          onChange={(e) => setNewComPayment({...newComPayment, deductions: parseInt(e.target.value) || 0})}
+                          placeholder="0"
+                          className="border-red-300 focus:border-red-500"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">×5€ ou ×1500 FCFA</p>
+                      </div>
+                    </div>
+
+                    {/* Récapitulatif */}
+                    {newComPayment.amount && (
+                      <div className="bg-purple-50 p-3 rounded-lg border border-purple-200">
+                        <div className="flex justify-between items-center text-sm">
+                          <span>Montant de base:</span>
+                          <span>{parseFloat(newComPayment.amount || 0).toFixed(2)} {newComPayment.currency}</span>
+                        </div>
+                        {parseInt(newComPayment.bonus || 0) > 0 && (
+                          <div className="flex justify-between items-center text-sm text-green-600">
+                            <span>+ Bonus:</span>
+                            <span>+{parseFloat(newComPayment.bonus || 0).toFixed(2)} {newComPayment.currency}</span>
+                          </div>
+                        )}
+                        {parseInt(newComPayment.deductions || 0) > 0 && (
+                          <div className="flex justify-between items-center text-sm text-red-600">
+                            <span>- Déductions ({newComPayment.deductions} × {newComPayment.currency === 'FCFA' ? '1500' : '5'}):</span>
+                            <span>-{(parseInt(newComPayment.deductions || 0) * (newComPayment.currency === 'FCFA' ? 1500 : 5)).toFixed(2)} {newComPayment.currency}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between items-center mt-2 pt-2 border-t border-purple-300 font-bold text-lg text-purple-700">
+                          <span>💰 MONTANT NET:</span>
+                          <span>
+                            {Math.max(0, 
+                              parseFloat(newComPayment.amount || 0) + 
+                              parseFloat(newComPayment.bonus || 0) - 
+                              (parseInt(newComPayment.deductions || 0) * (newComPayment.currency === 'FCFA' ? 1500 : 5))
+                            ).toFixed(2)} {newComPayment.currency}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Notes */}
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Notes</label>
+                      <textarea
+                        value={newComPayment.notes}
+                        onChange={(e) => setNewComPayment({...newComPayment, notes: e.target.value})}
+                        placeholder="Ajouter un commentaire..."
+                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm min-h-[60px]"
+                      />
+                    </div>
+
+                    <Button onClick={handleAddComPayment} className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3">
+                      ✅ Enregistrer le Bulletin de Salaire
+                    </Button>
+                  </div>
+
+                  {/* Recent Com Payments */}
+                  <div>
+                    <h4 className="font-semibold text-sm mb-3 text-gray-700">📋 Bulletins Récents - Chargés de Com</h4>
+                    <div className="space-y-2 max-h-[500px] overflow-y-auto">
+                      {comPayments.length === 0 ? (
+                        <p className="text-gray-500 text-sm text-center py-4">Aucun paiement enregistré</p>
+                      ) : (
+                        comPayments.slice(0, 10).map(payment => {
+                          const montantNet = Math.max(0,
+                            parseFloat(payment.amount || 0) + 
+                            parseFloat(payment.bonus || 0) - 
+                            (parseInt(payment.deductions || 0) * (payment.currency === 'FCFA' ? 1500 : 5))
+                          );
+                          return (
+                            <div key={payment.id} className="flex justify-between items-center p-3 bg-purple-50 rounded-lg border border-purple-100">
+                              <div>
+                                <p className="font-medium text-sm">{payment.comCode || payment.com_code} - {payment.month}</p>
+                                <p className="text-xs text-gray-500">
+                                  Base: {payment.amount} {payment.currency || 'EUR'}
+                                  {payment.bonus > 0 && <span className="text-green-600 ml-1">+{payment.bonus}</span>}
+                                  {payment.deductions > 0 && <span className="text-red-600 ml-1">-{payment.deductions}déd</span>}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-purple-600">{montantNet.toFixed(0)} {payment.currency || 'EUR'}</span>
+                                <button onClick={() => handleDeleteComPayment(payment.id)} className="p-1.5 text-red-500 hover:bg-red-100 rounded" title="Supprimer">
+                                  🗑️
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* HR Tab */}

@@ -230,3 +230,18 @@ E-learning platform pour l'apprentissage de l'anglais avec multi-dashboards (Adm
   - Pack Débutant : 80€ / 25,000 FCFA
   - Pack Intermédiaire : 100€ / 35,000 FCFA
   - Pack Avancé : 150€ / 50,000 FCFA
+
+
+### Mise à jour Septembre 2026 (Suite 11) - Réorganisation Paiements & UI
+- **Logo dans l'en-tête** : Logo MyKalama affiché à côté de "My KALAMA English" sur la page d'accueil
+- **Paiements Chargés de Com transférés au Secrétariat** :
+  - Suppression de la section "Fiches de paie - Chargés de Com" de l'Admin
+  - Nouvelle section "📢 Bulletin de Salaire - Chargé(e) de Communication" dans l'espace Secrétariat
+  - Système identique aux professeurs : montant de base, bonus, déductions (×5€ ou ×1500 FCFA)
+  - Endpoints API : `GET/POST/DELETE /api/secretary/com-payments`
+- **Dashboard Communication mis à jour** :
+  - Solde affiché à 0€ avec mention "(voir Secrétariat)"
+  - **30 jours de congés** par défaut
+  - Onglet "Soldes" supprimé
+  - Onglets restants : Actualités, Disponibilités, Messages, Notes, Congés, Kalamathèque
+  - Logo remplacé par icône Megaphone

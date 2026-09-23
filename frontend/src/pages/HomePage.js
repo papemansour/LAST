@@ -469,9 +469,16 @@ const HomePage = () => {
       {/* Navigation */}
       <nav className="bg-white shadow-sm fixed w-full top-0 z-50">
         <div className="container mx-auto px-4 py-3 md:py-4 flex justify-between items-center">
-          <div className="flex flex-col">
-            <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-teal-600">My KALAMA</h1>
-            <span className="text-xs sm:text-sm text-gray-600 font-semibold uppercase tracking-wide">English</span>
+          <div className="flex items-center gap-3">
+            <img 
+              src="https://customer-assets-gfyr7b9c.emergentagent.net/job_0231dd73-3288-45b1-94c8-b711e90646ba/artifacts/jawlqd6l_dcc5e2c7-dea7-45dc-b2b6-6d6c615a529b.jpeg" 
+              alt="MyKalama Logo" 
+              className="h-10 md:h-12 w-auto"
+            />
+            <div className="flex flex-col">
+              <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-teal-600">My KALAMA</h1>
+              <span className="text-xs sm:text-sm text-gray-600 font-semibold uppercase tracking-wide">English</span>
+            </div>
           </div>
           <Link to="/login">
             <Button variant="outline" data-testid="login-nav-button" className="border-teal-600 text-teal-600 hover:bg-teal-50 text-sm md:text-base px-3 py-1 md:px-4 md:py-2">

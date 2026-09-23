@@ -452,15 +452,15 @@ const CommunicationDashboard = () => {
             </CardContent>
           </Card>
           
-          <Card className="bg-white border-green-100">
+          <Card className="bg-white/70 backdrop-blur-md border-2 border-white/30 shadow-lg hover:shadow-xl transition-shadow">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-green-100 rounded-lg">
                   <DollarSign className="h-5 w-5 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-green-700">{balanceInfo.pendingAmount || 0}€</p>
-                  <p className="text-xs text-gray-500">Solde à venir</p>
+                  <p className="text-2xl font-bold text-green-700">0€</p>
+                  <p className="text-xs text-gray-500">Solde (voir Secrétariat)</p>
                 </div>
               </div>
             </CardContent>
@@ -506,8 +506,8 @@ const CommunicationDashboard = () => {
                   <Plane className="h-5 w-5 text-yellow-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-yellow-700">{leaves.filter(l => l.status === 'approved').length}</p>
-                  <p className="text-xs text-gray-500">Congés</p>
+                  <p className="text-2xl font-bold text-yellow-700">30</p>
+                  <p className="text-xs text-gray-500">Jours de congés</p>
                 </div>
               </div>
             </CardContent>
@@ -524,10 +524,6 @@ const CommunicationDashboard = () => {
             <TabsTrigger value="availability" className="data-[state=active]:bg-teal-600 data-[state=active]:text-white" data-testid="com-tab-availability">
               <Calendar className="h-4 w-4 mr-2" />
               Disponibilités
-            </TabsTrigger>
-            <TabsTrigger value="balance" className="data-[state=active]:bg-teal-600 data-[state=active]:text-white" data-testid="com-tab-balance">
-              <DollarSign className="h-4 w-4 mr-2" />
-              Soldes
             </TabsTrigger>
             <TabsTrigger value="messages" className="data-[state=active]:bg-teal-600 data-[state=active]:text-white relative" data-testid="com-tab-messages">
               <MessageSquare className="h-4 w-4 mr-2" />
@@ -635,55 +631,6 @@ const CommunicationDashboard = () => {
           </TabsContent>
 
           {/* BALANCE/PAYSLIPS TAB (like teachers) */}
-          <TabsContent value="balance">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-teal-700">Mes Soldes</CardTitle>
-                <CardDescription>Consultez vos paiements et soldes à venir</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {/* Balance Summary */}
-                <div className="grid md:grid-cols-3 gap-4 mb-6">
-                  <div className="bg-gradient-to-br from-green-100 to-green-50 rounded-lg p-4 text-center">
-                    <p className="text-3xl font-bold text-green-700">{balanceInfo.pendingAmount || 0} €</p>
-                    <p className="text-sm text-green-600">Solde à venir</p>
-                  </div>
-                  <div className="bg-gradient-to-br from-blue-100 to-blue-50 rounded-lg p-4 text-center">
-                    <p className="text-3xl font-bold text-blue-700">{balanceInfo.paidAmount || 0} €</p>
-                    <p className="text-sm text-blue-600">Total payé</p>
-                  </div>
-                  <div className="bg-gradient-to-br from-teal-100 to-teal-50 rounded-lg p-4 text-center">
-                    <p className="text-3xl font-bold text-teal-700">{balanceInfo.totalHours || 0}h</p>
-                    <p className="text-sm text-teal-600">Heures totales</p>
-                  </div>
-                </div>
-
-                {/* Payment History */}
-                <h3 className="font-semibold text-teal-700 mb-3">Historique des paiements</h3>
-                {balanceInfo.payments && balanceInfo.payments.length > 0 ? (
-                  <div className="space-y-3">
-                    {balanceInfo.payments.map((payment, idx) => (
-                      <div key={idx} className={`flex items-center justify-between p-4 rounded-lg border ${payment.status === 'paid' ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'}`}>
-                        <div>
-                          <p className="font-semibold">{payment.month} {payment.year}</p>
-                          <p className="text-sm text-gray-600">{payment.notes || 'Paiement'}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-bold text-lg">{payment.amount} €</p>
-                          <span className={`px-2 py-1 text-xs rounded-full ${payment.status === 'paid' ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800'}`}>
-                            {payment.status === 'paid' ? 'Payé' : 'En attente'}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-center text-gray-500 py-8">Aucun paiement enregistré</p>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
           {/* MESSAGES TAB */}
           <TabsContent value="messages">
             <Card>

@@ -318,6 +318,81 @@ async def delete_student_receipt(receipt_id: str, current_user: dict = Depends(g
     
     return {"message": "Receipt deleted"}
 
+
+# Communication Staff Payments endpoints
+
+@router.get("/secretary/com-payments")
+async def get_com_payments(current_user: dict = Depends(get_current_user)):
+    """Get all communication staff payments"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    payments = await db.com_payments.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return payments
+
+
+@router.post("/secretary/com-payments")
+async def create_com_payment(payment_data: dict = Body(...), current_user: dict = Depends(get_current_user)):
+    """Create a communication staff payment (like teacher payment with bonuses/deductions)"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    com_code = payment_data.get("comCode", "").upper()
+    if com_code not in ['MBM', 'FZT']:
+        raise HTTPException(status_code=400, detail="Invalid communication code")
+    
+    currency = payment_data.get("currency", "EUR")
+    deduction_rate = 1500 if currency == "FCFA" else 5
+    
+    amount = float(payment_data.get("amount", 0))
+    bonus = float(payment_data.get("bonus", 0))
+    deductions = int(payment_data.get("deductions", 0))
+    deductions_amount = deductions * deduction_rate
+    montant_net = max(0, amount + bonus - deductions_amount)
+    
+    # Generate invoice reference
+    invoice_ref = f"COM-{com_code}-{datetime.now().strftime('%Y%m')}-{random.randint(1000, 9999)}"
+    
+    payment = {
+        "id": str(uuid4()),
+        "com_code": com_code,
+        "comCode": com_code,
+        "com_name": payment_data.get("comName", f"{com_code} - Chargé(e) de Com"),
+        "month": payment_data.get("month", ""),
+        "amount": amount,
+        "currency": currency,
+        "hours_worked": payment_data.get("hoursWorked", 0),
+        "hourly_rate": payment_data.get("hourlyRate", 0),
+        "bonus": bonus,
+        "deductions": deductions,
+        "deductions_amount": deductions_amount,
+        "montant_net": montant_net,
+        "description": payment_data.get("description", "Travail de communication"),
+        "notes": payment_data.get("notes", ""),
+        "invoice_ref": invoice_ref,
+        "status": "pending",
+        "created_by": current_user['id'],
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.com_payments.insert_one(payment)
+    logger.info(f"Com payment created for: {com_code} - Net: {montant_net} {currency} - Ref: {invoice_ref}")
+    return {"message": "Payment created", "id": payment['id'], "montant_net": montant_net, "invoice_ref": invoice_ref}
+
+
+@router.delete("/secretary/com-payments/{payment_id}")
+async def delete_com_payment(payment_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a communication staff payment"""
+    if current_user['role'] not in ['secretary', 'admin']:
+        raise HTTPException(status_code=403, detail="Secretary or admin access required")
+    
+    result = await db.com_payments.delete_one({"id": payment_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Payment not found")
+    
+    return {"message": "Payment deleted"}
+
+
 # Prestataire invoices endpoints
 
 

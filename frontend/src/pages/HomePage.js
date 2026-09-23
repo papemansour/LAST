@@ -1155,7 +1155,7 @@ const HomePage = () => {
                         onChange={(e) => setCourseType(e.target.value)}
                         className="w-4 h-4 text-teal-600"
                       />
-                      <span>Cours Groupé (max 3 personnes)</span>
+                      <span>Cours Groupé (à partir de 2 personnes : 120€, +30€/pers. supplémentaire)</span>
                     </label>
                   </div>
                 </div>
@@ -1274,6 +1274,34 @@ const HomePage = () => {
                 ) : (
                   /* Formulaire cours groupé - personne principale + membres additionnels */
                   <>
+                    <div className="bg-gradient-to-r from-blue-50 to-teal-50 p-4 rounded-lg border-2 border-teal-200">
+                      <div className="flex items-center gap-3 mb-3">
+                        <span className="text-3xl">👥</span>
+                        <div>
+                          <h3 className="font-bold text-teal-700">Pack Cours Groupé</h3>
+                          <p className="text-sm text-gray-600">Apprenez en famille ou entre amis !</p>
+                        </div>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg border border-teal-100">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-semibold text-teal-800">Tarification :</p>
+                            <ul className="text-sm text-gray-600 mt-1">
+                              <li>• 2 personnes : <strong className="text-teal-700">120€</strong></li>
+                              <li>• Personne supplémentaire : <strong className="text-teal-700">+30€</strong></li>
+                            </ul>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs text-gray-500">Votre groupe :</p>
+                            <p className="text-2xl font-bold text-teal-600">
+                              {120 + Math.max(0, additionalMembers.length - 1) * 30}€
+                            </p>
+                            <p className="text-xs text-gray-500">{1 + additionalMembers.length} personne(s)</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
                     <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-200">
                       <p className="text-sm text-gray-700">
                         <strong>📝 Inscription de groupe :</strong> Remplissez vos informations complètes, puis ajoutez les autres membres (nom et prénom uniquement).

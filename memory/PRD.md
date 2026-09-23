@@ -188,3 +188,26 @@ E-learning platform pour l'apprentissage de l'anglais avec multi-dashboards (Adm
   - Secrétaire ne peut pas modifier le champ `is_active`
 - **Data-testid ajoutés** pour faciliter les tests automatisés
 
+
+### Mise à jour Septembre 2026 (Suite 9) - Kalamai AI Tutor & UI Updates
+- **Kalamai - Tuteur IA** : Nouveau tuteur conversationnel alimenté par OpenAI GPT-5.4
+  - Disponible 24h/24, 7j/7 pour tous les étudiants
+  - Adapte le niveau de conversation au niveau de l'étudiant (K-Kid, Débutant, Intermédiaire, Avancé)
+  - Historique des conversations persistent en base de données
+  - Interface de chat moderne avec streaming de réponses
+  - Accessible via onglet "Kalamai" dans le dashboard étudiant
+- **Endpoints API Kalamai**:
+  - `POST /api/kalamai/chat` - Chat avec le tuteur (streaming SSE)
+  - `GET /api/kalamai/history` - Historique des conversations
+  - `GET /api/kalamai/sessions` - Liste des sessions
+  - `DELETE /api/kalamai/session/{id}` - Supprimer une session
+  - `POST /api/kalamai/new-session` - Créer nouvelle session
+- **Dashboard Communication - Style mis à jour**:
+  - Couleurs teal (vert-bleu) comme le dashboard professeur
+  - Effet glass (backdrop-blur) sur les cartes
+  - Logo MyKalama ajouté dans l'en-tête
+- **Nouvelle tarification Pack Groupé**:
+  - 2 personnes : 120€
+  - Personne supplémentaire : +30€
+  - Calcul dynamique du prix affiché dans le formulaire
+- **Logo MyKalama** intégré dans le dashboard Communication

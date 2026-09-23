@@ -15,7 +15,7 @@ import {
 import { toast } from 'sonner';
 import apiClient from '../utils/api';
 import { useAuth } from '../hooks/useAuth';
-import { LogOut, BookOpen, FileText, Link as LinkIcon, Upload, Send, User, Mail, MessageCircle, Heart, Sparkles, Eye, GraduationCap, Gamepad2, Newspaper, Library, UserCircle, Video, TrendingUp, Trophy, Gift, Calendar, Receipt } from 'lucide-react';
+import { LogOut, BookOpen, FileText, Link as LinkIcon, Upload, Send, User, Mail, MessageCircle, Heart, Sparkles, Eye, GraduationCap, Gamepad2, Newspaper, Library, UserCircle, Video, TrendingUp, Trophy, Gift, Calendar, Receipt, Bot } from 'lucide-react';
 import ConversationChat from '../components/ConversationChat';
 import NewsDisplay from '../components/NewsDisplay';
 import WelcomeLetter from '../components/WelcomeLetter';
@@ -41,6 +41,7 @@ import TrialCountdown from '../components/TrialCountdown';
 import StudentPayments from '../components/StudentPayments';
 import RamadanPromoBanner from '../components/RamadanPromoBanner';
 import StudentAvailability from '../components/StudentAvailability';
+import KalamaiTutor from '../components/KalamaiTutor';
 const StudentDashboard = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
@@ -407,6 +408,16 @@ const StudentDashboard = () => {
             >
               <Gamepad2 className="w-8 h-8 text-green-600 data-[state=active]:text-white" />
               <span className="text-xs font-semibold">Jeu</span>
+            </TabsTrigger>
+            
+            <TabsTrigger 
+              value="kalamai" 
+              data-testid="student-tab-kalamai"
+              className="h-24 data-[state=active]:bg-gradient-to-br data-[state=active]:from-teal-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:scale-105 bg-white/40 backdrop-blur-md hover:bg-white/60 border-2 border-white/30 rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer relative"
+            >
+              <Bot className="w-8 h-8 text-teal-600 data-[state=active]:text-white" />
+              <span className="text-xs font-semibold">Kalamai</span>
+              <span className="absolute -top-1 -right-1 bg-yellow-400 text-yellow-900 text-[10px] px-1.5 py-0.5 rounded-full font-bold animate-pulse">24h</span>
             </TabsTrigger>
             
             <TabsTrigger 
@@ -801,6 +812,11 @@ const StudentDashboard = () => {
           {/* Games Tab */}
           <TabsContent value="games">
             <StudentGames />
+          </TabsContent>
+
+          {/* Kalamai AI Tutor Tab */}
+          <TabsContent value="kalamai">
+            <KalamaiTutor userLevel={user?.level || 'intermediate'} />
           </TabsContent>
 
           {/* Conversations Tab */}

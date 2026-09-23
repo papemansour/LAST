@@ -343,13 +343,15 @@ const CommunicationDashboard = () => {
   // Code verification modal
   if (showCodeModal) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center">
-        <Card className="w-full max-w-md mx-4">
+      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50 flex items-center justify-center">
+        <Card className="w-full max-w-md mx-4 bg-white/70 backdrop-blur-md border-2 border-white/30 shadow-xl">
           <CardHeader className="text-center">
-            <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Megaphone className="h-8 w-8 text-purple-600" />
-            </div>
-            <CardTitle className="text-purple-700">Espace Communication</CardTitle>
+            <img 
+              src="https://customer-assets-gfyr7b9c.emergentagent.net/job_0231dd73-3288-45b1-94c8-b711e90646ba/artifacts/jawlqd6l_dcc5e2c7-dea7-45dc-b2b6-6d6c615a529b.jpeg" 
+              alt="MyKalama Logo" 
+              className="h-16 w-auto mx-auto mb-4"
+            />
+            <CardTitle className="text-teal-700">Espace Communication</CardTitle>
             <CardDescription>Entrez votre code personnel pour accéder à votre espace</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -362,7 +364,7 @@ const CommunicationDashboard = () => {
                   setCodeError('');
                 }}
                 placeholder=""
-                className="text-center text-2xl font-bold tracking-widest"
+                className="text-center text-2xl font-bold tracking-widest border-teal-200 focus:border-teal-500"
                 maxLength={3}
                 onKeyPress={(e) => e.key === 'Enter' && verifyCode()}
                 data-testid="com-personal-code-input"
@@ -373,7 +375,7 @@ const CommunicationDashboard = () => {
             </div>
             <Button 
               onClick={verifyCode}
-              className="w-full bg-purple-600 hover:bg-purple-700"
+              className="w-full bg-teal-600 hover:bg-teal-700"
               disabled={personalCode.length < 3}
               data-testid="com-access-btn"
             >
@@ -382,7 +384,7 @@ const CommunicationDashboard = () => {
             <Button 
               variant="outline"
               onClick={handleLogout}
-              className="w-full"
+              className="w-full border-teal-600 text-teal-600 hover:bg-teal-50"
               data-testid="com-logout-btn"
             >
               <LogOut className="h-4 w-4 mr-2" />
@@ -396,22 +398,27 @@ const CommunicationDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-purple-100">
+      <header className="bg-white/70 backdrop-blur-md shadow-sm border-b border-teal-100">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-purple-700">MYKALAMA - Communication</h1>
+          <div className="flex items-center gap-3">
+            <img 
+              src="https://customer-assets-gfyr7b9c.emergentagent.net/job_0231dd73-3288-45b1-94c8-b711e90646ba/artifacts/jawlqd6l_dcc5e2c7-dea7-45dc-b2b6-6d6c615a529b.jpeg" 
+              alt="MyKalama Logo" 
+              className="h-10 w-auto"
+            />
+            <h1 className="text-2xl font-bold text-teal-700">MYKALAMA - Communication</h1>
             <p className="text-sm text-gray-600">
               Espace {COM_CODES[verifiedCode]?.fullName || 'Chargé(e) de Com'}
-              <span className="ml-2 px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-xs font-bold">
+              <span className="ml-2 px-2 py-0.5 bg-teal-100 text-teal-700 rounded-full text-xs font-bold">
                 {verifiedCode}
               </span>
             </p>
@@ -423,7 +430,7 @@ const CommunicationDashboard = () => {
             <Button 
               variant="outline" 
               onClick={handleLogout}
-              className="border-purple-300 text-purple-600 hover:bg-purple-50"
+              className="border-teal-300 text-teal-600 hover:bg-teal-50"
             >
               <LogOut className="h-4 w-4 mr-2" />
               Déconnexion
@@ -435,14 +442,14 @@ const CommunicationDashboard = () => {
       <main className="max-w-7xl mx-auto px-4 py-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-          <Card className="bg-white border-purple-100">
+          <Card className="bg-white/70 backdrop-blur-md border-2 border-white/30 shadow-lg hover:shadow-xl transition-shadow">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <FileText className="h-5 w-5 text-purple-600" />
+                <div className="p-2 bg-teal-100 rounded-lg">
+                  <FileText className="h-5 w-5 text-teal-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-purple-700">{news.length}</p>
+                  <p className="text-2xl font-bold text-teal-700">{news.length}</p>
                   <p className="text-xs text-gray-500">Actualités</p>
                 </div>
               </div>
@@ -513,33 +520,33 @@ const CommunicationDashboard = () => {
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="bg-white border border-purple-100 p-1 flex-wrap h-auto gap-1" data-testid="com-tabs-list">
-            <TabsTrigger value="news" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white" data-testid="com-tab-news">
+          <TabsList className="bg-white border border-teal-100 p-1 flex-wrap h-auto gap-1" data-testid="com-tabs-list">
+            <TabsTrigger value="news" className="data-[state=active]:bg-teal-600 data-[state=active]:text-white" data-testid="com-tab-news">
               <Megaphone className="h-4 w-4 mr-2" />
               Actualités
             </TabsTrigger>
-            <TabsTrigger value="availability" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white" data-testid="com-tab-availability">
+            <TabsTrigger value="availability" className="data-[state=active]:bg-teal-600 data-[state=active]:text-white" data-testid="com-tab-availability">
               <Calendar className="h-4 w-4 mr-2" />
               Disponibilités
             </TabsTrigger>
-            <TabsTrigger value="balance" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white" data-testid="com-tab-balance">
+            <TabsTrigger value="balance" className="data-[state=active]:bg-teal-600 data-[state=active]:text-white" data-testid="com-tab-balance">
               <DollarSign className="h-4 w-4 mr-2" />
               Soldes
             </TabsTrigger>
-            <TabsTrigger value="messages" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white relative" data-testid="com-tab-messages">
+            <TabsTrigger value="messages" className="data-[state=active]:bg-teal-600 data-[state=active]:text-white relative" data-testid="com-tab-messages">
               <MessageSquare className="h-4 w-4 mr-2" />
               Messages
               {unreadCount > 0 && <span className="ml-1 bg-red-500 text-white text-xs rounded-full px-1.5">{unreadCount}</span>}
             </TabsTrigger>
-            <TabsTrigger value="notes" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white" data-testid="com-tab-notes">
+            <TabsTrigger value="notes" className="data-[state=active]:bg-teal-600 data-[state=active]:text-white" data-testid="com-tab-notes">
               <StickyNote className="h-4 w-4 mr-2" />
               Notes
             </TabsTrigger>
-            <TabsTrigger value="leaves" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white" data-testid="com-tab-leaves">
+            <TabsTrigger value="leaves" className="data-[state=active]:bg-teal-600 data-[state=active]:text-white" data-testid="com-tab-leaves">
               <Plane className="h-4 w-4 mr-2" />
               Congés
             </TabsTrigger>
-            <TabsTrigger value="kalamatheque" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white" data-testid="com-tab-kalamatheque">
+            <TabsTrigger value="kalamatheque" className="data-[state=active]:bg-teal-600 data-[state=active]:text-white" data-testid="com-tab-kalamatheque">
               <BookOpen className="h-4 w-4 mr-2" />
               Kalamathèque
             </TabsTrigger>
@@ -550,10 +557,10 @@ const CommunicationDashboard = () => {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle className="text-purple-700">Gestion des Actualités</CardTitle>
+                  <CardTitle className="text-teal-700">Gestion des Actualités</CardTitle>
                   <CardDescription>Créez et gérez les actualités de la plateforme</CardDescription>
                 </div>
-                <Button onClick={() => { setEditingNews(null); setNewsForm({ title: '', content: '', category: 'general', image_url: '', is_published: true }); setShowNewsModal(true); }} className="bg-purple-600 hover:bg-purple-700">
+                <Button onClick={() => { setEditingNews(null); setNewsForm({ title: '', content: '', category: 'general', image_url: '', is_published: true }); setShowNewsModal(true); }} className="bg-teal-600 hover:bg-teal-700">
                   <Plus className="h-4 w-4 mr-2" />
                   Nouvelle Actualité
                 </Button>
@@ -594,10 +601,10 @@ const CommunicationDashboard = () => {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle className="text-purple-700">Mes Disponibilités - {verifiedCode}</CardTitle>
+                  <CardTitle className="text-teal-700">Mes Disponibilités - {verifiedCode}</CardTitle>
                   <CardDescription>Sélectionnez vos créneaux disponibles pour chaque jour</CardDescription>
                 </div>
-                <Button onClick={saveAvailability} className="bg-purple-600 hover:bg-purple-700" disabled={savingAvailability}>
+                <Button onClick={saveAvailability} className="bg-teal-600 hover:bg-teal-700" disabled={savingAvailability}>
                   {savingAvailability ? 'Enregistrement...' : 'Enregistrer'}
                 </Button>
               </CardHeader>
@@ -606,8 +613,8 @@ const CommunicationDashboard = () => {
                   <table className="w-full border-collapse">
                     <thead>
                       <tr>
-                        <th className="p-2 border bg-purple-50 text-purple-700 font-semibold">Horaire</th>
-                        {DAYS.map(day => (<th key={day.key} className="p-2 border bg-purple-50 text-purple-700 font-semibold">{day.label}</th>))}
+                        <th className="p-2 border bg-teal-50 text-teal-700 font-semibold">Horaire</th>
+                        {DAYS.map(day => (<th key={day.key} className="p-2 border bg-teal-50 text-teal-700 font-semibold">{day.label}</th>))}
                       </tr>
                     </thead>
                     <tbody>
@@ -617,7 +624,7 @@ const CommunicationDashboard = () => {
                           {DAYS.map(day => {
                             const isSelected = (availability[day.key] || []).includes(time);
                             return (
-                              <td key={day.key} className={`p-2 border text-center cursor-pointer transition-colors ${isSelected ? 'bg-purple-500 text-white hover:bg-purple-600' : 'bg-white hover:bg-purple-100'}`} onClick={() => toggleSlot(day.key, time)}>
+                              <td key={day.key} className={`p-2 border text-center cursor-pointer transition-colors ${isSelected ? 'bg-teal-500 text-white hover:bg-teal-600' : 'bg-white hover:bg-teal-100'}`} onClick={() => toggleSlot(day.key, time)}>
                                 {isSelected && <Check className="h-4 w-4 mx-auto" />}
                               </td>
                             );
@@ -635,7 +642,7 @@ const CommunicationDashboard = () => {
           <TabsContent value="balance">
             <Card>
               <CardHeader>
-                <CardTitle className="text-purple-700">Mes Soldes</CardTitle>
+                <CardTitle className="text-teal-700">Mes Soldes</CardTitle>
                 <CardDescription>Consultez vos paiements et soldes à venir</CardDescription>
               </CardHeader>
               <CardContent>
@@ -649,14 +656,14 @@ const CommunicationDashboard = () => {
                     <p className="text-3xl font-bold text-blue-700">{balanceInfo.paidAmount || 0} €</p>
                     <p className="text-sm text-blue-600">Total payé</p>
                   </div>
-                  <div className="bg-gradient-to-br from-purple-100 to-purple-50 rounded-lg p-4 text-center">
-                    <p className="text-3xl font-bold text-purple-700">{balanceInfo.totalHours || 0}h</p>
-                    <p className="text-sm text-purple-600">Heures totales</p>
+                  <div className="bg-gradient-to-br from-teal-100 to-teal-50 rounded-lg p-4 text-center">
+                    <p className="text-3xl font-bold text-teal-700">{balanceInfo.totalHours || 0}h</p>
+                    <p className="text-sm text-teal-600">Heures totales</p>
                   </div>
                 </div>
 
                 {/* Payment History */}
-                <h3 className="font-semibold text-purple-700 mb-3">Historique des paiements</h3>
+                <h3 className="font-semibold text-teal-700 mb-3">Historique des paiements</h3>
                 {balanceInfo.payments && balanceInfo.payments.length > 0 ? (
                   <div className="space-y-3">
                     {balanceInfo.payments.map((payment, idx) => (
@@ -686,10 +693,10 @@ const CommunicationDashboard = () => {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle className="text-purple-700">Messages Internes</CardTitle>
+                  <CardTitle className="text-teal-700">Messages Internes</CardTitle>
                   <CardDescription>Communiquez avec l'équipe</CardDescription>
                 </div>
-                <Button onClick={() => setShowMessageModal(true)} className="bg-purple-600 hover:bg-purple-700">
+                <Button onClick={() => setShowMessageModal(true)} className="bg-teal-600 hover:bg-teal-700">
                   <Plus className="h-4 w-4 mr-2" />
                   Nouveau Message
                 </Button>
@@ -703,10 +710,10 @@ const CommunicationDashboard = () => {
                       const isSent = msg.sender_code === verifiedCode;
                       const isUnread = !msg.is_read && !isSent;
                       return (
-                        <div key={msg.id} className={`p-4 rounded-lg border ${isSent ? 'bg-purple-50 border-purple-200 ml-8' : isUnread ? 'bg-blue-50 border-blue-300' : 'bg-gray-50 border-gray-200 mr-8'}`} onClick={() => isUnread && markAsRead(msg.id)}>
+                        <div key={msg.id} className={`p-4 rounded-lg border ${isSent ? 'bg-teal-50 border-teal-200 ml-8' : isUnread ? 'bg-blue-50 border-blue-300' : 'bg-gray-50 border-gray-200 mr-8'}`} onClick={() => isUnread && markAsRead(msg.id)}>
                           <div className="flex justify-between items-start mb-2">
                             <div className="flex items-center gap-2">
-                              <span className={`px-2 py-0.5 text-xs rounded-full font-bold ${msg.sender_code === 'ADMIN' ? 'bg-red-100 text-red-700' : msg.sender_code === 'SECRETARY' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'}`}>
+                              <span className={`px-2 py-0.5 text-xs rounded-full font-bold ${msg.sender_code === 'ADMIN' ? 'bg-red-100 text-red-700' : msg.sender_code === 'SECRETARY' ? 'bg-blue-100 text-blue-700' : 'bg-teal-100 text-teal-700'}`}>
                                 {msg.sender_code}
                               </span>
                               <span className="text-sm text-gray-600">{msg.sender_name}</span>
@@ -730,10 +737,10 @@ const CommunicationDashboard = () => {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle className="text-purple-700">Mes Notes</CardTitle>
+                  <CardTitle className="text-teal-700">Mes Notes</CardTitle>
                   <CardDescription>Gérez vos notes personnelles</CardDescription>
                 </div>
-                <Button onClick={() => setShowNoteModal(true)} className="bg-purple-600 hover:bg-purple-700">
+                <Button onClick={() => setShowNoteModal(true)} className="bg-teal-600 hover:bg-teal-700">
                   <Plus className="h-4 w-4 mr-2" />
                   Nouvelle Note
                 </Button>
@@ -766,10 +773,10 @@ const CommunicationDashboard = () => {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle className="text-purple-700">Mes Congés</CardTitle>
+                  <CardTitle className="text-teal-700">Mes Congés</CardTitle>
                   <CardDescription>Gérez vos demandes de congés</CardDescription>
                 </div>
-                <Button onClick={() => setShowLeaveModal(true)} className="bg-purple-600 hover:bg-purple-700">
+                <Button onClick={() => setShowLeaveModal(true)} className="bg-teal-600 hover:bg-teal-700">
                   <Plus className="h-4 w-4 mr-2" />
                   Demander un congé
                 </Button>
@@ -802,14 +809,14 @@ const CommunicationDashboard = () => {
           <TabsContent value="kalamatheque">
             <Card>
               <CardHeader>
-                <CardTitle className="text-purple-700">Kalamathèque</CardTitle>
+                <CardTitle className="text-teal-700">Kalamathèque</CardTitle>
                 <CardDescription>Accédez à la bibliothèque en ligne</CardDescription>
               </CardHeader>
               <CardContent className="text-center py-8">
-                <BookOpen className="h-16 w-16 text-purple-300 mx-auto mb-4" />
+                <BookOpen className="h-16 w-16 text-teal-300 mx-auto mb-4" />
                 <p className="text-gray-600 mb-4">Accédez à la Kalamathèque, notre bibliothèque de livres en anglais</p>
                 <p className="text-sm text-gray-500 mb-4">Code d'accès: <span className="font-mono font-bold">Digika</span></p>
-                <Button onClick={() => window.open('/kalamatheque-access', '_blank')} className="bg-purple-600 hover:bg-purple-700">
+                <Button onClick={() => window.open('/kalamatheque-access', '_blank')} className="bg-teal-600 hover:bg-teal-700">
                   <BookOpen className="h-4 w-4 mr-2" />
                   Ouvrir la Kalamathèque
                 </Button>
@@ -823,7 +830,7 @@ const CommunicationDashboard = () => {
       <Dialog open={showNewsModal} onOpenChange={setShowNewsModal}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-purple-700">{editingNews ? 'Modifier l\'actualité' : 'Nouvelle Actualité'}</DialogTitle>
+            <DialogTitle className="text-teal-700">{editingNews ? 'Modifier l\'actualité' : 'Nouvelle Actualité'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div><Label>Titre *</Label><Input value={newsForm.title} onChange={(e) => setNewsForm({...newsForm, title: e.target.value})} placeholder="Titre" /></div>
@@ -845,7 +852,7 @@ const CommunicationDashboard = () => {
           </div>
           <div className="flex justify-end gap-3 mt-4">
             <Button variant="outline" onClick={() => setShowNewsModal(false)}>Annuler</Button>
-            <Button onClick={handleSaveNews} className="bg-purple-600 hover:bg-purple-700" disabled={!newsForm.title || !newsForm.content}>
+            <Button onClick={handleSaveNews} className="bg-teal-600 hover:bg-teal-700" disabled={!newsForm.title || !newsForm.content}>
               {editingNews ? 'Mettre à jour' : 'Créer'}
             </Button>
           </div>
@@ -856,7 +863,7 @@ const CommunicationDashboard = () => {
       <Dialog open={showMessageModal} onOpenChange={setShowMessageModal}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-purple-700">Nouveau Message</DialogTitle>
+            <DialogTitle className="text-teal-700">Nouveau Message</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -864,7 +871,7 @@ const CommunicationDashboard = () => {
               <Select value={messageForm.recipient_code} onValueChange={(v) => setMessageForm({...messageForm, recipient_code: v})}>
                 <SelectTrigger><SelectValue placeholder="Choisir..." /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="header-com" disabled className="font-bold text-purple-700">— Chargés de Com —</SelectItem>
+                  <SelectItem value="header-com" disabled className="font-bold text-teal-700">— Chargés de Com —</SelectItem>
                   {verifiedCode !== 'MBM' && <SelectItem value="MBM">MBM</SelectItem>}
                   {verifiedCode !== 'FZT' && <SelectItem value="FZT">FZT</SelectItem>}
                   <SelectItem value="header-staff" disabled className="font-bold text-blue-700">— Staff —</SelectItem>
@@ -886,7 +893,7 @@ const CommunicationDashboard = () => {
           </div>
           <div className="flex justify-end gap-3 mt-4">
             <Button variant="outline" onClick={() => setShowMessageModal(false)}>Annuler</Button>
-            <Button onClick={handleSendMessage} className="bg-purple-600 hover:bg-purple-700" disabled={!messageForm.recipient_code || !messageForm.content}>
+            <Button onClick={handleSendMessage} className="bg-teal-600 hover:bg-teal-700" disabled={!messageForm.recipient_code || !messageForm.content}>
               <Send className="h-4 w-4 mr-2" />Envoyer
             </Button>
           </div>
@@ -897,7 +904,7 @@ const CommunicationDashboard = () => {
       <Dialog open={showNoteModal} onOpenChange={setShowNoteModal}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-purple-700">Nouvelle Note</DialogTitle>
+            <DialogTitle className="text-teal-700">Nouvelle Note</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div><Label>Titre</Label><Input value={noteForm.title} onChange={(e) => setNoteForm({...noteForm, title: e.target.value})} /></div>
@@ -905,7 +912,7 @@ const CommunicationDashboard = () => {
           </div>
           <div className="flex justify-end gap-3 mt-4">
             <Button variant="outline" onClick={() => setShowNoteModal(false)}>Annuler</Button>
-            <Button onClick={handleSaveNote} className="bg-purple-600 hover:bg-purple-700" disabled={!noteForm.content}>Enregistrer</Button>
+            <Button onClick={handleSaveNote} className="bg-teal-600 hover:bg-teal-700" disabled={!noteForm.content}>Enregistrer</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -914,7 +921,7 @@ const CommunicationDashboard = () => {
       <Dialog open={showLeaveModal} onOpenChange={setShowLeaveModal}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-purple-700">Demande de Congé</DialogTitle>
+            <DialogTitle className="text-teal-700">Demande de Congé</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -925,7 +932,7 @@ const CommunicationDashboard = () => {
           </div>
           <div className="flex justify-end gap-3 mt-4">
             <Button variant="outline" onClick={() => setShowLeaveModal(false)}>Annuler</Button>
-            <Button onClick={handleSaveLeave} className="bg-purple-600 hover:bg-purple-700" disabled={!leaveForm.start_date || !leaveForm.end_date || !leaveForm.reason}>Envoyer</Button>
+            <Button onClick={handleSaveLeave} className="bg-teal-600 hover:bg-teal-700" disabled={!leaveForm.start_date || !leaveForm.end_date || !leaveForm.reason}>Envoyer</Button>
           </div>
         </DialogContent>
       </Dialog>

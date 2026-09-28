@@ -1,0 +1,45 @@
+{
+  "summary": "Tested 5 requested changes: (1) Congés STAFFS tab moved to RH space, (2) removed from Facturation, (3) all-staff API returns all roles, (4) dropdown shows all staff w/ roles, (5) KalamaiMascot SVG. All 5 tests PASS. Backend GET /api/secretary/all-staff (secretaire@mykalamaenglish.com token) returns 5 staffs: Admin KALAMA (admin), Secrétaire Kalama (secretary), mansour diagne (teacher), ProfTest Nouveau (teacher), Chargé(e) de Com (communication) with role_label and leaves_used/leaves_total=30. UI: secretary code login secretaire2025 → /secretary → RH tab now shows sub-tab 'Congés STAFFS' (yellow highlighted) alongside Congés/Calendrier/Professeurs/Étudiants. The Congés STAFFS tab renders section title 'Gestion des Congés - STAFFS (30j/an)' with dropdown listing all 5 members with their role labels and remaining balance (e.g. 'Chargé(e) de Com (Chargé(e) de Com) - 24j restants' after existing 6d leave; others 30j restants). 'Solde des Congés par Staff' panel + 'Congés Récents' list rendered. Facturation tab NO LONGER contains 'Gestion des Congés - STAFFS' section (confirmed by content search). KalamaiMascot SVG confirmed via code inspection in /app/frontend/src/components/KalamaiTutor.js lines 13-93 and KalamaiQuiz.js: green plush body via linearGradient#bodyGradient (#5dd39e→#3dba7b→#2d9a5e), big pink eyes (#ff6eb4 with #ff1493 pupils, #ffb6d9 outlines), pink ears/blush, cute smile. All 3 KalamaiMascot usages in KalamaiTutor.js render <svg viewBox='0 0 100 100'> (no more <Bot> icon).",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "GET /api/secretary/all-staff", "issue": "leaves_used now aggregated correctly from staff_leaves (was hard-coded 0 in iteration_15). Improvement confirmed: Chargé(e) de Com shows leaves_used=6."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "SecretaryHR - Congés STAFFS 'Solde des Congés par Staff' panel", "issue": "Panel displays only 4 staff cards (Admin KALAMA, Secrétaire Kalama, mansour diagne, ProfTest Nouveau) - the Chargé(e) de Com card is MISSING from the balance panel even though it appears correctly in the dropdown (24j restants) and in Congés Récents. Likely a slice/filter limit in the render loop (probably limits to 4 or excludes 'communication' role somewhere). See screenshot conges_staffs.png.", "selector": "Solde des Congés par Staff card list", "priority": "MEDIUM"},
+      {"component": "SecretaryHR - stat cards", "issue": "Top stat card 'Employes: 4' hard-coded/miscomputed - actual staff count is 5 (all-staff endpoint returns 5). Also 'Jours restants (total): 60j' inconsistent with 5 staff × 30 − 6 = 144j. Legacy Professeurs-only stats not updated for STAFFS scope.", "selector": "stat cards row (Employes, Jours restants total)", "priority": "MEDIUM"},
+      {"component": "Student login flow", "issue": "Logging in with mouhamadbachirdiagne@gmail.com/Student123test lands on /student but shows 'Erreur de chargement' toast and displays login form again. Likely unrelated to this iteration but blocks visual verification of KalamaiMascot render in-app.", "selector": ".error toast on /student", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "SecretaryHR Congés STAFFS form", "issues": ["No data-testid on staff select, date inputs, motif, submit button - Playwright had to fall back to French label selectors (previously flagged in iteration_15)."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_secretary_staff.py (existing, still valid)",
+    "/app/test_reports/iteration_16.json"
+  ],
+  "action_items": [
+    "Fix 'Solde des Congés par Staff' panel in SecretaryHR.js to render ALL staff returned by /api/secretary/all-staff (currently missing Chargé(e) de Com — likely a .slice(0,4) or role filter).",
+    "Update top stat cards on RH tab: 'Employes' count and 'Jours restants (total)' should reflect all staff (5 users, 144j) not just professeurs (4).",
+    "Investigate 'Erreur de chargement' on /student route for mouhamadbachirdiagne@gmail.com — blocks visual verification of KalamaiMascot mascot.",
+    "Add data-testid attributes on Congés STAFFS form: staff-leave-select, staff-leave-start, staff-leave-end, staff-leave-motif, staff-leave-submit."
+  ],
+  "critical_code_review_comments": [
+    "Good: SecretaryDashboard.js was split into SecretaryBilling.js / SecretaryHR.js / SecretaryPrestataires.js — resolves the >2300-line concern from iterations 13–15.",
+    "KalamaiMascot SVG is duplicated in KalamaiTutor.js and KalamaiQuiz.js (identical ~80 lines) — extract to a shared component /app/frontend/src/components/KalamaiMascot.js to satisfy DRY.",
+    "SecretaryHR.js Solde panel likely filters/slices staff array — verify it renders the same array as the dropdown (currently divergent)."
+  ],
+  "updated_files": [
+    "/app/test_reports/iteration_16.json"
+  ],
+  "success_rate": {"backend": "100% (all-staff endpoint returns all 5 roles)", "frontend": "80% (4/5 UI checks pass; Solde panel misses 1 staff)"},
+  "test_credentials": "From /app/memory/test_credentials.md — secretary code secretaire2025 (UI); secretaire@mykalamaenglish.com/kalamasecret (API).",
+  "seed_data_creation": "No new seed data. Existing Chargé(e) de Com leave (6j, 20-25/12/2025) preserved from prior iterations.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "All 5 requested changes are functionally in place. Two remaining minor UI issues on SecretaryHR.js Congés STAFFS view: (a) 'Solde des Congés par Staff' panel omits Chargé(e) de Com — check for slice/filter, (b) top stat cards not updated for STAFFS scope. KalamaiMascot visual render in the running app was NOT verified due to unrelated /student 'Erreur de chargement' — student login broken with credentials in test_credentials.md, main agent should investigate.",
+  "rca of the issue": "For missing Chargé(e) de Com in Solde panel: the API returns all 5 staff correctly (verified via curl), the dropdown renders all 5, but the 'Solde des Congés par Staff' card grid shows only 4. Root cause is in SecretaryHR.js rendering block for the balance panel — most likely a .slice(0,4), .filter(role !== 'communication'), or using a different data source (e.g. teachers-only list) instead of the all-staff array used by the dropdown. Fix: use the same staffList state that populates the dropdown."
+}
